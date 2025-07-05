@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Edit Lane - FASTag Parking{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width: 500px;">
+    <h2 class="mb-4"><i class="fas fa-pen-to-square me-2"></i>Edit Lane</h2>
+    <form method="POST" class="card p-3 shadow-sm border-0">
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i> Location</label>
+            <select name="location_id" class="form-select" required>
+                {% for loc in locations %}
+                <option value="{{ loc['id'] }}" {% if loc['id'] == lane['location_id'] %}selected{% endif %}>{{ loc['name'] }} ({{ loc['site_id'] }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-tag me-1"></i> Lane Name</label>
+            <input type="text" name="lane_name" class="form-control" value="{{ lane['lane_name'] }}" required>
+        </div>
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save</button>
+            <a href="{{ url_for('lanes', location_id=lane['location_id']) }}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

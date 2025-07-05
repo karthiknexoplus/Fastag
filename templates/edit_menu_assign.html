@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Edit Menu Assignment - FASTag Parking{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width: 600px;">
+    <h2 class="mb-4"><i class="fas fa-pen-to-square me-2"></i>Edit Menu Assignment</h2>
+    <form method="POST" class="card p-3 shadow-sm border-0">
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-microchip me-1"></i> MAC Address</label>
+            <input type="text" name="mac_address" class="form-control" value="{{ assignment['mac_address'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i> Location</label>
+            <select name="location_id" class="form-select">
+                <option value="">-- None --</option>
+                {% for loc in locations %}
+                <option value="{{ loc['id'] }}" {% if loc['id'] == assignment['location_id'] %}selected{% endif %}>{{ loc['name'] }} ({{ loc['site_id'] }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-road me-1"></i> Lane</label>
+            <select name="lane_id" class="form-select">
+                <option value="">-- None --</option>
+                {% for lane in lanes %}
+                <option value="{{ lane['id'] }}" {% if lane['id'] == assignment['lane_id'] %}selected{% endif %}>{{ lane['lane_name'] }} ({{ lane['type']|capitalize }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save</button>
+            <a href="{{ url_for('menu_assign') }}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

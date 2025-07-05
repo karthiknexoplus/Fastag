@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Locations - FASTag Parking{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width: 700px;">
+    <h2 class="mb-4"><i class="fas fa-map-marker-alt me-2"></i>Locations</h2>
+    <form method="POST" class="card p-3 mb-4 shadow-sm border-0">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <label class="form-label"><i class="fas fa-building me-1"></i> Name</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="col-md-7">
+                <label class="form-label"><i class="fas fa-map me-1"></i> Address</label>
+                <input type="text" name="address" class="form-control" required>
+            </div>
+        </div>
+        <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Add Location</button>
+        </div>
+    </form>
+    <div class="card p-3 shadow-sm border-0">
+        <h5 class="mb-3"><i class="fas fa-list me-2"></i>Saved Locations</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th><i class="fas fa-building"></i> Name</th>
+                        <th><i class="fas fa-map"></i> Address</th>
+                        <th><i class="fas fa-id-badge"></i> Site ID</th>
+                        <th style="width:70px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loc in locations %}
+                    <tr>
+                        <td>{{ loc['name'] }}</td>
+                        <td>{{ loc['address'] }}</td>
+                        <td>{{ loc['site_id'] }}</td>
+                        <td class="text-center">
+                            <a href="{{ url_for('edit_location', id=loc['id']) }}" class="text-primary me-2" title="Edit"><i class="fas fa-pen-to-square" style="font-size:1.05rem;"></i></a>
+                            <form method="POST" action="{{ url_for('delete_location', id=loc['id']) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger" title="Delete" onclick="return confirm('Delete this location?');"><i class="fas fa-trash-alt" style="font-size:1.05rem;"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="text-center text-muted">No locations yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 
