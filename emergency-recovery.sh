@@ -1,136 +1,94 @@
 #!/bin/bash
 
-# Emergency Recovery Script for Fastag
-# Run this if the website stops working after deployment
+echo "🚨 Emergency Recovery for Internal Server Error"
+echo "=============================================="
 
-set -e
-
-echo "🚨 Emergency Recovery for Fastag"
-echo "================================"
-echo ""
-
-# Check if running as root or with sudo
+# Check if running as root
 if [ "$EUID" -ne 0 ]; then
     echo "❌ This script must be run as root or with sudo"
     exit 1
 fi
 
-echo "🔍 Step 1: Checking current status..."
+echo ""
+echo "🔍 Step 1: Checking service status..."
 echo "Gunicorn status:"
-sudo systemctl status fastag --no-pager || echo "Gunicorn not running"
+systemctl status fastag --no-pager -l
 
 echo ""
 echo "Nginx status:"
-sudo systemctl status nginx --no-pager || echo "Nginx not running"
+systemctl status nginx --no-pager -l
 
 echo ""
-echo "🔧 Step 2: Restarting services..."
-sudo systemctl restart fastag
-sleep 3
-sudo systemctl restart nginx
-sleep 3
+echo "🔍 Step 2: Checking application logs..."
+echo "Recent Gunicorn logs:"
+sudo journalctl -u fastag --no-pager -n 20
 
 echo ""
-echo "🧪 Step 3: Testing services..."
-
-# Test Gunicorn
-echo "Testing Gunicorn..."
-if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
-    echo "✅ Gunicorn is working"
-else
-    echo "❌ Gunicorn is not working"
-    echo "Checking Gunicorn logs..."
-    sudo journalctl -u fastag --no-pager -n 20
-fi
-
-# Test Nginx
-echo "Testing Nginx..."
-if curl -s -I "http://localhost" | grep -q "200 OK\|302 Found"; then
-    echo "✅ Nginx is working"
-else
-    echo "❌ Nginx is not working"
-    echo "Checking Nginx configuration..."
-    sudo nginx -t
-    echo "Checking Nginx logs..."
-    sudo tail -n 20 /var/log/nginx/fastag_error.log
-fi
-
-# Test static files
-echo "Testing static files..."
-if curl -s -I "http://localhost/static/logo.png" | grep -q "200 OK"; then
-    echo "✅ Static files are working"
-else
-    echo "❌ Static files are not working"
-    echo "Fixing static files..."
-    sudo mkdir -p /var/www/fastag_static
-    sudo cp -r /home/ubuntu/Fastag/fastag/static/* /var/www/fastag_static/ 2>/dev/null || echo "Static files already copied"
-    sudo chown -R www-data:www-data /var/www/fastag_static
-    sudo chmod -R 755 /var/www/fastag_static
-    sudo chmod 644 /var/www/fastag_static/*
-fi
+echo "🔍 Step 3: Checking Nginx error logs..."
+echo "Recent Nginx errors:"
+sudo tail -20 /var/log/nginx/fastag_error.log 2>/dev/null || echo "No error log found"
 
 echo ""
-echo "🔧 Step 4: Creating simple working Nginx config..."
-
-# Create a simple, working Nginx config
-sudo tee /etc/nginx/sites-available/fastag > /dev/null << 'EOF'
-server {
-    listen 80;
-    server_name _;
-    
-    # Logs
-    access_log /var/log/nginx/fastag_access.log;
-    error_log /var/log/nginx/fastag_error.log;
-    
-    # Static files
-    location /static/ {
-        alias /var/www/fastag_static/;
-        expires 30d;
-    }
-    
-    # Proxy to Gunicorn
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-EOF
-
-# Test and reload Nginx
-echo "Testing Nginx configuration..."
-if sudo nginx -t; then
-    echo "✅ Nginx configuration is valid"
-    sudo systemctl reload nginx
-    echo "✅ Nginx reloaded successfully"
-else
-    echo "❌ Nginx configuration has errors"
-    sudo nginx -t
-fi
+echo "🔍 Step 4: Testing Gunicorn directly..."
+echo "Testing localhost:8000:"
+curl -I http://localhost:8000 2>/dev/null | head -1 || echo "Gunicorn not responding"
 
 echo ""
-echo "🧪 Step 5: Final testing..."
+echo "🔍 Step 5: Checking application files..."
+echo "Checking if application files exist:"
+ls -la /home/ubuntu/Fastag/fastag/
+echo ""
+echo "Checking wsgi.py:"
+ls -la /home/ubuntu/Fastag/wsgi.py
+
+echo ""
+echo "🔍 Step 6: Checking Python environment..."
+echo "Python version:"
+python3 --version
+echo ""
+echo "Checking if virtual environment is active:"
+echo $VIRTUAL_ENV
+
+echo ""
+echo "🔍 Step 7: Checking dependencies..."
+echo "Checking requirements.txt:"
+ls -la /home/ubuntu/Fastag/requirements.txt
+echo ""
+echo "Checking if packages are installed:"
+pip list | grep -E "(flask|gunicorn)" || echo "Packages not found"
+
+echo ""
+echo "🔍 Step 8: Testing application startup..."
+echo "Testing application startup:"
+cd /home/ubuntu/Fastag
+python3 -c "from fastag import app; print('App imports successfully')" 2>&1 || echo "App import failed"
+
+echo ""
+echo "🔧 Step 9: Attempting to restart services..."
+echo "Restarting Gunicorn:"
+systemctl restart fastag
+sleep 5
+
+echo "Restarting Nginx:"
+systemctl restart nginx
 sleep 3
 
-# Final tests
-echo "Testing website access..."
-if curl -s -I "http://localhost" | head -1; then
-    echo "✅ Website is accessible"
-else
-    echo "❌ Website is not accessible"
-fi
-
-echo "Testing static files..."
-if curl -s -I "http://localhost/static/logo.png" | grep -q "200 OK"; then
-    echo "✅ Static files are accessible"
-else
-    echo "❌ Static files are not accessible"
-fi
+echo ""
+echo "🔍 Step 10: Final status check..."
+echo "Gunicorn status after restart:"
+systemctl is-active fastag
+echo "Nginx status after restart:"
+systemctl is-active nginx
 
 echo ""
-echo "🎯 Emergency recovery completed!"
-echo "If issues persist, check the logs:"
-echo "  sudo journalctl -u fastag -f"
-echo "  sudo tail -f /var/log/nginx/fastag_error.log" 
+echo "🧪 Step 11: Testing website..."
+echo "Testing HTTPS:"
+curl -I https://fastag.onebee.in 2>/dev/null | head -1 || echo "HTTPS not responding"
+
+echo ""
+echo "🎯 Recovery completed!"
+echo "If the issue persists, check:"
+echo "1. sudo journalctl -u fastag -f"
+echo "2. sudo tail -f /var/log/nginx/fastag_error.log"
+echo "3. Check if database is accessible"
+echo "4. Verify all environment variables are set" 
