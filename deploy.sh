@@ -28,11 +28,25 @@ sudo chown ubuntu:ubuntu /home/ubuntu/Fastag
 echo "🐍 Setting up Python virtual environment..."
 cd /home/ubuntu/Fastag
 sudo -u ubuntu python3 -m venv venv
-sudo -u ubuntu /home/ubuntu/Fastag/venv/bin/pip install --upgrade pip
+
+# Determine the correct Python executable name
+if [ -f "/home/ubuntu/Fastag/venv/bin/python3" ]; then
+    PYTHON_EXEC="/home/ubuntu/Fastag/venv/bin/python3"
+elif [ -f "/home/ubuntu/Fastag/venv/bin/python" ]; then
+    PYTHON_EXEC="/home/ubuntu/Fastag/venv/bin/python"
+else
+    echo "❌ Error: Could not find Python executable in virtual environment"
+    exit 1
+fi
+
+echo "✅ Using Python executable: $PYTHON_EXEC"
+
+# Upgrade pip
+sudo -u ubuntu $PYTHON_EXEC -m pip install --upgrade pip
 
 # Install Python dependencies
 echo "📚 Installing Python dependencies..."
-sudo -u ubuntu /home/ubuntu/Fastag/venv/bin/pip install -r requirements.txt
+sudo -u ubuntu $PYTHON_EXEC -m pip install -r requirements.txt
 
 # Create logs directory
 echo "📝 Creating logs directory..."
@@ -41,7 +55,7 @@ sudo -u ubuntu mkdir -p /home/ubuntu/Fastag/logs
 # Initialize database
 echo "🗄️ Initializing database..."
 cd /home/ubuntu/Fastag
-sudo -u ubuntu /home/ubuntu/Fastag/venv/bin/python init_database.py
+sudo -u ubuntu $PYTHON_EXEC init_database.py
 
 # Set up systemd service
 echo "⚙️ Setting up systemd service..."
