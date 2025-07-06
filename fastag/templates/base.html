@@ -74,6 +74,10 @@
                 <a href="{{ url_for('lanes.lanes') }}" class="nav-icon-link {% if request.endpoint == 'lanes.lanes' %}active{% endif %}" title="Lanes">
                     <i class="fas fa-road"></i>
                 </a>
+                <a href="{{ url_for('kyc_users.kyc_users') }}" class="nav-icon-link {% if request.endpoint == 'kyc_users.kyc_users' %}active{% endif %}" title="KYC Users">
+                    <i class="fas fa-id-card"></i>
+                    <span class="nav-label d-none d-md-inline">KYC Users</span>
+                </a>
                 <a href="{{ url_for('auth.logout') }}" class="nav-icon-link" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
