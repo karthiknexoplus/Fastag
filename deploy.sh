@@ -80,10 +80,39 @@ sudo -u ubuntu $PYTHON_EXEC -m pip install -r requirements.txt
 echo "📝 Creating logs directory..."
 sudo -u ubuntu mkdir -p /home/ubuntu/Fastag/logs
 
+# Set up database directory and initialize database
+echo "🗄️ Setting up database..."
+cd /home/ubuntu/Fastag
+
+# Create instance directory if it doesn't exist
+if [ ! -d "instance" ]; then
+    echo "📂 Creating instance directory..."
+    sudo -u ubuntu mkdir -p instance
+fi
+
 # Initialize database
 echo "🗄️ Initializing database..."
-cd /home/ubuntu/Fastag
 sudo -u ubuntu $PYTHON_EXEC init_database.py
+
+# Verify database was created
+if [ ! -f "instance/fastag.db" ]; then
+    echo "❌ Error: Database file was not created"
+    exit 1
+fi
+
+echo "✅ Database initialized successfully"
+
+# Test database connection
+echo "🧪 Testing database connection..."
+sudo -u ubuntu $PYTHON_EXEC -c "
+from fastag import create_app
+app = create_app()
+with app.app_context():
+    from fastag.utils.db import get_db
+    db = get_db()
+    locations = db.execute('SELECT * FROM locations').fetchall()
+    print(f'✅ Database test successful - Found {len(locations)} locations')
+"
 
 # Set up systemd service
 echo "⚙️ Setting up systemd service..."
@@ -116,6 +145,19 @@ sudo ufw --force enable
 echo "🔐 Setting proper permissions..."
 sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag
 sudo chmod -R 755 /home/ubuntu/Fastag
+
+# Final verification
+echo "🔍 Final verification..."
+echo "Checking application status..."
+sudo systemctl status fastag --no-pager
+
+echo "Testing application..."
+sleep 3  # Give the service time to start
+if curl -s http://localhost:8000 > /dev/null; then
+    echo "✅ Application is responding on localhost:8000"
+else
+    echo "⚠️ Application may not be fully started yet"
+fi
 
 echo "✅ Deployment completed successfully!"
 echo ""
