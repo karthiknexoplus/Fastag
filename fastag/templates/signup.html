@@ -89,22 +89,14 @@
             border: 1px solid rgba(255,255,255,0.24);
             padding: 2rem 1.5rem 1.5rem 1.5rem;
         }
-        .modern-input {
-            background: transparent;
+        .input-group-text {
+            background: #f3e9ff;
+            color: #764ba2;
             border: none;
-            border-bottom: 2px solid #d1d5db;
-            border-radius: 0;
-            font-size: 1.05rem;
-            color: #222;
-            box-shadow: none;
-            transition: border-color 0.2s;
         }
-        .modern-input:focus {
-            border-bottom: 2.5px solid #764ba2;
-            outline: none;
-            background: transparent;
-            color: #222;
-            box-shadow: none;
+        .form-control:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 0.2rem rgba(118,75,162,.15);
         }
         .gradient-btn {
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
@@ -136,8 +128,8 @@
             <div class="glass-card w-100" style="max-width: 340px;">
                 <div class="text-center mb-3">
                     <i class="fas fa-user-plus fa-2x form-icon mb-2"></i>
-                    <h3 class="fw-bold mb-1" style="font-size:1.4rem;">Create Account</h3>
-                    <div class="text-muted mb-3" style="font-size:1rem;">Sign up for FASTag Parking</div>
+                    <h3 class="fw-bold mb-1 fs-4">Create Account</h3>
+                    <div class="text-muted mb-3 fs-6">Sign up for FASTag Parking</div>
                 </div>
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
@@ -149,18 +141,26 @@
                     {% endfor %}
                   {% endif %}
                 {% endwith %}
-                <form method="POST" autocomplete="off">
+                <form method="POST" autocomplete="off" class="needs-validation" novalidate>
                     <div class="mb-3">
-                        <input type="text" class="form-control modern-input" name="username" placeholder="Username" required autofocus>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control fs-6" name="username" placeholder="Username" required autofocus>
+                            <div class="invalid-feedback">Please enter a username.</div>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <input type="password" class="form-control modern-input" name="password" placeholder="Password" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control fs-6" name="password" placeholder="Password" required>
+                            <div class="invalid-feedback">Please enter a password.</div>
+                        </div>
                     </div>
                     <div class="d-grid mb-2">
-                        <button type="submit" class="btn gradient-btn btn-md rounded-pill shadow-sm">Sign Up</button>
+                        <button type="submit" class="btn gradient-btn btn-md rounded-pill shadow-sm fs-5"><i class="fas fa-user-plus me-2"></i>Sign Up</button>
                     </div>
                 </form>
-                <div class="mt-2 text-center" style="font-size:0.97rem;">
+                <div class="mt-2 text-center fs-6">
                     <span>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></span>
                 </div>
             </div>
@@ -177,6 +177,20 @@
         else if (hour < 21) msg = 'Good Evening! Welcome!';
         else msg = 'Good Night! Welcome!';
         welcome.textContent = msg;
+        // Bootstrap validation
+        (() => {
+          'use strict';
+          const forms = document.querySelectorAll('.needs-validation');
+          Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
