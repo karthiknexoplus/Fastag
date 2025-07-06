@@ -240,22 +240,80 @@ if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
             
             # Fix static file handling after SSL setup
             echo "🔧 Fixing static file handling after SSL setup..."
-            sudo sed -i '/location \/static\/ {/,/}/d' /etc/nginx/sites-available/fastag
-            sudo sed -i '/# Static files - serve directly from nginx for better performance/a\
-    # Static files - serve directly from nginx for better performance\
-    location /static/ {\
-        alias /home/ubuntu/Fastag/fastag/static/;\
-        expires 30d;\
-        add_header Cache-Control "public, immutable";\
-        add_header Access-Control-Allow-Origin "*";\
-        \
-        # Handle common static file types\
-        location ~* \\.(jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|eot|svg)$ {\
-            expires 1y;\
-            add_header Cache-Control "public, immutable";\
-            add_header Access-Control-Allow-Origin "*";\
-        }\
-    }' /etc/nginx/sites-available/fastag
+            
+            # Create a proper nginx config with static files
+            sudo tee /etc/nginx/sites-available/fastag > /dev/null << 'EOF'
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name fastag.onebee.in;
+    
+    # SSL Configuration (certbot will add this)
+    ssl_certificate /etc/letsencrypt/live/fastag.onebee.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fastag.onebee.in/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+    
+    # Logs
+    access_log /var/log/nginx/fastag_access.log;
+    error_log /var/log/nginx/fastag_error.log;
+    
+    # Static files - serve directly from nginx for better performance
+    location /static/ {
+        alias /home/ubuntu/Fastag/fastag/static/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        add_header Access-Control-Allow-Origin "*";
+        
+        # Handle common static file types
+        location ~* \.(jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|eot|svg)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+            add_header Access-Control-Allow-Origin "*";
+        }
+    }
+    
+    # Proxy to Gunicorn
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket support (if needed)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript;
+}
+
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name fastag.onebee.in;
+    return 301 https://$server_name$request_uri;
+}
+EOF
             
             # Set up automatic renewal
             echo "⏰ Setting up automatic renewal..."
