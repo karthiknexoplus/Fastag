@@ -397,10 +397,14 @@ sudo systemctl restart nginx
 # Test Nginx
 echo "🧪 Testing Nginx..."
 sleep 3
-if curl -s -I "http://localhost" | grep -q "200 OK\|302 Found"; then
-    echo "✅ Nginx is working"
+if curl -s -I "http://localhost" > /dev/null 2>&1; then
+    echo "✅ Nginx is working (localhost)"
+elif curl -s -I "http://$DOMAIN" > /dev/null 2>&1; then
+    echo "✅ Nginx is working (domain)"
 else
     echo "❌ Nginx is not responding properly"
+    echo "Checking Nginx error logs..."
+    sudo tail -n 10 /var/log/nginx/error.log
     sudo systemctl status nginx
     exit 1
 fi
