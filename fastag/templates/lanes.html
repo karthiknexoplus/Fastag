@@ -2,12 +2,12 @@
 {% block title %}Lanes - FASTag Parking{% endblock %}
 {% block content %}
 <div class="container-fluid" style="max-width: 900px;">
-    <h2 class="mb-4"><i class="fas fa-road me-2"></i>Lanes</h2>
+    <h2 class="mb-4 fs-4"><i class="fas fa-road me-2"></i>Lanes</h2>
     <form method="get" class="mb-4">
         <div class="row g-2 align-items-center">
             <div class="col-md-6">
-                <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i> Location</label>
-                <select name="location_id" class="form-select" onchange="this.form.submit()" required>
+                <label class="form-label fs-6"><i class="fas fa-map-marker-alt me-1"></i> Location</label>
+                <select name="location_id" class="form-select fs-6" onchange="this.form.submit()" required>
                     <option value="">Select Location</option>
                     {% for loc in locations %}
                     <option value="{{ loc['id'] }}" {% if selected_location and loc['id']|string == selected_location %}selected{% endif %}>{{ loc['name'] }} ({{ loc['site_id'] }})</option>
@@ -17,22 +17,27 @@
         </div>
     </form>
     {% if selected_location %}
-    <form method="POST" class="card p-3 mb-4 shadow-sm border-0">
+    <form method="POST" class="card p-3 mb-4 shadow-sm border-0 needs-validation" novalidate>
         <div class="row g-3 align-items-center">
             <div class="col-md-8">
-                <label class="form-label"><i class="fas fa-tag me-1"></i> Lane Name</label>
-                <input type="text" name="lane_name" class="form-control" required>
+                <label class="form-label fs-6"><i class="fas fa-tag me-1"></i> Lane Name</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                    <input type="text" name="lane_name" class="form-control fs-6" required>
+                    <div class="invalid-feedback">Please enter a lane name.</div>
+                </div>
                 <input type="hidden" name="location_id" value="{{ selected_location }}">
             </div>
             <div class="col-md-4 text-end align-self-end">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Add Lane</button>
+                <button type="submit" class="btn btn-primary rounded-pill fs-6"><i class="fas fa-plus me-1"></i> Add Lane</button>
             </div>
         </div>
     </form>
+    {% endif %}
     <div class="card p-3 shadow-sm border-0">
-        <h5 class="mb-3"><i class="fas fa-list me-2"></i>Lanes for this Location</h5>
+        <h5 class="mb-3 fs-5"><i class="fas fa-list me-2"></i>Lanes for this Location</h5>
         <div class="table-responsive">
-            <table class="table table-bordered align-middle">
+            <table class="table table-bordered align-middle fs-6">
                 <thead class="table-light">
                     <tr>
                         <th><i class="fas fa-tag"></i> Lane Name</th>
@@ -45,16 +50,16 @@
                     <tr>
                         <td>{{ lane['lane_name'] }}</td>
                         <td>
-                            <a href="{{ url_for('readers.readers', lane_id=lane['id']) }}" class="btn btn-outline-secondary btn-sm mb-1">
+                            <a href="{{ url_for('readers.readers', lane_id=lane['id']) }}" class="btn btn-outline-secondary btn-sm mb-1 fs-6">
                                 <i class="fas fa-microchip"></i> Manage Readers
                             </a>
                             <br>
                             {% if readers_map.get(lane['id'], 0) > 0 %}
-                                <a href="#" class="btn btn-outline-info btn-sm mt-1" title="Reader Settings">
+                                <a href="#" class="btn btn-outline-info btn-sm mt-1 fs-6" title="Reader Settings">
                                     <i class="fas fa-cog"></i>
                                 </a>
                             {% else %}
-                                <button class="btn btn-outline-secondary btn-sm mt-1" title="No Readers" disabled style="opacity:0.5;">
+                                <button class="btn btn-outline-secondary btn-sm mt-1 fs-6" title="No Readers" disabled style="opacity:0.5;">
                                     <i class="fas fa-cog"></i>
                                 </button>
                             {% endif %}
@@ -73,6 +78,20 @@
             </table>
         </div>
     </div>
-    {% endif %}
 </div>
+<script>
+(() => {
+  'use strict';
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+</script>
 {% endblock %} 
