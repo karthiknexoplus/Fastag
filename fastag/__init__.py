@@ -16,6 +16,7 @@ def create_app():
     from fastag.routes.kyc_users import kyc_users_bp
     from fastag.routes.admin import admin_bp
     from fastag.routes.analytics import analytics_bp
+    from fastag.routes.fuel_price import fuel_price_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(locations_bp)
     app.register_blueprint(lanes_bp)
@@ -24,6 +25,7 @@ def create_app():
     app.register_blueprint(kyc_users_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(analytics_bp, url_prefix='/analytics')
+    app.register_blueprint(fuel_price_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
     return app
