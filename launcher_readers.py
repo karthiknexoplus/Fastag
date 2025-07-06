@@ -59,7 +59,7 @@ def get_readers_from_db():
 # Helper: start required service files
 def start_services(reader_ids):
     for rid in reader_ids:
-        svc = f"rfid_reader{rid}_service.py"
+        svc = f"fastag/rfid/rfid_reader{rid}_service.py"
         if os.path.exists(svc):
             print(f"Starting {svc}...")
             subprocess.Popen(['python3', svc])

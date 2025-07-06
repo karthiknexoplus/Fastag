@@ -48,6 +48,35 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         margin-bottom: 1.5rem;
     }
+    .chart-wrapper {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .chart-wrapper-small {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+    @media (max-width: 768px) {
+        .chart-wrapper {
+            height: 250px;
+        }
+        .chart-wrapper-small {
+            height: 200px;
+        }
+        .chart-container {
+            padding: 1rem;
+        }
+    }
+    @media (max-width: 576px) {
+        .chart-wrapper {
+            height: 200px;
+        }
+        .chart-wrapper-small {
+            height: 180px;
+        }
+    }
     .activity-item {
         padding: 1rem;
         border-left: 4px solid #667eea;
@@ -184,7 +213,9 @@
                     <i class="fas fa-clock text-primary me-2"></i>
                     Hourly Activity (Last 24 Hours)
                 </h5>
-                <canvas id="hourlyChart" height="100"></canvas>
+                <div class="chart-wrapper">
+                    <canvas id="hourlyChart"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-xl-4 mb-3">
@@ -193,7 +224,9 @@
                     <i class="fas fa-road text-primary me-2"></i>
                     Lane Utilization
                 </h5>
-                <canvas id="laneChart" height="100"></canvas>
+                <div class="chart-wrapper-small">
+                    <canvas id="laneChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -312,12 +345,29 @@ function initializeCharts() {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 10
+                    }
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        maxTicksLimit: 6
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxTicksLimit: 12
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    radius: 3
                 }
             }
         }
@@ -342,7 +392,16 @@ function initializeCharts() {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 10,
+                        padding: 8
+                    }
+                }
+            },
+            elements: {
+                arc: {
+                    borderWidth: 2
                 }
             }
         }
