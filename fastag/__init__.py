@@ -26,4 +26,7 @@ def create_app():
     app.register_blueprint(analytics_bp, url_prefix='/analytics')
     # DB teardown
     app.teardown_appcontext(close_db)
-    return app 
+    return app
+
+# Create the app instance for direct import
+app = create_app() 
