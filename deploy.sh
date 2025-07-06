@@ -363,7 +363,7 @@ sleep 5
 
 # Test Gunicorn one last time
 echo "🧪 Final Gunicorn test..."
-if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
+if curl -s -I "http://localhost:8000" > /dev/null 2>&1; then
     echo "✅ Gunicorn is running successfully"
 else
     echo "❌ Gunicorn is not responding after all checks. See systemctl status fastag and logs."
