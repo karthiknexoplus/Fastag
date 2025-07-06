@@ -1,0 +1,483 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - FASTag Parking{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+    }
+    .stats-card.success {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .stats-card.warning {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    .stats-card.danger {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    }
+    .stats-card.info {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+    .stats-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+    }
+    .activity-item {
+        padding: 1rem;
+        border-left: 4px solid #667eea;
+        background: white;
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 0.5rem;
+        transition: transform 0.2s ease;
+    }
+    .activity-item:hover {
+        transform: translateX(5px);
+    }
+    .activity-item.granted {
+        border-left-color: #28a745;
+    }
+    .activity-item.denied {
+        border-left-color: #dc3545;
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .status-granted {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status-denied {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .refresh-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    .loading-spinner {
+        display: none;
+    }
+    .table-modern {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    .table-modern th {
+        background: #f8f9fa;
+        border: none;
+        font-weight: 600;
+        color: #495057;
+        padding: 1rem;
+    }
+    .table-modern td {
+        border: none;
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    .table-modern tbody tr:hover {
+        background: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 text-dark fw-bold">
+                <i class="fas fa-chart-line text-primary me-2"></i>
+                Analytics Dashboard
+            </h1>
+            <p class="text-muted mb-0">Real-time insights and performance metrics</p>
+        </div>
+        <button class="btn refresh-btn" onclick="refreshData()">
+            <i class="fas fa-sync-alt me-2"></i>
+            <span class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </span>
+            Refresh Data
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body text-center">
+                    <div class="stats-number" id="current-occupancy">-</div>
+                    <div class="stats-label">Current Occupancy</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card success h-100">
+                <div class="card-body text-center">
+                    <div class="stats-number" id="today-granted">-</div>
+                    <div class="stats-label">Today's Granted</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card warning h-100">
+                <div class="card-body text-center">
+                    <div class="stats-number" id="today-denied">-</div>
+                    <div class="stats-label">Today's Denied</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card info h-100">
+                <div class="card-body text-center">
+                    <div class="stats-number" id="total-events">-</div>
+                    <div class="stats-label">Total Events Today</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-xl-8 mb-3">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-clock text-primary me-2"></i>
+                    Hourly Activity (Last 24 Hours)
+                </h5>
+                <canvas id="hourlyChart" height="100"></canvas>
+            </div>
+        </div>
+        <div class="col-xl-4 mb-3">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-road text-primary me-2"></i>
+                    Lane Utilization
+                </h5>
+                <canvas id="laneChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Row -->
+    <div class="row">
+        <div class="col-xl-6 mb-4">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-users text-primary me-2"></i>
+                    Top Active Users
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Vehicle</th>
+                                <th>Events</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-users-table">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-4">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-exclamation-triangle text-primary me-2"></i>
+                    Recent Activity
+                </h5>
+                <div id="recent-activity" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reader Health -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-heartbeat text-primary me-2"></i>
+                    Reader Health Status
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th>Reader ID</th>
+                                <th>IP Address</th>
+                                <th>Type</th>
+                                <th>Lane</th>
+                                <th>Events (24h)</th>
+                                <th>Last Activity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reader-health-table">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+let hourlyChart, laneChart;
+
+// Initialize charts
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    loadAnalyticsData();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadAnalyticsData, 30000);
+});
+
+function initializeCharts() {
+    // Hourly Chart
+    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+    hourlyChart = new Chart(hourlyCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Granted',
+                data: [],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Denied',
+                data: [],
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Lane Chart
+    const laneCtx = document.getElementById('laneChart').getContext('2d');
+    laneChart = new Chart(laneCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: [
+                    '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                    '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function loadAnalyticsData() {
+    fetch('/analytics/api/analytics-data')
+        .then(response => response.json())
+        .then(data => {
+            updateStats(data);
+            updateCharts(data);
+            updateTables(data);
+        })
+        .catch(error => {
+            console.error('Error loading analytics data:', error);
+        });
+}
+
+function updateStats(data) {
+    document.getElementById('current-occupancy').textContent = data.current_occupancy || 0;
+    document.getElementById('today-granted').textContent = data.today_stats?.granted || 0;
+    document.getElementById('today-denied').textContent = data.today_stats?.denied || 0;
+    document.getElementById('total-events').textContent = data.today_stats?.total || 0;
+}
+
+function updateCharts(data) {
+    // Update hourly chart
+    if (data.hourly_data) {
+        const labels = data.hourly_data.map(item => item[0] + ':00');
+        const grantedData = data.hourly_data.map(item => item[2]);
+        const deniedData = data.hourly_data.map(item => item[3]);
+        
+        hourlyChart.data.labels = labels;
+        hourlyChart.data.datasets[0].data = grantedData;
+        hourlyChart.data.datasets[1].data = deniedData;
+        hourlyChart.update();
+    }
+
+    // Update lane chart
+    if (data.lane_utilization) {
+        const labels = data.lane_utilization.map(item => item[0]);
+        const dataValues = data.lane_utilization.map(item => item[1]);
+        
+        laneChart.data.labels = labels;
+        laneChart.data.datasets[0].data = dataValues;
+        laneChart.update();
+    }
+}
+
+function updateTables(data) {
+    // Update top users table
+    const topUsersTable = document.getElementById('top-users-table');
+    if (data.top_users) {
+        topUsersTable.innerHTML = data.top_users.map(user => `
+            <tr>
+                <td>
+                    <div class="fw-bold">${user[1] || 'Unknown'}</div>
+                    <small class="text-muted">${user[0]}</small>
+                </td>
+                <td>${user[2] || 'N/A'}</td>
+                <td>
+                    <span class="badge bg-primary">${user[3]}</span>
+                </td>
+                <td>
+                    <span class="status-badge ${user[4] > user[5] ? 'status-granted' : 'status-denied'}">
+                        ${user[4] > user[5] ? 'Active' : 'Issues'}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Update recent activity
+    const recentActivity = document.getElementById('recent-activity');
+    if (data.recent_activity) {
+        recentActivity.innerHTML = data.recent_activity.map(activity => `
+            <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="fw-bold">${activity[4] || 'Unknown User'}</div>
+                        <small class="text-muted">${activity[1]} • ${activity[6]}</small>
+                    </div>
+                    <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
+                        ${activity[2].toUpperCase()}
+                    </span>
+                </div>
+                <small class="text-muted">${new Date(activity[0]).toLocaleString()}</small>
+            </div>
+        `).join('');
+    }
+
+    // Update reader health table
+    const readerHealthTable = document.getElementById('reader-health-table');
+    if (data.reader_health) {
+        readerHealthTable.innerHTML = data.reader_health.map(reader => {
+            const isHealthy = reader[4] > 0;
+            return `
+                <tr>
+                    <td>${reader[0]}</td>
+                    <td>${reader[1]}</td>
+                    <td>${reader[2]}</td>
+                    <td>${reader[3]}</td>
+                    <td>${reader[4]}</td>
+                    <td>${reader[5] ? new Date(reader[5]).toLocaleString() : 'Never'}</td>
+                    <td>
+                        <span class="status-badge ${isHealthy ? 'status-granted' : 'status-denied'}">
+                            ${isHealthy ? 'Healthy' : 'Inactive'}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+}
+
+function refreshData() {
+    const btn = document.querySelector('.refresh-btn');
+    const spinner = btn.querySelector('.loading-spinner');
+    const icon = btn.querySelector('.fas.fa-sync-alt');
+    
+    // Show loading state
+    icon.style.display = 'none';
+    spinner.style.display = 'inline-block';
+    btn.disabled = true;
+    
+    // Load data
+    loadAnalyticsData();
+    
+    // Hide loading state after 1 second
+    setTimeout(() => {
+        icon.style.display = 'inline-block';
+        spinner.style.display = 'none';
+        btn.disabled = false;
+    }, 1000);
+}
+</script>
+{% endblock %} 

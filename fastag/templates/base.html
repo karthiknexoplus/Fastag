@@ -81,6 +81,10 @@
                     <i class="fas fa-id-card"></i>
                     <span class="nav-label d-none d-md-inline">KYC Users</span>
                 </a>
+                <a href="{{ url_for('analytics.dashboard') }}" class="nav-icon-link {% if request.endpoint.startswith('analytics.') %}active{% endif %}" title="Analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-label d-none d-md-inline">Analytics</span>
+                </a>
                 <a href="{{ url_for('auth.logout') }}" class="nav-icon-link" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="nav-label d-none d-md-inline">Logout</span>

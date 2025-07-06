@@ -7,8 +7,6 @@ import threading
 import sys
 import os
 from ctypes import *
-import RPi.GPIO as GPIO
-from datetime import datetime
 import sqlite3
 import json
 import logging
@@ -17,13 +15,21 @@ from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import requests
 from collections import defaultdict
-from rfid_common import setup_logging, get_reader_type_from_db
+from datetime import datetime
+
+# Try to import RPi.GPIO, but handle gracefully if not available
+try:
+    import RPi.GPIO as GPIO
+    GPIO_AVAILABLE = True
+except ImportError:
+    GPIO_AVAILABLE = False
+    print("RPi.GPIO not available - running in simulation mode")
 
 # Add the current directory to Python path to import from app
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Always use absolute DB path
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'access_control.db'))
+# Use the correct database path that matches deploy.sh
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'instance', 'fastag.db'))
 print('Using DB:', DB_PATH)
 
 # Setup logging
@@ -106,11 +112,24 @@ def setup_logging():
     
     return logger
 
+def get_reader_type_from_db(reader_id, db_path):
+    """Get reader type from database"""
+    try:
+        conn = sqlite3.connect(db_path, check_same_thread=False)
+        c = conn.cursor()
+        c.execute("SELECT type FROM readers WHERE id = ?", (reader_id,))
+        result = c.fetchone()
+        conn.close()
+        return result[0] if result else 'unknown'
+    except Exception as e:
+        return 'unknown'
+
 logger = setup_logging()
 
 # Try to import Flask components, but handle gracefully if not available
 try:
     from app import app, db, VehicleUser, AccessLog, Lane, Device
+    from fastag.utils.db import get_db
     # Patch SQLAlchemy URI to use absolute path
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
     FLASK_AVAILABLE = True
@@ -166,17 +185,13 @@ except ImportError as e:
         try:
             conn = sqlite3.connect(DB_PATH, check_same_thread=False)
             c = conn.cursor()
-            c.execute("SELECT id, name, vehicle_number, is_active, valid_from, valid_to FROM vehicle_users WHERE fastag_id=?", (tag_id,))
+            # Use kyc_users table (current project schema)
+            c.execute("SELECT id, name, vehicle_number FROM kyc_users WHERE fastag_id=?", (tag_id,))
             row = c.fetchone()
             conn.close()
             if row:
-                user_id, name, vehicle_number, is_active, valid_from, valid_to = row
-                now = datetime.now().date()
-                valid = is_active and datetime.strptime(valid_from[:10], '%Y-%m-%d').date() <= now <= datetime.strptime(valid_to[:10], '%Y-%m-%d').date()
-                if valid:
-                    return {'found': True, 'user': {'id': user_id, 'name': name, 'vehicle_number': vehicle_number}, 'message': f"Access granted for vehicle {vehicle_number} - {name}"}
-                else:
-                    return {'found': False, 'message': f"Tag {tag_id} found but not valid for today"}
+                user_id, name, vehicle_number = row
+                return {'found': True, 'user': {'id': user_id, 'name': name, 'vehicle_number': vehicle_number}, 'message': f"Access granted for vehicle {vehicle_number} - {name}"}
             else:
                 return {'found': False, 'message': f"Tag {tag_id} not found in database"}
         except Exception as e:
@@ -188,12 +203,11 @@ except ImportError as e:
         try:
             conn = sqlite3.connect(DB_PATH, check_same_thread=False)
             c = conn.cursor()
+            # Use current project's access_logs table schema
             c.execute("""
-                INSERT INTO access_logs (user_id, lane_id, device_id, access_time, status, created_at)
+                INSERT INTO access_logs (tag_id, reader_id, lane_id, access_result, reason, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                user['id'] if user else None, lane_id, device_id, datetime.now(), status, datetime.now()
-            ))
+            """, (tag_id, reader_id, lane_id, status, None, datetime.now()))
             conn.commit()
             conn.close()
             logger.debug(f"✓ Access log created: {status} for tag {tag_id}")
@@ -472,6 +486,9 @@ class RelayController:
         self.logger.info("🔌 Safety check: All relays confirmed OFF on startup")
     
     def init_gpio(self):
+        if not GPIO_AVAILABLE:
+            self.logger.warning("GPIO is not available, skipping GPIO initialization.")
+            return
         try:
             self.logger.info("Setting up GPIO mode (BCM)...")
             GPIO.setmode(GPIO.BCM)
@@ -484,6 +501,9 @@ class RelayController:
             self.logger.error(f"✗ GPIO initialization error: {str(e)}")
     
     def turn_on(self, relay_number):
+        if not GPIO_AVAILABLE:
+            self.logger.warning("GPIO is not available, cannot turn on relay.")
+            return False
         try:
             if 1 <= relay_number <= 4:
                 pin = self.pins[relay_number - 1]
@@ -499,6 +519,9 @@ class RelayController:
             return False
     
     def turn_off(self, relay_number):
+        if not GPIO_AVAILABLE:
+            self.logger.warning("GPIO is not available, cannot turn off relay.")
+            return False
         try:
             if 1 <= relay_number <= 4:
                 pin = self.pins[relay_number - 1]
@@ -514,6 +537,9 @@ class RelayController:
             return False
     
     def turn_off_all(self):
+        if not GPIO_AVAILABLE:
+            self.logger.warning("GPIO is not available, cannot turn off all relays.")
+            return
         try:
             self.logger.info("Turning OFF all relays...")
             for pin in self.pins:
@@ -523,6 +549,9 @@ class RelayController:
             self.logger.error(f"✗ Error turning off all relays: {str(e)}")
     
     def cleanup(self):
+        if not GPIO_AVAILABLE:
+            self.logger.warning("GPIO is not available, skipping GPIO cleanup.")
+            return
         try:
             self.logger.info("Cleaning up GPIO...")
             self.turn_off_all()
@@ -555,16 +584,90 @@ class RFIDService:
         self.logger.info("RFID Service initialized")
         
     def setup_readers(self):
-        self.logger.info("Setting up RFID readers...")
-        # Reader 1: 192.168.60.250
-        reader1 = RFIDReader("192.168.60.250", 1, 1, 1, dll_path="./libSWNetClientApi1.so")
-        self.readers.append(reader1)
+        self.logger.info("Setting up RFID readers from database...")
         
-        # Reader 2: 192.168.60.251
-        reader2 = RFIDReader("192.168.60.251", 2, 2, 2, dll_path="./libSWNetClientApi2.so")
-        self.readers.append(reader2)
-        
-        self.logger.info(f"✓ Setup {len(self.readers)} readers")
+        try:
+            if FLASK_AVAILABLE:
+                # Use Flask database
+                with self.app.app_context():
+                    db = get_db()
+                    # Query readers with their lane and location information
+                    readers_data = db.execute("""
+                        SELECT 
+                            r.id as reader_id,
+                            r.reader_ip,
+                            r.mac_address,
+                            r.type,
+                            r.lane_id,
+                            l.lane_name,
+                            loc.name as location_name
+                        FROM readers r
+                        JOIN lanes l ON r.lane_id = l.id
+                        JOIN locations loc ON l.location_id = loc.id
+                        ORDER BY r.id
+                    """).fetchall()
+            else:
+                # Standalone mode - use direct sqlite3 access
+                conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+                c = conn.cursor()
+                c.execute("""
+                    SELECT 
+                        r.id as reader_id,
+                        r.reader_ip,
+                        r.mac_address,
+                        r.type,
+                        r.lane_id,
+                        l.lane_name,
+                        loc.name as location_name
+                    FROM readers r
+                    JOIN lanes l ON r.lane_id = l.id
+                    JOIN locations loc ON l.location_id = loc.id
+                    ORDER BY r.id
+                """)
+                readers_data = c.fetchall()
+                conn.close()
+            
+            if not readers_data:
+                self.logger.warning("No readers found in database.")
+                return
+            
+            # Clear existing readers
+            self.readers = []
+            
+            for reader_data in readers_data:
+                reader_id = reader_data['reader_id']
+                reader_ip = reader_data['reader_ip']
+                lane_id = reader_data['lane_id']
+                reader_type = reader_data['type']
+                lane_name = reader_data['lane_name']
+                location_name = reader_data['location_name']
+                
+                # Determine DLL path based on reader type or ID
+                if reader_type == 'entry':
+                    dll_path = "./libSWNetClientApi1.so"
+                elif reader_type == 'exit':
+                    dll_path = "./libSWNetClientApi2.so"
+                else:
+                    # Fallback based on reader ID
+                    dll_path = f"./libSWNetClientApi{reader_id}.so"
+                
+                # Create RFID reader instance
+                reader = RFIDReader(
+                    ip_address=reader_ip,
+                    reader_id=reader_id,
+                    lane_id=lane_id,
+                    device_id=reader_id,  # Use reader_id as device_id
+                    dll_path=dll_path
+                )
+                
+                self.readers.append(reader)
+                self.logger.info(f"✓ Configured Reader {reader_id}: {reader_ip} ({reader_type}) - Lane: {lane_name} at {location_name}")
+            
+            self.logger.info(f"✓ Setup {len(self.readers)} readers from database")
+            
+        except Exception as e:
+            self.logger.error(f"✗ Error loading readers from database: {str(e)}")
+            self.readers = []
     
     def connect_readers(self):
         self.logger.info("Connecting to RFID readers...")
@@ -575,21 +678,22 @@ class RFIDService:
                 self.logger.error(f"✗ Reader {reader.reader_id} failed to connect")
     
     def verify_tag_in_database(self, tag_id):
-        self.logger.debug(f"Verifying tag {tag_id} in database...")  # Changed to debug
+        self.logger.debug(f"Verifying tag {tag_id} in database...")
         if FLASK_AVAILABLE:
             # Use Flask database
             with self.app.app_context():
                 try:
-                    # Check if tag exists in vehicle_users table
-                    user = VehicleUser.query.filter_by(fastag_id=tag_id).first()
+                    # Check if tag exists in kyc_users table (current project schema)
+                    db = get_db()
+                    user = db.execute('SELECT * FROM kyc_users WHERE fastag_id = ?', (tag_id,)).fetchone()
                     if user:
                         self.logger.info(f"✓ Tag {tag_id} found in database")
-                        self.logger.debug(f"  - Vehicle: {user.vehicle_number}")  # Changed to debug
-                        self.logger.debug(f"  - Owner: {user.name}")  # Changed to debug
+                        self.logger.debug(f"  - Vehicle: {user['vehicle_number']}")
+                        self.logger.debug(f"  - Owner: {user['name']}")
                         return {
                             'found': True,
                             'user': user,
-                            'message': f"Access granted for vehicle {user.vehicle_number} - {user.name}"
+                            'message': f"Access granted for vehicle {user['vehicle_number']} - {user['name']}"
                         }
                     else:
                         self.logger.warning(f"✗ Tag {tag_id} not found in database")
@@ -638,21 +742,17 @@ class RFIDService:
                 if FLASK_AVAILABLE:
                     with self.app.app_context():
                         try:
-                            access_log = AccessLog(
-                                user_id=user.id if user else None,
-                                lane_id=lane_id,
-                                device_id=device_id,
-                                tag_id=tag_id,
-                                access_time=datetime.now(),
-                                status=status
-                            )
-                            db.session.add(access_log)
-                            db.session.commit()
+                            db = get_db()
+                            # Use current project's access_logs table schema
+                            db.execute("""
+                                INSERT INTO access_logs (tag_id, reader_id, lane_id, access_result, reason, timestamp)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            """, (tag_id, reader_id, lane_id, status, None, datetime.now()))
+                            db.commit()
                             self.update_db_insert(tag_id, lane_id)
                             self.logger.debug(f"✓ Access log created: {status} for tag {tag_id}")
                         except Exception as e:
                             self.logger.error(f"✗ Error logging access: {str(e)}")
-                            db.session.rollback()
                 else:
                     log_access_sqlite(tag_id, user, status, reader_id, lane_id, device_id)
                     self.update_db_insert(tag_id, lane_id)

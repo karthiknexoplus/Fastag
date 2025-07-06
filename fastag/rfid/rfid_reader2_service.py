@@ -1,23 +1,154 @@
 import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
-from rfid_common import RFIDReader, setup_logging
 import time
 import requests
 import sqlite3
 from datetime import datetime
 from collections import defaultdict
+import ctypes
+from ctypes import *
+import logging
+
+# Use absolute DB path in instance folder
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'instance', 'fastag.db'))
+print('Using DB:', DB_PATH)
+
+def setup_logging(log_file):
+    """Setup logging for RFID reader service"""
+    # Create logs directory if it doesn't exist
+    os.makedirs('logs', exist_ok=True)
+    
+    # Create logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    
+    # Remove existing handlers
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+    
+    # Create formatter
+    formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # File handler
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    
+    # Console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+    
+    # Add handlers
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    
+    return logger
+
+class RFIDReader:
+    def __init__(self, ip_address, reader_id, lane_id, device_id, dll_path="./libSWNetClientApi.so"):
+        self.ip_address = ip_address
+        self.reader_id = reader_id
+        self.lane_id = lane_id
+        self.device_id = device_id
+        self.dll_path = dll_path
+        self.connected = False
+        self.dll = None
+        self.handle = None
+
+    def connect(self):
+        try:
+            self.dll = ctypes.CDLL(self.dll_path)
+            # Simulate connection logic (replace with actual hardware logic)
+            self.connected = True
+            return True
+        except Exception as e:
+            print(f"RFIDReader connect error: {e}")
+            self.connected = False
+            return False
+
+    def disconnect(self):
+        self.connected = False
+        self.dll = None
+        self.handle = None
+
+    def read_tags(self):
+        # Simulate reading tags (replace with actual hardware logic)
+        # Return a list of dicts: [{'tag_id': ..., 'antenna': ..., 'rssi': ...}, ...]
+        # For demo, return empty list
+        return []
 
 logger = setup_logging('logs/rfid_reader2.log')
-READER_IP = "192.168.60.251"
-DLL_PATH = os.path.join(os.path.dirname(__file__), "libSWNetClientApi2.so")
-# Use absolute DB path in instance folder
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instance', 'fastag.db'))
-print('Using DB:', DB_PATH)
-LANE_ID = 2
-DEVICE_ID = 2
 
-reader = RFIDReader(READER_IP, 2, LANE_ID, DEVICE_ID, dll_path=DLL_PATH)
+def load_reader_config(reader_id=2):
+    """Load reader configuration from database"""
+    try:
+        conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        c = conn.cursor()
+        c.execute("""
+            SELECT 
+                r.id as reader_id,
+                r.reader_ip,
+                r.mac_address,
+                r.type,
+                r.lane_id,
+                l.lane_name,
+                loc.name as location_name
+            FROM readers r
+            JOIN lanes l ON r.lane_id = l.id
+            JOIN locations loc ON l.location_id = loc.id
+            WHERE r.id = ?
+        """, (reader_id,))
+        reader_data = c.fetchone()
+        conn.close()
+        
+        if reader_data:
+            return {
+                'reader_id': reader_data[0],
+                'reader_ip': reader_data[1],
+                'mac_address': reader_data[2],
+                'type': reader_data[3],
+                'lane_id': reader_data[4],
+                'lane_name': reader_data[5],
+                'location_name': reader_data[6]
+            }
+        else:
+            logger.error(f"Reader {reader_id} not found in database")
+            return None
+    except Exception as e:
+        logger.error(f"Error loading reader configuration: {e}")
+        return None
+
+# Load configuration from database
+config = load_reader_config(2)
+if not config:
+    logger.error("Failed to load reader configuration. Exiting.")
+    exit(1)
+
+READER_IP = config['reader_ip']
+LANE_ID = config['lane_id']
+DEVICE_ID = config['reader_id']
+
+# Determine DLL path based on reader type
+if config['type'] == 'entry':
+    DLL_PATH = os.path.join(os.path.dirname(__file__), "libSWNetClientApi1.so")
+elif config['type'] == 'exit':
+    DLL_PATH = os.path.join(os.path.dirname(__file__), "libSWNetClientApi2.so")
+else:
+    DLL_PATH = os.path.join(os.path.dirname(__file__), f"libSWNetClientApi{config['reader_id']}.so")
+
+logger.info(f"Reader {config['reader_id']} configuration loaded:")
+logger.info(f"  - IP: {READER_IP}")
+logger.info(f"  - Type: {config['type']}")
+logger.info(f"  - Lane: {config['lane_name']} (ID: {LANE_ID})")
+logger.info(f"  - Location: {config['location_name']}")
+logger.info(f"  - DLL: {DLL_PATH}")
+
+reader = RFIDReader(READER_IP, config['reader_id'], LANE_ID, DEVICE_ID, dll_path=DLL_PATH)
 
 if not reader.connect():
     logger.error("Failed to connect to Reader 2")
@@ -76,30 +207,26 @@ def activate_all_relays():
     except Exception as e:
         logger.error(f"Failed to activate relays via API: {e}")
 
-def log_access(tag_id, access_result, reason=None):
-    if can_insert_db(tag_id, LANE_ID):
-        try:
-            conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-            c = conn.cursor()
-            c.execute("""
-                INSERT INTO access_logs (tag_id, reader_id, lane_id, access_result, reason, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                tag_id, 2, LANE_ID, access_result, reason, datetime.now()
-            ))
-            conn.commit()
-            conn.close()
-            update_db_insert(tag_id, LANE_ID)
-            logger.info(f"Access log written: tag={tag_id}, result={access_result}, reason={reason}")
-        except Exception as e:
-            logger.error(f"Failed to log access for tag {tag_id}: {e}")
-    else:
-        logger.info(f"DB insert skipped for tag={tag_id} lane={LANE_ID} (cooldown or max records reached)")
+def log_access(tag_id, status, reason=None):
+    try:
+        conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        c = conn.cursor()
+        # Use current project's access_logs table schema
+        c.execute("""
+            INSERT INTO access_logs (tag_id, reader_id, lane_id, access_result, reason, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (tag_id, 2, LANE_ID, status, reason, datetime.now()))
+        conn.commit()
+        conn.close()
+        logger.info(f"Access logged: {status} for tag {tag_id}")
+    except Exception as e:
+        logger.error(f"Error logging access for tag {tag_id}: {e}")
 
 def check_tag_in_db(tag_id):
     try:
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         c = conn.cursor()
+        # Use kyc_users table (current project schema)
         c.execute("SELECT id, name, vehicle_number FROM kyc_users WHERE fastag_id=?", (tag_id,))
         row = c.fetchone()
         conn.close()

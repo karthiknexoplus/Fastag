@@ -1,1 +1,12 @@
-instance/ 
+instance/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.log
+logs/
+.env
+.DS_Store
+*.so 

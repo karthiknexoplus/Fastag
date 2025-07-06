@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - FASTag Parking{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
+<style>
+    .report-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .report-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+    .export-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 0.75rem 2rem;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    .date-input {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: border-color 0.3s ease;
+    }
+    .date-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    .report-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+    .icon-access {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .icon-users {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .icon-lanes {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    .icon-readers {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    .spinner-border-custom {
+        width: 3rem;
+        height: 3rem;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 text-dark fw-bold">
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                Reports & Exports
+            </h1>
+            <p class="text-muted mb-0">Generate and download detailed reports</p>
+        </div>
+    </div>
+
+    <!-- Date Range Selector -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card report-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3 text-dark fw-bold">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        Select Date Range
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="start-date" class="form-label fw-bold">Start Date</label>
+                            <input type="text" class="form-control date-input" id="start-date" placeholder="Select start date">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="end-date" class="form-label fw-bold">End Date</label>
+                            <input type="text" class="form-control date-input" id="end-date" placeholder="Select end date">
+                        </div>
+                        <div class="col-md-4 mb-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" onclick="setDateRange('today')">
+                                <i class="fas fa-calendar-day me-2"></i>Today
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" onclick="setDateRange('yesterday')">
+                                <i class="fas fa-calendar-minus me-2"></i>Yesterday
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" onclick="setDateRange('week')">
+                                <i class="fas fa-calendar-week me-2"></i>This Week
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" onclick="setDateRange('month')">
+                                <i class="fas fa-calendar-alt me-2"></i>This Month
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-outline-secondary w-100" onclick="setDateRange('quarter')">
+                                <i class="fas fa-calendar-check me-2"></i>This Quarter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Types -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-access mx-auto">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </div>
+                    <h5 class="card-title text-dark fw-bold">Access Logs Report</h5>
+                    <p class="card-text text-muted">
+                        Detailed access logs with user information, lane details, and access results.
+                        Includes timestamps, reasons for access decisions, and reader information.
+                    </p>
+                    <div class="mt-3">
+                        <button class="btn export-btn" onclick="exportReport('access_logs')">
+                            <i class="fas fa-download me-2"></i>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-users mx-auto">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h5 class="card-title text-dark fw-bold">User Activity Report</h5>
+                    <p class="card-text text-muted">
+                        User activity summary with vehicle information, access patterns,
+                        and usage statistics. Perfect for user behavior analysis.
+                    </p>
+                    <div class="mt-3">
+                        <button class="btn export-btn" onclick="exportReport('user_activity')">
+                            <i class="fas fa-download me-2"></i>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-lanes mx-auto">
+                        <i class="fas fa-road"></i>
+                    </div>
+                    <h5 class="card-title text-dark fw-bold">Lane Performance Report</h5>
+                    <p class="card-text text-muted">
+                        Lane utilization statistics, throughput analysis, and performance metrics.
+                        Helps optimize lane operations and identify bottlenecks.
+                    </p>
+                    <div class="mt-3">
+                        <button class="btn export-btn" onclick="exportReport('lane_performance')">
+                            <i class="fas fa-download me-2"></i>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card report-card h-100">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-readers mx-auto">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h5 class="card-title text-dark fw-bold">Reader Health Report</h5>
+                    <p class="card-text text-muted">
+                        RFID reader status, uptime statistics, and health monitoring data.
+                        Essential for maintenance planning and system reliability.
+                    </p>
+                    <div class="mt-3">
+                        <button class="btn export-btn" onclick="exportReport('reader_health')">
+                            <i class="fas fa-download me-2"></i>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Exports -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card report-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3 text-dark fw-bold">
+                        <i class="fas fa-history text-primary me-2"></i>
+                        Recent Exports
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Report Type</th>
+                                    <th>Date Range</th>
+                                    <th>Generated</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-exports">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No recent exports</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="text-center">
+        <div class="spinner-border spinner-border-custom" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="mt-3 text-dark fw-bold">Generating Report...</div>
+        <div class="text-muted">Please wait while we prepare your export</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script>
+// Initialize date pickers
+document.addEventListener('DOMContentLoaded', function() {
+    flatpickr("#start-date", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        onChange: function(selectedDates, dateStr) {
+            // Auto-set end date if not set
+            if (!document.getElementById('end-date').value) {
+                document.getElementById('end-date')._flatpickr.setDate(dateStr);
+            }
+        }
+    });
+    
+    flatpickr("#end-date", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        onChange: function(selectedDates, dateStr) {
+            // Ensure start date is not after end date
+            const startDate = document.getElementById('start-date').value;
+            if (startDate && startDate > dateStr) {
+                document.getElementById('start-date')._flatpickr.setDate(dateStr);
+            }
+        }
+    });
+});
+
+function setDateRange(range) {
+    const today = new Date();
+    const startDate = document.getElementById('start-date');
+    const endDate = document.getElementById('end-date');
+    
+    switch(range) {
+        case 'today':
+            startDate._flatpickr.setDate(today);
+            endDate._flatpickr.setDate(today);
+            break;
+        case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate._flatpickr.setDate(yesterday);
+            endDate._flatpickr.setDate(yesterday);
+            break;
+        case 'week':
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            startDate._flatpickr.setDate(weekStart);
+            endDate._flatpickr.setDate(today);
+            break;
+        case 'month':
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            startDate._flatpickr.setDate(monthStart);
+            endDate._flatpickr.setDate(today);
+            break;
+        case 'quarter':
+            const quarter = Math.floor(today.getMonth() / 3);
+            const quarterStart = new Date(today.getFullYear(), quarter * 3, 1);
+            startDate._flatpickr.setDate(quarterStart);
+            endDate._flatpickr.setDate(today);
+            break;
+    }
+}
+
+function exportReport(reportType) {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    
+    if (!startDate || !endDate) {
+        showAlert('Please select both start and end dates', 'warning');
+        return;
+    }
+    
+    if (startDate > endDate) {
+        showAlert('Start date cannot be after end date', 'warning');
+        return;
+    }
+    
+    // Show loading overlay
+    document.getElementById('loading-overlay').style.display = 'flex';
+    
+    // Build URL with parameters
+    const url = `/analytics/api/export-data?type=${reportType}&start_date=${startDate}&end_date=${endDate}`;
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${reportType}_${startDate}_to_${endDate}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Hide loading overlay after a delay
+    setTimeout(() => {
+        document.getElementById('loading-overlay').style.display = 'none';
+        showAlert('Report exported successfully!', 'success');
+        addToRecentExports(reportType, startDate, endDate);
+    }, 2000);
+}
+
+function addToRecentExports(reportType, startDate, endDate) {
+    const table = document.getElementById('recent-exports');
+    const row = document.createElement('tr');
+    
+    const reportNames = {
+        'access_logs': 'Access Logs',
+        'user_activity': 'User Activity',
+        'lane_performance': 'Lane Performance',
+        'reader_health': 'Reader Health'
+    };
+    
+    row.innerHTML = `
+        <td>${reportNames[reportType] || reportType}</td>
+        <td>${startDate} to ${endDate}</td>
+        <td>${new Date().toLocaleString()}</td>
+        <td><span class="badge bg-success">Completed</span></td>
+        <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="exportReport('${reportType}')">
+                <i class="fas fa-download me-1"></i>Re-export
+            </button>
+        </td>
+    `;
+    
+    // Remove "No recent exports" row if it exists
+    const noExportsRow = table.querySelector('tr td[colspan="5"]');
+    if (noExportsRow) {
+        noExportsRow.parentElement.remove();
+    }
+    
+    table.insertBefore(row, table.firstChild);
+}
+
+function showAlert(message, type) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %} 
