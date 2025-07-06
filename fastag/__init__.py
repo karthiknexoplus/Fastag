@@ -13,11 +13,15 @@ def create_app():
     from fastag.routes.lanes import lanes_bp
     from fastag.routes.readers import readers_bp
     from fastag.routes.api import api
+    from fastag.routes.kyc_users import kyc_users_bp
+    from fastag.routes.admin import admin_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(locations_bp)
     app.register_blueprint(lanes_bp)
     app.register_blueprint(readers_bp)
     app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(kyc_users_bp)
+    app.register_blueprint(admin_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
     return app 

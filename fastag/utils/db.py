@@ -73,5 +73,27 @@ def init_db(db):
             FOREIGN KEY (lane_id) REFERENCES lanes (id) ON DELETE CASCADE,
             UNIQUE(lane_id, type)
         );
+
+        CREATE TABLE IF NOT EXISTS kyc_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            fastag_id TEXT UNIQUE NOT NULL,
+            vehicle_number TEXT NOT NULL,
+            contact_number TEXT NOT NULL,
+            address TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS access_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tag_id TEXT NOT NULL,
+            reader_id INTEGER NOT NULL,
+            lane_id INTEGER NOT NULL,
+            access_result TEXT NOT NULL CHECK (access_result IN ('granted', 'denied')),
+            reason TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (reader_id) REFERENCES readers (id),
+            FOREIGN KEY (lane_id) REFERENCES lanes (id)
+        );
     ''')
     db.commit() 

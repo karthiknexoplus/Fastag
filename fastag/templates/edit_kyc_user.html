@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Edit KYC User{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width: 600px;">
+    <h2 class="mb-4"><i class="fas fa-edit me-2"></i>Edit KYC User</h2>
+    <form method="POST" class="card p-3 mb-4 shadow-sm border-0">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" value="{{ user['name'] }}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">FASTag ID</label>
+                <input type="text" name="fastag_id" class="form-control" value="{{ user['fastag_id'] }}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Vehicle Number</label>
+                <input type="text" name="vehicle_number" class="form-control" value="{{ user['vehicle_number'] }}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Contact Number</label>
+                <input type="text" name="contact_number" class="form-control" value="{{ user['contact_number'] }}" required>
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">Address</label>
+                <input type="text" name="address" class="form-control" value="{{ user['address'] }}">
+            </div>
+            <div class="col-md-12 text-end">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button>
+                <a href="{{ url_for('kyc_users.kyc_users') }}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %} 
