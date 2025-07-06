@@ -309,28 +309,26 @@ except Exception as e:
     exit(1)
 "
 
-# Test Flask app database connection
-echo "🧪 Testing Flask app database connection..."
+# Test Flask app import and DB connection before enabling Gunicorn service
+echo "🧪 Testing Flask app import and DB connection..."
 sudo -u ubuntu $PYTHON_EXEC -c "
-from fastag import create_app
-app = create_app()
-
-with app.app_context():
-    from fastag.utils.db import get_db
-    try:
+import sys
+import traceback
+try:
+    from fastag import create_app
+    app = create_app()
+    with app.app_context():
+        from fastag.utils.db import get_db
         db = get_db()
-        print('✅ Flask database connection successful')
-        
-        # Test a simple query
         result = db.execute('SELECT COUNT(*) FROM users').fetchone()
-        print(f'✅ User count query successful: {result[0]} users')
-        
-    except Exception as e:
-        print(f'❌ Flask database error: {e}')
-        import traceback
-        traceback.print_exc()
-        exit(1)
+        print(f'✅ Flask app and DB test passed: {result[0]} users')
+except Exception as e:
+    print(f'❌ Flask app/DB error: {e}')
+    traceback.print_exc()
+    sys.exit(1)
 "
+
+echo "✅ Flask and Gunicorn startup checks passed. Proceeding to enable systemd service."
 
 # Set up systemd service
 echo "⚙️ Setting up systemd service..."
@@ -358,57 +356,21 @@ sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 sudo ufw --force enable
 
-# Start Gunicorn with comprehensive testing
-echo "🚀 Starting Gunicorn..."
+# Start Gunicorn via systemd
+echo "🚀 Starting Gunicorn via systemd..."
 sudo systemctl start fastag
 sleep 5
 
-# Test Gunicorn with retry logic
-echo "🧪 Testing Gunicorn..."
-MAX_RETRIES=3
-RETRY_COUNT=0
-
-while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-    if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
-        echo "✅ Gunicorn is running successfully"
-        break
-    else
-        RETRY_COUNT=$((RETRY_COUNT + 1))
-        echo "⚠️ Gunicorn not responding (attempt $RETRY_COUNT/$MAX_RETRIES)"
-        
-        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-            echo "🔄 Restarting Gunicorn and waiting..."
-            sudo systemctl restart fastag
-            sleep 10
-        else
-            echo "❌ Gunicorn is not responding after $MAX_RETRIES attempts"
-            echo "Checking Gunicorn status and logs..."
-            sudo systemctl status fastag --no-pager
-            echo ""
-            echo "Recent Gunicorn logs:"
-            sudo journalctl -u fastag -n 20 --no-pager
-            echo ""
-            echo "🔧 Attempting to fix Gunicorn..."
-            
-            # Try to fix common issues
-            sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag
-            sudo chmod -R 755 /home/ubuntu/Fastag
-            sudo chmod 644 /home/ubuntu/Fastag/instance/fastag.db
-            
-            # Restart one more time
-            sudo systemctl restart fastag
-            sleep 10
-            
-            # Final test
-            if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
-                echo "✅ Gunicorn is now working after fixes!"
-            else
-                echo "❌ Gunicorn still not working - manual intervention needed"
-                exit 1
-            fi
-        fi
-    fi
-done
+# Test Gunicorn one last time
+echo "🧪 Final Gunicorn test..."
+if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
+    echo "✅ Gunicorn is running successfully"
+else
+    echo "❌ Gunicorn is not responding after all checks. See systemctl status fastag and logs."
+    sudo systemctl status fastag --no-pager
+    sudo journalctl -u fastag -n 20 --no-pager
+    exit 1
+fi
 
 # Configure Nginx (HTTP only initially)
 echo "🌐 Configuring Nginx for domain: $DOMAIN"
