@@ -238,6 +238,25 @@ if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
         if sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "admin@$DOMAIN" --redirect; then
             echo "✅ SSL certificate obtained successfully!"
             
+            # Fix static file handling after SSL setup
+            echo "🔧 Fixing static file handling after SSL setup..."
+            sudo sed -i '/location \/static\/ {/,/}/d' /etc/nginx/sites-available/fastag
+            sudo sed -i '/# Static files - serve directly from nginx for better performance/a\
+    # Static files - serve directly from nginx for better performance\
+    location /static/ {\
+        alias /home/ubuntu/Fastag/fastag/static/;\
+        expires 30d;\
+        add_header Cache-Control "public, immutable";\
+        add_header Access-Control-Allow-Origin "*";\
+        \
+        # Handle common static file types\
+        location ~* \\.(jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|eot|svg)$ {\
+            expires 1y;\
+            add_header Cache-Control "public, immutable";\
+            add_header Access-Control-Allow-Origin "*";\
+        }\
+    }' /etc/nginx/sites-available/fastag
+            
             # Set up automatic renewal
             echo "⏰ Setting up automatic renewal..."
             (sudo crontab -l 2>/dev/null; echo "0 12 * * * /usr/bin/certbot renew --quiet") | sudo crontab -
