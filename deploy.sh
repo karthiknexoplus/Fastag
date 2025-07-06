@@ -301,22 +301,23 @@ if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
             echo "🔧 Fixing static file handling after SSL setup..."
         
         # Create a proper nginx config with static files and SSL
-        sudo tee /etc/nginx/sites-available/fastag > /dev/null << EOF
+        # Use a simpler approach to avoid syntax errors with variables
+        sudo tee /etc/nginx/sites-available/fastag > /dev/null << 'EOF'
 # Redirect HTTP to HTTPS
 server {
     listen 80;
-    server_name $DOMAIN;
-    return 301 https://\$server_name\$request_uri;
+    server_name fastag.onebee.in;
+    return 301 https://$server_name$request_uri;
 }
 
 # Main HTTPS server
 server {
     listen 443 ssl http2;
-    server_name $DOMAIN;
+    server_name fastag.onebee.in;
     
     # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/fastag.onebee.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fastag.onebee.in/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     
