@@ -219,7 +219,7 @@ class RFIDReader:
         # --- Per-reader logging ---
         if db_path is not None:
             reader_type = get_reader_type_from_db(reader_id, db_path)
-            log_path = os.path.join('logs', f'reader_{reader_type}_{reader_id}.log')
+            log_path = os.path.join('logs', f'{reader_type}_reader.log')
             self.logger = setup_logging(log_path)
             self.logger.info(f"Per-reader log started for Reader {reader_id} (type: {reader_type})")
         else:
