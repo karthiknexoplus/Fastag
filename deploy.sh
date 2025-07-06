@@ -289,17 +289,24 @@ if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
         if sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "admin@$DOMAIN" --redirect; then
             echo "✅ SSL certificate obtained successfully!"
             
-            # Fix static file handling after SSL setup
-            echo "🔧 Fixing static file handling after SSL setup..."
-            
-            # Create a proper nginx config with static files
-            sudo tee /etc/nginx/sites-available/fastag > /dev/null << 'EOF'
+                    # Fix static file handling after SSL setup
+        echo "🔧 Fixing static file handling after SSL setup..."
+        
+        # Create a proper nginx config with static files and SSL
+        sudo tee /etc/nginx/sites-available/fastag > /dev/null << 'EOF'
+# Redirect HTTP to HTTPS
 server {
     listen 80;
-    listen 443 ssl;
+    server_name fastag.onebee.in;
+    return 301 https://$server_name$request_uri;
+}
+
+# Main HTTPS server
+server {
+    listen 443 ssl http2;
     server_name fastag.onebee.in;
     
-    # SSL Configuration (certbot will add this)
+    # SSL Configuration
     ssl_certificate /etc/letsencrypt/live/fastag.onebee.in/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/fastag.onebee.in/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
@@ -316,9 +323,9 @@ server {
     access_log /var/log/nginx/fastag_access.log;
     error_log /var/log/nginx/fastag_error.log;
     
-    # Static files - serve directly from nginx for better performance
+    # Static files - serve from /var/www/fastag_static (guaranteed access)
     location /static/ {
-        alias /home/ubuntu/Fastag/fastag/static/;
+        alias /var/www/fastag_static/;
         expires 30d;
         add_header Cache-Control "public, immutable";
         add_header Access-Control-Allow-Origin "*";
@@ -356,13 +363,6 @@ server {
     gzip_min_length 1024;
     gzip_proxied expired no-cache no-store private auth;
     gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript;
-}
-
-# Redirect HTTP to HTTPS
-server {
-    listen 80;
-    server_name fastag.onebee.in;
-    return 301 https://$server_name$request_uri;
 }
 EOF
             
@@ -454,9 +454,26 @@ fi
 if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
     echo "Testing domain access..."
     if curl -s -I "http://$DOMAIN" | head -1; then
-        echo "✅ Domain is accessible"
+        echo "✅ Domain is accessible via HTTP"
     else
         echo "⚠️ Domain may not be accessible yet (DNS propagation)"
+    fi
+    
+    # Test HTTPS if SSL was set up
+    if [[ "$SSL_SETUP_SUCCESS" == "true" ]]; then
+        echo "Testing HTTPS access..."
+        if curl -s -I "https://$DOMAIN" | head -1; then
+            echo "✅ Domain is accessible via HTTPS"
+        else
+            echo "⚠️ HTTPS may not be accessible yet"
+        fi
+        
+        echo "Testing static files via HTTPS..."
+        if curl -s -I "https://$DOMAIN/static/logo.png" | grep -q "200 OK"; then
+            echo "✅ Static files are accessible via HTTPS"
+        else
+            echo "⚠️ Static files may not be accessible via HTTPS"
+        fi
     fi
 fi
 
@@ -508,6 +525,9 @@ echo ""
 echo "🔍 Test static files:"
 echo "   curl -I http://localhost/static/logo.png"
 echo "   curl -I http://$DOMAIN/static/logo.png"
+if [[ "$SSL_SETUP_SUCCESS" == "true" ]]; then
+    echo "   curl -I https://$DOMAIN/static/logo.png"
+fi
 echo ""
 echo "🔒 Add SSL later (if needed):"
 echo "   sudo certbot --nginx -d $DOMAIN"
