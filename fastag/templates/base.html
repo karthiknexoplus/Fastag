@@ -67,12 +67,15 @@
             <div class="d-flex align-items-center ms-auto">
                 <a href="{{ url_for('auth.home') }}" class="nav-icon-link {% if request.endpoint == 'auth.home' %}active{% endif %}" title="Dashboard">
                     <i class="fas fa-home"></i>
+                    <span class="nav-label d-none d-md-inline">Dashboard</span>
                 </a>
                 <a href="{{ url_for('locations.locations') }}" class="nav-icon-link {% if request.endpoint == 'locations.locations' %}active{% endif %}" title="Locations">
                     <i class="fas fa-map-marker-alt"></i>
+                    <span class="nav-label d-none d-md-inline">Locations</span>
                 </a>
                 <a href="{{ url_for('lanes.lanes') }}" class="nav-icon-link {% if request.endpoint == 'lanes.lanes' %}active{% endif %}" title="Lanes">
                     <i class="fas fa-road"></i>
+                    <span class="nav-label d-none d-md-inline">Lanes</span>
                 </a>
                 <a href="{{ url_for('kyc_users.kyc_users') }}" class="nav-icon-link {% if request.endpoint == 'kyc_users.kyc_users' %}active{% endif %}" title="KYC Users">
                     <i class="fas fa-id-card"></i>
@@ -80,6 +83,7 @@
                 </a>
                 <a href="{{ url_for('auth.logout') }}" class="nav-icon-link" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-label d-none d-md-inline">Logout</span>
                 </a>
                 {% if session.get('user') %}
                 <li class="nav-item">
