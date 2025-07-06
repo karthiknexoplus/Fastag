@@ -256,7 +256,7 @@ fi
 
 echo "✅ Database initialized successfully"
 
-# Test database connection
+# Test database connection and show user info
 echo "🧪 Testing database connection..."
 sudo -u ubuntu $PYTHON_EXEC -c "
 from fastag import create_app
@@ -265,7 +265,11 @@ with app.app_context():
     from fastag.utils.db import get_db
     db = get_db()
     locations = db.execute('SELECT * FROM locations').fetchall()
+    users = db.execute('SELECT username FROM users').fetchall()
     print(f'✅ Database test successful - Database initialized with {len(locations)} locations')
+    print(f'✅ Users in database: {len(users)}')
+    for user in users:
+        print(f'   - {user[0]}')
 "
 
 # Set up systemd service

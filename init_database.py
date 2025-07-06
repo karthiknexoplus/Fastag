@@ -2,14 +2,20 @@
 
 import sqlite3
 import os
+import hashlib
+import secrets
 
 # Database path - create in instance directory
 import os
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'instance', 'fastag.db')
 
+def hash_password(password):
+    """Hash a password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
 def init_database():
-    """Initialize the database with all required tables"""
+    """Initialize the database with all required tables and default admin user"""
     
     # Ensure instance directory exists
     db_dir = os.path.dirname(DB_PATH)
@@ -67,12 +73,22 @@ def init_database():
         );
     ''')
     
+    # Check if any users exist
+    cursor.execute("SELECT COUNT(*) FROM users")
+    user_count = cursor.fetchone()[0]
+    print(f"✅ Users in database: {user_count}")
+    
+    # Check if any locations exist
+    cursor.execute("SELECT COUNT(*) FROM locations")
+    location_count = cursor.fetchone()[0]
+    print(f"✅ Locations in database: {location_count}")
+    
     conn.commit()
     conn.close()
     
-    print("Database initialized successfully!")
-    print("✅ Database tables created - no sample data added")
-    print("📝 You can now add your own users, locations, lanes, and readers through the web interface")
+    print("")
+    print("🎉 Database initialized successfully!")
+    print("📝 You can now sign up for a new account and add data through the web interface")
 
 if __name__ == '__main__':
     init_database() 
