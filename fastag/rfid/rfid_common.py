@@ -3,6 +3,7 @@ import sys
 import os
 import logging
 from datetime import datetime
+import sqlite3
 
 # Logging setup (simple version for services)
 def setup_logging(log_path):
@@ -52,3 +53,13 @@ class RFIDReader:
         # Return a list of dicts: [{'tag_id': ..., 'antenna': ..., 'rssi': ...}, ...]
         # For demo, return empty list
         return [] 
+
+def get_reader_type_from_db(reader_id, db_path):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute("SELECT type FROM readers WHERE id = ?", (reader_id,))
+    row = c.fetchone()
+    conn.close()
+    if row:
+        return row[0]  # 'entry' or 'exit'
+    return "unknown" 
