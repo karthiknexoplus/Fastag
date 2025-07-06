@@ -207,6 +207,7 @@ def export_data():
     report_type = request.args.get('type', 'access_logs')
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
+    vehicle_number = request.args.get('vehicle_number', '')
     
     db = get_db()
     
@@ -227,8 +228,12 @@ def export_data():
             JOIN readers r ON al.reader_id = r.id
         """
         
+        conditions = []
         if start_date and end_date:
-            query += f" WHERE DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'"
+            conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         
         query += " ORDER BY al.timestamp DESC"
         
@@ -242,11 +247,183 @@ def export_data():
         for row in rows:
             writer.writerow(row)
         
-        from flask import Response
-        return Response(
-            output.getvalue(),
-            mimetype='text/csv',
-            headers={'Content-Disposition': f'attachment; filename=access_logs_{datetime.now().strftime("%Y%m%d")}.csv'}
-        )
+        filename = f'access_logs_{datetime.now().strftime("%Y%m%d")}.csv'
     
-    return jsonify({'error': 'Invalid report type'}), 400 
+    elif report_type == 'entry_reports':
+        query = """
+            SELECT 
+                al.timestamp,
+                al.tag_id,
+                ku.name as user_name,
+                ku.vehicle_number,
+                ku.contact_number,
+                l.lane_name,
+                r.reader_ip,
+                al.reason
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            JOIN lanes l ON al.lane_id = l.id
+            JOIN readers r ON al.reader_id = r.id
+            WHERE al.access_result = 'granted'
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+        
+        query += " ORDER BY al.timestamp DESC"
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Entry Time', 'Tag ID', 'User Name', 'Vehicle Number', 'Contact Number', 'Entry Lane', 'Reader IP', 'Notes'])
+        
+        for row in rows:
+            writer.writerow(row)
+        
+        filename = f'entry_reports_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'exit_reports':
+        query = """
+            SELECT 
+                al.timestamp,
+                al.tag_id,
+                ku.name as user_name,
+                ku.vehicle_number,
+                ku.contact_number,
+                l.lane_name,
+                r.reader_ip,
+                al.reason
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            JOIN lanes l ON al.lane_id = l.id
+            JOIN readers r ON al.reader_id = r.id
+            WHERE al.access_result = 'granted'
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+        
+        query += " ORDER BY al.timestamp DESC"
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Exit Time', 'Tag ID', 'User Name', 'Vehicle Number', 'Contact Number', 'Exit Lane', 'Reader IP', 'Notes'])
+        
+        for row in rows:
+            writer.writerow(row)
+        
+        filename = f'exit_reports_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'vehicle_non_exited':
+        # Find vehicles that entered but haven't exited (based on last activity)
+        query = """
+            SELECT 
+                ku.name as user_name,
+                ku.vehicle_number,
+                ku.contact_number,
+                ku.address,
+                al.tag_id,
+                MAX(al.timestamp) as last_activity,
+                l.lane_name as entry_lane,
+                r.reader_ip as entry_reader,
+                CASE 
+                    WHEN MAX(al.timestamp) >= datetime('now', '-24 hours') THEN 'Recently Active'
+                    WHEN MAX(al.timestamp) >= datetime('now', '-7 days') THEN 'Active This Week'
+                    ELSE 'Long Term'
+                END as status
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            JOIN lanes l ON al.lane_id = l.id
+            JOIN readers r ON al.reader_id = r.id
+            WHERE al.access_result = 'granted'
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+        
+        query += """
+            GROUP BY al.tag_id, ku.name, ku.vehicle_number, ku.contact_number, ku.address, l.lane_name, r.reader_ip
+            HAVING MAX(al.timestamp) = (
+                SELECT MAX(timestamp) 
+                FROM access_logs al2 
+                WHERE al2.tag_id = al.tag_id
+            )
+            ORDER BY last_activity DESC
+        """
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['User Name', 'Vehicle Number', 'Contact Number', 'Address', 'Tag ID', 'Last Activity', 'Entry Lane', 'Entry Reader', 'Status'])
+        
+        for row in rows:
+            writer.writerow(row)
+        
+        filename = f'vehicle_non_exited_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'vehicle_specific':
+        if not vehicle_number:
+            return jsonify({'error': 'Vehicle number is required for vehicle-specific reports'}), 400
+        
+        query = """
+            SELECT 
+                al.timestamp,
+                al.access_result,
+                al.reason,
+                ku.name as user_name,
+                ku.vehicle_number,
+                ku.contact_number,
+                l.lane_name,
+                r.reader_ip
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            JOIN lanes l ON al.lane_id = l.id
+            JOIN readers r ON al.reader_id = r.id
+            WHERE ku.vehicle_number = ?
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+        
+        query += " ORDER BY al.timestamp DESC"
+        
+        rows = db.execute(query, (vehicle_number,)).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Timestamp', 'Access Result', 'Reason', 'User Name', 'Vehicle Number', 'Contact Number', 'Lane', 'Reader IP'])
+        
+        for row in rows:
+            writer.writerow(row)
+        
+        filename = f'vehicle_{vehicle_number}_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    else:
+        return jsonify({'error': 'Invalid report type'}), 400
+    
+    from flask import Response
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename={filename}'}
+    ) 
