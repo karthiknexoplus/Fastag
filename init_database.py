@@ -3,11 +3,19 @@
 import sqlite3
 import os
 
-# Database path
-DB_PATH = 'fastag.db'
+# Database path - create in instance directory
+import os
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'instance', 'fastag.db')
 
 def init_database():
     """Initialize the database with all required tables"""
+    
+    # Ensure instance directory exists
+    db_dir = os.path.dirname(DB_PATH)
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+        print(f"Created directory: {db_dir}")
     
     # Connect to database
     conn = sqlite3.connect(DB_PATH)

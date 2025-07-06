@@ -102,13 +102,7 @@ sudo -u ubuntu mkdir -p /home/ubuntu/Fastag/logs
 echo "🗄️ Setting up database..."
 cd /home/ubuntu/Fastag
 
-# Create instance directory if it doesn't exist
-if [ ! -d "instance" ]; then
-    echo "📂 Creating instance directory..."
-    sudo -u ubuntu mkdir -p instance
-fi
-
-# Initialize database
+# Initialize database (script will create instance directory if needed)
 echo "🗄️ Initializing database..."
 sudo -u ubuntu $PYTHON_EXEC init_database.py
 
