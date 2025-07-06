@@ -85,6 +85,29 @@
                     <i class="fas fa-chart-line"></i>
                     <span class="nav-label d-none d-md-inline">Analytics</span>
                 </a>
+                <div class="dropdown d-inline-block">
+                    <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Menu Fastag">
+                        <i class="fas fa-tags"></i>
+                        <span class="nav-label d-none d-md-inline">Menu Fastag</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('fastag.find_vehicle') }}">
+                            <i class="fas fa-car me-2"></i>Find Vehicle
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('fastag.find_bank') }}">
+                            <i class="fas fa-university me-2"></i>Find Bank
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('fastag.fastag_balance') }}">
+                            <i class="fas fa-wallet me-2"></i>Fastag Balance
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('fastag.find_challan') }}">
+                            <i class="fas fa-file-invoice me-2"></i>Find Challan
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('fastag.find_fuel_price') }}">
+                            <i class="fas fa-gas-pump me-2"></i>Find Fuel Price
+                        </a></li>
+                    </ul>
+                </div>
                 <a href="{{ url_for('auth.logout') }}" class="nav-icon-link" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="nav-label d-none d-md-inline">Logout</span>
