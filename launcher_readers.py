@@ -7,7 +7,7 @@ import time
 import psutil
 
 # Path to DB and service scripts
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instance', 'access_control.db'))
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instance', 'fastag.db'))
 SERVICE_FILES = [
     'rfid_reader1_service.py',
     'rfid_reader2_service.py',
@@ -42,6 +42,12 @@ def stop_all_services():
 def get_readers_from_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    # Check if readers table exists
+    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='readers'")
+    if not c.fetchone():
+        print("❌ ERROR: 'readers' table does not exist in the database. Please run database initialization first.")
+        conn.close()
+        exit(1)
     c.execute("SELECT id FROM readers ORDER BY id ASC LIMIT 2")
     rows = c.fetchall()
     conn.close()

@@ -10,7 +10,7 @@ logger = setup_logging('logs/rfid_reader1.log')
 READER_IP = "192.168.60.250"
 DLL_PATH = "./libSWNetClientApi1.so"
 # Use absolute DB path in instance folder
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instance', 'access_control.db'))
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instance', 'fastag.db'))
 print('Using DB:', DB_PATH)
 LANE_ID = 1
 DEVICE_ID = 1
