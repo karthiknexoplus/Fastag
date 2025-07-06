@@ -11,10 +11,32 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         border: none;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
     }
     .report-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+    .report-card .card-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .report-card .card-text {
+        flex-grow: 1;
+        margin-bottom: 1rem;
+    }
+    .report-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: white;
+        margin-bottom: 0.75rem;
     }
     .export-btn {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -171,89 +193,199 @@
 
     <!-- Report Types -->
     <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card report-card h-100">
+        <!-- Vehicle Reports Section -->
+        <div class="col-12 mb-4">
+            <h4 class="text-dark fw-bold mb-3">
+                <i class="fas fa-car text-primary me-2"></i>
+                Vehicle Reports
+            </h4>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
                 <div class="card-body text-center">
                     <div class="report-icon icon-access mx-auto">
                         <i class="fas fa-sign-in-alt"></i>
                     </div>
-                    <h5 class="card-title text-dark fw-bold">Entry Reports</h5>
-                    <p class="card-text text-muted">
-                        Detailed entry logs with user information, vehicle details, and entry timestamps.
-                        Perfect for tracking vehicle entries and entry patterns.
+                    <h6 class="card-title text-dark fw-bold">Entry Reports</h6>
+                    <p class="card-text text-muted small">
+                        Detailed entry logs with user information and timestamps.
                     </p>
-                    <div class="mt-3">
-                        <button class="btn export-btn" onclick="exportReport('entry_reports')">
-                            <i class="fas fa-download me-2"></i>
-                            Export CSV
-                        </button>
-                    </div>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('entry_reports')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-6 mb-4">
-            <div class="card report-card h-100">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
                 <div class="card-body text-center">
                     <div class="report-icon icon-users mx-auto">
                         <i class="fas fa-sign-out-alt"></i>
                     </div>
-                    <h5 class="card-title text-dark fw-bold">Exit Reports</h5>
-                    <p class="card-text text-muted">
-                        Comprehensive exit logs with vehicle information, exit timestamps, and lane details.
-                        Essential for tracking vehicle departures and exit patterns.
+                    <h6 class="card-title text-dark fw-bold">Exit Reports</h6>
+                    <p class="card-text text-muted small">
+                        Comprehensive exit logs with departure details.
                     </p>
-                    <div class="mt-3">
-                        <button class="btn export-btn" onclick="exportReport('exit_reports')">
-                            <i class="fas fa-download me-2"></i>
-                            Export CSV
-                        </button>
-                    </div>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('exit_reports')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-6 mb-4">
-            <div class="card report-card h-100">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
                 <div class="card-body text-center">
                     <div class="report-icon icon-lanes mx-auto">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <h5 class="card-title text-dark fw-bold">Vehicle Non-Exited Report</h5>
-                    <p class="card-text text-muted">
-                        List of vehicles that entered but haven't exited yet. Includes contact information
-                        and last activity status for security and management purposes.
+                    <h6 class="card-title text-dark fw-bold">Non-Exited Vehicles</h6>
+                    <p class="card-text text-muted small">
+                        Vehicles that entered but haven't exited yet.
                     </p>
-                    <div class="mt-3">
-                        <button class="btn export-btn" onclick="exportReport('vehicle_non_exited')">
-                            <i class="fas fa-download me-2"></i>
-                            Export CSV
+                    <button class="btn export-btn btn-sm" onclick="exportReport('vehicle_non_exited')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 mb-3">
+            <div class="card report-card">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-readers mx-auto">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h6 class="card-title text-dark fw-bold">Vehicle-Specific Report</h6>
+                    <p class="card-text text-muted small">
+                        Detailed activity for a specific vehicle number.
+                    </p>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" id="vehicle-number" placeholder="Enter vehicle number">
+                        <button class="btn export-btn btn-sm" onclick="exportVehicleReport()">
+                            <i class="fas fa-download me-1"></i>Export
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-6 mb-4">
-            <div class="card report-card h-100">
+        <!-- Time-Based Reports Section -->
+        <div class="col-12 mb-4 mt-4">
+            <h4 class="text-dark fw-bold mb-3">
+                <i class="fas fa-clock text-primary me-2"></i>
+                Time-Based Reports
+            </h4>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
                 <div class="card-body text-center">
-                    <div class="report-icon icon-readers mx-auto">
-                        <i class="fas fa-car"></i>
+                    <div class="report-icon icon-access mx-auto">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <h5 class="card-title text-dark fw-bold">Vehicle-Specific Report</h5>
-                    <p class="card-text text-muted">
-                        Detailed activity report for a specific vehicle number. Enter the vehicle number
-                        below to generate a comprehensive report for that vehicle.
+                    <h6 class="card-title text-dark fw-bold">Peak Hours Analysis</h6>
+                    <p class="card-text text-muted small">
+                        Busiest entry/exit times and traffic patterns.
                     </p>
-                    <div class="mt-3">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" id="vehicle-number" placeholder="Enter vehicle number">
-                            <button class="btn export-btn" onclick="exportVehicleReport()">
-                                <i class="fas fa-download me-2"></i>
-                                Export
-                            </button>
-                        </div>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('peak_hours')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-users mx-auto">
+                        <i class="fas fa-calendar-day"></i>
                     </div>
+                    <h6 class="card-title text-dark fw-bold">Daily Traffic Patterns</h6>
+                    <p class="card-text text-muted small">
+                        Hour-by-hour activity breakdown by date.
+                    </p>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('daily_traffic')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-lanes mx-auto">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <h6 class="card-title text-dark fw-bold">Weekly Trends</h6>
+                    <p class="card-text text-muted small">
+                        Long-term usage patterns and weekly analysis.
+                    </p>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('weekly_trends')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facility Management Reports Section -->
+        <div class="col-12 mb-4 mt-4">
+            <h4 class="text-dark fw-bold mb-3">
+                <i class="fas fa-building text-primary me-2"></i>
+                Facility Management Reports
+            </h4>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-access mx-auto">
+                        <i class="fas fa-road"></i>
+                    </div>
+                    <h6 class="card-title text-dark fw-bold">Lane Performance</h6>
+                    <p class="card-text text-muted small">
+                        Which lanes are most/least used with metrics.
+                    </p>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('lane_performance')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-users mx-auto">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h6 class="card-title text-dark fw-bold">Equipment Health</h6>
+                    <p class="card-text text-muted small">
+                        Reader status, maintenance, and system health.
+                    </p>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('equipment_health')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card report-card">
+                <div class="card-body text-center">
+                    <div class="report-icon icon-lanes mx-auto">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h6 class="card-title text-dark fw-bold">Denied Access Analysis</h6>
+                    <p class="card-text text-muted small">
+                        Security insights and access failure reasons.
+                    </p>
+                    <button class="btn export-btn btn-sm" onclick="exportReport('denied_access_analysis')">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
                 </div>
             </div>
         </div>
@@ -456,9 +588,14 @@ function addToRecentExports(reportType, startDate, endDate, vehicleNumber = '') 
         'exit_reports': 'Exit Reports',
         'vehicle_non_exited': 'Vehicle Non-Exited',
         'vehicle_specific': vehicleNumber ? `Vehicle Report (${vehicleNumber})` : 'Vehicle Report',
+        'peak_hours': 'Peak Hours Analysis',
+        'daily_traffic': 'Daily Traffic Patterns',
+        'weekly_trends': 'Weekly Trends',
+        'lane_performance': 'Lane Performance',
+        'equipment_health': 'Equipment Health',
+        'denied_access_analysis': 'Denied Access Analysis',
         'access_logs': 'Access Logs',
         'user_activity': 'User Activity',
-        'lane_performance': 'Lane Performance',
         'reader_health': 'Reader Health'
     };
     

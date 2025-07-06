@@ -418,6 +418,223 @@ def export_data():
         
         filename = f'vehicle_{vehicle_number}_{datetime.now().strftime("%Y%m%d")}.csv'
     
+    elif report_type == 'peak_hours':
+        query = """
+            SELECT 
+                strftime('%H', timestamp) as hour,
+                COUNT(*) as total_events,
+                SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as granted,
+                SUM(CASE WHEN access_result = 'denied' THEN 1 ELSE 0 END) as denied
+            FROM access_logs 
+            WHERE timestamp >= datetime('now', '-30 days')
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+        
+        query += """
+            GROUP BY strftime('%H', timestamp)
+            ORDER BY total_events DESC
+        """
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Hour', 'Total Events', 'Granted', 'Denied', 'Success Rate (%)'])
+        
+        for row in rows:
+            success_rate = (row[2] / row[1] * 100) if row[1] > 0 else 0
+            writer.writerow([f"{row[0]}:00", row[1], row[2], row[3], f"{success_rate:.1f}"])
+        
+        filename = f'peak_hours_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'daily_traffic':
+        query = """
+            SELECT 
+                DATE(timestamp) as date,
+                strftime('%H', timestamp) as hour,
+                COUNT(*) as total_events,
+                SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as granted,
+                SUM(CASE WHEN access_result = 'denied' THEN 1 ELSE 0 END) as denied
+            FROM access_logs 
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        
+        query += """
+            GROUP BY DATE(timestamp), strftime('%H', timestamp)
+            ORDER BY date DESC, hour ASC
+        """
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Date', 'Hour', 'Total Events', 'Granted', 'Denied', 'Success Rate (%)'])
+        
+        for row in rows:
+            success_rate = (row[3] / row[2] * 100) if row[2] > 0 else 0
+            writer.writerow([row[0], f"{row[1]}:00", row[2], row[3], row[4], f"{success_rate:.1f}"])
+        
+        filename = f'daily_traffic_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'weekly_trends':
+        query = """
+            SELECT 
+                strftime('%Y-%W', timestamp) as week,
+                COUNT(*) as total_events,
+                SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as granted,
+                SUM(CASE WHEN access_result = 'denied' THEN 1 ELSE 0 END) as denied,
+                COUNT(DISTINCT DATE(timestamp)) as active_days
+            FROM access_logs 
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        
+        query += """
+            GROUP BY strftime('%Y-%W', timestamp)
+            ORDER BY week DESC
+        """
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Week', 'Total Events', 'Granted', 'Denied', 'Active Days', 'Avg Daily Events', 'Success Rate (%)'])
+        
+        for row in rows:
+            avg_daily = row[1] / row[4] if row[4] > 0 else 0
+            success_rate = (row[2] / row[1] * 100) if row[1] > 0 else 0
+            writer.writerow([row[0], row[1], row[2], row[3], row[4], f"{avg_daily:.1f}", f"{success_rate:.1f}"])
+        
+        filename = f'weekly_trends_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'lane_performance':
+        query = """
+            SELECT 
+                l.lane_name,
+                COUNT(*) as total_events,
+                SUM(CASE WHEN al.access_result = 'granted' THEN 1 ELSE 0 END) as granted,
+                SUM(CASE WHEN al.access_result = 'denied' THEN 1 ELSE 0 END) as denied,
+                COUNT(DISTINCT al.tag_id) as unique_vehicles,
+                MAX(al.timestamp) as last_activity,
+                r.reader_ip,
+                r.type as reader_type
+            FROM access_logs al
+            JOIN lanes l ON al.lane_id = l.id
+            JOIN readers r ON al.reader_id = r.id
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        
+        query += """
+            GROUP BY l.id, l.lane_name, r.reader_ip, r.type
+            ORDER BY total_events DESC
+        """
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Lane Name', 'Total Events', 'Granted', 'Denied', 'Unique Vehicles', 'Success Rate (%)', 'Last Activity', 'Reader IP', 'Reader Type'])
+        
+        for row in rows:
+            success_rate = (row[2] / row[1] * 100) if row[1] > 0 else 0
+            writer.writerow([row[0], row[1], row[2], row[3], row[4], f"{success_rate:.1f}", row[5], row[6], row[7]])
+        
+        filename = f'lane_performance_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'equipment_health':
+        query = """
+            SELECT 
+                r.id as reader_id,
+                r.reader_ip,
+                r.type as reader_type,
+                l.lane_name,
+                COUNT(al.id) as events_last_7d,
+                COUNT(CASE WHEN al.timestamp >= datetime('now', '-24 hours') THEN 1 END) as events_last_24h,
+                MAX(al.timestamp) as last_activity,
+                CASE 
+                    WHEN MAX(al.timestamp) >= datetime('now', '-1 hour') THEN 'Online'
+                    WHEN MAX(al.timestamp) >= datetime('now', '-24 hours') THEN 'Recent'
+                    WHEN MAX(al.timestamp) >= datetime('now', '-7 days') THEN 'Inactive'
+                    ELSE 'Offline'
+                END as status
+            FROM readers r
+            JOIN lanes l ON r.lane_id = l.id
+            LEFT JOIN access_logs al ON r.id = al.reader_id 
+                AND al.timestamp >= datetime('now', '-7 days')
+            GROUP BY r.id, r.reader_ip, r.type, l.lane_name
+            ORDER BY r.id
+        """
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Reader ID', 'IP Address', 'Type', 'Lane', 'Events (7 days)', 'Events (24h)', 'Last Activity', 'Status'])
+        
+        for row in rows:
+            writer.writerow(row)
+        
+        filename = f'equipment_health_{datetime.now().strftime("%Y%m%d")}.csv'
+    
+    elif report_type == 'denied_access_analysis':
+        query = """
+            SELECT 
+                al.reason,
+                COUNT(*) as denied_count,
+                COUNT(DISTINCT al.tag_id) as unique_vehicles,
+                MAX(al.timestamp) as last_attempt,
+                GROUP_CONCAT(DISTINCT ku.vehicle_number) as vehicle_numbers
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            WHERE al.access_result = 'denied'
+        """
+        
+        conditions = []
+        if start_date and end_date:
+            conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
+        
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+        
+        query += """
+            GROUP BY al.reason
+            ORDER BY denied_count DESC
+        """
+        
+        rows = db.execute(query).fetchall()
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Reason', 'Denied Count', 'Unique Vehicles', 'Last Attempt', 'Vehicle Numbers'])
+        
+        for row in rows:
+            writer.writerow(row)
+        
+        filename = f'denied_access_{datetime.now().strftime("%Y%m%d")}.csv'
+    
     else:
         return jsonify({'error': 'Invalid report type'}), 400
     
