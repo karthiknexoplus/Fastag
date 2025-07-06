@@ -1,9 +1,16 @@
 import sqlite3
+import os
 from flask import g, current_app
 
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect(current_app.config['DB_PATH'])
+        # Ensure the instance directory exists
+        db_path = current_app.config['DB_PATH']
+        db_dir = os.path.dirname(db_path)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+        
+        g.db = sqlite3.connect(db_path)
         g.db.row_factory = sqlite3.Row
         init_db(g.db)
     return g.db
