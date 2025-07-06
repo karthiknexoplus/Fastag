@@ -137,12 +137,67 @@ echo ""
 echo "🌐 Domain Configuration..."
 DOMAIN=$(get_domain)
 
-# Configure Nginx with the correct domain
+# Configure Nginx with the correct domain and static files
 echo "🌐 Configuring Nginx for domain: $DOMAIN"
-sudo cp /home/ubuntu/Fastag/nginx.conf /etc/nginx/sites-available/fastag
-
-# Update Nginx configuration with the correct domain
-sudo sed -i "s/your-domain.com www.your-domain.com/$DOMAIN/g" /etc/nginx/sites-available/fastag
+# Create optimized Nginx configuration
+sudo tee /etc/nginx/sites-available/fastag > /dev/null << EOF
+server {
+    listen 80;
+    server_name $DOMAIN;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+    
+    # Logs
+    access_log /var/log/nginx/fastag_access.log;
+    error_log /var/log/nginx/fastag_error.log;
+    
+    # Static files - serve from /var/www/fastag_static (guaranteed access)
+    location /static/ {
+        alias /var/www/fastag_static/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        add_header Access-Control-Allow-Origin "*";
+        
+        # Handle common static file types
+        location ~* \\.(jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|eot|svg)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+            add_header Access-Control-Allow-Origin "*";
+        }
+    }
+    
+    # Proxy to Gunicorn
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # WebSocket support (if needed)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript;
+}
+EOF
 
 # Backup nginx config for SSL setup
 sudo cp /etc/nginx/sites-available/fastag /etc/nginx/sites-available/fastag.backup
@@ -170,25 +225,21 @@ sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag
 sudo chmod -R 755 /home/ubuntu/Fastag
 sudo chmod 644 /home/ubuntu/Fastag/instance/fastag.db
 
-# Ensure static files are accessible
-echo "🖼️ Setting up static files..."
+# Set up static files with guaranteed access
+echo "🖼️ Setting up static files with guaranteed access..."
+# Create Nginx-accessible static directory
+sudo mkdir -p /var/www/fastag_static
+sudo cp -r /home/ubuntu/Fastag/fastag/static/* /var/www/fastag_static/
+sudo chown -R www-data:www-data /var/www/fastag_static
+sudo chmod -R 755 /var/www/fastag_static
+sudo chmod 644 /var/www/fastag_static/*
+
+# Also set up original location permissions for backup
 sudo chown -R ubuntu:www-data /home/ubuntu/Fastag/fastag/static/
 sudo chmod -R 755 /home/ubuntu/Fastag/fastag/static/
 sudo chmod 644 /home/ubuntu/Fastag/fastag/static/*
 
-# Test static file accessibility
-echo "🧪 Testing static file accessibility..."
-if [ -f "/home/ubuntu/Fastag/fastag/static/logo.png" ]; then
-    echo "✅ Logo file exists and is accessible"
-else
-    echo "❌ Logo file not found"
-fi
-
-if [ -f "/home/ubuntu/Fastag/fastag/static/branding.jpg" ]; then
-    echo "✅ Branding image exists and is accessible"
-else
-    echo "❌ Branding image not found"
-fi
+echo "✅ Static files set up in both locations"
 
 # Start the application
 echo "🚀 Starting Fastag application..."
@@ -363,20 +414,50 @@ echo ""
 echo "🧪 Final Application Test..."
 sleep 5
 
-# Test application endpoints
-echo "Testing application endpoints..."
-if curl -s -I "http://localhost:8000" > /dev/null; then
-    echo "✅ Application is responding on localhost:8000"
+# Comprehensive testing
+echo "🧪 Comprehensive Application Testing..."
+sleep 3
+
+# Test Gunicorn directly
+echo "Testing Gunicorn (port 8000)..."
+if curl -s -I "http://localhost:8000" | head -1; then
+    echo "✅ Gunicorn is responding"
 else
-    echo "⚠️ Application may not be fully started yet"
+    echo "❌ Gunicorn is not responding"
 fi
 
-# Test static files
-echo "Testing static files..."
-if curl -s -I "http://localhost:8000/static/logo.png" > /dev/null; then
-    echo "✅ Static files are accessible"
+# Test Nginx proxy
+echo "Testing Nginx proxy (port 80)..."
+if curl -s -I "http://localhost" | head -1; then
+    echo "✅ Nginx proxy is working"
 else
-    echo "⚠️ Static files may not be accessible"
+    echo "❌ Nginx proxy is not working"
+fi
+
+# Test static files through Nginx
+echo "Testing static files through Nginx..."
+if curl -s -I "http://localhost/static/logo.png" | grep -q "200 OK"; then
+    echo "✅ Static files are accessible via Nginx"
+else
+    echo "❌ Static files are not accessible via Nginx"
+fi
+
+# Test static files through Gunicorn
+echo "Testing static files through Gunicorn..."
+if curl -s -I "http://localhost:8000/static/logo.png" | grep -q "200 OK"; then
+    echo "✅ Static files are accessible via Gunicorn"
+else
+    echo "❌ Static files are not accessible via Gunicorn"
+fi
+
+# Test domain access (if not localhost)
+if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
+    echo "Testing domain access..."
+    if curl -s -I "http://$DOMAIN" | head -1; then
+        echo "✅ Domain is accessible"
+    else
+        echo "⚠️ Domain may not be accessible yet (DNS propagation)"
+    fi
 fi
 
 echo ""
@@ -407,4 +488,30 @@ echo "🔄 Restart Services:"
 echo "   sudo systemctl restart fastag"
 echo "   sudo systemctl restart nginx"
 echo ""
-echo "🎉 Your Fastag Parking Management System is ready!" 
+echo "🎉 Your Fastag Parking Management System is ready!"
+
+echo ""
+echo "🔧 Troubleshooting Commands (if needed):"
+echo "========================================"
+echo "📊 Check service status:"
+echo "   sudo systemctl status fastag"
+echo "   sudo systemctl status nginx"
+echo ""
+echo "📝 View logs:"
+echo "   sudo journalctl -u fastag -f"
+echo "   sudo tail -f /var/log/nginx/fastag_error.log"
+echo ""
+echo "🔄 Restart services:"
+echo "   sudo systemctl restart fastag"
+echo "   sudo systemctl restart nginx"
+echo ""
+echo "🔍 Test static files:"
+echo "   curl -I http://localhost/static/logo.png"
+echo "   curl -I http://$DOMAIN/static/logo.png"
+echo ""
+echo "🔒 Add SSL later (if needed):"
+echo "   sudo certbot --nginx -d $DOMAIN"
+echo ""
+echo "📁 Static files location:"
+echo "   /var/www/fastag_static/ (Nginx served)"
+echo "   /home/ubuntu/Fastag/fastag/static/ (Original)" 
