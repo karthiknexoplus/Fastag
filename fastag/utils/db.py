@@ -7,9 +7,17 @@ def get_db():
         # Ensure the instance directory exists
         db_path = current_app.config['DB_PATH']
         db_dir = os.path.dirname(db_path)
+        
+        # Debug information
+        print(f"DEBUG: Database path: {db_path}")
+        print(f"DEBUG: Database directory: {db_dir}")
+        print(f"DEBUG: Current working directory: {os.getcwd()}")
+        
         if db_dir and not os.path.exists(db_dir):
+            print(f"DEBUG: Creating directory: {db_dir}")
             os.makedirs(db_dir, exist_ok=True)
         
+        print(f"DEBUG: Connecting to database: {db_path}")
         g.db = sqlite3.connect(db_path)
         g.db.row_factory = sqlite3.Row
         init_db(g.db)
