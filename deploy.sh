@@ -123,7 +123,7 @@ with app.app_context():
     from fastag.utils.db import get_db
     db = get_db()
     locations = db.execute('SELECT * FROM locations').fetchall()
-    print(f'✅ Database test successful - Found {len(locations)} locations')
+    print(f'✅ Database test successful - Database initialized with {len(locations)} locations')
 "
 
 # Set up systemd service
@@ -169,6 +169,26 @@ echo "🔐 Setting proper permissions..."
 sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag
 sudo chmod -R 755 /home/ubuntu/Fastag
 sudo chmod 644 /home/ubuntu/Fastag/instance/fastag.db
+
+# Ensure static files are accessible
+echo "🖼️ Setting up static files..."
+sudo chmod -R 644 /home/ubuntu/Fastag/fastag/static/*
+sudo chmod 755 /home/ubuntu/Fastag/fastag/static/
+sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag/fastag/static/
+
+# Test static file accessibility
+echo "🧪 Testing static file accessibility..."
+if [ -f "/home/ubuntu/Fastag/fastag/static/logo.png" ]; then
+    echo "✅ Logo file exists and is accessible"
+else
+    echo "❌ Logo file not found"
+fi
+
+if [ -f "/home/ubuntu/Fastag/fastag/static/branding.jpg" ]; then
+    echo "✅ Branding image exists and is accessible"
+else
+    echo "❌ Branding image not found"
+fi
 
 # Start the application
 echo "🚀 Starting Fastag application..."
@@ -263,6 +283,26 @@ fi
 echo ""
 echo "✅ Complete deployment finished successfully!"
 echo ""
+echo "🧪 Final Application Test..."
+sleep 5
+
+# Test application endpoints
+echo "Testing application endpoints..."
+if curl -s -I "http://localhost:8000" > /dev/null; then
+    echo "✅ Application is responding on localhost:8000"
+else
+    echo "⚠️ Application may not be fully started yet"
+fi
+
+# Test static files
+echo "Testing static files..."
+if curl -s -I "http://localhost:8000/static/logo.png" > /dev/null; then
+    echo "✅ Static files are accessible"
+else
+    echo "⚠️ Static files may not be accessible"
+fi
+
+echo ""
 echo "📋 Deployment Summary:"
 echo "======================"
 if [[ "$SSL_SETUP_SUCCESS" == "true" ]]; then
@@ -275,7 +315,8 @@ else
         echo "💡 To enable SSL later: sudo certbot --nginx -d $DOMAIN"
     fi
 fi
-echo "👤 Login: admin / admin123"
+echo "👤 Login: Create your first user through the signup page"
+echo "📝 Database: Empty (no sample data) - add your own data through the web interface"
 echo ""
 echo "🔍 Service Status:"
 echo "   sudo systemctl status fastag"

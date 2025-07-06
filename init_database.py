@@ -67,28 +67,12 @@ def init_database():
         );
     ''')
     
-    # Add some sample data
-    cursor.execute("INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)", 
-                   ('admin', 'admin123'))
-    
-    cursor.execute("INSERT OR IGNORE INTO locations (name, address, site_id) VALUES (?, ?, ?)", 
-                   ('Central Parking', '123 Main St', 'CP001'))
-    
-    cursor.execute("INSERT OR IGNORE INTO lanes (location_id, lane_name) VALUES (?, ?)", 
-                   (1, 'Main Entry'))
-    
-    cursor.execute("INSERT OR IGNORE INTO readers (lane_id, mac_address, type, reader_ip) VALUES (?, ?, ?, ?)", 
-                   (1, '00:00:00:00', 'entry', '192.168.1.100'))
-    
     conn.commit()
     conn.close()
     
     print("Database initialized successfully!")
-    print("Sample data added:")
-    print("- User: admin/admin123")
-    print("- Location: Central Parking (CP001)")
-    print("- Lane: Main Entry")
-    print("- Reader: 00:00:00:00 (entry)")
+    print("✅ Database tables created - no sample data added")
+    print("📝 You can now add your own users, locations, lanes, and readers through the web interface")
 
 if __name__ == '__main__':
     init_database() 

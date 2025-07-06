@@ -1,247 +1,110 @@
-# Fastag Management System
+# Fastag Parking Management System
 
-A modern, scalable Flask application for managing FASTag parking locations, lanes, and RFID readers with a beautiful, responsive UI.
+A comprehensive parking management system with RFID reader integration, location management, and API endpoints for external devices.
 
-## 🚀 Features
+## 🚀 Quick Deployment
 
-### Authentication
-- Secure login/signup system with session management
-- Glassmorphism design with modern UI elements
-- Activity logging for all user actions
+After cloning the repository to your EC2 instance, simply run:
 
-### Location Management
-- Create and manage parking locations
-- Auto-generated unique site IDs
-- Full CRUD operations with modern interface
-
-### Lane Management
-- Add lanes to locations
-- Track reader count per lane
-- Integrated with location system
-
-### Reader Management
-- Configure RFID readers per lane
-- Support for entry/exit readers (max 2 per lane)
-- MAC address and IP configuration
-- Type validation (entry/exit only)
-
-### Technical Features
-- Modular blueprint architecture
-- SQLite database with proper relationships
-- Comprehensive logging system
-- Production-ready configuration
-- Responsive Bootstrap UI with FontAwesome icons
-
-## 🏗️ Project Structure
-
-```
-Fastag/
-├── fastag/                    # Main application package
-│   ├── __init__.py           # Flask app factory
-│   ├── routes/               # Blueprint routes
-│   │   ├── auth.py          # Authentication routes
-│   │   ├── locations.py     # Location management
-│   │   ├── lanes.py         # Lane management
-│   │   └── readers.py       # Reader management
-│   ├── templates/           # Jinja2 templates
-│   │   ├── base.html        # Base template
-│   │   ├── login.html       # Login page
-│   │   ├── signup.html      # Signup page
-│   │   ├── home.html        # Dashboard
-│   │   ├── locations.html   # Location management
-│   │   ├── lanes.html       # Lane management
-│   │   ├── edit_lane.html   # Edit lane form
-│   │   ├── readers.html     # Reader management
-│   │   └── edit_reader.html # Edit reader form
-│   └── utils/               # Utility modules
-│       ├── db.py           # Database utilities
-│       └── logging.py      # Logging configuration
-├── instance/                # Instance-specific files
-│   └── fastag.db           # SQLite database
-├── logs/                    # Application logs
-├── config.py               # Configuration settings
-├── wsgi.py                 # WSGI entry point
-├── test_app.py             # Test script
-└── README.md               # This file
+```bash
+sudo ./deploy.sh
 ```
 
-## 🛠️ Installation & Setup
+That's it! The script handles everything automatically.
 
-### Prerequisites
-- Python 3.7+
-- pip
+## 🌐 Features
 
-### Installation Steps
+- **User Management**: Secure login system
+- **Location Management**: Add/edit parking locations
+- **Lane Management**: Configure entry/exit lanes
+- **Reader Management**: Manage RFID readers with MAC addresses
+- **API Endpoints**: External device integration
+- **Real-time Monitoring**: Live system status
+- **SSL Support**: Automatic Let's Encrypt certificates
 
-1. **Clone or download the project**
-   ```bash
-   cd /path/to/Fastag
-   ```
+## 🔧 Prerequisites
 
-2. **Install dependencies**
-   ```bash
-   pip install flask
-   ```
+- Ubuntu Server 22.04 LTS (recommended)
+- EC2 Security Group with ports 22, 80, 443 open
+- Domain name (optional, for SSL)
 
-3. **Run the test script to verify setup**
-   ```bash
-   python test_app.py
-   ```
+## 📋 What the Deployment Script Does
 
-4. **Start the application**
-   ```bash
-   python wsgi.py
-   ```
+1. **System Setup**: Updates packages, installs dependencies
+2. **Application Setup**: Creates Python environment, installs requirements
+3. **Database Setup**: Initializes database (no sample data)
+4. **Web Server**: Configures Nginx with your domain
+5. **SSL Certificate**: Automatic Let's Encrypt setup (optional)
+6. **Firewall**: Configures UFW with proper rules
+7. **Services**: Sets up systemd services with auto-start
+8. **Testing**: Verifies everything works correctly
 
-5. **Access the application**
-   - Open your browser and go to `http://localhost:5000`
-   - Create an account and start managing your FASTag system
+## 🌐 Access Your Application
 
-## 📊 Database Schema
+After deployment, your application will be available at:
 
-### Users Table
-- `id`: Primary key
-- `username`: Unique username
-- `password`: Hashed password
-- `created_at`: Timestamp
+- **HTTP**: `http://your-domain-or-ip`
+- **HTTPS**: `https://your-domain` (if SSL was set up)
+- **Signup**: Create your first user account
+- **API**: `http://your-domain/api/device/[mac-address]`
 
-### Activity Log Table
-- `id`: Primary key
-- `user_id`: Foreign key to users
-- `action`: Action description
-- `details`: Additional details
-- `timestamp`: When action occurred
+## 📊 API Endpoints
 
-### Locations Table
-- `id`: Primary key
-- `name`: Location name
-- `address`: Physical address
-- `site_id`: Auto-generated unique ID
-- `created_at`: Timestamp
-
-### Lanes Table
-- `id`: Primary key
-- `location_id`: Foreign key to locations
-- `lane_name`: Lane identifier
-- `created_at`: Timestamp
-
-### Readers Table
-- `id`: Primary key
-- `lane_id`: Foreign key to lanes
-- `mac_address`: Reader MAC address
-- `type`: 'entry' or 'exit'
-- `reader_ip`: Reader IP address
-- `created_at`: Timestamp
-
-## 🔧 Configuration
-
-The application uses a `config.py` file for configuration:
-
-```python
-import os
-
-class Config:
-    SECRET_KEY = 'your-secret-key-here'
-    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'fastag.db')
-    LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+### Device Lookup
+```
+GET /api/device/{mac_address}
 ```
 
-## 🎨 UI Features
+### Device Registration
+```
+POST /api/device/register
+Content-Type: application/json
 
-### Modern Design
-- Glassmorphism effects
-- Responsive Bootstrap 5 layout
-- FontAwesome icons throughout
-- Consistent color scheme
-- Professional typography
+{
+    "mac_address": "00:11:22:33:44:55"
+}
+```
 
-### User Experience
-- Intuitive navigation
-- Confirmation dialogs for deletions
-- Real-time form validation
-- Clear visual feedback
-- Mobile-friendly interface
+### System Status
+```
+GET /api/status
+```
+
+## 🔍 Troubleshooting
+
+### Check Service Status
+```bash
+sudo systemctl status fastag
+sudo systemctl status nginx
+```
+
+### View Logs
+```bash
+sudo journalctl -u fastag -f
+sudo tail -f /var/log/nginx/fastag_error.log
+```
+
+### Restart Services
+```bash
+sudo systemctl restart fastag
+sudo systemctl restart nginx
+```
 
 ## 🔒 Security Features
 
-- Session-based authentication
-- Password hashing
-- SQL injection protection
-- CSRF protection
-- Input validation
-- Activity logging
+- **Firewall**: UFW configured with necessary ports
+- **SSL/TLS**: Automatic Let's Encrypt certificates
+- **Secure Headers**: Nginx security headers
+- **Database**: SQLite with proper permissions
+- **Process Isolation**: Systemd service management
 
-## 📝 Usage Guide
+## 📝 Database
 
-### 1. Authentication
-- Register a new account or login
-- All actions are logged for audit purposes
+The database is initialized empty with no sample data. You can:
+1. Create your first user through the signup page
+2. Add locations, lanes, and readers through the web interface
+3. Use the API endpoints for external device integration
 
-### 2. Location Management
-- Add new locations with name and address
-- Site IDs are automatically generated
-- Edit or delete existing locations
+## 🎉 Success!
 
-### 3. Lane Management
-- Select a location to manage its lanes
-- Add lanes to locations
-- Each lane can have up to 2 readers
-
-### 4. Reader Configuration
-- Configure RFID readers for each lane
-- Set MAC address and IP address
-- Specify reader type (entry/exit)
-- Maximum 2 readers per lane (1 entry, 1 exit)
-
-## 🚀 Production Deployment
-
-### Using WSGI Server
-```bash
-# Install Gunicorn
-pip install gunicorn
-
-# Run with Gunicorn
-gunicorn -w 4 -b 0.0.0.0:8000 wsgi:app
-```
-
-### Using Docker (example)
-```dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY . .
-RUN pip install flask gunicorn
-EXPOSE 8000
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "wsgi:app"]
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Database errors**: Ensure the `instance/` directory exists and is writable
-2. **Import errors**: Verify all dependencies are installed
-3. **Port conflicts**: Change the port in `wsgi.py` if 5000 is in use
-
-### Logs
-- Check the `logs/` directory for application logs
-- Database is stored in `instance/fastag.db`
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support or questions, please check the logs or create an issue in the repository.
-
----
-
-**Powered by Nexoplus Innovations Pvt Ltd** 
+Your Fastag Parking Management System is now ready for production use! 
