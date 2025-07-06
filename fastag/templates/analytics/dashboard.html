@@ -169,6 +169,26 @@
         </button>
     </div>
 
+    <!-- Analytics Navigation Menu -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <div class="d-flex justify-content-center">
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-primary active">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('analytics.reports') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-3">
