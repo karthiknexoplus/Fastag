@@ -1,0 +1,19 @@
+[Unit]
+Description=Fastag Parking Management System
+After=network.target
+
+[Service]
+Type=notify
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Fastag
+Environment="PATH=/home/ubuntu/Fastag/venv/bin"
+ExecStart=/home/ubuntu/Fastag/venv/bin/gunicorn --config gunicorn.conf.py wsgi:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=always
+
+[Install]
+WantedBy=multi-user.target 

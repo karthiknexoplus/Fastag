@@ -1,0 +1,23 @@
+import os
+from flask import Flask
+from fastag.utils.logging import setup_logging
+from fastag.utils.db import close_db
+
+def create_app():
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_object('config.Config')
+    setup_logging(app.config['LOG_DIR'])
+    # Register blueprints
+    from fastag.routes.auth import auth_bp
+    from fastag.routes.locations import locations_bp
+    from fastag.routes.lanes import lanes_bp
+    from fastag.routes.readers import readers_bp
+    from fastag.routes.api import api
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(locations_bp)
+    app.register_blueprint(lanes_bp)
+    app.register_blueprint(readers_bp)
+    app.register_blueprint(api, url_prefix='/api')
+    # DB teardown
+    app.teardown_appcontext(close_db)
+    return app 

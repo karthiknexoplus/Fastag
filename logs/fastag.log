@@ -1,0 +1,712 @@
+[2025-07-05 17:34:03,408] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.7:5000
+[2025-07-05 17:34:03,408] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:34:03,409] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:34:03,694] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:34:03,704] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:34:06,080] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:06] "[33mGET / HTTP/1.1[0m" 404 -
+[2025-07-05 17:34:07,731] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:07] "[33mGET / HTTP/1.1[0m" 404 -
+[2025-07-05 17:34:07,749] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2025-07-05 17:34:18,831] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/wsgi.py', reloading
+[2025-07-05 17:34:18,873] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:34:19,134] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:34:19,140] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:34:27,063] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:34:27,063] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:34:27,065] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:34:27,391] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:34:27,397] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:34:28,231] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:28] "[33mGET / HTTP/1.1[0m" 404 -
+[2025-07-05 17:34:38,633] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:38] "[33mGET / HTTP/1.1[0m" 404 -
+[2025-07-05 17:34:38,668] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2025-07-05 17:34:53,263] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:53] "[35m[1mGET /login HTTP/1.1[0m" 500 -
+[2025-07-05 17:34:53,300] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:53] "GET /login?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+[2025-07-05 17:34:53,306] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:53] "GET /login?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+[2025-07-05 17:34:53,317] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:53] "GET /login?__debugger__=yes&cmd=resource&f=console.png&s=czAffPdHJcHYwz1e4Kjk HTTP/1.1" 200 -
+[2025-07-05 17:34:53,389] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:34:53] "GET /login?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+[2025-07-05 17:35:16,700] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/auth.py', reloading
+[2025-07-05 17:35:16,742] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:35:16,774] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/auth.py', reloading
+[2025-07-05 17:35:16,816] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:35:16,997] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:35:17,003] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:35:17,069] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:35:17,076] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:35:43,725] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:35:43,725] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:35:43,726] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:35:44,038] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:35:44,048] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:35:45,876] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "[35m[1mGET /login HTTP/1.1[0m" 500 -
+[2025-07-05 17:35:45,905] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "[36mGET /login?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:35:45,909] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "[36mGET /login?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:35:45,910] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "[36mGET /login?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:35:45,917] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "[36mGET /login?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:35:45,918] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "[36mGET /login?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:35:45,920] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "[36mGET /login?__debugger__=yes&cmd=resource&f=console.png&s=czAffPdHJcHYwz1e4Kjk HTTP/1.1[0m" 304 -
+[2025-07-05 17:35:45,934] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:35:45] "GET /login?__debugger__=yes&cmd=resource&f=console.png&s=xFDlyKLENZVEaIuTPJwC HTTP/1.1" 200 -
+[2025-07-05 17:37:20,642] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:37:20,643] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:37:20,644] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:37:20,971] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:37:20,980] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:37:55,189] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:37:55] "GET /login HTTP/1.1" 200 -
+[2025-07-05 17:37:55,207] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:37:55] "[33mGET /static/logo.png HTTP/1.1[0m" 404 -
+[2025-07-05 17:37:55,378] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:37:55] "[33mGET /static/branding.jpg HTTP/1.1[0m" 404 -
+[2025-07-05 17:37:55,568] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:37:55] "[33mGET /static/favicon.png HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:23,727] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:23] "GET /signup HTTP/1.1" 200 -
+[2025-07-05 17:38:23,769] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:23] "[33mGET /static/logo.png HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:23,786] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:23] "[33mGET /static/branding.jpg HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:27,267] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:27] "POST /signup HTTP/1.1" 200 -
+[2025-07-05 17:38:27,301] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:27] "[33mGET /static/logo.png HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:27,313] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:27] "[33mGET /static/branding.jpg HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:30,133] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:30] "POST /signup HTTP/1.1" 200 -
+[2025-07-05 17:38:30,166] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:30] "[33mGET /static/logo.png HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:30,179] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:30] "[33mGET /static/branding.jpg HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:33,511] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:33] "GET /login HTTP/1.1" 200 -
+[2025-07-05 17:38:33,549] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:33] "[33mGET /static/logo.png HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:33,563] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:33] "[33mGET /static/branding.jpg HTTP/1.1[0m" 404 -
+[2025-07-05 17:38:36,007] INFO in auth: User admin logged in.
+[2025-07-05 17:38:36,009] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:36] "[32mPOST /login HTTP/1.1[0m" 302 -
+[2025-07-05 17:38:36,045] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:36] "[35m[1mGET /locations HTTP/1.1[0m" 500 -
+[2025-07-05 17:38:36,068] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:36] "GET /locations?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+[2025-07-05 17:38:36,069] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:36] "GET /locations?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+[2025-07-05 17:38:36,085] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:36] "GET /locations?__debugger__=yes&cmd=resource&f=console.png&s=tqNP0t7bI0KFEpIqIlQs HTTP/1.1" 200 -
+[2025-07-05 17:38:36,115] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:38:36] "GET /locations?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+[2025-07-05 17:39:36,723] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:39:36,724] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:39:36,725] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:39:36,980] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:39:36,986] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:39:37,033] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:39:37] "[35m[1mGET /locations HTTP/1.1[0m" 500 -
+[2025-07-05 17:39:37,045] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:39:37] "[36mGET /locations?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:39:37,045] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:39:37] "[36mGET /locations?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:39:37,055] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:39:37] "GET /locations?__debugger__=yes&cmd=resource&f=console.png&s=U3ItubnH80nkbbbLU3cg HTTP/1.1" 200 -
+[2025-07-05 17:40:00,539] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/auth.py', reloading
+[2025-07-05 17:40:00,608] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:40:00,866] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:40:00,874] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:40:01,206] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/auth.py', reloading
+[2025-07-05 17:40:01,248] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:40:01,496] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:40:01,504] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:40:05,507] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:05] "[35m[1mGET /locations HTTP/1.1[0m" 500 -
+[2025-07-05 17:40:05,515] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:05] "[36mGET /locations?__debugger__=yes&cmd=resource&f=console.png&s=U3ItubnH80nkbbbLU3cg HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:05,521] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:05] "[36mGET /locations?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:05,523] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:05] "[36mGET /locations?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:05,532] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:05] "GET /locations?__debugger__=yes&cmd=resource&f=console.png&s=xR5JQEWYb6kYmSCC6En1 HTTP/1.1" 200 -
+[2025-07-05 17:40:06,634] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:06] "[35m[1mGET /locations HTTP/1.1[0m" 500 -
+[2025-07-05 17:40:06,637] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:06] "[36mGET /locations?__debugger__=yes&cmd=resource&f=console.png&s=U3ItubnH80nkbbbLU3cg HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:06,650] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:06] "[36mGET /locations?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:06,652] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:06] "[36mGET /locations?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:06,663] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:06] "[36mGET /locations?__debugger__=yes&cmd=resource&f=console.png&s=xR5JQEWYb6kYmSCC6En1 HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:10,823] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:10] "[35m[1mGET /locations HTTP/1.1[0m" 500 -
+[2025-07-05 17:40:10,843] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:10] "[36mGET /locations?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:10,844] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:10] "[36mGET /locations?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:10,855] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:10] "[36mGET /locations?__debugger__=yes&cmd=resource&f=console.png&s=xR5JQEWYb6kYmSCC6En1 HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:29,052] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:29] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:40:29,081] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:29] "GET /static/logo.png HTTP/1.1" 200 -
+[2025-07-05 17:40:31,243] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:31] "GET /lanes HTTP/1.1" 200 -
+[2025-07-05 17:40:31,269] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:31] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:32,186] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:32] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:40:32,193] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:32] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:40:32,225] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:32] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:33,204] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:33] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:40:33,211] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:33] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:40:33,240] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:33] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:35,721] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:35] "[35m[1mGET /lanes?location_id=1 HTTP/1.1[0m" 500 -
+[2025-07-05 17:40:35,739] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:35] "GET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+[2025-07-05 17:40:35,743] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:35] "GET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+[2025-07-05 17:40:35,771] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:35] "GET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=xR5JQEWYb6kYmSCC6En1 HTTP/1.1" 200 -
+[2025-07-05 17:40:35,817] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:35] "GET /lanes?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+[2025-07-05 17:40:40,824] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/auth.py', reloading
+[2025-07-05 17:40:40,929] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:40:41,188] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/auth.py', reloading
+[2025-07-05 17:40:41,236] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:40:41,303] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:40:41,310] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:40:41,496] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:40:41,503] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:40:55,657] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "[35m[1mGET /lanes?location_id=1 HTTP/1.1[0m" 500 -
+[2025-07-05 17:40:55,674] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:55,675] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=xR5JQEWYb6kYmSCC6En1 HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:55,677] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:55,684] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:55,685] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:55,685] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:40:55,703] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:40:55] "GET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=6CRbhYZIp2xA1ZgDc2ef HTTP/1.1" 200 -
+[2025-07-05 17:41:24,790] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:24] "[35m[1mGET /lanes?location_id=1 HTTP/1.1[0m" 500 -
+[2025-07-05 17:41:24,808] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:24] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:24,810] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:24] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:24,824] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:24] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=6CRbhYZIp2xA1ZgDc2ef HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:31,994] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:31] "[35m[1mGET /lanes?location_id=1 HTTP/1.1[0m" 500 -
+[2025-07-05 17:41:32,010] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:32] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:32,010] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:32] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:32,018] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:32] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=6CRbhYZIp2xA1ZgDc2ef HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:35,981] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:35] "[35m[1mGET /lanes?location_id=1 HTTP/1.1[0m" 500 -
+[2025-07-05 17:41:35,997] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:35] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:35,998] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:35] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:36,010] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:36] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=6CRbhYZIp2xA1ZgDc2ef HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:38,415] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:38] "[35m[1mGET /lanes?location_id=1 HTTP/1.1[0m" 500 -
+[2025-07-05 17:41:38,437] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:38] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:38,438] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:38] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:38,447] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:38] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=6CRbhYZIp2xA1ZgDc2ef HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:41,300] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:41] "[35m[1mGET /lanes?location_id=1 HTTP/1.1[0m" 500 -
+[2025-07-05 17:41:41,313] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:41] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:41,314] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:41] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:41,323] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:41] "[36mGET /lanes?__debugger__=yes&cmd=resource&f=console.png&s=6CRbhYZIp2xA1ZgDc2ef HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:46,418] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:46] "[32mGET / HTTP/1.1[0m" 302 -
+[2025-07-05 17:41:46,455] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:46] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:41:46,501] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:46] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:48,571] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:48] "GET /locations/edit/1 HTTP/1.1" 200 -
+[2025-07-05 17:41:48,598] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:48] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:50,067] INFO in locations: Location updated: test (ID 1)
+[2025-07-05 17:41:50,068] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:50] "[32mPOST /locations/edit/1 HTTP/1.1[0m" 302 -
+[2025-07-05 17:41:50,080] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:50] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:41:50,111] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:41:50] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:41:59,220] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:41:59,221] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:41:59,222] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:41:59,545] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:41:59,551] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:42:02,377] INFO in locations: Location deleted (ID 1)
+[2025-07-05 17:42:02,379] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:02] "[32mPOST /locations/delete/1 HTTP/1.1[0m" 302 -
+[2025-07-05 17:42:02,429] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:02] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:42:02,526] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:02] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:42:28,649] INFO in locations: Location added: test (E628D42C)
+[2025-07-05 17:42:28,649] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:28] "[32mPOST /locations HTTP/1.1[0m" 302 -
+[2025-07-05 17:42:28,659] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:28] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:42:28,685] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:28] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:42:30,169] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:30] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:42:30,194] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:30] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:42:33,355] INFO in lanes: Lane added: test (Location 2)
+[2025-07-05 17:42:33,356] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:33] "[32mPOST /lanes?location_id=2 HTTP/1.1[0m" 302 -
+[2025-07-05 17:42:33,366] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:33] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:42:33,390] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:33] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:42:34,565] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:34] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:42:34,590] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:34] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:42:44,350] INFO in readers: Reader added: 1:1:1:1: (entry) for lane 2
+[2025-07-05 17:42:44,351] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:44] "[32mPOST /readers/2 HTTP/1.1[0m" 302 -
+[2025-07-05 17:42:44,367] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:44] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:42:44,392] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:42:44] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:43:02,308] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:43:02,309] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:43:02,311] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:43:02,599] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:43:02,605] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:43:03,752] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:43:03] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:43:03,767] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:43:03] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:43:59,768] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:43:59] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:43:59,776] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:43:59] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:43:59,810] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:43:59] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:01,028] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:01] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:01,039] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:01] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:01,069] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:01] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:02,011] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:02] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:02,026] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:02] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:02,062] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:02] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:02,807] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:02] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:02,825] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:02] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:02,849] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:02] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:03,616] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:03] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:03,630] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:03] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:03,652] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:03] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:04,622] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:04] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:04,634] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:04] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:04,659] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:04] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:06,390] INFO in readers: Reader deleted: 1:1:1:1: (ID 3)
+[2025-07-05 17:44:06,392] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:06] "[32mPOST /readers/delete/3 HTTP/1.1[0m" 302 -
+[2025-07-05 17:44:06,402] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:06] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:06,437] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:06] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:10,079] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:10] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:44:10,118] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:10] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:12,033] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:12] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:12,035] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:12] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:12,065] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:12] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:12,917] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:12] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:44:12,952] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:12] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:28,269] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:28] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:44:28,312] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:28] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:31,160] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:31] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:44:31,211] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:31] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:33,932] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:33] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:44:33,947] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:33] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:44:33,989] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:33] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:36,063] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:36] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:44:36,092] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:36] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:37,947] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:37] "GET /lanes/edit/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:37,975] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:37] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:39,271] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:39] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:44:39,297] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:39] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:41,733] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:41] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:44:41,763] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:41] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:42,646] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:42] "GET /lanes HTTP/1.1" 200 -
+[2025-07-05 17:44:42,672] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:42] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:45,763] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:45] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:44:45,786] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:45] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:48,866] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:48] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:44:48,889] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:48] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:50,960] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:50] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:44:50,963] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:50] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:44:50,986] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:44:50] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:19,752] INFO in readers: Reader added: 00:00:00:00 (entry) for lane 2
+[2025-07-05 17:45:19,753] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:19] "[32mPOST /readers/2 HTTP/1.1[0m" 302 -
+[2025-07-05 17:45:19,775] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:19] "[35m[1mGET /readers/2 HTTP/1.1[0m" 500 -
+[2025-07-05 17:45:19,789] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:19] "GET /readers/2?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+[2025-07-05 17:45:19,790] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:19] "GET /readers/2?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+[2025-07-05 17:45:19,808] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:19] "GET /readers/2?__debugger__=yes&cmd=resource&f=console.png&s=oOg0lJ3uYzJNlSxRiXb8 HTTP/1.1" 200 -
+[2025-07-05 17:45:19,853] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:19] "GET /readers/2?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+[2025-07-05 17:45:35,249] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:35] "[35m[1mGET /readers/2 HTTP/1.1[0m" 500 -
+[2025-07-05 17:45:35,254] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:35] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:35,332] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:35] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:35,335] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:35] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:35,351] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:35] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=console.png&s=oOg0lJ3uYzJNlSxRiXb8 HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:40,351] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:40] "[35m[1mGET /readers/2 HTTP/1.1[0m" 500 -
+[2025-07-05 17:45:40,362] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:40] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:40,433] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:40] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:40,434] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:40] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:40,444] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:40] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=console.png&s=oOg0lJ3uYzJNlSxRiXb8 HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:53,840] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:45:53,840] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:45:53,841] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:45:54,091] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:45:54,097] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:45:58,837] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:58] "[35m[1mGET /readers/2 HTTP/1.1[0m" 500 -
+[2025-07-05 17:45:58,852] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:58] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:58,853] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:58] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:58,853] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:58] "[36mGET /readers/2?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+[2025-07-05 17:45:58,863] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:45:58] "GET /readers/2?__debugger__=yes&cmd=resource&f=console.png&s=TJjHhAEGRgwaz7uMNBYo HTTP/1.1" 200 -
+[2025-07-05 17:46:04,769] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:04] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:46:04,802] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:04] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:22,367] INFO in readers: Reader added: 00:00:00:00 (exit) for lane 2
+[2025-07-05 17:46:22,368] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:22] "[32mPOST /readers/2 HTTP/1.1[0m" 302 -
+[2025-07-05 17:46:22,379] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:22] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:46:22,414] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:22] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:25,548] INFO in readers: Reader deleted: 00:00:00:00 (ID 4)
+[2025-07-05 17:46:25,549] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:25] "[32mPOST /readers/delete/4 HTTP/1.1[0m" 302 -
+[2025-07-05 17:46:25,559] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:25] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:46:25,600] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:25] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:27,770] INFO in readers: Reader deleted: 00:00:00:00 (ID 5)
+[2025-07-05 17:46:27,771] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:27] "[32mPOST /readers/delete/5 HTTP/1.1[0m" 302 -
+[2025-07-05 17:46:27,783] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:27] "GET /readers/2 HTTP/1.1" 200 -
+[2025-07-05 17:46:27,821] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:27] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:28,751] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:28] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:46:28,793] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:28] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:31,434] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:31] "GET /lanes/edit/2 HTTP/1.1" 200 -
+[2025-07-05 17:46:31,465] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:31] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:32,328] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:32] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:46:32,361] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:32] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:35,886] INFO in lanes: Lane deleted (ID 2) and its readers.
+[2025-07-05 17:46:35,887] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:35] "[32mPOST /lanes/delete/2 HTTP/1.1[0m" 302 -
+[2025-07-05 17:46:35,898] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:35] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:46:35,937] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:35] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:38,005] INFO in lanes: Lane added: test (Location 2)
+[2025-07-05 17:46:38,006] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:38] "[32mPOST /lanes?location_id=2 HTTP/1.1[0m" 302 -
+[2025-07-05 17:46:38,017] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:38] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:46:38,052] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:38] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:39,046] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:39] "GET /readers/3 HTTP/1.1" 200 -
+[2025-07-05 17:46:39,080] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:39] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:50,351] INFO in readers: Reader added: 00:00:00:00 (entry) for lane 3
+[2025-07-05 17:46:50,352] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:50] "[32mPOST /readers/3 HTTP/1.1[0m" 302 -
+[2025-07-05 17:46:50,362] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:50] "GET /readers/3 HTTP/1.1" 200 -
+[2025-07-05 17:46:50,396] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:50] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:46:52,099] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:52] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:46:52,132] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:46:52] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:47:26,149] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:47:26] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:47:26,201] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:47:26] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:47:27,302] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:47:27] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:47:27,315] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:47:27] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:47:27,348] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:47:27] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:49:10,957] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:49:10] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:49:10,964] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:49:10] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:49:10,987] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:49:10] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:50:51,873] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 17:50:51,921] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:50:52,137] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 17:50:52,227] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:50:52,233] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:51:01,290] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/__init__.py', reloading
+[2025-07-05 17:51:01,333] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:55:28,141] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 17:55:28,142] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 17:55:28,143] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:55:28,423] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:55:28,430] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:55:28,474] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:28] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:55:28,494] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:28] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:55:32,283] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:32] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:55:32,293] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:32] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:55:32,318] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:32] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:55:33,441] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:33] "GET /lanes HTTP/1.1" 200 -
+[2025-07-05 17:55:33,466] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:33] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:55:35,321] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:35] "GET /lanes?location_id=2 HTTP/1.1" 200 -
+[2025-07-05 17:55:35,344] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:35] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:55:37,293] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:37] "GET /readers/3 HTTP/1.1" 200 -
+[2025-07-05 17:55:37,317] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:37] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:55:44,911] INFO in api: Looking up device with MAC: 00:00:00:00::
+[2025-07-05 17:55:44,912] WARNING in api: No reader found for MAC: 00:00:00:00::
+[2025-07-05 17:55:44,912] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:55:44] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 17:56:23,275] INFO in api: Looking up device with MAC: 00:00:00:00::
+[2025-07-05 17:56:23,276] WARNING in api: No reader found for MAC: 00:00:00:00::
+[2025-07-05 17:56:23,277] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:56:23] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 17:56:52,110] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/auth.py', reloading
+[2025-07-05 17:56:52,178] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:56:52,761] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:56:52,781] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:57:01,656] INFO in api: Looking up device with MAC: 00:00:00:00::
+[2025-07-05 17:57:01,658] WARNING in api: No reader found for MAC: 00:00:00:00::
+[2025-07-05 17:57:01,658] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:01] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 17:57:53,516] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:53] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:57:53,537] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:53] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:57:53,570] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:53] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:57:54,791] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:54] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:57:54,799] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:54] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:57:54,823] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:54] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:57:55,467] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:55] "GET /lanes HTTP/1.1" 200 -
+[2025-07-05 17:57:55,493] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:55] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:57:59,291] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:59] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:57:59,298] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:59] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:57:59,325] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:57:59] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:58:01,375] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:01] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:58:01,383] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:01] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:58:01,408] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:01] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:58:03,207] INFO in auth: User logged out: admin
+[2025-07-05 17:58:03,208] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:03] "[32mGET /logout HTTP/1.1[0m" 302 -
+[2025-07-05 17:58:03,225] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:03] "GET /login HTTP/1.1" 200 -
+[2025-07-05 17:58:03,253] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:03] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:58:03,266] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:03] "GET /static/branding.jpg HTTP/1.1" 200 -
+[2025-07-05 17:58:08,543] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:08] "GET /login HTTP/1.1" 200 -
+[2025-07-05 17:58:08,551] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:08] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:58:08,554] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:08] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 17:58:08,584] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:08] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:58:08,600] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:08] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 17:58:11,406] INFO in auth: User logged in: admin
+[2025-07-05 17:58:11,407] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:11] "[32mPOST /login HTTP/1.1[0m" 302 -
+[2025-07-05 17:58:11,416] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:11] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 17:58:11,426] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:11] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 17:58:11,452] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:58:11] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 17:59:15,923] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/init_database.py', reloading
+[2025-07-05 17:59:15,966] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:59:16,236] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:59:16,242] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:59:24,422] INFO in api: Looking up device with MAC: 00:00:00:00::
+[2025-07-05 17:59:24,423] WARNING in api: No reader found for MAC: 00:00:00:00::
+[2025-07-05 17:59:24,423] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:59:24] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 17:59:34,396] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 17:59:34,445] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:59:34,720] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:59:34,726] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:59:40,779] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 17:59:40,850] INFO in _internal:  * Restarting with stat
+[2025-07-05 17:59:41,148] WARNING in _internal:  * Debugger is active!
+[2025-07-05 17:59:41,155] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 17:59:52,088] INFO in api: Looking up device with MAC: 00:00:00:00:00:00
+[2025-07-05 17:59:52,089] WARNING in api: No reader found for MAC: 00:00:00:00:00:00
+[2025-07-05 17:59:52,090] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 17:59:52] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 18:00:01,587] INFO in api: Looking up device with MAC: 00:00:00:00:00:00
+[2025-07-05 18:00:01,588] WARNING in api: No reader found for MAC: 00:00:00:00:00:00
+[2025-07-05 18:00:01,589] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:00:01] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 18:01:07,808] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 18:01:07,847] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:01:08,101] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:01:08,107] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:01:36,461] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:36] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:01:36,470] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:36] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:36,485] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:36] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:38,323] INFO in auth: User logged out: admin
+[2025-07-05 18:01:38,324] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:38] "[32mGET /logout HTTP/1.1[0m" 302 -
+[2025-07-05 18:01:38,335] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:38] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:01:38,340] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:38] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:38,360] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:38] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:38,368] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:38] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:42,213] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:42] "POST /login HTTP/1.1" 200 -
+[2025-07-05 18:01:42,238] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:42] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:42,247] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:42] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:44,668] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:44] "POST /login HTTP/1.1" 200 -
+[2025-07-05 18:01:44,693] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:44] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:44,702] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:44] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:45,859] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:45] "GET /signup HTTP/1.1" 200 -
+[2025-07-05 18:01:45,863] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:45] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:45,863] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:45] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:45,883] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:45] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:45,891] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:45] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:48,374] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:48] "POST /signup HTTP/1.1" 200 -
+[2025-07-05 18:01:48,399] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:48] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:48,407] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:48] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:52,382] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:52] "POST /signup HTTP/1.1" 200 -
+[2025-07-05 18:01:52,407] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:52] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:52,416] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:52] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:54,811] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:54] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:01:54,819] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:54] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:54,820] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:54] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:54,835] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:54] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:54,843] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:54] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:57,524] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:57] "POST /login HTTP/1.1" 200 -
+[2025-07-05 18:01:57,549] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:57] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:01:57,562] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:01:57] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:10,412] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:10] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:02:10,418] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:10] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:10,421] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:10] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:10,437] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:10] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:10,454] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:10] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:47,525] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 18:02:47,525] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 18:02:47,526] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:02:47,775] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:02:47,782] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:02:48,073] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:48] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:02:48,084] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:48] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:48,084] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:48] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:48,093] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:48] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:48,109] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:48] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:52,371] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:52] "POST /login HTTP/1.1" 200 -
+[2025-07-05 18:02:52,395] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:52] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:52,403] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:52] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:53,775] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:53] "GET /signup HTTP/1.1" 200 -
+[2025-07-05 18:02:53,778] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:53] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:53,779] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:53] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:53,798] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:53] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:53,809] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:53] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:56,184] INFO in auth: New user registered: admin
+[2025-07-05 18:02:56,186] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:56] "[32mPOST /signup HTTP/1.1[0m" 302 -
+[2025-07-05 18:02:56,196] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:56] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:02:56,220] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:56] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:56,234] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:56] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:02:58,501] INFO in auth: User logged in: admin
+[2025-07-05 18:02:58,501] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:58] "[32mPOST /login HTTP/1.1[0m" 302 -
+[2025-07-05 18:02:58,511] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:58] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 18:02:58,530] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:58] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:02:58,556] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:02:58] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:03:04,794] INFO in locations: Location added: test (930EBC42)
+[2025-07-05 18:03:04,795] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:04] "[32mPOST /locations HTTP/1.1[0m" 302 -
+[2025-07-05 18:03:04,805] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:04] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:03:04,830] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:04] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:03:06,197] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:06] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:03:06,219] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:06] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:03:08,948] INFO in lanes: Lane added: entry (Location 1)
+[2025-07-05 18:03:08,948] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:08] "[32mPOST /lanes?location_id=1 HTTP/1.1[0m" 302 -
+[2025-07-05 18:03:08,958] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:08] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:03:08,983] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:08] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:03:10,615] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:10] "GET /readers/1 HTTP/1.1" 200 -
+[2025-07-05 18:03:10,640] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:10] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:03:31,859] INFO in readers: Reader added: 00:00:00:00 (entry) for lane 1
+[2025-07-05 18:03:31,859] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:31] "[32mPOST /readers/1 HTTP/1.1[0m" 302 -
+[2025-07-05 18:03:31,869] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:31] "GET /readers/1 HTTP/1.1" 200 -
+[2025-07-05 18:03:31,894] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:31] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:03:34,254] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:03:34,255] INFO in api: Found device: {'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}
+[2025-07-05 18:03:34,255] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:34] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:03:58,947] INFO in readers: Reader added: 00:00:00:00 (exit) for lane 1
+[2025-07-05 18:03:58,948] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:58] "[32mPOST /readers/1 HTTP/1.1[0m" 302 -
+[2025-07-05 18:03:58,958] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:58] "GET /readers/1 HTTP/1.1" 200 -
+[2025-07-05 18:03:58,983] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:03:58] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:04:00,988] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:04:00,989] INFO in api: Found device: {'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}
+[2025-07-05 18:04:00,989] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:00] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:04:05,431] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:05] "GET /readers/1 HTTP/1.1" 200 -
+[2025-07-05 18:04:05,463] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:05] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:04:08,810] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:04:08,811] INFO in api: Found device: {'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}
+[2025-07-05 18:04:08,811] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:08] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:04:37,708] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:37] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:04:37,730] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:37] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:04:58,404] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:58] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:04:58,432] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:58] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:04:59,465] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:59] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:04:59,503] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:04:59] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:05:00,433] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:00] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:05:00,469] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:00] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:05:01,297] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:01] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:05:01,335] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:01] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:05:06,827] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 18:05:06,867] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:05:07,121] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:05:07,127] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:05:08,936] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:08] "GET /readers/1 HTTP/1.1" 200 -
+[2025-07-05 18:05:08,971] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:08] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:05:12,966] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:05:12,967] INFO in api: Found devices: [{'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}, {'reader_id': 2, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.151', 'type': 'exit', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}]
+[2025-07-05 18:05:12,968] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:12] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:05:24,982] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 18:05:24,983] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 18:05:24,984] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:05:25,253] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:05:25,259] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:05:25,289] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:25] "GET /readers/1 HTTP/1.1" 200 -
+[2025-07-05 18:05:25,312] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:25] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:05:28,623] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:05:28,625] INFO in api: Found devices: [{'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}, {'reader_id': 2, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.151', 'type': 'exit', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}]
+[2025-07-05 18:05:28,626] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:05:28] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:06:06,532] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:06] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:06:06,555] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:06] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:06:33,479] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:33] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 18:06:33,492] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:33] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:06:33,517] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:33] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:06:37,430] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:37] "GET /lanes HTTP/1.1" 200 -
+[2025-07-05 18:06:37,453] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:37] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:06:38,646] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:38] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:06:38,649] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:38] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:06:38,669] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:06:38] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:07:59,553] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 18:07:59,636] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:07:59,965] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:07:59,972] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:09:38,406] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 18:09:38,407] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 18:09:38,408] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:09:38,674] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:09:38,680] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:09:39,824] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:09:39,825] INFO in api: Found devices: [{'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}, {'reader_id': 2, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.151', 'type': 'exit', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}]
+[2025-07-05 18:09:39,826] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:09:39] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:09:51,429] INFO in api: Looking up device with MAC: 00:00:00:01
+[2025-07-05 18:09:51,429] WARNING in api: No reader found for MAC: 00:00:00:01
+[2025-07-05 18:09:51,430] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:09:51] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 18:09:57,431] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:09:57,432] INFO in api: Found devices: [{'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}, {'reader_id': 2, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.151', 'type': 'exit', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}]
+[2025-07-05 18:09:57,433] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:09:57] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:12:37,042] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/health.py', reloading
+[2025-07-05 18:12:37,081] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:12:37,343] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:12:37,349] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:12:46,423] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/utils/db.py', reloading
+[2025-07-05 18:12:46,463] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:12:46,714] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:12:46,721] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:12:54,791] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/__init__.py', reloading
+[2025-07-05 18:12:54,835] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:12:55,098] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:12:55,104] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:13:43,543] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/utils/filters.py', reloading
+[2025-07-05 18:13:43,589] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:13:43,848] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:13:43,855] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:13:53,943] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/__init__.py', reloading
+[2025-07-05 18:13:53,992] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:13:54,265] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:13:54,272] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:14:07,384] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/init_database.py', reloading
+[2025-07-05 18:14:07,428] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:14:07,686] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:14:07,693] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:15:46,533] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/utils/db.py', reloading
+[2025-07-05 18:15:46,581] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:15:46,868] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:15:46,875] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:16:10,200] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/health.py', reloading
+[2025-07-05 18:16:10,274] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:16:10,579] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:16:10,587] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:17:00,058] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/init_database.py', reloading
+[2025-07-05 18:17:00,102] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:17:00,364] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:17:00,371] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:17:07,431] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/init_database.py', reloading
+[2025-07-05 18:17:07,484] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:17:07,797] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:17:07,804] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:19:43,975] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 18:19:44,016] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:19:44,276] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:19:44,283] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:21:04,095] INFO in api: Device lookup request for MAC: 00:00:00:00
+[2025-07-05 18:21:04,098] WARNING in api: No device found for MAC: 00:00:00:00
+[2025-07-05 18:21:04,099] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:04] "[33mPOST /api/device/lookup HTTP/1.1[0m" 404 -
+[2025-07-05 18:21:09,297] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:09] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:21:09,306] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:09] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:21:09,323] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:09] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:21:12,920] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:12] "GET /lanes?location_id=1 HTTP/1.1" 200 -
+[2025-07-05 18:21:12,943] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:12] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:21:15,405] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:15] "GET /readers/1 HTTP/1.1" 200 -
+[2025-07-05 18:21:15,428] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:15] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:21:44,195] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/api.py', reloading
+[2025-07-05 18:21:44,277] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:21:58,104] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.7:8000
+[2025-07-05 18:21:58,105] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-05 18:21:58,106] INFO in _internal:  * Restarting with stat
+[2025-07-05 18:21:58,382] WARNING in _internal:  * Debugger is active!
+[2025-07-05 18:21:58,389] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-05 18:21:58,400] INFO in api: Looking up device with MAC: 00:00:00:00
+[2025-07-05 18:21:58,402] INFO in api: Found devices: [{'reader_id': 1, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.150', 'type': 'entry', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}, {'reader_id': 2, 'mac_address': '00:00:00:00', 'reader_ip': '192.168.001.151', 'type': 'exit', 'lane': {'id': 1, 'lane_name': 'entry', 'location': {'id': 1, 'name': 'test', 'site_id': '930EBC42'}}}]
+[2025-07-05 18:21:58,403] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:21:58] "POST /api/device/lookup HTTP/1.1" 200 -
+[2025-07-05 18:22:12,615] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:12] "[32mGET / HTTP/1.1[0m" 302 -
+[2025-07-05 18:22:12,642] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:12] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:22:12,669] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:12] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:15,187] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:15] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 18:22:15,194] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:15] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:22:15,219] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:15] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:16,149] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:16] "GET /lanes HTTP/1.1" 200 -
+[2025-07-05 18:22:16,171] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:16] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:21,605] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:21] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 18:22:21,612] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:21] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:22:21,636] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:21] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:24,022] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:24] "GET /lanes HTTP/1.1" 200 -
+[2025-07-05 18:22:24,045] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:24] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:25,322] INFO in auth: User logged out: admin
+[2025-07-05 18:22:25,323] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:25] "[32mGET /logout HTTP/1.1[0m" 302 -
+[2025-07-05 18:22:25,334] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:25] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:22:25,339] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:25] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:25,359] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:25] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:25,366] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:25] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:28,308] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:28] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:22:28,314] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:28] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:28,317] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:28] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:28,337] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:28] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:28,349] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:28] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:35,006] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:35] "POST /login HTTP/1.1" 200 -
+[2025-07-05 18:22:35,031] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:35] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:35,044] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:35] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:37,240] INFO in auth: User logged in: admin
+[2025-07-05 18:22:37,240] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:37] "[32mPOST /login HTTP/1.1[0m" 302 -
+[2025-07-05 18:22:37,251] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:37] "[32mGET /home HTTP/1.1[0m" 302 -
+[2025-07-05 18:22:37,261] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:37] "GET /locations HTTP/1.1" 200 -
+[2025-07-05 18:22:37,284] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:37] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:38,724] INFO in auth: User logged out: admin
+[2025-07-05 18:22:38,724] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:38] "[32mGET /logout HTTP/1.1[0m" 302 -
+[2025-07-05 18:22:38,731] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:38] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:22:38,735] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:38] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:38,754] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:38] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:38,767] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:38] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:46,185] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "GET /login HTTP/1.1" 200 -
+[2025-07-05 18:22:46,191] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:46,191] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:46,210] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+[2025-07-05 18:22:46,222] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -

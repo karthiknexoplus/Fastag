@@ -18,7 +18,7 @@
         </div>
         <div class="text-end">
             <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save</button>
-            <a href="{{ url_for('lanes', location_id=lane['location_id']) }}" class="btn btn-secondary ms-2">Cancel</a>
+            <a href="{{ url_for('lanes.lanes', location_id=lane['location_id']) }}" class="btn btn-secondary ms-2">Cancel</a>
         </div>
     </form>
 </div>

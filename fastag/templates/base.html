@@ -60,21 +60,21 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('auth.home') }}">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
                 <span class="fw-bold text-dark" style="font-size:1.2rem; letter-spacing:1px;">FASTag Parking</span>
             </a>
             <div class="d-flex align-items-center ms-auto">
-                <a href="{{ url_for('home') }}" class="nav-icon-link {% if request.endpoint == 'home' %}active{% endif %}" title="Dashboard">
+                <a href="{{ url_for('auth.home') }}" class="nav-icon-link {% if request.endpoint == 'auth.home' %}active{% endif %}" title="Dashboard">
                     <i class="fas fa-home"></i>
                 </a>
-                <a href="{{ url_for('locations') }}" class="nav-icon-link {% if request.endpoint == 'locations' %}active{% endif %}" title="Locations">
+                <a href="{{ url_for('locations.locations') }}" class="nav-icon-link {% if request.endpoint == 'locations.locations' %}active{% endif %}" title="Locations">
                     <i class="fas fa-map-marker-alt"></i>
                 </a>
-                <a href="{{ url_for('lanes') }}" class="nav-icon-link {% if request.endpoint == 'lanes' %}active{% endif %}" title="Lanes">
+                <a href="{{ url_for('lanes.lanes') }}" class="nav-icon-link {% if request.endpoint == 'lanes.lanes' %}active{% endif %}" title="Lanes">
                     <i class="fas fa-road"></i>
                 </a>
-                <a href="{{ url_for('logout') }}" class="nav-icon-link" title="Logout">
+                <a href="{{ url_for('auth.logout') }}" class="nav-icon-link" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
