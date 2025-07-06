@@ -585,4 +585,58 @@ echo "   Check Nginx: sudo systemctl status nginx"
 echo "   View Nginx logs: sudo tail -f /var/log/nginx/fastag_error.log"
 
 echo ""
-echo "🎯 Deployment completed successfully!" 
+echo "🎯 Deployment completed successfully!"
+
+# Run emergency fix to ensure everything works
+echo ""
+echo "🔧 Running emergency fix to ensure optimal configuration..."
+echo "=========================================================="
+
+# Make emergency-fix.sh executable and run it
+if [ -f "emergency-fix.sh" ]; then
+    chmod +x emergency-fix.sh
+    echo "✅ Emergency fix script found and made executable"
+    
+    echo "🚀 Running emergency fix..."
+    if sudo ./emergency-fix.sh; then
+        echo "✅ Emergency fix completed successfully!"
+        echo ""
+        echo "🎉 Final Deployment Summary:"
+        echo "============================="
+        echo "✅ Application: Fastag Parking Management System"
+        echo "✅ Domain: $DOMAIN"
+        echo "✅ Gunicorn: Running on port 8000"
+        echo "✅ Nginx: Running and proxying to Gunicorn"
+        echo "✅ Static Files: Served from /var/www/fastag_static"
+        echo "✅ Database: SQLite initialized"
+        echo "✅ Firewall: Configured (ports 22, 80, 443 open)"
+        if [[ "$SSL_SETUP_SUCCESS" == "true" ]]; then
+            echo "✅ SSL: Certificate installed and auto-renewal configured"
+        else
+            echo "⚠️ SSL: Not configured (can be added later)"
+        fi
+
+        echo ""
+        echo "🌐 Access your application:"
+        if [[ "$SSL_SETUP_SUCCESS" == "true" ]]; then
+            echo "   HTTPS: https://$DOMAIN"
+            echo "   HTTP: http://$DOMAIN (redirects to HTTPS)"
+        else
+            echo "   HTTP: http://$DOMAIN"
+        fi
+
+        echo ""
+        echo "📋 Useful commands:"
+        echo "   Check status: sudo systemctl status fastag"
+        echo "   View logs: sudo journalctl -u fastag -f"
+        echo "   Restart app: sudo systemctl restart fastag"
+        echo "   Check Nginx: sudo systemctl status nginx"
+        echo "   View Nginx logs: sudo tail -f /var/log/nginx/fastag_error.log"
+    else
+        echo "⚠️ Emergency fix encountered issues, but deployment may still be functional"
+        echo "Check the logs above for details"
+    fi
+else
+    echo "⚠️ Emergency fix script not found, skipping emergency fix"
+    echo "Deployment completed without emergency fix"
+fi 
