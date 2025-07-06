@@ -27,21 +27,49 @@ sudo chown ubuntu:ubuntu /home/ubuntu/Fastag
 # Set up Python virtual environment
 echo "🐍 Setting up Python virtual environment..."
 cd /home/ubuntu/Fastag
-sudo -u ubuntu python3 -m venv venv
+
+# Remove existing venv if it exists and is corrupted
+if [ -d "venv" ]; then
+    echo "🗑️ Removing existing virtual environment..."
+    sudo -u ubuntu rm -rf venv
+fi
+
+# Create virtual environment with explicit Python path
+echo "🔧 Creating virtual environment..."
+sudo -u ubuntu /usr/bin/python3 -m venv venv
+
+# Wait a moment for venv creation to complete
+sleep 2
+
+# Check if venv was created successfully
+if [ ! -d "venv" ]; then
+    echo "❌ Error: Virtual environment creation failed"
+    exit 1
+fi
 
 # Determine the correct Python executable name
-if [ -f "/home/ubuntu/Fastag/venv/bin/python3" ]; then
-    PYTHON_EXEC="/home/ubuntu/Fastag/venv/bin/python3"
-elif [ -f "/home/ubuntu/Fastag/venv/bin/python" ]; then
-    PYTHON_EXEC="/home/ubuntu/Fastag/venv/bin/python"
+echo "🔍 Checking Python executables in virtual environment..."
+ls -la venv/bin/python*
+
+if [ -f "venv/bin/python3" ]; then
+    PYTHON_EXEC="venv/bin/python3"
+elif [ -f "venv/bin/python" ]; then
+    PYTHON_EXEC="venv/bin/python"
 else
     echo "❌ Error: Could not find Python executable in virtual environment"
+    echo "Contents of venv/bin/:"
+    ls -la venv/bin/
     exit 1
 fi
 
 echo "✅ Using Python executable: $PYTHON_EXEC"
 
+# Test the Python executable
+echo "🧪 Testing Python executable..."
+sudo -u ubuntu $PYTHON_EXEC --version
+
 # Upgrade pip
+echo "⬆️ Upgrading pip..."
 sudo -u ubuntu $PYTHON_EXEC -m pip install --upgrade pip
 
 # Install Python dependencies
