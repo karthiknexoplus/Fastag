@@ -144,6 +144,9 @@ sudo cp /home/ubuntu/Fastag/nginx.conf /etc/nginx/sites-available/fastag
 # Update Nginx configuration with the correct domain
 sudo sed -i "s/your-domain.com www.your-domain.com/$DOMAIN/g" /etc/nginx/sites-available/fastag
 
+# Backup nginx config for SSL setup
+sudo cp /etc/nginx/sites-available/fastag /etc/nginx/sites-available/fastag.backup
+
 sudo ln -sf /etc/nginx/sites-available/fastag /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default  # Remove default site
 
@@ -197,8 +200,22 @@ if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
     if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
         echo "🎫 Obtaining SSL certificate..."
         
-        # Get SSL certificate first (certbot will modify nginx config automatically)
-        if sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "admin@$DOMAIN"; then
+        # Ensure nginx is running and accessible
+        echo "🔄 Ensuring nginx is running..."
+        sudo systemctl restart nginx
+        sleep 3
+        
+        # Test domain accessibility
+        echo "🧪 Testing domain accessibility..."
+        if curl -s -I "http://$DOMAIN" > /dev/null 2>&1; then
+            echo "✅ Domain is accessible"
+        else
+            echo "⚠️ Domain may not be accessible yet (DNS propagation)"
+            echo "Continuing with SSL setup..."
+        fi
+        
+        # Get SSL certificate (certbot will handle nginx config automatically)
+        if sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "admin@$DOMAIN" --redirect; then
             echo "✅ SSL certificate obtained successfully!"
             
             # Set up automatic renewal
@@ -209,16 +226,38 @@ if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
             echo "🔄 Testing certificate renewal..."
             sudo certbot renew --dry-run
             
-            echo "✅ SSL setup completed!"
+            # Test nginx config
+            echo "🧪 Testing nginx configuration..."
+            if sudo nginx -t; then
+                echo "✅ Nginx configuration is valid"
+                sudo systemctl reload nginx
+                echo "✅ SSL setup completed successfully!"
+                SSL_SETUP_SUCCESS=true
+            else
+                echo "❌ Nginx configuration error after SSL setup"
+                echo "Restoring original configuration..."
+                sudo cp /etc/nginx/sites-available/fastag.backup /etc/nginx/sites-available/fastag 2>/dev/null || echo "No backup found"
+                sudo systemctl reload nginx
+                SSL_SETUP_SUCCESS=false
+            fi
         else
-            echo "⚠️ SSL certificate setup failed. You can set it up manually later."
-            echo "   Run: sudo certbot --nginx -d $DOMAIN"
+            echo "⚠️ SSL certificate setup failed"
+            echo "This might be due to:"
+            echo "1. DNS not pointing to this server yet"
+            echo "2. Domain not accessible from internet"
+            echo "3. Port 80 not open"
+            echo ""
+            echo "You can set it up manually later with:"
+            echo "   sudo certbot --nginx -d $DOMAIN"
+            SSL_SETUP_SUCCESS=false
         fi
     else
         echo "⏭️ Skipping SSL setup"
+        SSL_SETUP_SUCCESS=false
     fi
 else
     echo "⏭️ Skipping SSL setup (using localhost/IP)"
+    SSL_SETUP_SUCCESS=false
 fi
 
 echo ""
@@ -226,12 +265,17 @@ echo "✅ Complete deployment finished successfully!"
 echo ""
 echo "📋 Deployment Summary:"
 echo "======================"
-echo "🌐 Application URL: http://$DOMAIN"
-if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
-    echo "🔒 HTTPS URL: https://$DOMAIN (if SSL was set up)"
+if [[ "$SSL_SETUP_SUCCESS" == "true" ]]; then
+    echo "🌐 Application URL: https://$DOMAIN (SSL enabled)"
+    echo "📊 API Endpoint: https://$DOMAIN/api/device/00:00:00:00"
+else
+    echo "🌐 Application URL: http://$DOMAIN"
+    echo "📊 API Endpoint: http://$DOMAIN/api/device/00:00:00:00"
+    if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
+        echo "💡 To enable SSL later: sudo certbot --nginx -d $DOMAIN"
+    fi
 fi
 echo "👤 Login: admin / admin123"
-echo "📊 API Endpoint: http://$DOMAIN/api/device/00:00:00:00"
 echo ""
 echo "🔍 Service Status:"
 echo "   sudo systemctl status fastag"
