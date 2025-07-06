@@ -236,15 +236,24 @@ sudo -u ubuntu $PYTHON_EXEC -m pip install --upgrade pip
 echo "📚 Installing Python dependencies..."
 sudo -u ubuntu $PYTHON_EXEC -m pip install -r requirements.txt
 
-# Create logs directory
+# Create logs directory and fix permissions
 echo "📝 Creating logs directory..."
 sudo -u ubuntu mkdir -p /home/ubuntu/Fastag/logs
+sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag/logs
+sudo chmod -R 755 /home/ubuntu/Fastag/logs
+
+# Ensure Gunicorn config is correct
+echo "🔧 Ensuring Gunicorn configuration..."
+if [ ! -f "gunicorn.conf.py" ]; then
+    echo "❌ Gunicorn config file missing"
+    exit 1
+fi
 
 # Set up database directory and initialize database
 echo "🗄️ Setting up database..."
 cd /home/ubuntu/Fastag
 
-# Initialize database (script will create instance directory if needed)
+# Initialize database with comprehensive error handling
 echo "🗄️ Initializing database..."
 sudo -u ubuntu $PYTHON_EXEC init_database.py
 
@@ -254,22 +263,73 @@ if [ ! -f "instance/fastag.db" ]; then
     exit 1
 fi
 
+# Fix database permissions
+echo "🔧 Fixing database permissions..."
+sudo chown ubuntu:ubuntu instance/fastag.db
+sudo chmod 644 instance/fastag.db
+
 echo "✅ Database initialized successfully"
 
-# Test database connection and show user info
+# Comprehensive database testing
 echo "🧪 Testing database connection..."
+sudo -u ubuntu $PYTHON_EXEC -c "
+import sqlite3
+import os
+
+# Test direct database access
+db_path = '/home/ubuntu/Fastag/instance/fastag.db'
+print(f'Testing database: {db_path}')
+
+try:
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Check tables
+    cursor.execute(\"SELECT name FROM sqlite_master WHERE type='table'\")
+    tables = cursor.fetchall()
+    print(f'✅ Database accessible - Found {len(tables)} tables:')
+    for table in tables:
+        print(f'   - {table[0]}')
+    
+    # Check users table
+    cursor.execute('SELECT COUNT(*) FROM users')
+    user_count = cursor.fetchone()[0]
+    print(f'✅ Users in database: {user_count}')
+    
+    # Check locations table
+    cursor.execute('SELECT COUNT(*) FROM locations')
+    location_count = cursor.fetchone()[0]
+    print(f'✅ Locations in database: {location_count}')
+    
+    conn.close()
+    print('✅ Database connection test successful')
+    
+except Exception as e:
+    print(f'❌ Database error: {e}')
+    exit(1)
+"
+
+# Test Flask app database connection
+echo "🧪 Testing Flask app database connection..."
 sudo -u ubuntu $PYTHON_EXEC -c "
 from fastag import create_app
 app = create_app()
+
 with app.app_context():
     from fastag.utils.db import get_db
-    db = get_db()
-    locations = db.execute('SELECT * FROM locations').fetchall()
-    users = db.execute('SELECT username FROM users').fetchall()
-    print(f'✅ Database test successful - Database initialized with {len(locations)} locations')
-    print(f'✅ Users in database: {len(users)}')
-    for user in users:
-        print(f'   - {user[0]}')
+    try:
+        db = get_db()
+        print('✅ Flask database connection successful')
+        
+        # Test a simple query
+        result = db.execute('SELECT COUNT(*) FROM users').fetchone()
+        print(f'✅ User count query successful: {result[0]} users')
+        
+    except Exception as e:
+        print(f'❌ Flask database error: {e}')
+        import traceback
+        traceback.print_exc()
+        exit(1)
 "
 
 # Set up systemd service
@@ -298,21 +358,57 @@ sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 sudo ufw --force enable
 
-# Start Gunicorn
+# Start Gunicorn with comprehensive testing
 echo "🚀 Starting Gunicorn..."
 sudo systemctl start fastag
 sleep 5
 
-# Test Gunicorn
+# Test Gunicorn with retry logic
 echo "🧪 Testing Gunicorn..."
-if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
-    echo "✅ Gunicorn is running successfully"
-else
-    echo "❌ Gunicorn is not responding properly"
-    echo "Checking Gunicorn status..."
-    sudo systemctl status fastag
-    exit 1
-fi
+MAX_RETRIES=3
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
+        echo "✅ Gunicorn is running successfully"
+        break
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        echo "⚠️ Gunicorn not responding (attempt $RETRY_COUNT/$MAX_RETRIES)"
+        
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "🔄 Restarting Gunicorn and waiting..."
+            sudo systemctl restart fastag
+            sleep 10
+        else
+            echo "❌ Gunicorn is not responding after $MAX_RETRIES attempts"
+            echo "Checking Gunicorn status and logs..."
+            sudo systemctl status fastag --no-pager
+            echo ""
+            echo "Recent Gunicorn logs:"
+            sudo journalctl -u fastag -n 20 --no-pager
+            echo ""
+            echo "🔧 Attempting to fix Gunicorn..."
+            
+            # Try to fix common issues
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag
+            sudo chmod -R 755 /home/ubuntu/Fastag
+            sudo chmod 644 /home/ubuntu/Fastag/instance/fastag.db
+            
+            # Restart one more time
+            sudo systemctl restart fastag
+            sleep 10
+            
+            # Final test
+            if curl -s -I "http://localhost:8000" | grep -q "200 OK\|302 Found"; then
+                echo "✅ Gunicorn is now working after fixes!"
+            else
+                echo "❌ Gunicorn still not working - manual intervention needed"
+                exit 1
+            fi
+        fi
+    fi
+done
 
 # Configure Nginx (HTTP only initially)
 echo "🌐 Configuring Nginx for domain: $DOMAIN"
