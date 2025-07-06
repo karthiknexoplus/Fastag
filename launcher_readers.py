@@ -5,12 +5,15 @@ import subprocess
 import signal
 import time
 import psutil
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'fastag', 'rfid'))
+from rfid_common import RFIDReader, setup_logging
 
 # Path to DB and service scripts
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instance', 'fastag.db'))
 SERVICE_FILES = [
-    'rfid_reader1_service.py',
-    'rfid_reader2_service.py',
+    'fastag/rfid/rfid_reader1_service.py',
+    'fastag/rfid/rfid_reader2_service.py',
 ]
 
 # Helper: find running service processes
