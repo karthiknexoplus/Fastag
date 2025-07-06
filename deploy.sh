@@ -197,10 +197,7 @@ if [[ "$DOMAIN" != "localhost" && "$DOMAIN" != "127.0.0.1" ]]; then
     if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
         echo "🎫 Obtaining SSL certificate..."
         
-        # Temporarily modify Nginx config for SSL verification
-        sudo sed -i 's/listen 80;/listen 80;\n    listen 443 ssl;/' /etc/nginx/sites-available/fastag
-        
-        # Get SSL certificate
+        # Get SSL certificate first (certbot will modify nginx config automatically)
         if sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "admin@$DOMAIN"; then
             echo "✅ SSL certificate obtained successfully!"
             
