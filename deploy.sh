@@ -172,9 +172,9 @@ sudo chmod 644 /home/ubuntu/Fastag/instance/fastag.db
 
 # Ensure static files are accessible
 echo "🖼️ Setting up static files..."
-sudo chmod -R 644 /home/ubuntu/Fastag/fastag/static/*
-sudo chmod 755 /home/ubuntu/Fastag/fastag/static/
-sudo chown -R ubuntu:ubuntu /home/ubuntu/Fastag/fastag/static/
+sudo chown -R ubuntu:www-data /home/ubuntu/Fastag/fastag/static/
+sudo chmod -R 755 /home/ubuntu/Fastag/fastag/static/
+sudo chmod 644 /home/ubuntu/Fastag/fastag/static/*
 
 # Test static file accessibility
 echo "🧪 Testing static file accessibility..."
