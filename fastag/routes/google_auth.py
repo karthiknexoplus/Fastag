@@ -100,12 +100,8 @@ def callback():
 
 @google_auth_bp.route('/logout')
 def logout():
-    """Logout route"""
-    if 'user' in session:
-        user_name = session['user'].get('name', 'User')
-        session.clear()
-        flash(f'Goodbye, {user_name}! You have been logged out.', 'info')
-    return redirect(url_for('auth.login'))
+    """Redirect to general logout route"""
+    return redirect(url_for('auth.logout'))
 
 @google_auth_bp.route('/profile')
 @login_required
