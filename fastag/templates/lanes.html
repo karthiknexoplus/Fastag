@@ -55,7 +55,7 @@
                             </a>
                             <br>
                             {% if readers_map.get(lane['id'], 0) > 0 %}
-                                <a href="#" class="btn btn-outline-info btn-sm mt-1 fs-6" title="Reader Settings">
+                                <a href="{{ url_for('readers.readers', lane_id=lane['id']) }}" class="btn btn-outline-info btn-sm mt-1 fs-6" title="Reader Settings">
                                     <i class="fas fa-cog"></i>
                                 </a>
                             {% else %}
