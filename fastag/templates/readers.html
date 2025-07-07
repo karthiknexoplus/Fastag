@@ -64,7 +64,7 @@
                             <form method="POST" action="{{ url_for('readers.delete_reader', id=r['id']) }}" style="display:inline;">
                                 <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger" title="Delete" onclick="return confirm('Delete this reader?');"><i class="fas fa-trash-alt" style="font-size:1.05rem;"></i></button>
                             </form>
-                            <button type="button" class="btn btn-link p-0 m-0 align-baseline text-success open-barrier-btn" data-reader-id="{{ r['id'] }}" title="Open Barrier"><i class="fas fa-gate-open" style="font-size:1.05rem;"></i></button>
+                            <button type="button" class="btn btn-link p-0 m-0 align-baseline text-success open-barrier-btn" data-reader-id="{{ r['id'] }}" title="Open Barrier"><i class="fas fa-door-open" style="font-size:1.05rem;"></i></button>
                         </td>
                     </tr>
                     {% else %}
