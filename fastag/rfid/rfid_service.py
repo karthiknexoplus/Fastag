@@ -509,7 +509,7 @@ class RelayController:
             if 1 <= relay_number <= 3:
                 pin = self.pins[relay_number - 1]
                 self.logger.info(f"Turning ON relay {relay_number} (GPIO pin {pin})...")
-                GPIO.output(pin, True)  # HIGH for active-high relays (turns ON)
+                GPIO.output(pin, GPIO.LOW)  # LOW for active-low relays (turns ON)
                 self.logger.info(f"✓ Relay {relay_number} turned ON")
                 return True
             else:
@@ -527,7 +527,7 @@ class RelayController:
             if 1 <= relay_number <= 3:
                 pin = self.pins[relay_number - 1]
                 self.logger.info(f"Turning OFF relay {relay_number} (GPIO pin {pin})...")
-                GPIO.output(pin, False)  # LOW for active-high relays (turns OFF)
+                GPIO.output(pin, GPIO.HIGH)  # HIGH for active-low relays (turns OFF)
                 self.logger.info(f"✓ Relay {relay_number} turned OFF")
                 return True
             else:
