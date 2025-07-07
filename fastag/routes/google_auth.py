@@ -21,8 +21,9 @@ def init_oauth(app):
     # Check if Google OAuth credentials are configured
     client_id = app.config.get('GOOGLE_CLIENT_ID')
     client_secret = app.config.get('GOOGLE_CLIENT_SECRET')
-    
-    if not client_id or client_id == 'your-google-client-id' or 'your-actual-secret-here' in str(client_secret):
+    logger.info(f"DEBUG: GOOGLE_CLIENT_ID={client_id!r}, GOOGLE_CLIENT_SECRET={client_secret!r}")
+    # Strip whitespace for robust checking
+    if not client_id or client_id.strip() == 'your-google-client-id' or 'your-actual-secret-here' in str(client_secret).strip():
         logger.warning("Google OAuth credentials not properly configured")
         return
     
