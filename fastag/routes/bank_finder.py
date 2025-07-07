@@ -25,8 +25,10 @@ def find_bank():
             error = f"Please enter a valid 24-character TagID (hexadecimal). Current value: {search_value} (length: {len(search_value)})"
         else:
             try:
-                # Use Axis Bank API
-                url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value}'
+                # Use Axis Bank API - Fix case sensitivity for SearchType
+                # Convert TagID to TagId (lowercase 'd') as per API specification
+                api_search_type = 'TagId' if search_type == 'TagID' else search_type
+                url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType={api_search_type}&SearchValue={search_value}'
                 headers = {
                     'Cookie': 'axisbiconnect=1034004672.47873.0000'
                 }
@@ -37,6 +39,7 @@ def find_bank():
                 # Print response details for debugging
                 logging.info(f"API URL: {url}")
                 logging.info(f"Search Type: {search_type}")
+                logging.info(f"API Search Type: {api_search_type}")
                 logging.info(f"Search Value: {search_value}")
                 logging.info(f"Response status: {response.status_code}")
                 logging.info(f"Response headers: {dict(response.headers)}")
@@ -69,7 +72,9 @@ def find_bank():
 def bank_api(search_type, search_value):
     """API endpoint for AJAX requests"""
     try:
-        url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value.upper()}'
+        # Fix case sensitivity for SearchType
+        api_search_type = 'TagId' if search_type == 'TagID' else search_type
+        url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType={api_search_type}&SearchValue={search_value.upper()}'
         headers = {
             'Cookie': 'axisbiconnect=1034004672.47873.0000'
         }
@@ -85,7 +90,7 @@ def bank_api(search_type, search_value):
 def debug_tag_search(tag_id):
     """Debug route to test Tag ID search specifically"""
     try:
-        url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=TagID&SearchValue={tag_id.upper()}'
+        url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=TagId&SearchValue={tag_id.upper()}'
         headers = {
             'Cookie': 'axisbiconnect=1034004672.47873.0000'
         }
