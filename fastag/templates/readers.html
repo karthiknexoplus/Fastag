@@ -65,6 +65,7 @@
                                 <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger" title="Delete" onclick="return confirm('Delete this reader?');"><i class="fas fa-trash-alt" style="font-size:1.05rem;"></i></button>
                             </form>
                             <button type="button" class="btn btn-link p-0 m-0 align-baseline text-success open-barrier-btn" data-reader-id="{{ r['id'] }}" title="Open Barrier"><i class="fas fa-door-open" style="font-size:1.05rem;"></i></button>
+                            <button type="button" class="btn btn-link p-0 m-0 align-baseline text-info rfpower-btn" data-reader-id="{{ r['id'] }}" data-reader-ip="{{ r['reader_ip'] }}" title="RF Power"><i class="fas fa-broadcast-tower" style="font-size:1.05rem;"></i></button>
                         </td>
                     </tr>
                     {% else %}
@@ -73,6 +74,36 @@
                 </tbody>
             </table>
         </div>
+    </div>
+    <!-- RF Power Modal -->
+    <div class="modal fade" id="rfpowerModal" tabindex="-1" aria-labelledby="rfpowerModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="rfpowerModalLabel"><i class="fas fa-broadcast-tower me-2"></i>RF Power Control</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="rfpower-modal-form">
+              <input type="hidden" id="modal-reader-id">
+              <div class="mb-3">
+                <label class="form-label">Reader IP</label>
+                <input type="text" class="form-control" id="modal-reader-ip" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Current RF Power</label>
+                <input type="text" class="form-control" id="modal-current-rf" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Set New RF Power (1-30)</label>
+                <input type="number" class="form-control" id="modal-new-rf" min="1" max="30" required>
+              </div>
+              <div id="modal-rfpower-feedback" class="mb-2"></div>
+              <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Set RF Power</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="mt-3">
         <a href="{{ url_for('lanes.lanes', location_id=lane['location_id']) }}" class="btn btn-secondary fs-6"><i class="fas fa-arrow-left me-1"></i> Back to Lanes</a>
@@ -136,6 +167,53 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(err => {
         alert('Error: ' + err);
       });
+    });
+  });
+  // RF Power Modal logic
+  const rfpowerModal = new bootstrap.Modal(document.getElementById('rfpowerModal'));
+  document.querySelectorAll('.rfpower-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const readerId = btn.getAttribute('data-reader-id');
+      const readerIp = btn.getAttribute('data-reader-ip');
+      document.getElementById('modal-reader-id').value = readerId;
+      document.getElementById('modal-reader-ip').value = readerIp;
+      document.getElementById('modal-new-rf').value = '';
+      document.getElementById('modal-rfpower-feedback').innerHTML = '';
+      // Fetch current RF power
+      fetch(`/api/rfid/rfpower?reader=${readerId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.rf_power !== undefined) {
+            document.getElementById('modal-current-rf').value = data.rf_power;
+          } else {
+            document.getElementById('modal-current-rf').value = 'Error';
+          }
+        });
+      rfpowerModal.show();
+    });
+  });
+  document.getElementById('rfpower-modal-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const readerId = parseInt(document.getElementById('modal-reader-id').value);
+    const new_rf = parseInt(document.getElementById('modal-new-rf').value);
+    const feedback = document.getElementById('modal-rfpower-feedback');
+    feedback.innerHTML = '';
+    fetch('/api/rfid/rfpower', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reader: readerId, rf_power: new_rf })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for Reader ${data.reader}.</div>`;
+        document.getElementById('modal-current-rf').value = data.rf_power;
+      } else {
+        feedback.innerHTML = `<div class='alert alert-danger'>${data.error || 'Failed to set RF Power.'}</div>`;
+      }
+    })
+    .catch(() => {
+      feedback.innerHTML = `<div class='alert alert-danger'>Network error. Please try again.</div>`;
     });
   });
 });

@@ -86,4 +86,10 @@ def open_barrier(id):
         relay_controller.turn_off(relay_num)
         return jsonify({"success": True, "activated": relay_num}), 200
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500 
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@readers_bp.route('/rfid/rfpower', methods=['GET'])
+def rfid_rfpower_page():
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    return render_template('rfid_rfpower.html') 

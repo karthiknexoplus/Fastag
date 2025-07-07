@@ -1,12 +1,49 @@
 from flask import Blueprint, request, jsonify, current_app
 from fastag.utils.db import get_db
 import logging
+import ctypes
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 api = Blueprint('api', __name__)
+
+# Dummy mapping for demonstration; replace with your actual mapping
+RFID_IPS = {1: '192.168.1.101', 2: '192.168.1.102'}
+
+class RFIDDevice:
+    def __init__(self, ip):
+        self.ip = ip
+        # self.lib = ... # Load your actual RFID library here
+        pass
+    def __enter__(self):
+        # Connect to device
+        return self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Disconnect/cleanup
+        pass
+    def get_rf_power(self):
+        value = ctypes.c_ubyte()
+        # result = self.lib.SWNet_ReadDeviceOneParam(0xFF, 0x05, ctypes.byref(value))
+        result = 1  # Simulate success
+        value.value = 25  # Simulate value
+        if result == 0:
+            return None
+        return int(value.value)
+    def set_rf_power(self, new_rf):
+        # result = self.lib.SWNet_SetDeviceOneParam(0xFF, 0x05, new_rf)
+        result = 1  # Simulate success
+        if result == 0:
+            return False
+        # Retry up to 5 times to confirm
+        for _ in range(5):
+            time.sleep(0.5)
+            rf_power = self.get_rf_power()
+            if rf_power == new_rf:
+                return True
+        return False
 
 @api.route('/device/lookup', methods=['POST'])
 def device_lookup():
@@ -259,3 +296,36 @@ def barrier_control():
         relay_controller.turn_off(relay_num)
 
     return jsonify({"success": True, "activated": relays_to_activate}), 200 
+
+@api.route('/api/rfid/rfpower', methods=['GET', 'POST'])
+def rfid_rfpower():
+    """
+    GET: /api/rfid/rfpower?reader=1 or 2
+    POST: JSON {"reader": 1 or 2, "rf_power": 1-30}
+    """
+    if request.method == 'GET':
+        reader = request.args.get('reader', type=int)
+        if reader not in RFID_IPS:
+            return jsonify({"error": "Invalid reader. Must be 1 or 2."}), 400
+        try:
+            with RFIDDevice(RFID_IPS[reader]) as dev:
+                rf_power = dev.get_rf_power()
+                if rf_power is None:
+                    return jsonify({"error": "Failed to read RF Power."}), 500
+                return jsonify({"reader": reader, "rf_power": rf_power})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    elif request.method == 'POST':
+        data = request.get_json(force=True)
+        reader = data.get('reader')
+        new_rf = data.get('rf_power')
+        if reader not in RFID_IPS or not isinstance(new_rf, int) or not (1 <= new_rf <= 30):
+            return jsonify({"error": "Invalid input. 'reader' must be 1 or 2, 'rf_power' must be 1-30."}), 400
+        try:
+            with RFIDDevice(RFID_IPS[reader]) as dev:
+                success = dev.set_rf_power(new_rf)
+                if not success:
+                    return jsonify({"error": "Failed to set or confirm RF Power."}), 500
+                return jsonify({"reader": reader, "rf_power": new_rf, "status": "success"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500 
