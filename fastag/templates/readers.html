@@ -186,8 +186,13 @@ document.addEventListener('DOMContentLoaded', function() {
           if (data.rf_power !== undefined) {
             document.getElementById('modal-current-rf').value = data.rf_power;
           } else {
-            document.getElementById('modal-current-rf').value = 'Error';
+            document.getElementById('modal-current-rf').value = '';
+            document.getElementById('modal-rfpower-feedback').innerHTML = `<div class='alert alert-danger'>Unable to fetch RF Power: ${data.error || 'Unknown error'}</div>`;
           }
+        })
+        .catch(() => {
+          document.getElementById('modal-current-rf').value = '';
+          document.getElementById('modal-rfpower-feedback').innerHTML = `<div class='alert alert-danger'>Network failure: Unable to fetch RF Power.</div>`;
         });
       rfpowerModal.show();
     });
