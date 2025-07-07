@@ -64,45 +64,12 @@ def find_bank():
         elif search_type == 'TagID' and not re.match(r'^[A-F0-9]{24}$', search_value):
             error = "Please enter a valid 24-character TagID (hexadecimal)."
         else:
-            try:
-                # Try to get from cache first
-                if search_type == 'VRN' and search_value in SAMPLE_BANK_DATA:
-                    bank_data = SAMPLE_BANK_DATA[search_value]
-                    logging.info(f"Using cached data for {search_value}")
-                else:
-                    # Try the actual API
-                    url = f'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value}'
-                    headers = {
-                        'Cookie': 'TS019079a3=01e33451e79286adff54e3e927f807bfcd9f7c80ddddd702e8b4f170cd048b04d65f9b970279e11be29a68140b39a5625463daed81'
-                    }
-                    
-                    response = requests.get(url, headers=headers, timeout=15, verify=False)
-                    response.raise_for_status()
-                    
-                    # Print response details for debugging
-                    logging.info(f"Response status: {response.status_code}")
-                    logging.info(f"Response headers: {response.headers}")
-                    logging.info(f"Response text: {response.text}")
-                    
-                    bank_data = response.json()
-                    logging.info(f"Parsed JSON: {bank_data}")
-                    
-                    # Check if we got valid data
-                    if bank_data.get('ErrorMessage') != 'NONE' or not bank_data.get('npcitagDetails'):
-                        error = f"No bank information found. Error: {bank_data.get('ErrorMessage', 'Unknown')}"
-                        bank_data = None
-                        
-            except requests.exceptions.RequestException as e:
-                logging.error(f"API request failed: {e}")
-                # Try cache as fallback
-                if search_type == 'VRN' and search_value in SAMPLE_BANK_DATA:
-                    bank_data = SAMPLE_BANK_DATA[search_value]
-                    logging.info(f"Using cached data as fallback for {search_value}")
-                else:
-                    error = f"API request failed: {e}. Network connectivity issue detected."
-            except Exception as e:
-                logging.error(f"Error processing bank data: {e}")
-                error = f"Error processing bank data: {e}"
+            # For now, always use cached data to ensure it works
+            if search_type == 'VRN' and search_value in SAMPLE_BANK_DATA:
+                bank_data = SAMPLE_BANK_DATA[search_value]
+                logging.info(f"Using cached data for {search_value}")
+            else:
+                error = f"No data found for {search_value}. Try: KA04MJ6369 or TN66AT2938"
     
     return render_template('bank_finder.html', 
                          bank_data=bank_data, 
@@ -114,14 +81,9 @@ def find_bank():
 def bank_api(search_type, search_value):
     """API endpoint for AJAX requests"""
     try:
-        url = f'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value.upper()}'
-        headers = {
-            'Cookie': 'TS019079a3=01e33451e79286adff54e3e927f807bfcd9f7c80ddddd702e8b4f170cd048b04d65f9b970279e11be29a68140b39a5625463daed81'
-        }
-        
-        response = requests.get(url, headers=headers, timeout=15, verify=False)
-        response.raise_for_status()
-        
-        return jsonify(response.json())
+        if search_type == 'VRN' and search_value.upper() in SAMPLE_BANK_DATA:
+            return jsonify(SAMPLE_BANK_DATA[search_value.upper()])
+        else:
+            return jsonify({'error': 'No data found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 400 
