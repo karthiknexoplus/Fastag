@@ -33,8 +33,8 @@
                         {% for login in logins %}
                         <tr>
                             <td>
-                                {% if login['picture'] %}
-                                    <img src="{{ login['picture'] }}" class="rounded-circle me-1" style="width:28px;height:28px;object-fit:cover;vertical-align:middle;"> 
+                                {% if login['login_method'] == 'google' %}
+                                    <img src="{{ login['picture'] or url_for('static', filename='favicon.ico') }}" class="rounded-circle me-1" style="width:28px;height:28px;object-fit:cover;vertical-align:middle;"> 
                                 {% else %}
                                     <i class="fas fa-user-circle text-secondary me-1" style="font-size:1.2rem;vertical-align:middle;"></i>
                                 {% endif %}
@@ -68,8 +68,8 @@
                         {% for action in actions %}
                         <tr>
                             <td>
-                                {% if action['picture'] %}
-                                    <img src="{{ action['picture'] }}" class="rounded-circle me-1" style="width:28px;height:28px;object-fit:cover;vertical-align:middle;"> 
+                                {% if action['action'] == 'login' and action['details'] == 'Google login' %}
+                                    <img src="{{ action['picture'] or url_for('static', filename='favicon.ico') }}" class="rounded-circle me-1" style="width:28px;height:28px;object-fit:cover;vertical-align:middle;"> 
                                 {% else %}
                                     <i class="fas fa-user-circle text-secondary me-1" style="font-size:1.2rem;vertical-align:middle;"></i>
                                 {% endif %}

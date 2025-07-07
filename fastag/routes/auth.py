@@ -24,8 +24,8 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['user'] = {'username': username, 'login_method': 'local'}
             logging.info(f"User logged in: {username}")
-            log_user_login(username, 'local', picture=None)
-            log_user_action(username, 'login', 'Local login', picture=None)
+            log_user_login(username, 'local')
+            log_user_action(username, 'login', 'Local login')
             return redirect(url_for('auth.home'))
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
@@ -54,7 +54,7 @@ def logout():
     session.pop('user', None)
     if username:
         logging.info(f"User logged out: {username}")
-        log_user_action(username, 'logout', 'User logged out', picture=None)
+        log_user_action(username, 'logout', 'User logged out')
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
 

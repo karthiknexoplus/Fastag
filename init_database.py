@@ -104,7 +104,6 @@ def init_database():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT,
                 login_method TEXT,
-                picture TEXT,
                 login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS user_actions (
@@ -112,13 +111,12 @@ def init_database():
                 username TEXT,
                 action TEXT,
                 details TEXT,
-                picture TEXT,
                 action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
-        # Add missing columns for migrations
-        add_column_if_not_exists(cursor, 'user_logins', 'picture', 'TEXT')
-        add_column_if_not_exists(cursor, 'user_actions', 'picture', 'TEXT')
+        # Example: Add missing column migration (add more as needed)
+        # add_column_if_not_exists(cursor, 'kyc_users', 'email', 'TEXT')
+        # add_column_if_not_exists(cursor, 'access_logs', 'extra_info', 'TEXT')
         # Print summary
         print_schema_summary(cursor)
         # Check if any users exist
