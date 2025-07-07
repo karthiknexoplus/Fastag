@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Fastag Balance Checker{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Fastag Balance Checker
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="reg_no" class="form-label">
+                                    <i class="fas fa-car me-1"></i>
+                                    Vehicle Registration Number
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="reg_no" 
+                                       name="reg_no" 
+                                       value="{{ reg_no or '' }}"
+                                       placeholder="e.g., KA04MJ6369"
+                                       required>
+                                <div class="invalid-feedback">
+                                    Please enter a valid registration number.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="biller_id" class="form-label">
+                                    <i class="fas fa-id-card me-1"></i>
+                                    Biller ID
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="biller_id" 
+                                       name="biller_id" 
+                                       value="{{ biller_id or '' }}"
+                                       placeholder="e.g., e5ce08e4-82f9-499c-9b37-d8d64a241d42"
+                                       required>
+                                <div class="invalid-feedback">
+                                    Please enter a valid biller ID.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search me-2"></i>
+                                Check Fastag Balance
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if fastag_info %}
+                    <hr class="my-4">
+                    <div class="fastag-result">
+                        <h5 class="text-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Fastag Information Found
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-wallet me-2"></i>
+                                            Balance Information
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold">Current Balance:</span>
+                                            <span class="badge bg-success fs-6">₹{{ fastag_info.balance }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Account ID:</span>
+                                            <span class="text-muted">{{ fastag_info.account_id }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>Category:</span>
+                                            <span class="badge bg-info">{{ fastag_info.category_type }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-university me-2"></i>
+                                            Bank Details
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Bank Name:</span>
+                                            <span class="text-muted">{{ fastag_info.biller_details.name }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Biller ID:</span>
+                                            <span class="text-muted">{{ fastag_info.biller_details.biller_id }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>Status:</span>
+                                            <span class="badge bg-success">Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if fastag_info.meta_data %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-car me-2"></i>
+                                            Vehicle Information
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Vehicle Make:</span>
+                                                    <span class="text-muted">{{ fastag_info.meta_data.vehicle_data.make }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Vehicle Model:</span>
+                                                    <span class="text-muted">{{ fastag_info.meta_data.vehicle_data.model }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Registration:</span>
+                                                    <span class="text-muted">{{ fastag_info.meta_data.vehicle_data.registration_number }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Vehicle Type:</span>
+                                                    <span class="badge bg-secondary">{{ fastag_info.meta_data.vehicle_data.vehicle_type }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Customer Name:</span>
+                                                    <span class="text-muted">{{ fastag_info.meta_data.customer_name }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Status:</span>
+                                                    <span class="badge bg-success">{{ fastag_info.meta_data.status }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if fastag_info.acko_recharge_limits %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-chart-line me-2"></i>
+                                            Recharge Limits
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <div class="fw-bold text-primary">₹{{ fastag_info.acko_recharge_limits.daily_recharge_limit }}</div>
+                                                    <small class="text-muted">Daily Limit</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <div class="fw-bold text-primary">₹{{ fastag_info.acko_recharge_limits.weekly_recharge_limit }}</div>
+                                                    <small class="text-muted">Weekly Limit</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <div class="fw-bold text-primary">₹{{ fastag_info.acko_recharge_limits.monthly_recharge_limit }}</div>
+                                                    <small class="text-muted">Monthly Limit</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <div class="fw-bold text-primary">{{ fastag_info.acko_recharge_limits.daily_transaction_limit }}</div>
+                                                    <small class="text-muted">Daily Transactions</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card border-secondary">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Additional Information
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Last Updated:</span>
+                                                    <span class="text-muted">{{ fastag_info.last_updated_at }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Reference ID:</span>
+                                                    <span class="text-muted">{{ fastag_info.meta_data.ref_id }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Min Amount:</span>
+                                                    <span class="text-muted">₹{{ fastag_info.biller_details.min_amount }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Max Amount:</span>
+                                                    <span class="text-muted">₹{{ fastag_info.biller_details.max_amount }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %} 
