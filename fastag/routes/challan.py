@@ -45,10 +45,17 @@ def challan():
                     req2 = requests.get(f'https://api.spinny.com/v3/api/challan/pending/?request_id={request_id}', headers=headers, cookies=cookies, timeout=10)
                     req2.raise_for_status()
                     data2 = req2.json()
+                    # Debug print
+                    print('DEBUG: data2["data"] =', data2.get('data'))
                     if not data2.get('is_success') or not data2.get('data'):
                         error = data2.get('message', 'No challan data found.')
                     else:
-                        challan_data = data2['data']
+                        # Only keep objects with a challan_number or offense_details
+                        challan_data = [c for c in data2['data'] if c.get('challan_number') or c.get('offense_details')]
+                        if not challan_data:
+                            challan_data = None
             except Exception as e:
                 error = f'Error fetching challan: {str(e)}'
+    print('DEBUG: challan_data =', challan_data)
+    print('DEBUG: error =', error)
     return render_template('challan.html', challan_data=challan_data, error=error, reg_no=reg_no) 
