@@ -100,6 +100,12 @@ def init_database():
                 FOREIGN KEY (reader_id) REFERENCES readers (id),
                 FOREIGN KEY (lane_id) REFERENCES lanes (id)
             );
+            CREATE TABLE IF NOT EXISTS user_logins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                login_method TEXT,
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
         ''')
         # Example: Add missing column migration (add more as needed)
         # add_column_if_not_exists(cursor, 'kyc_users', 'email', 'TEXT')

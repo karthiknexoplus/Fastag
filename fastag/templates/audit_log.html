@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">User Audit Log</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Recent Logins</h4>
+            <table class="table table-sm table-bordered">
+                <thead><tr><th>User</th><th>Method</th><th>Time</th></tr></thead>
+                <tbody>
+                {% for login in logins %}
+                <tr>
+                    <td>{{ login['username'] }}</td>
+                    <td>{{ login['login_method'] }}</td>
+                    <td>{{ login['login_time'] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h4>Recent Actions</h4>
+            <table class="table table-sm table-bordered">
+                <thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
+                <tbody>
+                {% for action in actions %}
+                <tr>
+                    <td>{{ action['username'] }}</td>
+                    <td>{{ action['action'] }}</td>
+                    <td>{{ action['details'] }}</td>
+                    <td>{{ action['action_time'] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

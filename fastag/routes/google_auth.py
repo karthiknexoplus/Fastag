@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import base64
+from fastag.utils.db import log_user_login, log_user_action
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -81,26 +82,24 @@ def callback():
         token = oauth.google.authorize_access_token()
         nonce = session.pop('nonce', None)
         user_info = oauth.google.parse_id_token(token, nonce=nonce)
-        
         # Extract user information
         user_data = {
-            'id': user_info.get('sub'),
+            'username': user_info.get('email'),
             'email': user_info.get('email'),
             'name': user_info.get('name'),
             'picture': user_info.get('picture'),
             'given_name': user_info.get('given_name'),
-            'family_name': user_info.get('family_name')
+            'family_name': user_info.get('family_name'),
+            'login_method': 'google'
         }
-        
         logger.info(f"Google OAuth login successful for user: {user_data['email']}")
-        
         # Store user in session
         session['user'] = user_data
         session['token'] = token
-        
+        log_user_login(user_data['username'], 'google')
+        log_user_action(user_data['username'], 'login', 'Google login')
         flash(f'Welcome, {user_data["name"]}! You have been successfully logged in.', 'success')
         return redirect(url_for('auth.home'))
-        
     except Exception as e:
         logger.error(f"Google OAuth callback error: {e}")
         flash('Login failed. Please try again.', 'error')

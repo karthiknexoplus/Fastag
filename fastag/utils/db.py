@@ -97,3 +97,19 @@ def init_db(db):
         );
     ''')
     db.commit() 
+
+def log_user_login(username, login_method):
+    db = get_db()
+    db.execute(
+        "INSERT INTO user_logins (username, login_method) VALUES (?, ?)",
+        (username, login_method)
+    )
+    db.commit()
+
+def log_user_action(username, action, details=""):
+    db = get_db()
+    db.execute(
+        "INSERT INTO user_actions (username, action, details) VALUES (?, ?, ?)",
+        (username, action, details)
+    )
+    db.commit() 
