@@ -2,6 +2,8 @@ import os
 from flask import Flask
 from fastag.utils.logging import setup_logging
 from fastag.utils.db import close_db
+from dotenv import load_dotenv
+load_dotenv()
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
