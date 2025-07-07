@@ -50,4 +50,12 @@ def logout():
     if username:
         logging.info(f"User logged out: {username}")
     flash('You have been logged out.', 'info')
-    return redirect(url_for('auth.login')) 
+    return redirect(url_for('auth.login'))
+
+@auth_bp.route('/debug/env')
+def debug_env():
+    import os
+    return {
+        "GOOGLE_CLIENT_ID": os.environ.get("GOOGLE_CLIENT_ID"),
+        "GOOGLE_CLIENT_SECRET": os.environ.get("GOOGLE_CLIENT_SECRET")
+    } 
