@@ -216,7 +216,7 @@ def device_register():
             "error": "Internal server error"
         }), 500 
 
-@api.route('/api/barrier-control', methods=['POST'])
+@api.route('/barrier-control', methods=['POST'])
 def barrier_control():
     """
     Control the barrier relays. Accepts JSON:
