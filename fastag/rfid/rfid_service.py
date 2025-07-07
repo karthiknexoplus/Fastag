@@ -479,7 +479,7 @@ class RFIDReader:
 class RelayController:
     def __init__(self):
         self.logger = logging.getLogger('RelayController')
-        self.pins = [17, 27, 22, 23]
+        self.pins = [26, 20, 21]  # CH1, CH2, CH3
         self.logger.info("Initializing GPIO for relay control...")
         self.init_gpio()
         # Safety measure: ensure all relays are OFF on startup
@@ -506,7 +506,7 @@ class RelayController:
             self.logger.warning("GPIO is not available, cannot turn on relay.")
             return False
         try:
-            if 1 <= relay_number <= 4:
+            if 1 <= relay_number <= 3:
                 pin = self.pins[relay_number - 1]
                 self.logger.info(f"Turning ON relay {relay_number} (GPIO pin {pin})...")
                 GPIO.output(pin, True)  # HIGH for active-high relays (turns ON)
@@ -524,7 +524,7 @@ class RelayController:
             self.logger.warning("GPIO is not available, cannot turn off relay.")
             return False
         try:
-            if 1 <= relay_number <= 4:
+            if 1 <= relay_number <= 3:
                 pin = self.pins[relay_number - 1]
                 self.logger.info(f"Turning OFF relay {relay_number} (GPIO pin {pin})...")
                 GPIO.output(pin, False)  # LOW for active-high relays (turns OFF)

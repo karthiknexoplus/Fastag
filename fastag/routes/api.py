@@ -232,11 +232,8 @@ def barrier_control():
     if action != 'open':
         return jsonify({"success": False, "error": "Unsupported action"}), 400
 
-    # Get the number of readers from the database
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT COUNT(*) FROM readers")
-    total_relays = cursor.fetchone()[0]
+    # Only allow relays 1-3 for 3-relay hardware
+    allowed_relays = [1, 2, 3]
 
     # Import relay controller from the app context
     relay_controller = getattr(current_app, 'relay_controller', None)
@@ -247,9 +244,11 @@ def barrier_control():
 
     # Determine which relays to activate
     if relay_numbers is None or relay_numbers == 'all':
-        relays_to_activate = list(range(1, total_relays + 1))
+        relays_to_activate = allowed_relays
     else:
-        relays_to_activate = relay_numbers
+        relays_to_activate = [r for r in relay_numbers if r in allowed_relays]
+        if not relays_to_activate:
+            return jsonify({"success": False, "error": "No valid relay numbers provided"}), 400
 
     # Activate the relays
     for relay_num in relays_to_activate:
