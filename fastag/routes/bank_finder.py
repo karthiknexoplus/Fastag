@@ -2,6 +2,10 @@ from flask import Blueprint, render_template, request, jsonify
 import requests
 import logging
 import re
+import urllib3
+
+# Disable SSL warnings for this specific API
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 bank_finder_bp = Blueprint('bank_finder', __name__)
 
@@ -24,12 +28,16 @@ def find_bank():
                 # API endpoint and headers
                 url = f'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value}'
                 headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                     'Accept': 'application/json',
-                    'Cookie': 'TS019079a3=01e33451e7f6a9a64bbb5a6e970573e2c7ccf2f153dd52c79a5c8d34e25b94ef891ed412dcbc16ae837736ae9657086368e5a88d3c'
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://netc-acq.airtelbank.com/',
+                    'Origin': 'https://netc-acq.airtelbank.com',
+                    'Cookie': 'TS019079a3=01e33451e79286adff54e3e927f807bfcd9f7c80ddddd702e8b4f170cd048b04d65f9b970279e11be29a68140b39a5625463daed81'
                 }
                 
-                response = requests.get(url, headers=headers, timeout=15)
+                # Disable SSL verification for this specific API
+                response = requests.get(url, headers=headers, timeout=15, verify=False)
                 response.raise_for_status()
                 
                 bank_data = response.json()
@@ -58,12 +66,16 @@ def bank_api(search_type, search_value):
     try:
         url = f'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value.upper()}'
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'application/json',
-            'Cookie': 'TS019079a3=01e33451e7f6a9a64bbb5a6e970573e2c7ccf2f153dd52c79a5c8d34e25b94ef891ed412dcbc16ae837736ae9657086368e5a88d3c'
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://netc-acq.airtelbank.com/',
+            'Origin': 'https://netc-acq.airtelbank.com',
+            'Cookie': 'TS019079a3=01e33451e79286adff54e3e927f807bfcd9f7c80ddddd702e8b4f170cd048b04d65f9b970279e11be29a68140b39a5625463daed81'
         }
         
-        response = requests.get(url, headers=headers, timeout=15)
+        # Disable SSL verification for this specific API
+        response = requests.get(url, headers=headers, timeout=15, verify=False)
         response.raise_for_status()
         
         return jsonify(response.json())
