@@ -478,6 +478,7 @@ class RFIDReader:
 
 class RelayController:
     def __init__(self):
+        self.logger = logging.getLogger('RelayController')
         self.pins = [17, 27, 22, 23]
         self.logger.info("Initializing GPIO for relay control...")
         self.init_gpio()
