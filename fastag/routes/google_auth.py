@@ -96,8 +96,8 @@ def callback():
         # Store user in session
         session['user'] = user_data
         session['token'] = token
-        log_user_login(user_data['username'], 'google')
-        log_user_action(user_data['username'], 'login', 'Google login')
+        log_user_login(user_data['username'], 'google', picture=user_data['picture'])
+        log_user_action(user_data['username'], 'login', 'Google login', picture=user_data['picture'])
         flash(f'Welcome, {user_data["name"]}! You have been successfully logged in.', 'success')
         return redirect(url_for('auth.home'))
     except Exception as e:

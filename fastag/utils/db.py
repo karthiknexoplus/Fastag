@@ -98,18 +98,18 @@ def init_db(db):
     ''')
     db.commit() 
 
-def log_user_login(username, login_method):
+def log_user_login(username, login_method, picture=None):
     db = get_db()
     db.execute(
-        "INSERT INTO user_logins (username, login_method) VALUES (?, ?)",
-        (username, login_method)
+        "INSERT INTO user_logins (username, login_method, picture) VALUES (?, ?, ?)",
+        (username, login_method, picture)
     )
     db.commit()
 
-def log_user_action(username, action, details=""):
+def log_user_action(username, action, details="", picture=None):
     db = get_db()
     db.execute(
-        "INSERT INTO user_actions (username, action, details) VALUES (?, ?, ?)",
-        (username, action, details)
+        "INSERT INTO user_actions (username, action, details, picture) VALUES (?, ?, ?, ?)",
+        (username, action, details, picture)
     )
     db.commit() 
