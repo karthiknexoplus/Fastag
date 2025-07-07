@@ -25,18 +25,12 @@ def find_bank():
             error = "Please enter a valid 24-character TagID (hexadecimal)."
         else:
             try:
-                # API endpoint and headers
+                # API endpoint - EXACTLY like your curl
                 url = f'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value}'
                 headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Accept': 'application/json',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Referer': 'https://netc-acq.airtelbank.com/',
-                    'Origin': 'https://netc-acq.airtelbank.com',
                     'Cookie': 'TS019079a3=01e33451e79286adff54e3e927f807bfcd9f7c80ddddd702e8b4f170cd048b04d65f9b970279e11be29a68140b39a5625463daed81'
                 }
                 
-                # Disable SSL verification for this specific API
                 response = requests.get(url, headers=headers, timeout=15, verify=False)
                 response.raise_for_status()
                 
@@ -66,15 +60,9 @@ def bank_api(search_type, search_value):
     try:
         url = f'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value.upper()}'
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'application/json',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://netc-acq.airtelbank.com/',
-            'Origin': 'https://netc-acq.airtelbank.com',
             'Cookie': 'TS019079a3=01e33451e79286adff54e3e927f807bfcd9f7c80ddddd702e8b4f170cd048b04d65f9b970279e11be29a68140b39a5625463daed81'
         }
         
-        # Disable SSL verification for this specific API
         response = requests.get(url, headers=headers, timeout=15, verify=False)
         response.raise_for_status()
         
