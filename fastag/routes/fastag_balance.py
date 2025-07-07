@@ -7,19 +7,67 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Fastag Billers data
+FASTAG_BILLERS = [
+    {"name": "Airtel Payments Bank", "billerId": "9fae6085-9be7-4975-9300-60d9a737f5c7"},
+    {"name": "Axis Bank", "billerId": "ae721976-ab51-4a49-b692-6951de295376"},
+    {"name": "HDFC Bank", "billerId": "57813979-5935-4d1a-aae7-db1914a8e106"},
+    {"name": "ICICI Bank", "billerId": "d084a832-6880-4fbf-81f3-e284021bf320"},
+    {"name": "IDFC FIRST Bank", "billerId": "e5ce08e4-82f9-499c-9b37-d8d64a241d42"},
+    {"name": "SBI", "billerId": "91b24509-0d1e-4ff9-8f7d-812092f02d9d"},
+    {"name": "AU Small Finance Bank", "billerId": "6b3d5ac9-2ae2-4043-98b0-b2baef1b047e"},
+    {"name": "Bandhan Bank", "billerId": "a5813ec6-df65-419d-b4cf-284ea1cf6279"},
+    {"name": "Bank of Baroda", "billerId": "f73b8416-ad55-4c65-93bb-3a00003b25fd"},
+    {"name": "Bank of Maharashtra", "billerId": "90d80ef2-6711-428c-8b93-776b759400fb"},
+    {"name": "Canara Bank", "billerId": "c4d2a96c-2fd6-4eef-9763-f9658fc33f18"},
+    {"name": "Equitas Small Finance Bank", "billerId": "c672087b-ea11-4974-b132-4e0f17a8d1a0"},
+    {"name": "Federal Bank", "billerId": "217bbe27-7459-443a-b04a-1b7c2f88af32"},
+    {"name": "IDBI Bank", "billerId": "dfa6f62e-589f-4594-834e-32462346e769"},
+    {"name": "Indian Bank", "billerId": "574384d7-2cea-42b7-bb8e-d02821675897"},
+    {"name": "IndusInd Bank", "billerId": "8c64e1e7-de05-42f3-9b65-b730f95a7359"},
+    {"name": "IOB", "billerId": "d04485e2-2745-435e-893e-5f6180832b2a"},
+    {"name": "Jammu and Kashmir Bank", "billerId": "6e3abf92-bf9e-492c-b20e-320c0d308905"},
+    {"name": "Karnataka Bank", "billerId": "e8ef4cc6-5fe0-45aa-b251-1da32e0bf582"},
+    {"name": "Kotak Mahindra Bank", "billerId": "b2b0fce9-c0ac-4468-a4ee-f22ffa263c9c"},
+    {"name": "Livquick Technology", "billerId": "f869c0f4-4dee-4a13-b70e-e988eb50dc4a"},
+    {"name": "South Indian Bank", "billerId": "be95d909-ad89-4b5d-b62a-fe13446fd16c"},
+    {"name": "UCO Bank", "billerId": "696f84a4-10bb-4546-ad33-6ffee4daa1c8"},
+    {"name": "Union Bank of India", "billerId": "12302d69-13f4-43f8-b030-75a9ba87d0bb"},
+]
+
 fastag_balance_bp = Blueprint('fastag_balance', __name__)
 
 @fastag_balance_bp.route('/fastag_balance', methods=['GET', 'POST'])
 def fastag_balance():
     if request.method == 'POST':
         reg_no = request.form.get('reg_no', '').strip().upper()
-        biller_id = request.form.get('biller_id', '').strip()
+        selected_bank = request.form.get('selected_bank', '').strip()
         
         if not reg_no:
-            return render_template('fastag_balance.html', error="Registration number is required")
+            return render_template('fastag_balance.html', 
+                                error="Registration number is required",
+                                billers=FASTAG_BILLERS)
+        
+        if not selected_bank:
+            return render_template('fastag_balance.html', 
+                                error="Please select a bank",
+                                billers=FASTAG_BILLERS,
+                                reg_no=reg_no)
+        
+        # Find the biller ID for the selected bank
+        biller_id = None
+        selected_bank_name = ""
+        for biller in FASTAG_BILLERS:
+            if biller['name'] == selected_bank:
+                biller_id = biller['billerId']
+                selected_bank_name = biller['name']
+                break
         
         if not biller_id:
-            return render_template('fastag_balance.html', error="Biller ID is required")
+            return render_template('fastag_balance.html', 
+                                error="Invalid bank selection",
+                                billers=FASTAG_BILLERS,
+                                reg_no=reg_no)
         
         try:
             # Acko API endpoint
@@ -67,12 +115,14 @@ def fastag_balance():
                         return render_template('fastag_balance.html', 
                                             fastag_info=fastag_info,
                                             reg_no=reg_no,
-                                            biller_id=biller_id)
+                                            selected_bank=selected_bank_name,
+                                            billers=FASTAG_BILLERS)
                     else:
                         return render_template('fastag_balance.html', 
                                             error="No Fastag data found for the provided registration number",
                                             reg_no=reg_no,
-                                            biller_id=biller_id)
+                                            selected_bank=selected_bank_name,
+                                            billers=FASTAG_BILLERS)
                         
                 except json.JSONDecodeError as e:
                     logger.error(f"JSON decode error: {e}")
@@ -80,32 +130,37 @@ def fastag_balance():
                     return render_template('fastag_balance.html', 
                                         error="Invalid response format from API",
                                         reg_no=reg_no,
-                                        biller_id=biller_id)
+                                        selected_bank=selected_bank_name,
+                                        billers=FASTAG_BILLERS)
             else:
                 logger.error(f"API request failed with status {response.status_code}")
                 logger.error(f"Response content: {response.text}")
                 return render_template('fastag_balance.html', 
                                     error=f"API request failed with status {response.status_code}",
                                     reg_no=reg_no,
-                                    biller_id=biller_id)
+                                    selected_bank=selected_bank_name,
+                                    billers=FASTAG_BILLERS)
                 
         except requests.exceptions.Timeout:
             logger.error("API request timed out")
             return render_template('fastag_balance.html', 
                                 error="Request timed out. Please try again.",
                                 reg_no=reg_no,
-                                biller_id=biller_id)
+                                selected_bank=selected_bank_name,
+                                billers=FASTAG_BILLERS)
         except requests.exceptions.ConnectionError:
             logger.error("Connection error to API")
             return render_template('fastag_balance.html', 
                                 error="Connection error. Please check your internet connection.",
                                 reg_no=reg_no,
-                                biller_id=biller_id)
+                                selected_bank=selected_bank_name,
+                                billers=FASTAG_BILLERS)
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return render_template('fastag_balance.html', 
                                 error=f"An unexpected error occurred: {str(e)}",
                                 reg_no=reg_no,
-                                biller_id=biller_id)
+                                selected_bank=selected_bank_name,
+                                billers=FASTAG_BILLERS)
     
-    return render_template('fastag_balance.html') 
+    return render_template('fastag_balance.html', billers=FASTAG_BILLERS) 
