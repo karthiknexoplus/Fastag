@@ -3,38 +3,111 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">User Audit Log</h2>
-    <div class="row">
-        <div class="col-md-6">
-            <h4>Recent Logins</h4>
-            <table class="table table-sm table-bordered">
-                <thead><tr><th>User</th><th>Method</th><th>Time</th></tr></thead>
-                <tbody>
-                {% for login in logins %}
-                <tr>
-                    <td>{{ login['username'] }}</td>
-                    <td>{{ login['login_method'] }}</td>
-                    <td>{{ login['login_time'] }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    <form class="row g-2 mb-3" method="get">
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="user" placeholder="Filter by user" value="{{ user_filter }}">
         </div>
-        <div class="col-md-6">
-            <h4>Recent Actions</h4>
-            <table class="table table-sm table-bordered">
-                <thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
-                <tbody>
-                {% for action in actions %}
-                <tr>
-                    <td>{{ action['username'] }}</td>
-                    <td>{{ action['action'] }}</td>
-                    <td>{{ action['details'] }}</td>
-                    <td>{{ action['action_time'] }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="action" placeholder="Filter by action" value="{{ action_filter }}">
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="search" placeholder="Search details" value="{{ search }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-1"></i>Search</button>
+        </div>
+        <div class="col-md-1">
+            <a href="{{ url_for('auth.audit_log_export') }}" class="btn btn-success w-100"><i class="fas fa-file-csv me-1"></i>Export</a>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-sign-in-alt me-2"></i>Recent Logins
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>User</th><th>Method</th><th>Time</th></tr></thead>
+                        <tbody>
+                        {% for login in logins %}
+                        <tr>
+                            <td>
+                                {% if login['login_method'] == 'google' %}
+                                    <img src="{{ login['picture'] or url_for('static', filename='favicon.ico') }}" class="rounded-circle me-1" style="width:28px;height:28px;object-fit:cover;vertical-align:middle;"> 
+                                {% else %}
+                                    <i class="fas fa-user-circle text-secondary me-1" style="font-size:1.2rem;vertical-align:middle;"></i>
+                                {% endif %}
+                                <span>{{ login['username'] }}</span>
+                            </td>
+                            <td>
+                                <span class="badge {% if login['login_method']=='google' %}bg-danger{% else %}bg-primary{% endif %}">
+                                    {{ login['login_method']|capitalize }}
+                                </span>
+                            </td>
+                            <td><span title="{{ login['login_time'] }}">{{ login['login_time'] }}</span></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-end">
+                    <small>Showing {{ logins|length }} of {{ login_count }} logins</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-clipboard-list me-2"></i>Recent Actions
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
+                        <tbody>
+                        {% for action in actions %}
+                        <tr>
+                            <td>
+                                {% if action['action'] == 'login' and action['details'] == 'Google login' %}
+                                    <img src="{{ action['picture'] or url_for('static', filename='favicon.ico') }}" class="rounded-circle me-1" style="width:28px;height:28px;object-fit:cover;vertical-align:middle;"> 
+                                {% else %}
+                                    <i class="fas fa-user-circle text-secondary me-1" style="font-size:1.2rem;vertical-align:middle;"></i>
+                                {% endif %}
+                                <span>{{ action['username'] }}</span>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if action['action']=='login' %}bg-success
+                                    {% elif action['action']=='logout' %}bg-danger
+                                    {% elif action['action']=='edit' %}bg-warning text-dark
+                                    {% elif action['action']=='delete' %}bg-danger
+                                    {% else %}bg-info{% endif %}">
+                                    {{ action['action']|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ action['details'] }}</td>
+                            <td><span title="{{ action['action_time'] }}">{{ action['action_time'] }}</span></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-end">
+                    <small>Showing {{ actions|length }} of {{ action_count }} actions</small>
+                </div>
+            </div>
         </div>
     </div>
+    <nav aria-label="Audit log pagination">
+        <ul class="pagination justify-content-center">
+            {% if page > 1 %}
+            <li class="page-item"><a class="page-link" href="?page={{ page-1 }}&user={{ user_filter }}&action={{ action_filter }}&search={{ search }}">Previous</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">Page {{ page }}</span></li>
+            {% if logins|length == per_page or actions|length == per_page %}
+            <li class="page-item"><a class="page-link" href="?page={{ page+1 }}&user={{ user_filter }}&action={{ action_filter }}&search={{ search }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
 </div>
 {% endblock %} 
