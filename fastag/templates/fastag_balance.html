@@ -25,10 +25,7 @@
                     <form method="POST" class="needs-validation" novalidate>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="reg_no" class="form-label">
-                                    <i class="fas fa-car me-1"></i>
-                                    Vehicle Registration Number
-                                </label>
+                                <label for="reg_no" class="form-label"><i class="fas fa-car fastag-form-icon me-1"></i><span class="fastag-form-label">Vehicle Registration Number</span></label>
                                 <input type="text" 
                                        class="form-control" 
                                        id="reg_no" 
@@ -41,10 +38,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="selected_bank" class="form-label">
-                                    <i class="fas fa-university me-1"></i>
-                                    Select Bank
-                                </label>
+                                <label for="selected_bank" class="form-label"><i class="fas fa-university fastag-form-icon me-1"></i><span class="fastag-form-label">Select Bank</span></label>
                                 <select class="form-select" id="selected_bank" name="selected_bank" required>
                                     <option value="">Choose a bank...</option>
                                     {% for biller in billers %}
@@ -61,29 +55,20 @@
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-search me-2"></i>
-                                Check Fastag Balance
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-search fastag-form-icon me-2"></i><span class="fastag-form-label">Check Fastag Balance</span></button>
                         </div>
                     </form>
 
                     {% if fastag_info %}
                     <hr class="my-4">
                     <div class="fastag-result">
-                        <h5 class="text-success mb-3">
-                            <i class="fas fa-check-circle me-2"></i>
-                            Fastag Information Found
-                        </h5>
+                        <h5 class="text-success mb-3"><i class="fas fa-check-circle fastag-form-icon me-2"></i><span class="fastag-form-label">Fastag Information Found</span></h5>
                         
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="card border-success">
                                     <div class="card-header bg-success text-white">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-wallet me-2"></i>
-                                            Balance Information
-                                        </h6>
+                                        <h6 class="mb-0"><i class="fas fa-wallet fastag-form-icon me-2"></i><span class="fastag-form-label">Balance Information</span></h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -105,10 +90,7 @@
                             <div class="col-md-6">
                                 <div class="card border-primary">
                                     <div class="card-header bg-primary text-white">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-university me-2"></i>
-                                            Bank Details
-                                        </h6>
+                                        <h6 class="mb-0"><i class="fas fa-university fastag-form-icon me-2"></i><span class="fastag-form-label">Bank Details</span></h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -133,10 +115,7 @@
                             <div class="col-12">
                                 <div class="card border-info">
                                     <div class="card-header bg-info text-white">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-car me-2"></i>
-                                            Vehicle Information
-                                        </h6>
+                                        <h6 class="mb-0"><i class="fas fa-car fastag-form-icon me-2"></i><span class="fastag-form-label">Vehicle Information</span></h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
@@ -180,10 +159,7 @@
                             <div class="col-12">
                                 <div class="card border-warning">
                                     <div class="card-header bg-warning text-dark">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-chart-line me-2"></i>
-                                            Recharge Limits
-                                        </h6>
+                                        <h6 class="mb-0"><i class="fas fa-chart-line fastag-form-icon me-2"></i><span class="fastag-form-label">Recharge Limits</span></h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
@@ -222,10 +198,7 @@
                             <div class="col-12">
                                 <div class="card border-secondary">
                                     <div class="card-header bg-secondary text-white">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            Additional Information
-                                        </h6>
+                                        <h6 class="mb-0"><i class="fas fa-info-circle fastag-form-icon me-2"></i><span class="fastag-form-label">Additional Information</span></h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">

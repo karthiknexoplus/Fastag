@@ -11,6 +11,27 @@
         body {
             background: #f4f6fb;
         }
+        /* Consistent icon and font styling for menu, submenu, and forms */
+        .fastag-menu-icon, .fastag-form-icon, .fastag-submenu-icon {
+            font-size: 1.15rem !important;
+            color: #764ba2 !important;
+            vertical-align: middle;
+        }
+        .fastag-menu-label, .fastag-form-label, .fastag-submenu-label {
+            font-size: 1rem !important;
+            color: #333 !important;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .dropdown-item .fastag-submenu-icon {
+            margin-right: 0.5em;
+        }
+        .nav-icon-link .fastag-menu-icon {
+            margin-right: 0.3em;
+        }
+        .form-label .fastag-form-icon {
+            margin-right: 0.3em;
+        }
         .navbar-custom {
             background: #fff;
             box-shadow: 0 2px 16px rgba(80,80,160,0.07);
@@ -87,24 +108,24 @@
                 </a>
                 <div class="dropdown d-inline-block">
                     <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Fastag">
-                        <i class="fas fa-tags"></i>
-                        <span class="nav-label d-none d-md-inline">Fastag</span>
+                        <i class="fas fa-tags fastag-menu-icon"></i>
+                        <span class="nav-label fastag-menu-label d-none d-md-inline">Fastag</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="{{ url_for('vehicle_finder.find_vehicle') }}">
-                            <i class="fas fa-car me-2"></i>Find Vehicle
+                            <i class="fas fa-car fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Vehicle</span>
                         </a></li>
                         <li><a class="dropdown-item" href="{{ url_for('bank_finder.find_bank') }}">
-                            <i class="fas fa-university me-2"></i>Find Bank
+                            <i class="fas fa-university fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Bank</span>
                         </a></li>
                         <li><a class="dropdown-item" href="{{ url_for('fastag_balance.fastag_balance') }}">
-                            <i class="fas fa-wallet me-2"></i>Fastag Balance
+                            <i class="fas fa-wallet fastag-submenu-icon"></i><span class="fastag-submenu-label">Fastag Balance</span>
                         </a></li>
                         <li><a class="dropdown-item" href="/challan">
-                            <i class="fas fa-receipt me-2"></i>Find Challan
+                            <i class="fas fa-receipt fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Challan</span>
                         </a></li>
                         <li><a class="dropdown-item" href="{{ url_for('fuel_price.fuel_price') }}">
-                            <i class="fas fa-gas-pump me-2"></i>Find Fuel Price
+                            <i class="fas fa-gas-pump fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Fuel Price</span>
                         </a></li>
                     </ul>
                 </div>
