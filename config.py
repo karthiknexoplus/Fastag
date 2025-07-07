@@ -1,7 +1,7 @@
 import os
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'change-this-secret-key')
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'nexoplus@1234')
     LOG_DIR = os.environ.get('LOG_DIR', 'logs')
     # Use absolute path for database
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -10,7 +10,7 @@ class Config:
     
     # Google OAuth Configuration
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com')
-    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', 'GOCSPX-your-actual-secret-here')
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', 'GOCSPX-your-nexoplus@1234')
 
 class ProductionConfig(Config):
     DEBUG = False

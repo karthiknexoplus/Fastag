@@ -18,16 +18,25 @@ def init_oauth(app):
     """Initialize OAuth with the Flask app"""
     oauth.init_app(app)
     
+    # Check if Google OAuth credentials are configured
+    client_id = app.config.get('GOOGLE_CLIENT_ID')
+    client_secret = app.config.get('GOOGLE_CLIENT_SECRET')
+    
+    if not client_id or client_id == 'your-google-client-id' or 'your-actual-secret-here' in str(client_secret):
+        logger.warning("Google OAuth credentials not properly configured")
+        return
+    
     # Google OAuth configuration
     oauth.register(
         name='google',
-        client_id=app.config.get('GOOGLE_CLIENT_ID'),
-        client_secret=app.config.get('GOOGLE_CLIENT_SECRET'),
+        client_id=client_id,
+        client_secret=client_secret,
         server_metadata_url='https://accounts.google.com/.well-known/openid_configuration',
         client_kwargs={
             'scope': 'openid email profile'
         }
     )
+    logger.info("Google OAuth initialized successfully")
 
 def login_required(f):
     """Decorator to check if user is logged in"""
@@ -45,8 +54,18 @@ def login():
     if 'user' in session:
         return redirect(url_for('auth.home'))
     
-    redirect_uri = url_for('google_auth.callback', _external=True)
-    return oauth.google.authorize_redirect(redirect_uri)
+    try:
+        # Check if Google OAuth is properly configured
+        if not hasattr(oauth, 'google'):
+            flash('Google OAuth is not properly configured. Please contact administrator.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        redirect_uri = url_for('google_auth.callback', _external=True)
+        return oauth.google.authorize_redirect(redirect_uri)
+    except Exception as e:
+        logger.error(f"Google OAuth login error: {e}")
+        flash('Google OAuth is not properly configured. Please contact administrator.', 'error')
+        return redirect(url_for('auth.login'))
 
 @google_auth_bp.route('/callback')
 def callback():
@@ -86,7 +105,7 @@ def logout():
         user_name = session['user'].get('name', 'User')
         session.clear()
         flash(f'Goodbye, {user_name}! You have been logged out.', 'info')
-    return redirect(url_for('google_auth.login'))
+    return redirect(url_for('auth.login'))
 
 @google_auth_bp.route('/profile')
 @login_required
