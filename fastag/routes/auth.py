@@ -52,6 +52,7 @@ def logout():
     user = session.get('user')
     username = user['username'] if isinstance(user, dict) else user
     session.pop('user', None)
+    session.pop('_flashes', None)  # Clear all flash messages
     if username:
         logging.info(f"User logged out: {username}")
         log_user_action(username, 'logout', 'User logged out')
