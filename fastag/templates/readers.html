@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.open-barrier-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       const readerId = btn.getAttribute('data-reader-id');
+      console.log('Open Barrier clicked, readerId:', readerId); // Debug log
       fetch(`/readers/${readerId}/open-barrier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
