@@ -3,51 +3,11 @@ import requests
 import logging
 import re
 import urllib3
-import json
-import os
 
 # Disable SSL warnings for this specific API
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 bank_finder_bp = Blueprint('bank_finder', __name__)
-
-# Sample cached data for testing
-SAMPLE_BANK_DATA = {
-    "KA04MJ6369": {
-        "npcitagDetails": [{
-            "TagID": "34161FA820328EE80795F540",
-            "TID": "E2801105200079462ACD0A5A", 
-            "VRN": "KA04MJ6369",
-            "IssueDate": "2021-03-04",
-            "ExceptionCode": "00",
-            "BankId": "IDFC Bank",
-            "ComVehicle": "F",
-            "TagStatus": "A",
-            "VehicleClass": "VC4",
-            "AVC": None
-        }],
-        "ErrorMessage": "NONE",
-        "PlazaId": 0,
-        "PlazaDisplayId": ""
-    },
-    "TN66AT2938": {
-        "npcitagDetails": [{
-            "TagID": "34161FA82033E8E403D2D2C0",
-            "TID": "E28011C120000B0ACCBB031F",
-            "VRN": "TN66AT2938", 
-            "IssueDate": "2024-12-20",
-            "ExceptionCode": "01",
-            "BankId": "Equitas Bank",
-            "ComVehicle": "F",
-            "TagStatus": "A",
-            "VehicleClass": "VC4",
-            "AVC": None
-        }],
-        "ErrorMessage": "NONE",
-        "PlazaId": 0,
-        "PlazaDisplayId": ""
-    }
-}
 
 @bank_finder_bp.route('/find-bank', methods=['GET', 'POST'])
 def find_bank():
@@ -64,12 +24,34 @@ def find_bank():
         elif search_type == 'TagID' and not re.match(r'^[A-F0-9]{24}$', search_value):
             error = "Please enter a valid 24-character TagID (hexadecimal)."
         else:
-            # For now, always use cached data to ensure it works
-            if search_type == 'VRN' and search_value in SAMPLE_BANK_DATA:
-                bank_data = SAMPLE_BANK_DATA[search_value]
-                logging.info(f"Using cached data for {search_value}")
-            else:
-                error = f"No data found for {search_value}. Try: KA04MJ6369 or TN66AT2938"
+            try:
+                # Use Axis Bank API
+                url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value}'
+                headers = {
+                    'Cookie': 'axisbiconnect=1034004672.47873.0000'
+                }
+                
+                response = requests.get(url, headers=headers, timeout=15, verify=False)
+                response.raise_for_status()
+                
+                # Print response details for debugging
+                logging.info(f"Response status: {response.status_code}")
+                logging.info(f"Response text: {response.text}")
+                
+                bank_data = response.json()
+                logging.info(f"Parsed JSON: {bank_data}")
+                
+                # Check if we got valid data
+                if bank_data.get('ErrorMessage') != 'NONE' or not bank_data.get('npcitagDetails'):
+                    error = f"No bank information found. Error: {bank_data.get('ErrorMessage', 'Unknown')}"
+                    bank_data = None
+                    
+            except requests.exceptions.RequestException as e:
+                logging.error(f"API request failed: {e}")
+                error = f"API request failed: {e}. Network connectivity issue detected."
+            except Exception as e:
+                logging.error(f"Error processing bank data: {e}")
+                error = f"Error processing bank data: {e}"
     
     return render_template('bank_finder.html', 
                          bank_data=bank_data, 
@@ -81,9 +63,14 @@ def find_bank():
 def bank_api(search_type, search_value):
     """API endpoint for AJAX requests"""
     try:
-        if search_type == 'VRN' and search_value.upper() in SAMPLE_BANK_DATA:
-            return jsonify(SAMPLE_BANK_DATA[search_value.upper()])
-        else:
-            return jsonify({'error': 'No data found'}), 404
+        url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType={search_type}&SearchValue={search_value.upper()}'
+        headers = {
+            'Cookie': 'axisbiconnect=1034004672.47873.0000'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=15, verify=False)
+        response.raise_for_status()
+        
+        return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': str(e)}), 400 
