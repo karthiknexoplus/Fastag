@@ -4,6 +4,8 @@ from functools import wraps
 import requests
 import json
 import logging
+import os
+import base64
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -62,8 +64,11 @@ def login():
             return redirect(url_for('auth.login'))
         
         redirect_uri = url_for('google_auth.callback', _external=True)
-        logger.info(f"Google OAuth redirect_uri: {redirect_uri}")
-        return oauth.google.authorize_redirect(redirect_uri)
+        # Generate a nonce and store in session
+        nonce = base64.urlsafe_b64encode(os.urandom(24)).decode()
+        session['nonce'] = nonce
+        logger.info(f"Google OAuth redirect_uri: {redirect_uri}, nonce: {nonce}")
+        return oauth.google.authorize_redirect(redirect_uri, nonce=nonce)
     except Exception as e:
         logger.error(f"Google OAuth login error: {e}")
         flash('Google OAuth is not properly configured. Please contact administrator.', 'error')
@@ -74,7 +79,8 @@ def callback():
     """Google OAuth callback route"""
     try:
         token = oauth.google.authorize_access_token()
-        user_info = oauth.google.parse_id_token(token)
+        nonce = session.pop('nonce', None)
+        user_info = oauth.google.parse_id_token(token, nonce=nonce)
         
         # Extract user information
         user_data = {
