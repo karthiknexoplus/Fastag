@@ -34,19 +34,25 @@ def find_bank():
                 response = requests.get(url, headers=headers, timeout=15, verify=False)
                 response.raise_for_status()
                 
+                # Print response details for debugging
+                logging.info(f"Response status: {response.status_code}")
+                logging.info(f"Response headers: {response.headers}")
+                logging.info(f"Response text: {response.text}")
+                
                 bank_data = response.json()
+                logging.info(f"Parsed JSON: {bank_data}")
                 
                 # Check if we got valid data
                 if bank_data.get('ErrorMessage') != 'NONE' or not bank_data.get('npcitagDetails'):
-                    error = "No bank information found for this search."
+                    error = f"No bank information found. Error: {bank_data.get('ErrorMessage', 'Unknown')}"
                     bank_data = None
                     
             except requests.exceptions.RequestException as e:
                 logging.error(f"API request failed: {e}")
-                error = "Unable to fetch bank information. Please try again later."
+                error = f"API request failed: {e}"
             except Exception as e:
                 logging.error(f"Error processing bank data: {e}")
-                error = "An error occurred while processing the request."
+                error = f"Error processing bank data: {e}"
     
     return render_template('bank_finder.html', 
                          bank_data=bank_data, 
