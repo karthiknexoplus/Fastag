@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from fastag.utils.db import get_db
 import logging
 
@@ -215,3 +215,48 @@ def device_register():
             "success": False,
             "error": "Internal server error"
         }), 500 
+
+@api.route('/api/barrier-control', methods=['POST'])
+def barrier_control():
+    """
+    Control the barrier relays. Accepts JSON:
+    {
+        "action": "open",
+        "relay_numbers": [1, 2]  # optional, if omitted, all relays are activated
+    }
+    """
+    data = request.get_json()
+    action = data.get('action')
+    relay_numbers = data.get('relay_numbers', None)
+
+    if action != 'open':
+        return jsonify({"success": False, "error": "Unsupported action"}), 400
+
+    # Get the number of readers from the database
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) FROM readers")
+    total_relays = cursor.fetchone()[0]
+
+    # Import relay controller from the app context
+    relay_controller = getattr(current_app, 'relay_controller', None)
+    if relay_controller is None:
+        from fastag.rfid.rfid_service import RelayController
+        relay_controller = RelayController()
+        setattr(current_app, 'relay_controller', relay_controller)
+
+    # Determine which relays to activate
+    if relay_numbers is None or relay_numbers == 'all':
+        relays_to_activate = list(range(1, total_relays + 1))
+    else:
+        relays_to_activate = relay_numbers
+
+    # Activate the relays
+    for relay_num in relays_to_activate:
+        relay_controller.turn_on(relay_num)
+    import time
+    time.sleep(2)  # Keep relays on for 2 seconds
+    for relay_num in relays_to_activate:
+        relay_controller.turn_off(relay_num)
+
+    return jsonify({"success": True, "activated": relays_to_activate}), 200 
