@@ -13,6 +13,7 @@ def find_challan(vehicle_number):
         'platform': 'web',
         'referer': 'https://www.spinny.com/',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Cookie': 'platform=web; _ga=GA1.1.1579651496.1751339593; utm_source=organic; _fbp=fb.1.1751339593140.936413749208728004; __adroll_fpc=6581289b75df5d88fb9cd115bffa6245-1751339593155; csrftoken=taMXcq8Gt9C1aKEcp1phCHtprcMIiAqj0p80Jeoz3G9MomkCnxq37L4qfSdIsS1V; sessionid=k0ni1mdpr6h20vtlu3clbwgndfan0qop; _gcl_au=1.1.644083528.1751339593.1541646746.1751339618.1751339618; cto_bundle=WDC80F9XRjc3JTJGSnBWR0drUjU2RGx1eW1sYVdkb2YzQzRRa1hIRzI3Uldzb1lzOSUyRkg5U2pxVUElMkZCNmRiUEFxWUxkaGpJVm85bE5obUFUYTJNZFQ1dW5PZm5HeUxTRXBXMHBRSDlZNE1XRHFhYUw4eDRwVmJrMDA2TEVjSnNTaWhHd0hNNWQ2RkZKZk1KS0lpJTJCc21XMjhDdFoyRld6Z0VOMkFGQkJPJTJGRyUyRnlUV1QwSTN5STY5RHBhUDM1MlBKQm5aSWhMU0pIbTFIWWMlMkYlMkYyMVU4Yk1Hck9UamclMkZnJTNEJTNE; _ga_WQREN8TJ7R=GS2.1.s1751466453$o3$g1$t1751466633$j45$l0$h0'
     }
     try:
         # Step 1: Get request_id for the vehicle number
