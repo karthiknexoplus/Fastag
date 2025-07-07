@@ -62,6 +62,7 @@ def login():
             return redirect(url_for('auth.login'))
         
         redirect_uri = url_for('google_auth.callback', _external=True)
+        logger.info(f"Google OAuth redirect_uri: {redirect_uri}")
         return oauth.google.authorize_redirect(redirect_uri)
     except Exception as e:
         logger.error(f"Google OAuth login error: {e}")
