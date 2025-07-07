@@ -9,6 +9,7 @@ gunicorn==21.2.0
 python-dotenv==1.0.0
 Flask-OAuthlib==0.9.6
 authlib==1.2.1
+psutil
  
 # Recommended versions:
 # Flask 2.2.3
