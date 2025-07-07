@@ -20,6 +20,11 @@ def create_app():
     from fastag.routes.vehicle_finder import vehicle_finder_bp
     from fastag.routes.bank_finder import bank_finder_bp
     from fastag.routes.fastag_balance import fastag_balance_bp
+    from fastag.routes.google_auth import google_auth_bp, init_oauth
+    
+    # Initialize OAuth
+    init_oauth(app)
+    
     app.register_blueprint(auth_bp)
     app.register_blueprint(locations_bp)
     app.register_blueprint(lanes_bp)
@@ -32,6 +37,7 @@ def create_app():
     app.register_blueprint(vehicle_finder_bp)
     app.register_blueprint(bank_finder_bp)
     app.register_blueprint(fastag_balance_bp)
+    app.register_blueprint(google_auth_bp, url_prefix='/google')
     # DB teardown
     app.teardown_appcontext(close_db)
     return app

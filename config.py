@@ -7,6 +7,10 @@ class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     DB_PATH = os.environ.get('DB_PATH', os.path.join(BASE_DIR, 'instance', 'fastag.db'))
     DEBUG = False
+    
+    # Google OAuth Configuration
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', 'your-google-client-id')
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', 'your-google-client-secret')
 
 class ProductionConfig(Config):
     DEBUG = False
