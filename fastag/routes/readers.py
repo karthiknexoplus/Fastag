@@ -79,7 +79,11 @@ def open_barrier(id):
     relay_controller = current_app.relay_controller
     user = None
     if 'user' in session:
-        user = session['user']
+        # If session['user'] is a dict, extract the username
+        if isinstance(session['user'], dict):
+            user = session['user'].get('username')
+        else:
+            user = session['user']
     try:
         print(f"[DEBUG] About to call log_barrier_event (opened) for relay {relay_num}")
         relay_controller.turn_on(relay_num)
