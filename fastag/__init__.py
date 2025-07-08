@@ -5,13 +5,15 @@ from fastag.utils.db import close_db
 from dotenv import load_dotenv
 load_dotenv()
 import subprocess
+import logging
 
 def get_rpi_system_info():
     def run(cmd):
         try:
             return subprocess.check_output(cmd, shell=True, text=True).strip()
-        except Exception:
-            return None
+        except Exception as e:
+            logging.warning(f"System info command failed: {cmd} ({e})")
+            return 'N/A'
     temp = run('vcgencmd measure_temp')
     volts = run('vcgencmd measure_volts')
     throttled = run('vcgencmd get_throttled')
@@ -68,7 +70,7 @@ def create_app():
     app.teardown_appcontext(close_db)
     @app.context_processor
     def inject_system_info():
-        return {'system_info': 'TEST INFO'}
+        return {'system_info': get_rpi_system_info()}
     return app
 
 # Create the app instance for direct import
