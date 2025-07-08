@@ -5,15 +5,15 @@
     <div class="row">
         <div class="col-12">
             <h2 class="mb-4 fs-4">
-                <i class="fas fa-car me-2 text-primary"></i>Find Vehicle Information
+                <i class="fas fa-car fastag-menu-icon"></i><span class="fastag-menu-label">Find Vehicle Information</span>
             </h2>
             
             <!-- Search Form -->
             <div class="card p-4 mb-4 shadow-sm border-0">
                 <form method="POST" class="row g-3 align-items-end">
                     <div class="col-md-8">
-                        <label class="form-label fs-6">
-                            <i class="fas fa-search me-1"></i>Vehicle Registration Number
+                        <label class="form-label fastag-form-label">
+                            <i class="fas fa-search fastag-form-icon"></i>Vehicle Registration Number
                         </label>
                         <input type="text" name="reg_no" class="form-control fs-6" 
                                placeholder="Enter registration number (e.g., KA03KD1578)" 
@@ -21,7 +21,7 @@
                         <div class="form-text">Format: KA03KD1578</div>
                     </div>
                     <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary w-100 fs-6">
+                        <button type="submit" class="btn w-100 fs-6" style="background: #764ba2; color: white; border: none;">
                             <i class="fas fa-search me-1"></i>Find Vehicle
                         </button>
                     </div>
@@ -39,7 +39,7 @@
             <!-- Vehicle Information -->
             {% if vehicle_data %}
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-success text-white">
+                <div class="card-header" style="background: #764ba2; color: white;">
                     <h5 class="mb-0 fs-5">
                         <i class="fas fa-car me-2"></i>Vehicle Details
                     </h5>
@@ -49,7 +49,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Registration Number</label>
-                                <div class="fs-5 fw-bold text-primary">{{ vehicle_data.registration_number }}</div>
+                                <div class="fs-5 fw-bold" style="color: #764ba2;">{{ vehicle_data.registration_number }}</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Owner Name</label>
@@ -57,7 +57,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Vehicle Type</label>
-                                <span class="badge bg-info fs-6">{{ vehicle_data.vehicle_type_v2.replace('_', ' ').title() }}</span>
+                                <span class="badge fs-6" style="background: #764ba2; color: white;">{{ vehicle_data.vehicle_type_v2.replace('_', ' ').title() }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -71,7 +71,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Fuel Type</label>
-                                <span class="badge bg-warning fs-6">{{ vehicle_data.fuel_type }}</span>
+                                <span class="badge fs-6" style="background: #4b2e83; color: white;">{{ vehicle_data.fuel_type }}</span>
                             </div>
                         </div>
                     </div>
@@ -112,8 +112,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-search fa-2x text-primary mb-3"></i>
-                            <h6 class="card-title">Quick Search</h6>
+                            <i class="fas fa-search fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Quick Search</h6>
                             <p class="card-text small text-muted">
                                 Find vehicle details instantly with registration number
                             </p>
@@ -123,8 +123,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-shield-alt fa-2x text-success mb-3"></i>
-                            <h6 class="card-title">Verified Data</h6>
+                            <i class="fas fa-shield-alt fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Verified Data</h6>
                             <p class="card-text small text-muted">
                                 Get accurate information from official sources
                             </p>
@@ -134,8 +134,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-clock fa-2x text-warning mb-3"></i>
-                            <h6 class="card-title">Real-time</h6>
+                            <i class="fas fa-clock fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Real-time</h6>
                             <p class="card-text small text-muted">
                                 Latest vehicle information updated regularly
                             </p>
@@ -160,8 +160,12 @@
     padding: 8px 16px;
 }
 .form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
 }
 </style>
 {% endblock %} 
