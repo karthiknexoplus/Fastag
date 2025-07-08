@@ -162,14 +162,9 @@
     </div>
     <footer class="footer mt-auto py-3 text-center" style="color: #888;">
         Powered by Nexoplus Innovations Pvt Ltd
-        {% if system_info or weather_info %}
+        {% if system_info %}
         <div style="font-size:0.95em; margin-top:6px; text-align:center; letter-spacing:0.5px;">
-            {% if system_info %}
-                {{ system_info|safe }}
-            {% endif %}
-            {% if weather_info %}
-                <span style="margin-left:12px;">{{ weather_info|safe }}</span>
-            {% endif %}
+            {{ system_info|safe }}
             {% if session.get('user') %}
                 <button id="reboot-btn" class="btn btn-sm btn-danger ms-2" style="vertical-align:middle; margin-left:16px;" title="Reboot Raspberry Pi">
                     <i class="fas fa-power-off"></i> Reboot

@@ -10,49 +10,6 @@ from markupsafe import Markup
 import requests
 import time
 
-_weather_cache = {'data': None, 'timestamp': 0}
-def get_weather_info():
-    api_key = os.environ.get('OPENWEATHER_API_KEY')
-    if not api_key:
-        return 'Weather: <span style="color:#dc3545">API key missing</span>'
-    now = time.time()
-    if _weather_cache['data'] and now - _weather_cache['timestamp'] < 600:
-        return _weather_cache['data']
-    try:
-        # Get public IP geolocation
-        geo = requests.get('https://ipinfo.io/json', timeout=3).json()
-        city = geo.get('city', 'Unknown')
-        loc = geo.get('loc', '')
-        lat, lon = (loc.split(',') if ',' in loc else (None, None))
-        if not lat or not lon:
-            return 'Weather: <span style="color:#dc3545">Location unavailable</span>'
-        # Get weather
-        url = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric'
-        w = requests.get(url, timeout=3).json()
-        temp = w['main']['temp']
-        desc = w['weather'][0]['description'].capitalize()
-        icon = w['weather'][0]['icon']
-        icon_url = f'https://openweathermap.org/img/wn/{icon}.png'
-        # Weather type for badge
-        main = w['weather'][0]['main'].lower()
-        badge = ''
-        if 'rain' in main:
-            badge = '<span style="background:#3498db;color:#fff;padding:2px 8px;border-radius:8px;font-size:0.85em;margin-left:4px;">Rainy</span>'
-        elif 'thunder' in main:
-            badge = '<span style="background:#f39c12;color:#fff;padding:2px 8px;border-radius:8px;font-size:0.85em;margin-left:4px;">Thunderstorm</span>'
-        elif temp >= 35:
-            badge = '<span style="background:#e74c3c;color:#fff;padding:2px 8px;border-radius:8px;font-size:0.85em;margin-left:4px;">Hot</span>'
-        elif 'clear' in main:
-            badge = '<span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:8px;font-size:0.85em;margin-left:4px;">Clear</span>'
-        elif 'cloud' in main:
-            badge = '<span style="background:#95a5a6;color:#fff;padding:2px 8px;border-radius:8px;font-size:0.85em;margin-left:4px;">Cloudy</span>'
-        html = f'<img src="{icon_url}" style="vertical-align:middle;width:22px;height:22px;"> <span style="color:#764ba2;">{city}:</span> <span style="color:#333;">{temp:.1f}°C, {desc}</span> {badge}'
-        _weather_cache['data'] = html
-        _weather_cache['timestamp'] = now
-        return html
-    except Exception as e:
-        return f'Weather: <span style="color:#dc3545">N/A</span>'
-
 def get_rpi_system_info():
     def run(cmd):
         try:
@@ -185,7 +142,7 @@ def create_app():
     app.teardown_appcontext(close_db)
     @app.context_processor
     def inject_system_info():
-        return {'system_info': Markup(get_rpi_system_info()), 'weather_info': Markup(get_weather_info())}
+        return {'system_info': Markup(get_rpi_system_info())}
     return app
 
 # Create the app instance for direct import
