@@ -2,11 +2,15 @@
 {% block title %}Lanes - FASTag Parking{% endblock %}
 {% block content %}
 <div class="container-fluid" style="max-width: 900px;">
-    <h2 class="mb-4 fs-4"><i class="fas fa-road me-2"></i>Lanes</h2>
+    <h2 class="mb-4 fs-4">
+        <i class="fas fa-road fastag-menu-icon"></i><span class="fastag-menu-label">Lanes</span>
+    </h2>
     <form method="get" class="mb-4">
         <div class="row g-2 align-items-center">
             <div class="col-md-6">
-                <label class="form-label fs-6"><i class="fas fa-map-marker-alt me-1"></i> Location</label>
+                <label class="form-label fastag-form-label">
+                    <i class="fas fa-map-marker-alt fastag-form-icon"></i>Location
+                </label>
                 <select name="location_id" class="form-select fs-6" onchange="this.form.submit()" required>
                     <option value="">Select Location</option>
                     {% for loc in locations %}
@@ -20,7 +24,9 @@
     <form method="POST" class="card p-3 mb-4 shadow-sm border-0 needs-validation" novalidate>
         <div class="row g-3 align-items-center">
             <div class="col-md-8">
-                <label class="form-label fs-6"><i class="fas fa-tag me-1"></i> Lane Name</label>
+                <label class="form-label fastag-form-label">
+                    <i class="fas fa-tag fastag-form-icon"></i>Lane Name
+                </label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-tag"></i></span>
                     <input type="text" name="lane_name" class="form-control fs-6" required>
@@ -29,13 +35,17 @@
                 <input type="hidden" name="location_id" value="{{ selected_location }}">
             </div>
             <div class="col-md-4 text-end align-self-end">
-                <button type="submit" class="btn btn-primary rounded-pill fs-6"><i class="fas fa-plus me-1"></i> Add Lane</button>
+                <button type="submit" class="btn rounded-pill fs-6" style="background: #764ba2; color: white; border: none;">
+                    <i class="fas fa-plus me-1"></i> Add Lane
+                </button>
             </div>
         </div>
     </form>
     {% endif %}
     <div class="card p-3 shadow-sm border-0">
-        <h5 class="mb-3 fs-5"><i class="fas fa-list me-2"></i>Lanes for this Location</h5>
+        <h5 class="mb-3 fs-5">
+            <i class="fas fa-list fastag-menu-icon"></i><span class="fastag-menu-label">Lanes for this Location</span>
+        </h5>
         <div class="table-responsive">
             <table class="table table-bordered align-middle fs-6">
                 <thead class="table-light">
@@ -50,14 +60,18 @@
                     <tr>
                         <td>{{ lane['lane_name'] }}</td>
                         <td>
-                            <a href="{{ url_for('readers.readers', lane_id=lane['id']) }}" class="btn btn-outline-secondary btn-sm mb-1 fs-6">
+                            <a href="{{ url_for('readers.readers', lane_id=lane['id']) }}" class="btn btn-sm mb-1 fs-6" style="border-color: #764ba2; color: #764ba2; background: white;">
                                 <i class="fas fa-microchip"></i> Manage Readers
                             </a>
                         </td>
                         <td class="text-center">
-                            <a href="{{ url_for('lanes.edit_lane', id=lane['id']) }}" class="text-primary me-2" title="Edit"><i class="fas fa-pen-to-square" style="font-size:1.05rem;"></i></a>
+                            <a href="{{ url_for('lanes.edit_lane', id=lane['id']) }}" class="me-2" title="Edit" style="color: #764ba2;">
+                                <i class="fas fa-pen-to-square" style="font-size:1.05rem;"></i>
+                            </a>
                             <form method="POST" action="{{ url_for('lanes.delete_lane', id=lane['id']) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger" title="Delete" onclick="return confirm('Delete this lane and its readers?');"><i class="fas fa-trash-alt" style="font-size:1.05rem;"></i></button>
+                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline" title="Delete" onclick="return confirm('Delete this lane and its readers?');" style="color: #dc3545;">
+                                    <i class="fas fa-trash-alt" style="font-size:1.05rem;"></i>
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -69,6 +83,30 @@
         </div>
     </div>
 </div>
+
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.form-control:focus {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
+}
+.btn[style*="border-color: #764ba2"]:hover {
+    background: #764ba2 !important;
+    color: white !important;
+    border-color: #764ba2 !important;
+}
+</style>
+
 <script>
 (() => {
   'use strict';
