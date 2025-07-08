@@ -4,6 +4,28 @@ from fastag.utils.logging import setup_logging
 from fastag.utils.db import close_db
 from dotenv import load_dotenv
 load_dotenv()
+import subprocess
+
+def get_rpi_system_info():
+    def run(cmd):
+        try:
+            return subprocess.check_output(cmd, shell=True, text=True).strip()
+        except Exception:
+            return None
+    temp = run('vcgencmd measure_temp')
+    volts = run('vcgencmd measure_volts')
+    throttled = run('vcgencmd get_throttled')
+    uptime = run('uptime -p')
+    mem = run('free -h | grep Mem')
+    disk = run('df -h / | tail -1')
+    info = []
+    if temp: info.append(f"Temp: {temp}")
+    if volts: info.append(f"Volt: {volts}")
+    if throttled: info.append(f"Throttled: {throttled}")
+    if uptime: info.append(f"Uptime: {uptime}")
+    if mem: info.append(f"RAM: {mem}")
+    if disk: info.append(f"Disk: {disk}")
+    return ' | '.join(info)
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -44,6 +66,9 @@ def create_app():
     app.register_blueprint(challan_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
+    @app.context_processor
+    def inject_system_info():
+        return {'system_info': get_rpi_system_info()}
     return app
 
 # Create the app instance for direct import
