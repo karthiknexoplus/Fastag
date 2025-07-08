@@ -85,17 +85,26 @@ def open_barrier(id):
         else:
             user = session['user']
     try:
+        # Fetch reader and lane info for logging
+        reader = db.execute('SELECT * FROM readers WHERE id = ?', (relay_num,)).fetchone()
+        lane = db.execute('SELECT * FROM lanes WHERE id = ?', (reader['lane_id'],)).fetchone() if reader else None
+        reader_id = reader['id'] if reader else None
+        reader_ip = reader['reader_ip'] if reader else None
+        lane_id = lane['id'] if lane else None
+        lane_name = lane['lane_name'] if lane else None
+        device_id = None  # Update if you have device info
+
         print(f"[DEBUG] About to call log_barrier_event (opened) for relay {relay_num}")
         relay_controller.turn_on(relay_num)
         log_barrier_event(
             relay_number=relay_num,
             action='opened',
             user=user,
-            lane_id=None,
-            lane_name=None,
-            reader_id=None,
-            reader_ip=None,
-            device_id=None,
+            lane_id=lane_id,
+            lane_name=lane_name,
+            reader_id=reader_id,
+            reader_ip=reader_ip,
+            device_id=device_id,
             source='web/readers/open-barrier'
         )
         import time
@@ -106,11 +115,11 @@ def open_barrier(id):
             relay_number=relay_num,
             action='closed',
             user=user,
-            lane_id=None,
-            lane_name=None,
-            reader_id=None,
-            reader_ip=None,
-            device_id=None,
+            lane_id=lane_id,
+            lane_name=lane_name,
+            reader_id=reader_id,
+            reader_ip=reader_ip,
+            device_id=device_id,
             source='web/readers/open-barrier'
         )
         return jsonify({"success": True, "activated": relay_num}), 200
