@@ -1,0 +1,482 @@
+{
+	"info": {
+		"_postman_id": "fastag-api-collection",
+		"name": "Fastag API Collection",
+		"description": "Complete API collection for the Fastag RFID toll collection system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Analytics APIs",
+			"item": [
+				{
+					"name": "Get Analytics Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/analytics-data",
+							"host": ["{{base_url}}"],
+							"path": ["api", "analytics-data"]
+						},
+						"description": "Get analytics data for the dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Export Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/export-data?type=access_logs&start_date=2024-01-01&end_date=2024-12-31&vehicle_number=KA03KD1578",
+							"host": ["{{base_url}}"],
+							"path": ["api", "export-data"],
+							"query": [
+								{
+									"key": "type",
+									"value": "access_logs",
+									"description": "Report type (access_logs)"
+								},
+								{
+									"key": "start_date",
+									"value": "2024-01-01",
+									"description": "Start date (YYYY-MM-DD)"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-12-31",
+									"description": "End date (YYYY-MM-DD)"
+								},
+								{
+									"key": "vehicle_number",
+									"value": "KA03KD1578",
+									"description": "Vehicle number (optional)"
+								}
+							]
+						},
+						"description": "Export data as CSV"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Device Management APIs",
+			"item": [
+				{
+					"name": "Device Lookup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mac_address\": \"00:1A:2B:3C:4D:5E\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/device/lookup",
+							"host": ["{{base_url}}"],
+							"path": ["device", "lookup"]
+						},
+						"description": "Lookup device configuration by MAC address"
+					},
+					"response": []
+				},
+				{
+					"name": "Device Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/device/status",
+							"host": ["{{base_url}}"],
+							"path": ["device", "status"]
+						},
+						"description": "Health check endpoint for external devices"
+					},
+					"response": []
+				},
+				{
+					"name": "Device Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mac_address\": \"00:1A:2B:3C:4D:5E\",\n    \"type\": \"entry\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/device/register",
+							"host": ["{{base_url}}"],
+							"path": ["device", "register"]
+						},
+						"description": "Register a device (optional endpoint for device management)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Barrier Control APIs",
+			"item": [
+				{
+					"name": "Control Barrier",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"open\",\n    \"relay_numbers\": [1, 2]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/barrier-control",
+							"host": ["{{base_url}}"],
+							"path": ["barrier-control"]
+						},
+						"description": "Control the barrier relays"
+					},
+					"response": []
+				},
+				{
+					"name": "Open Barrier for Reader",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/readers/1/open-barrier",
+							"host": ["{{base_url}}"],
+							"path": ["readers", "1", "open-barrier"]
+						},
+						"description": "Open the barrier for a specific reader (relay)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RFID Power APIs",
+			"item": [
+				{
+					"name": "Get RF Power",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rfid/rfpower?reader=1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "rfid", "rfpower"],
+							"query": [
+								{
+									"key": "reader",
+									"value": "1",
+									"description": "Reader number (1 or 2)"
+								}
+							]
+						},
+						"description": "Get RF power for a specific reader"
+					},
+					"response": []
+				},
+				{
+					"name": "Set RF Power",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reader\": 1,\n    \"rf_power\": 15\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rfid/rfpower",
+							"host": ["{{base_url}}"],
+							"path": ["api", "rfid", "rfpower"]
+						},
+						"description": "Set RF power for a specific reader (1-30)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vehicle Finder APIs",
+			"item": [
+				{
+					"name": "Find Vehicle by Registration Number (GET)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/api/vehicle/KA03KD1578", "host": ["{{base_url}}"], "path": ["api", "vehicle", "KA03KD1578"]},
+						"description": "Get vehicle information by registration number (GET)"
+					},
+					"response": []
+				},
+				{
+					"name": "Find Vehicle by Registration Number (POST)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reg_no\": \"KA03KD1578\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/api/vehicle/find", "host": ["{{base_url}}"], "path": ["api", "vehicle", "find"]},
+						"description": "Find vehicle information by registration number (POST)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bank Finder APIs",
+			"item": [
+				{
+					"name": "Get Bank Info by VRN",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bank/VRN/TN66AT2938",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bank", "VRN", "TN66AT2938"]
+						},
+						"description": "Get bank information by vehicle registration number"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bank Info by TagID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bank/TagID/1234567890ABCDEF12345678",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bank", "TagID", "1234567890ABCDEF12345678"]
+						},
+						"description": "Get bank information by FASTag ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "FASTag Balance APIs",
+			"item": [
+				{
+					"name": "Debug FASTag API",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/debug_fastag_api",
+							"host": ["{{base_url}}"],
+							"path": ["debug_fastag_api"]
+						},
+						"description": "Debug endpoint to test FASTag balance API"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "KYC Users APIs",
+			"item": [
+				{
+					"name": "Add KYC User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"fastag_id\": \"1234567890ABCDEF12345678\",\n  \"vehicle_number\": \"KA03KD1578\",\n  \"contact_number\": \"9876543210\",\n  \"address\": \"Bangalore\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/api/kyc_users", "host": ["{{base_url}}"], "path": ["api", "kyc_users"]},
+						"description": "Add a new KYC user"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit KYC User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"fastag_id\": \"1234567890ABCDEF12345678\",\n  \"vehicle_number\": \"KA03KD1578\",\n  \"contact_number\": \"9876543210\",\n  \"address\": \"Bangalore\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/api/kyc_users/1", "host": ["{{base_url}}"], "path": ["api", "kyc_users", "1"]},
+						"description": "Edit an existing KYC user by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete KYC User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/api/kyc_users/1", "host": ["{{base_url}}"], "path": ["api", "kyc_users", "1"]},
+						"description": "Delete a KYC user by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Vehicle by FASTag ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kyc/fetch-vehicle/1234567890ABCDEF12345678",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kyc", "fetch-vehicle", "1234567890ABCDEF12345678"]
+						},
+						"description": "Fetch vehicle number by FASTag ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch FASTag by Vehicle Number",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kyc/fetch-fastag/KA03KD1578",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kyc", "fetch-fastag", "KA03KD1578"]
+						},
+						"description": "Fetch FASTag ID by vehicle number"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin APIs",
+			"item": [
+				{
+					"name": "Restart RFID Readers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/restart_readers",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "restart_readers"]
+						},
+						"description": "Restart RFID reader services (requires authentication)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Authentication APIs",
+			"item": [
+				{
+					"name": "Get User Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/user-info",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user-info"]
+						},
+						"description": "Get current user information"
+					},
+					"response": []
+				},
+				{
+					"name": "Debug Environment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/debug/env",
+							"host": ["{{base_url}}"],
+							"path": ["debug", "env"]
+						},
+						"description": "Debug endpoint to check environment variables"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "production_url",
+			"value": "https://fastag.onebee.in",
+			"type": "string"
+		},
+		{
+			"key": "development_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "local_network_url",
+			"value": "http://192.168.1.8",
+			"type": "string"
+		}
+	]
+} 
