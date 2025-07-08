@@ -20,4 +20,21 @@ def restart_readers():
         if request.is_json:
             return jsonify({'success': False, 'error': str(e)}), 500
         flash('Failed to restart RFID reader services: ' + str(e), 'danger')
+    return redirect(url_for('kyc_users.kyc_users'))
+
+@admin_bp.route('/admin/reboot', methods=['POST'])
+def reboot_pi():
+    if 'user' not in session:
+        if request.is_json:
+            return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+        return redirect(url_for('auth.login'))
+    try:
+        subprocess.Popen(['sudo', 'reboot'])
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'System is rebooting.'})
+        flash('System is rebooting.', 'success')
+    except Exception as e:
+        if request.is_json:
+            return jsonify({'success': False, 'error': str(e)}), 500
+        flash('Failed to reboot system: ' + str(e), 'danger')
     return redirect(url_for('kyc_users.kyc_users')) 

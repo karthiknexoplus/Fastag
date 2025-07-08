@@ -162,18 +162,44 @@
     </div>
     <footer class="footer mt-auto py-3 text-center" style="color: #888;">
         Powered by Nexoplus Innovations Pvt Ltd
-        {% if system_info %}
+        {% if system_info or weather_info %}
         <div style="font-size:0.95em; margin-top:6px; text-align:center; letter-spacing:0.5px;">
-            {% for part in system_info.split(' | ') %}
-                {% set key, value = part.split(':', 1) %}
-                <span style="color:#764ba2; font-weight:500;">{{ key }}:</span>
-                <span style="color:#333;">{{ value.strip() }}</span>
-                {% if not loop.last %}| {% endif %}
-            {% endfor %}
+            {% if system_info %}
+                {{ system_info|safe }}
+            {% endif %}
+            {% if weather_info %}
+                <span style="margin-left:12px;">{{ weather_info|safe }}</span>
+            {% endif %}
+            {% if session.get('user') %}
+                <button id="reboot-btn" class="btn btn-sm btn-danger ms-2" style="vertical-align:middle; margin-left:16px;" title="Reboot Raspberry Pi">
+                    <i class="fas fa-power-off"></i> Reboot
+                </button>
+            {% endif %}
         </div>
         {% endif %}
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var rebootBtn = document.getElementById('reboot-btn');
+        if (rebootBtn) {
+            rebootBtn.addEventListener('click', function() {
+                if (!confirm('Are you sure you want to reboot the Raspberry Pi?')) return;
+                rebootBtn.disabled = true;
+                fetch('/admin/reboot', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.success ? 'Rebooting... The Pi will restart shortly.' : ('Failed: ' + (data.error || 'Unknown error')));
+                })
+                .catch(() => alert('Failed to send reboot command.'))
+                .finally(() => { rebootBtn.disabled = false; });
+            });
+        }
+    });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html> 
