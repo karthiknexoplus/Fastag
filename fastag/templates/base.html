@@ -165,11 +165,6 @@
         {% if system_info %}
         <div style="font-size:0.95em; margin-top:6px; text-align:center; letter-spacing:0.5px;">
             {{ system_info|safe }}
-            {% if session.get('user') %}
-                <button id="reboot-btn" class="btn btn-sm btn-danger ms-2" style="vertical-align:middle; margin-left:16px;" title="Reboot Raspberry Pi">
-                    <i class="fas fa-power-off"></i> Reboot
-                </button>
-            {% endif %}
         </div>
         {% endif %}
     </footer>
