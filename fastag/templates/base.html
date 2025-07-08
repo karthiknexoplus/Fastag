@@ -163,8 +163,13 @@
     <footer class="footer mt-auto py-3 text-center" style="color: #888;">
         Powered by Nexoplus Innovations Pvt Ltd
         {% if system_info %}
-        <div style="font-size:0.8em; color:#999; text-align:right; margin-top:2px;">
-            {{ system_info|safe }}
+        <div style="font-size:0.95em; margin-top:6px; text-align:center; letter-spacing:0.5px;">
+            {% for part in system_info.split(' | ') %}
+                {% set key, value = part.split(':', 1) %}
+                <span style="color:#764ba2; font-weight:500;">{{ key }}:</span>
+                <span style="color:#333;">{{ value.strip() }}</span>
+                {% if not loop.last %}| {% endif %}
+            {% endfor %}
         </div>
         {% endif %}
     </footer>
