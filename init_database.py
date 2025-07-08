@@ -113,6 +113,21 @@ def init_database():
                 details TEXT,
                 action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+            CREATE TABLE IF NOT EXISTS barrier_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                relay_number INTEGER NOT NULL,
+                action TEXT NOT NULL CHECK (action IN ('opened', 'closed')),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                user TEXT,
+                lane_id INTEGER,
+                lane_name TEXT,
+                reader_id INTEGER,
+                reader_ip TEXT,
+                device_id INTEGER,
+                source TEXT,
+                FOREIGN KEY (lane_id) REFERENCES lanes (id),
+                FOREIGN KEY (reader_id) REFERENCES readers (id)
+            );
         ''')
         # Example: Add missing column migration (add more as needed)
         # add_column_if_not_exists(cursor, 'kyc_users', 'email', 'TEXT')
