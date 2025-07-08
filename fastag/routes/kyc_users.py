@@ -106,6 +106,52 @@ def fetch_fastag_by_vehicle(vehicle_number):
             'error': f"API request failed: {str(e)}"
         }), 400
 
+@kyc_users_bp.route('/api/kyc_users', methods=['POST'])
+def api_add_kyc_user():
+    """API endpoint to add a KYC user (for mobile app)"""
+    from fastag.utils.db import get_db
+    import logging
+    if not request.is_json:
+        return jsonify({"success": False, "error": "Request must be JSON"}), 400
+    data = request.get_json()
+    required_fields = ["name", "fastag_id", "vehicle_number", "contact_number", "address"]
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"success": False, "error": f"Missing field: {field}"}), 400
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute(
+            'INSERT INTO kyc_users (name, fastag_id, vehicle_number, contact_number, address) VALUES (?, ?, ?, ?, ?)',
+            (data["name"], data["fastag_id"], data["vehicle_number"], data["contact_number"], data["address"])
+        )
+        db.commit()
+        user_id = cursor.lastrowid
+        logging.info(f"KYC user added via API: {data['name']} ({data['fastag_id']})")
+        return jsonify({"success": True, "user_id": user_id}), 201
+    except Exception as e:
+        logging.error(f"Error adding KYC user via API: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@kyc_users_bp.route('/api/kyc_users/<int:id>', methods=['GET'])
+def api_get_kyc_user(id):
+    """API endpoint to fetch a single KYC user by ID (for mobile app)"""
+    db = get_db()
+    user = db.execute('SELECT * FROM kyc_users WHERE id = ?', (id,)).fetchone()
+    if user is None:
+        return jsonify({"success": False, "error": f"No KYC user found with id {id}"}), 404
+    # Convert sqlite3.Row to dict
+    user_dict = dict(user)
+    return jsonify({"success": True, "user": user_dict}), 200
+
+@kyc_users_bp.route('/api/kyc_users', methods=['GET'])
+def api_get_all_kyc_users():
+    """API endpoint to fetch all KYC users as JSON (for mobile app)"""
+    db = get_db()
+    users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
+    users_list = [dict(user) for user in users]
+    return jsonify({"success": True, "users": users_list}), 200
+
 @kyc_users_bp.route('/kyc_users/edit/<int:id>', methods=['GET', 'POST'])
 def edit_kyc_user(id):
     if 'user' not in session:
