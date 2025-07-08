@@ -2,28 +2,45 @@
 {% block title %}Audit Log{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">User Audit Log</h2>
+    <h2 class="mb-4">
+        <i class="fas fa-clipboard-list fastag-menu-icon"></i><span class="fastag-menu-label">User Audit Log</span>
+    </h2>
     <form class="row g-2 mb-3" method="get">
         <div class="col-md-3">
+            <label class="form-label fastag-form-label">
+                <i class="fas fa-user fastag-form-icon"></i>Filter by user
+            </label>
             <input type="text" class="form-control" name="user" placeholder="Filter by user" value="{{ user_filter }}">
         </div>
         <div class="col-md-3">
+            <label class="form-label fastag-form-label">
+                <i class="fas fa-tasks fastag-form-icon"></i>Filter by action
+            </label>
             <input type="text" class="form-control" name="action" placeholder="Filter by action" value="{{ action_filter }}">
         </div>
         <div class="col-md-3">
+            <label class="form-label fastag-form-label">
+                <i class="fas fa-search fastag-form-icon"></i>Search details
+            </label>
             <input type="text" class="form-control" name="search" placeholder="Search details" value="{{ search }}">
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-1"></i>Search</button>
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn w-100" style="background: #764ba2; color: white; border: none;">
+                <i class="fas fa-search me-1"></i>Search
+            </button>
         </div>
         <div class="col-md-1">
-            <a href="{{ url_for('auth.audit_log_export') }}" class="btn btn-success w-100"><i class="fas fa-file-csv me-1"></i>Export</a>
+            <label class="form-label">&nbsp;</label>
+            <a href="{{ url_for('auth.audit_log_export') }}" class="btn w-100" style="background: #4b2e83; color: white; border: none;">
+                <i class="fas fa-file-csv me-1"></i>Export
+            </a>
         </div>
     </form>
     <div class="row">
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
+                <div class="card-header" style="background: #764ba2; color: white;">
                     <i class="fas fa-sign-in-alt me-2"></i>Recent Logins
                 </div>
                 <div class="card-body p-0">
@@ -41,7 +58,7 @@
                                 <span>{{ login['username'] }}</span>
                             </td>
                             <td>
-                                <span class="badge {% if login['login_method']=='google' %}bg-danger{% else %}bg-primary{% endif %}">
+                                <span class="badge" style="background: #764ba2; color: white;">
                                     {{ login['login_method']|capitalize }}
                                 </span>
                             </td>
@@ -58,7 +75,7 @@
         </div>
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header" style="background: #4b2e83; color: white;">
                     <i class="fas fa-clipboard-list me-2"></i>Recent Actions
                 </div>
                 <div class="card-body p-0">
@@ -81,7 +98,7 @@
                                     {% elif action['action']=='logout' %}bg-danger
                                     {% elif action['action']=='edit' %}bg-warning text-dark
                                     {% elif action['action']=='delete' %}bg-danger
-                                    {% else %}bg-info{% endif %}">
+                                    {% else %}" style="background: #764ba2; color: white;"{% endif %}>
                                     {{ action['action']|capitalize }}
                                 </span>
                             </td>
@@ -110,4 +127,40 @@
         </ul>
     </nav>
 </div>
+
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.badge {
+    border-radius: 20px;
+    padding: 8px 16px;
+}
+.form-control:focus {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
+}
+.btn[style*="background: #4b2e83"]:hover {
+    background: #3a1f6b !important;
+    color: white !important;
+}
+.page-link {
+    color: #764ba2;
+}
+.page-link:hover {
+    color: #4b2e83;
+}
+.page-item.active .page-link {
+    background-color: #764ba2;
+    border-color: #764ba2;
+}
+</style>
 {% endblock %} 
