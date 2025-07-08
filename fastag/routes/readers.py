@@ -74,11 +74,7 @@ def open_barrier(id):
     relay_num = id  # Assuming relay number matches reader id (adjust if needed)
     if relay_num < 1 or relay_num > total_relays:
         return jsonify({"success": False, "error": "Invalid relay number"}), 400
-    relay_controller = getattr(current_app, 'relay_controller', None)
-    if relay_controller is None:
-        from fastag.rfid.rfid_service import RelayController
-        relay_controller = RelayController()
-        setattr(current_app, 'relay_controller', relay_controller)
+    relay_controller = current_app.relay_controller
     try:
         relay_controller.turn_on(relay_num)
         import time

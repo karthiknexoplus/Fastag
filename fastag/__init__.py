@@ -9,6 +9,7 @@ import logging
 from markupsafe import Markup
 import requests
 import time
+from fastag.rfid.rfid_service import RelayController
 
 def get_rpi_system_info():
     def run(cmd):
@@ -105,6 +106,8 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config.Config')
     setup_logging(app.config['LOG_DIR'])
+    # Attach a single RelayController instance to the app
+    app.relay_controller = RelayController()
     # Register blueprints
     from fastag.routes.auth import auth_bp
     from fastag.routes.locations import locations_bp

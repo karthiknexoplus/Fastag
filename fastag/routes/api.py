@@ -273,11 +273,7 @@ def barrier_control():
     allowed_relays = [1, 2, 3]
 
     # Import relay controller from the app context
-    relay_controller = getattr(current_app, 'relay_controller', None)
-    if relay_controller is None:
-        from fastag.rfid.rfid_service import RelayController
-        relay_controller = RelayController()
-        setattr(current_app, 'relay_controller', relay_controller)
+    relay_controller = current_app.relay_controller
 
     # Determine which relays to activate
     if relay_numbers is None or relay_numbers == 'all':
