@@ -2,24 +2,30 @@
 {% block content %}
 <div class="container mt-5">
     <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header" style="background: #764ba2; color: white;">
             <h3 class="mb-0"><i class="fas fa-receipt me-2"></i>Challan Search</h3>
         </div>
         <div class="card-body">
             <form method="POST" class="row g-3 mb-4" id="challan-form">
                 <div class="col-md-6">
-                    <label for="reg_no" class="form-label">Vehicle Number</label>
+                    <label for="reg_no" class="form-label fastag-form-label">
+                        <i class="fas fa-car fastag-form-icon"></i>Vehicle Number
+                    </label>
                     <input type="text" class="form-control" id="reg_no" name="reg_no" value="{{ reg_no }}" placeholder="e.g. TN66AT2938" required>
                 </div>
                 <div class="col-md-3 align-self-end">
-                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-search me-1"></i>Search</button>
+                    <button type="submit" class="btn w-100" style="background: #764ba2; color: white; border: none;">
+                        <i class="fas fa-search me-1"></i>Search
+                    </button>
                 </div>
             </form>
             {% if error %}
                 <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
             {% if challan_data and challan_data|length > 0 %}
-                <h5 class="mb-3">Pending Challans</h5>
+                <h5 class="mb-3 fastag-menu-label">
+                    <i class="fas fa-list fastag-menu-icon"></i>Pending Challans
+                </h5>
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle">
                         <thead class="table-light">
@@ -38,17 +44,17 @@
                                 <td>{{ c.challan_date[:10] if c.challan_date else '' }}</td>
                                 <td>{{ c.challan_number }}</td>
                                 <td>{{ c.offense_details }}</td>
-                                <td><span class="badge bg-warning text-dark">₹{{ c.amount|int }}</span></td>
+                                <td><span class="badge" style="background: #764ba2; color: white;">₹{{ c.amount|int }}</span></td>
                                 <td>
                                     {% if c.challan_status == 'Unpaid' %}
                                         <span class="badge bg-danger">Unpaid</span>
                                     {% else %}
-                                        <span class="badge bg-success">Paid</span>
+                                        <span class="badge" style="background: #4b2e83; color: white;">Paid</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if c.challan_images %}
-                                        <a href="{{ c.challan_images }}" target="_blank" class="btn btn-outline-info btn-sm">View</a>
+                                        <a href="{{ c.challan_images }}" target="_blank" class="btn btn-outline-info btn-sm" style="border-color: #764ba2; color: #764ba2;">View</a>
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
@@ -64,6 +70,29 @@
         </div>
     </div>
 </div>
+
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.badge {
+    border-radius: 20px;
+    padding: 8px 16px;
+}
+.form-control:focus {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
+}
+</style>
+
 <script>
 document.getElementById('challan-form').addEventListener('submit', function(e) {
     const regNo = document.getElementById('reg_no').value.trim();

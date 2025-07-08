@@ -5,15 +5,15 @@
     <div class="row">
         <div class="col-12">
             <h2 class="mb-4 fs-4">
-                <i class="fas fa-gas-pump me-2 text-warning"></i>Fuel Prices in India
+                <i class="fas fa-gas-pump fastag-menu-icon"></i><span class="fastag-menu-label">Fuel Prices in India</span>
             </h2>
             
             <!-- Search Form -->
             <div class="card p-4 mb-4 shadow-sm border-0">
                 <form method="GET" class="row g-3 align-items-end">
                     <div class="col-md-6">
-                        <label class="form-label fs-6">
-                            <i class="fas fa-search me-1"></i>Search by City
+                        <label class="form-label fastag-form-label">
+                            <i class="fas fa-search fastag-form-icon"></i>Search by City
                         </label>
                         <select name="city" class="form-select fs-6">
                             <option value="">All Cities</option>
@@ -25,12 +25,12 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100 fs-6">
+                        <button type="submit" class="btn w-100 fs-6" style="background: #764ba2; color: white; border: none;">
                             <i class="fas fa-search me-1"></i>Search
                         </button>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ url_for('fuel_price.fuel_price') }}" class="btn btn-outline-secondary w-100 fs-6">
+                        <a href="{{ url_for('fuel_price.fuel_price') }}" class="btn w-100 fs-6" style="border-color: #764ba2; color: #764ba2; background: white;">
                             <i class="fas fa-refresh me-1"></i>Clear
                         </a>
                     </div>
@@ -48,7 +48,7 @@
             <!-- Results -->
             {% if prices %}
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header" style="background: #764ba2; color: white;">
                     <h5 class="mb-0 fs-5">
                         <i class="fas fa-list me-2"></i>
                         {% if selected_city %}
@@ -76,7 +76,7 @@
                                 <tr>
                                     <td class="ps-3 fw-medium">{{ price.city }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-success fs-6">{{ price.price }}</span>
+                                        <span class="badge fs-6" style="background: #764ba2; color: white;">{{ price.price }}</span>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -106,8 +106,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-chart-line fa-2x text-primary mb-3"></i>
-                            <h6 class="card-title">Price Trends</h6>
+                            <i class="fas fa-chart-line fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Price Trends</h6>
                             <p class="card-text small text-muted">
                                 Track fuel price changes across major Indian cities
                             </p>
@@ -117,8 +117,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-map-marker-alt fa-2x text-success mb-3"></i>
-                            <h6 class="card-title">City-wise Data</h6>
+                            <i class="fas fa-map-marker-alt fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">City-wise Data</h6>
                             <p class="card-text small text-muted">
                                 Get accurate fuel prices for your specific city
                             </p>
@@ -128,8 +128,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-clock fa-2x text-warning mb-3"></i>
-                            <h6 class="card-title">Real-time Updates</h6>
+                            <i class="fas fa-clock fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Real-time Updates</h6>
                             <p class="card-text small text-muted">
                                 Latest fuel prices updated regularly
                             </p>
@@ -159,6 +159,14 @@
 }
 .table td {
     vertical-align: middle;
+}
+.form-control:focus {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
 }
 </style>
 {% endblock %} 
