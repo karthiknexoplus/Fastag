@@ -17,13 +17,25 @@
                 <label class="form-label fastag-form-label">
                     <i class="fas fa-tag fastag-form-icon"></i>FASTag ID
                 </label>
-                <input type="text" name="fastag_id" class="form-control" required>
+                <div class="input-group">
+                    <input type="text" name="fastag_id" id="fastag_id" class="form-control" required>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-vehicle-btn" title="Fetch Vehicle Number">
+                        <i class="fas fa-car"></i>
+                    </button>
+                </div>
+                <div id="fastag-feedback" class="form-text"></div>
             </div>
             <div class="col-md-4">
                 <label class="form-label fastag-form-label">
                     <i class="fas fa-car fastag-form-icon"></i>Vehicle Number
                 </label>
-                <input type="text" name="vehicle_number" class="form-control" required>
+                <div class="input-group">
+                    <input type="text" name="vehicle_number" id="vehicle_number" class="form-control" required>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-fastag-btn" title="Fetch FASTag ID">
+                        <i class="fas fa-tag"></i>
+                    </button>
+                </div>
+                <div id="vehicle-feedback" class="form-text"></div>
             </div>
             <div class="col-md-4">
                 <label class="form-label fastag-form-label">
@@ -104,5 +116,94 @@
     background: #4b2e83 !important;
     color: white !important;
 }
+.btn-outline-secondary:hover {
+    background: #764ba2 !important;
+    border-color: #764ba2 !important;
+    color: white !important;
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fastagIdInput = document.getElementById('fastag_id');
+    const vehicleNumberInput = document.getElementById('vehicle_number');
+    const fetchVehicleBtn = document.getElementById('fetch-vehicle-btn');
+    const fetchFastagBtn = document.getElementById('fetch-fastag-btn');
+    const fastagFeedback = document.getElementById('fastag-feedback');
+    const vehicleFeedback = document.getElementById('vehicle-feedback');
+
+    // Fetch vehicle number when FASTag ID button is clicked
+    fetchVehicleBtn.addEventListener('click', function() {
+        const fastagId = fastagIdInput.value.trim();
+        if (!fastagId) {
+            fastagFeedback.innerHTML = '<span style="color: #dc3545;">Please enter a FASTag ID first</span>';
+            return;
+        }
+
+        fetchVehicleBtn.disabled = true;
+        fetchVehicleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        fastagFeedback.innerHTML = '<span style="color: #17a2b8;">Fetching vehicle number...</span>';
+
+        fetch(`/api/kyc/fetch-vehicle/${encodeURIComponent(fastagId)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    vehicleNumberInput.value = data.vehicle_number;
+                    fastagFeedback.innerHTML = '<span style="color: #28a745;">Vehicle number fetched successfully!</span>';
+                } else {
+                    fastagFeedback.innerHTML = `<span style="color: #dc3545;">${data.error}</span>`;
+                }
+            })
+            .catch(error => {
+                fastagFeedback.innerHTML = '<span style="color: #dc3545;">Network error. Please try again.</span>';
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                fetchVehicleBtn.disabled = false;
+                fetchVehicleBtn.innerHTML = '<i class="fas fa-car"></i>';
+            });
+    });
+
+    // Fetch FASTag ID when vehicle number button is clicked
+    fetchFastagBtn.addEventListener('click', function() {
+        const vehicleNumber = vehicleNumberInput.value.trim();
+        if (!vehicleNumber) {
+            vehicleFeedback.innerHTML = '<span style="color: #dc3545;">Please enter a vehicle number first</span>';
+            return;
+        }
+
+        fetchFastagBtn.disabled = true;
+        fetchFastagBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        vehicleFeedback.innerHTML = '<span style="color: #17a2b8;">Fetching FASTag ID...</span>';
+
+        fetch(`/api/kyc/fetch-fastag/${encodeURIComponent(vehicleNumber)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fastagIdInput.value = data.fastag_id;
+                    vehicleFeedback.innerHTML = '<span style="color: #28a745;">FASTag ID fetched successfully!</span>';
+                } else {
+                    vehicleFeedback.innerHTML = `<span style="color: #dc3545;">${data.error}</span>`;
+                }
+            })
+            .catch(error => {
+                vehicleFeedback.innerHTML = '<span style="color: #dc3545;">Network error. Please try again.</span>';
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                fetchFastagBtn.disabled = false;
+                fetchFastagBtn.innerHTML = '<i class="fas fa-tag"></i>';
+            });
+    });
+
+    // Clear feedback when user starts typing
+    fastagIdInput.addEventListener('input', function() {
+        fastagFeedback.innerHTML = '';
+    });
+
+    vehicleNumberInput.addEventListener('input', function() {
+        vehicleFeedback.innerHTML = '';
+    });
+});
+</script>
 {% endblock %} 
