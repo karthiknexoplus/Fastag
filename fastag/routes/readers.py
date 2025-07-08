@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, sessio
 from fastag.utils.db import get_db
 import logging
 from fastag.utils.db import log_barrier_event
+import re
 
 readers_bp = Blueprint('readers', __name__)
 
@@ -92,7 +93,23 @@ def open_barrier(id):
         reader_ip = reader['reader_ip'] if reader else None
         lane_id = lane['id'] if lane else None
         lane_name = lane['lane_name'] if lane else None
-        device_id = None  # Update if you have device info
+        # Extract device type from User-Agent
+        user_agent = request.headers.get('User-Agent', '').lower()
+        if 'windows' in user_agent:
+            device_type = 'Windows'
+        elif 'macintosh' in user_agent or 'mac os' in user_agent:
+            device_type = 'Mac'
+        elif 'iphone' in user_agent or 'ipad' in user_agent:
+            device_type = 'iOS'
+        elif 'android' in user_agent:
+            device_type = 'Android'
+        elif 'linux' in user_agent:
+            device_type = 'Linux'
+        elif 'mobile' in user_agent:
+            device_type = 'Mobile'
+        else:
+            device_type = 'Other'
+        device_id = device_type
 
         print(f"[DEBUG] About to call log_barrier_event (opened) for relay {relay_num}")
         relay_controller.turn_on(relay_num)
