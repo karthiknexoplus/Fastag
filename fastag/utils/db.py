@@ -132,6 +132,7 @@ def log_user_action(username, action, details=""):
     db.commit() 
 
 def log_barrier_event(relay_number, action, user=None, lane_id=None, lane_name=None, reader_id=None, reader_ip=None, device_id=None, source=None):
+    print("[DEBUG] Inside log_barrier_event function")
     try:
         print(f"[DEBUG] log_barrier_event called: relay={relay_number}, action={action}, user={user}, lane_id={lane_id}, lane_name={lane_name}, reader_id={reader_id}, reader_ip={reader_ip}, device_id={device_id}, source={source}")
         db = get_db()

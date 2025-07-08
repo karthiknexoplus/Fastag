@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify, current_app
 from fastag.utils.db import get_db
 import logging
+from fastag.utils.db import log_barrier_event
 
 readers_bp = Blueprint('readers', __name__)
 
@@ -64,6 +65,7 @@ def delete_reader(id):
 
 @readers_bp.route('/readers/<int:id>/open-barrier', methods=['POST'])
 def open_barrier(id):
+    print("[DEBUG] open_barrier endpoint called")
     """
     Open the barrier for a specific reader (relay) from the web UI.
     """
@@ -75,13 +77,41 @@ def open_barrier(id):
     if relay_num < 1 or relay_num > total_relays:
         return jsonify({"success": False, "error": "Invalid relay number"}), 400
     relay_controller = current_app.relay_controller
+    user = None
+    if 'user' in session:
+        user = session['user']
     try:
+        print(f"[DEBUG] About to call log_barrier_event (opened) for relay {relay_num}")
         relay_controller.turn_on(relay_num)
+        log_barrier_event(
+            relay_number=relay_num,
+            action='opened',
+            user=user,
+            lane_id=None,
+            lane_name=None,
+            reader_id=None,
+            reader_ip=None,
+            device_id=None,
+            source='web/readers/open-barrier'
+        )
         import time
         time.sleep(2)
+        print(f"[DEBUG] About to call log_barrier_event (closed) for relay {relay_num}")
         relay_controller.turn_off(relay_num)
+        log_barrier_event(
+            relay_number=relay_num,
+            action='closed',
+            user=user,
+            lane_id=None,
+            lane_name=None,
+            reader_id=None,
+            reader_ip=None,
+            device_id=None,
+            source='web/readers/open-barrier'
+        )
         return jsonify({"success": True, "activated": relay_num}), 200
     except Exception as e:
+        print(f"[ERROR] Exception in open_barrier: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @readers_bp.route('/rfid/rfpower', methods=['GET'])
