@@ -14,12 +14,12 @@ def get_rpi_system_info():
         except Exception as e:
             logging.warning(f"System info command failed: {cmd} ({e})")
             return 'N/A'
-    temp = run('vcgencmd measure_temp')
-    volts = run('vcgencmd measure_volts')
-    throttled = run('vcgencmd get_throttled')
-    uptime = run('uptime -p')
-    mem = run('free -h | grep Mem')
-    disk = run('df -h / | tail -1')
+    temp = run('/usr/bin/vcgencmd measure_temp')
+    volts = run('/usr/bin/vcgencmd measure_volts')
+    throttled = run('/usr/bin/vcgencmd get_throttled')
+    uptime = run('/usr/bin/uptime -p')
+    mem = run('/usr/bin/free -h | grep Mem')
+    disk = run('/usr/bin/df -h / | tail -1')
     info = []
     if temp: info.append(f"Temp: {temp}")
     if volts: info.append(f"Volt: {volts}")
