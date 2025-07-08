@@ -79,9 +79,9 @@
 							"raw": "{\n    \"mac_address\": \"00:1A:2B:3C:4D:5E\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/device/lookup",
+							"raw": "{{base_url}}/api/device/lookup",
 							"host": ["{{base_url}}"],
-							"path": ["device", "lookup"]
+							"path": ["api", "device", "lookup"]
 						},
 						"description": "Lookup device configuration by MAC address"
 					},
@@ -93,9 +93,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/device/status",
+							"raw": "{{base_url}}/api/device/status",
 							"host": ["{{base_url}}"],
-							"path": ["device", "status"]
+							"path": ["api", "device", "status"]
 						},
 						"description": "Health check endpoint for external devices"
 					},
@@ -116,9 +116,9 @@
 							"raw": "{\n    \"mac_address\": \"00:1A:2B:3C:4D:5E\",\n    \"type\": \"entry\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/device/register",
+							"raw": "{{base_url}}/api/device/register",
 							"host": ["{{base_url}}"],
-							"path": ["device", "register"]
+							"path": ["api", "device", "register"]
 						},
 						"description": "Register a device (optional endpoint for device management)"
 					},
@@ -144,9 +144,9 @@
 							"raw": "{\n    \"action\": \"open\",\n    \"relay_numbers\": [1, 2]\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/barrier-control",
+							"raw": "{{base_url}}/api/barrier-control",
 							"host": ["{{base_url}}"],
-							"path": ["barrier-control"]
+							"path": ["api", "barrier-control"]
 						},
 						"description": "Control the barrier relays"
 					},
@@ -158,9 +158,9 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/readers/1/open-barrier",
+							"raw": "{{base_url}}/api/readers/1/open-barrier",
 							"host": ["{{base_url}}"],
-							"path": ["readers", "1", "open-barrier"]
+							"path": ["api", "readers", "1", "open-barrier"]
 						},
 						"description": "Open the barrier for a specific reader (relay)"
 					},
@@ -304,6 +304,34 @@
 			"name": "KYC Users APIs",
 			"item": [
 				{
+					"name": "Get All KYC Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kyc_users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kyc_users"]
+						},
+						"description": "Get all KYC users as a JSON array"
+					},
+					"response": []
+				},
+				{
+					"name": "Get KYC User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kyc_users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "kyc_users", "1"]
+						},
+						"description": "Get a single KYC user by ID (replace 1 with the desired user ID)"
+					},
+					"response": []
+				},
+				{
 					"name": "Add KYC User",
 					"request": {
 						"method": "POST",
@@ -431,6 +459,123 @@
 							"path": ["debug", "env"]
 						},
 						"description": "Debug endpoint to check environment variables"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Readers APIs",
+			"item": [
+				{
+					"name": "Edit Reader",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lane_id\": 1,\n  \"mac_address\": \"00:11:22:33:44:55\",\n  \"type\": \"entry\",\n  \"reader_ip\": \"192.168.1.100\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/readers/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "readers", "1"]
+						},
+						"description": "Edit a reader by ID (replace 1 with the desired reader ID)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Reader",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/readers/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "readers", "1"]
+						},
+						"description": "Delete a reader by ID (replace 1 with the desired reader ID)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lanes APIs",
+			"item": [
+				{
+					"name": "Edit Lane",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"location_id\": 1,\n  \"lane_name\": \"Main Entry\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/lanes/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "lanes", "1"]
+						},
+						"description": "Edit a lane by ID (replace 1 with the desired lane ID)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Lane",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/lanes/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "lanes", "1"]
+						},
+						"description": "Delete a lane by ID (replace 1 with the desired lane ID)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Locations APIs",
+			"item": [
+				{
+					"name": "Edit Location",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Central Parking\",\n  \"address\": \"123 Main St\",\n  \"site_id\": \"CP001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/locations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "locations", "1"]
+						},
+						"description": "Edit a location by ID (replace 1 with the desired location ID)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Location",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/locations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "locations", "1"]
+						},
+						"description": "Delete a location by ID (replace 1 with the desired location ID)"
 					},
 					"response": []
 				}

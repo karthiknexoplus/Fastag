@@ -1,0 +1,13 @@
+{
+	"id": "fastag-local-network-env",
+	"name": "Fastag Local Network",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "http://192.168.1.8",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment"
+} 

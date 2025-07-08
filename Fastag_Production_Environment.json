@@ -1,0 +1,13 @@
+{
+	"id": "fastag-production-env",
+	"name": "Fastag Production",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "https://fastag.onebee.in",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment"
+} 

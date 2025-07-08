@@ -47,4 +47,77 @@ def delete_location(id):
     db.commit()
     logging.info(f"Location deleted (ID {id})")
     flash('Location deleted!', 'info')
-    return redirect(url_for('locations.locations')) 
+    return redirect(url_for('locations.locations'))
+
+@locations_bp.route('/api/locations', methods=['POST'])
+def api_add_location():
+    """API endpoint to add a location (for mobile app)"""
+    if not request.is_json:
+        return {"success": False, "error": "Request must be JSON"}, 400
+    data = request.get_json()
+    name = data.get("name")
+    address = data.get("address")
+    if not name or not address:
+        return {"success": False, "error": "Missing name or address"}, 400
+    site_id = data.get("site_id") or os.urandom(4).hex().upper()
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO locations (name, address, site_id) VALUES (?, ?, ?)', (name, address, site_id))
+        db.commit()
+        location_id = cursor.lastrowid
+        logging.info(f"Location added via API: {name} ({site_id})")
+        return {"success": True, "location_id": location_id}, 201
+    except Exception as e:
+        logging.error(f"Error adding location via API: {e}")
+        return {"success": False, "error": str(e)}, 500
+
+@locations_bp.route('/api/locations/<int:id>', methods=['PUT'])
+def api_edit_location(id):
+    """API endpoint to edit a location (for mobile app)"""
+    if not request.is_json:
+        return {"success": False, "error": "Request must be JSON"}, 400
+    data = request.get_json()
+    name = data.get("name")
+    address = data.get("address")
+    if not name or not address:
+        return {"success": False, "error": "Missing name or address"}, 400
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('UPDATE locations SET name = ?, address = ? WHERE id = ?', (name, address, id))
+        db.commit()
+        if cursor.rowcount == 0:
+            return {"success": False, "error": "Location not found"}, 404
+        logging.info(f"Location updated via API: {name} (ID {id})")
+        return {"success": True}, 200
+    except Exception as e:
+        logging.error(f"Error editing location via API: {e}")
+        return {"success": False, "error": str(e)}, 500
+
+@locations_bp.route('/api/locations/<int:id>', methods=['DELETE'])
+def api_delete_location(id):
+    """API endpoint to delete a location (for mobile app)"""
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM locations WHERE id = ?', (id,))
+        db.commit()
+        if cursor.rowcount == 0:
+            return {"success": False, "error": "Location not found"}, 404
+        logging.info(f"Location deleted via API (ID {id})")
+        return {"success": True}, 200
+    except Exception as e:
+        logging.error(f"Error deleting location via API: {e}")
+        return {"success": False, "error": str(e)}, 500
+
+@locations_bp.route('/api/locations', methods=['GET'])
+def api_view_locations():
+    """API endpoint to view all locations"""
+    try:
+        db = get_db()
+        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations_list = [dict(l) for l in locations]
+        return {"success": True, "locations": locations_list}, 200
+    except Exception as e:
+        return {"success": False, "error": str(e)}, 500 

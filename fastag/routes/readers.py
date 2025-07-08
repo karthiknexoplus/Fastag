@@ -92,4 +92,84 @@ def open_barrier(id):
 def rfid_rfpower_page():
     if 'user' not in session:
         return redirect(url_for('auth.login'))
-    return render_template('rfid_rfpower.html') 
+    return render_template('rfid_rfpower.html')
+
+@readers_bp.route('/api/readers', methods=['POST'])
+def api_add_reader():
+    """API endpoint to add a reader (for mobile app)"""
+    if not request.is_json:
+        return {"success": False, "error": "Request must be JSON"}, 400
+    data = request.get_json()
+    lane_id = data.get("lane_id")
+    mac_address = data.get("mac_address")
+    type_ = data.get("type")
+    reader_ip = data.get("reader_ip")
+    if not lane_id or not mac_address or not type_ or not reader_ip:
+        return {"success": False, "error": "Missing lane_id, mac_address, type, or reader_ip"}, 400
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO readers (lane_id, mac_address, type, reader_ip) VALUES (?, ?, ?, ?)', (lane_id, mac_address, type_, reader_ip))
+        db.commit()
+        reader_id = cursor.lastrowid
+        logging.info(f"Reader added via API: {mac_address} ({type_}) for lane {lane_id}")
+        return {"success": True, "reader_id": reader_id}, 201
+    except Exception as e:
+        logging.error(f"Error adding reader via API: {e}")
+        return {"success": False, "error": str(e)}, 500
+
+@readers_bp.route('/api/readers/<int:id>', methods=['PUT'])
+def api_edit_reader(id):
+    """API endpoint to edit a reader (for mobile app)"""
+    if not request.is_json:
+        return {"success": False, "error": "Request must be JSON"}, 400
+    data = request.get_json()
+    lane_id = data.get("lane_id")
+    mac_address = data.get("mac_address")
+    type_ = data.get("type")
+    reader_ip = data.get("reader_ip")
+    if not lane_id or not mac_address or not type_ or not reader_ip:
+        return {"success": False, "error": "Missing lane_id, mac_address, type, or reader_ip"}, 400
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('UPDATE readers SET lane_id = ?, mac_address = ?, type = ?, reader_ip = ? WHERE id = ?', (lane_id, mac_address, type_, reader_ip, id))
+        db.commit()
+        if cursor.rowcount == 0:
+            return {"success": False, "error": "Reader not found"}, 404
+        logging.info(f"Reader updated via API: {mac_address} ({type_}) for lane {lane_id} (ID {id})")
+        return {"success": True}, 200
+    except Exception as e:
+        logging.error(f"Error editing reader via API: {e}")
+        return {"success": False, "error": str(e)}, 500
+
+@readers_bp.route('/api/readers/<int:id>', methods=['DELETE'])
+def api_delete_reader(id):
+    """API endpoint to delete a reader (for mobile app)"""
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM readers WHERE id = ?', (id,))
+        db.commit()
+        if cursor.rowcount == 0:
+            return {"success": False, "error": "Reader not found"}, 404
+        logging.info(f"Reader deleted via API (ID {id})")
+        return {"success": True}, 200
+    except Exception as e:
+        logging.error(f"Error deleting reader via API: {e}")
+        return {"success": False, "error": str(e)}, 500
+
+@readers_bp.route('/api/readers', methods=['GET'])
+def api_view_readers():
+    """API endpoint to view all readers (optionally filter by lane_id)"""
+    lane_id = request.args.get('lane_id', type=int)
+    try:
+        db = get_db()
+        if lane_id:
+            readers = db.execute('SELECT id, lane_id, mac_address, type, reader_ip FROM readers WHERE lane_id = ?', (lane_id,)).fetchall()
+        else:
+            readers = db.execute('SELECT id, lane_id, mac_address, type, reader_ip FROM readers').fetchall()
+        readers_list = [dict(r) for r in readers]
+        return {"success": True, "readers": readers_list}, 200
+    except Exception as e:
+        return {"success": False, "error": str(e)}, 500 
