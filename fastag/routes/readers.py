@@ -111,6 +111,10 @@ def open_barrier(id):
             device_type = 'Other'
         device_id = device_type
 
+        # Compose source string with client IP
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        source = f"web/readers/open-barrier ({client_ip})"
+
         print(f"[DEBUG] About to call log_barrier_event (opened) for relay {relay_num}")
         relay_controller.turn_on(relay_num)
         log_barrier_event(
@@ -122,7 +126,7 @@ def open_barrier(id):
             reader_id=reader_id,
             reader_ip=reader_ip,
             device_id=device_id,
-            source='web/readers/open-barrier'
+            source=source
         )
         import time
         time.sleep(2)
@@ -137,7 +141,7 @@ def open_barrier(id):
             reader_id=reader_id,
             reader_ip=reader_ip,
             device_id=device_id,
-            source='web/readers/open-barrier'
+            source=source
         )
         return jsonify({"success": True, "activated": relay_num}), 200
     except Exception as e:
