@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from flask import g, current_app
+import logging
 
 def get_db():
     if 'db' not in g:
@@ -95,6 +96,22 @@ def init_db(db):
             FOREIGN KEY (reader_id) REFERENCES readers (id),
             FOREIGN KEY (lane_id) REFERENCES lanes (id)
         );
+
+        CREATE TABLE IF NOT EXISTS barrier_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            relay_number INTEGER NOT NULL,
+            action TEXT NOT NULL CHECK (action IN ('opened', 'closed')),
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user TEXT,
+            lane_id INTEGER,
+            lane_name TEXT,
+            reader_id INTEGER,
+            reader_ip TEXT,
+            device_id INTEGER,
+            source TEXT,
+            FOREIGN KEY (lane_id) REFERENCES lanes (id),
+            FOREIGN KEY (reader_id) REFERENCES readers (id)
+        );
     ''')
     db.commit() 
 
@@ -113,3 +130,20 @@ def log_user_action(username, action, details=""):
         (username, action, details)
     )
     db.commit() 
+
+def log_barrier_event(relay_number, action, user=None, lane_id=None, lane_name=None, reader_id=None, reader_ip=None, device_id=None, source=None):
+    try:
+        print(f"[DEBUG] log_barrier_event called: relay={relay_number}, action={action}, user={user}, lane_id={lane_id}, lane_name={lane_name}, reader_id={reader_id}, reader_ip={reader_ip}, device_id={device_id}, source={source}")
+        db = get_db()
+        db.execute(
+            """
+            INSERT INTO barrier_events (relay_number, action, user, lane_id, lane_name, reader_id, reader_ip, device_id, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (relay_number, action, user, lane_id, lane_name, reader_id, reader_ip, device_id, source)
+        )
+        db.commit()
+        print("[DEBUG] log_barrier_event: insert committed")
+    except Exception as e:
+        print(f"[ERROR] log_barrier_event failed: {e}")
+        logging.error(f"log_barrier_event failed: {e}") 
