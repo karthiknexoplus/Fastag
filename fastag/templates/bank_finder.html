@@ -5,15 +5,15 @@
     <div class="row">
         <div class="col-12">
             <h2 class="mb-4 fs-4">
-                <i class="fas fa-university me-2 text-success"></i>Find Bank Information
+                <i class="fas fa-university fastag-menu-icon"></i><span class="fastag-menu-label">Find Bank Information</span>
             </h2>
             
             <!-- Search Form -->
             <div class="card p-4 mb-4 shadow-sm border-0">
                 <form method="POST" class="row g-3 align-items-end">
                     <div class="col-md-3">
-                        <label class="form-label fs-6">
-                            <i class="fas fa-search me-1"></i>Search Type
+                        <label class="form-label fastag-form-label">
+                            <i class="fas fa-search fastag-form-icon"></i>Search Type
                         </label>
                         <select name="search_type" class="form-select fs-6">
                             <option value="VRN" {% if search_type == 'VRN' %}selected{% endif %}>Vehicle Number</option>
@@ -21,8 +21,8 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fs-6">
-                            <i class="fas fa-key me-1"></i>Search Value
+                        <label class="form-label fastag-form-label">
+                            <i class="fas fa-key fastag-form-icon"></i>Search Value
                         </label>
                         <input type="text" name="search_value" class="form-control fs-6" 
                                placeholder="Enter VRN (e.g., TN66AT2938) or TagID" 
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-success w-100 fs-6">
+                        <button type="submit" class="btn w-100 fs-6" style="background: #764ba2; color: white; border: none;">
                             <i class="fas fa-search me-1"></i>Find Bank
                         </button>
                     </div>
@@ -51,7 +51,7 @@
             {% if bank_data and bank_data.npcitagDetails %}
             {% for tag in bank_data.npcitagDetails %}
             <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-success text-white">
+                <div class="card-header" style="background: #764ba2; color: white;">
                     <h5 class="mb-0 fs-5">
                         <i class="fas fa-university me-2"></i>Bank Details
                     </h5>
@@ -61,7 +61,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Bank Name</label>
-                                <div class="fs-5 fw-bold text-success">{{ tag.BankId }}</div>
+                                <div class="fs-5 fw-bold" style="color: #764ba2;">{{ tag.BankId }}</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Vehicle Registration</label>
@@ -85,7 +85,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Vehicle Class</label>
-                                <span class="badge bg-info fs-6">{{ tag.VehicleClass }}</span>
+                                <span class="badge fs-6" style="background: #764ba2; color: white;">{{ tag.VehicleClass }}</span>
                             </div>
                         </div>
                     </div>
@@ -133,8 +133,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-search fa-2x text-success mb-3"></i>
-                            <h6 class="card-title">Dual Search</h6>
+                            <i class="fas fa-search fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Dual Search</h6>
                             <p class="card-text small text-muted">
                                 Search by Vehicle Number or Tag ID
                             </p>
@@ -144,8 +144,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-shield-alt fa-2x text-primary mb-3"></i>
-                            <h6 class="card-title">Verified Data</h6>
+                            <i class="fas fa-shield-alt fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Verified Data</h6>
                             <p class="card-text small text-muted">
                                 Get accurate bank information from official sources
                             </p>
@@ -155,8 +155,8 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body text-center">
-                            <i class="fas fa-clock fa-2x text-warning mb-3"></i>
-                            <h6 class="card-title">Real-time</h6>
+                            <i class="fas fa-clock fa-2x fastag-menu-icon mb-3"></i>
+                            <h6 class="card-title fastag-menu-label">Real-time</h6>
                             <p class="card-text small text-muted">
                                 Latest bank information updated regularly
                             </p>
@@ -196,8 +196,12 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 8px 16px;
 }
 .form-control:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
 }
 .font-monospace {
     font-family: 'Courier New', monospace;

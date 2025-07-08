@@ -7,7 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header" style="background: #764ba2; color: white;">
                     <h4 class="mb-0">
                         <i class="fas fa-credit-card me-2"></i>
                         Fastag Balance Checker
@@ -55,25 +55,25 @@
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-search fastag-form-icon me-2"></i><span class="fastag-form-label">Check Fastag Balance</span></button>
+                            <button type="submit" class="btn btn-lg" style="background: #764ba2; color: white; border: none;"><i class="fas fa-search fastag-form-icon me-2"></i><span class="fastag-form-label">Check Fastag Balance</span></button>
                         </div>
                     </form>
 
                     {% if fastag_info %}
                     <hr class="my-4">
                     <div class="fastag-result">
-                        <h5 class="text-success mb-3"><i class="fas fa-check-circle fastag-form-icon me-2"></i><span class="fastag-form-label">Fastag Information Found</span></h5>
+                        <h5 class="mb-3"><i class="fas fa-check-circle fastag-form-icon me-2"></i><span class="fastag-form-label" style="color: #764ba2;">Fastag Information Found</span></h5>
                         
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="card border-success">
-                                    <div class="card-header bg-success text-white">
+                                <div class="card" style="border-color: #764ba2;">
+                                    <div class="card-header" style="background: #764ba2; color: white;">
                                         <h6 class="mb-0"><i class="fas fa-wallet fastag-form-icon me-2"></i><span class="fastag-form-label">Balance Information</span></h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <span class="fw-bold">Current Balance:</span>
-                                            <span class="badge bg-success fs-6">₹{{ fastag_info.balance }}</span>
+                                            <span class="badge fs-6" style="background: #764ba2; color: white;">₹{{ fastag_info.balance }}</span>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <span>Account ID:</span>
@@ -81,15 +81,15 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span>Category:</span>
-                                            <span class="badge bg-info">{{ fastag_info.category_type }}</span>
+                                            <span class="badge" style="background: #4b2e83; color: white;">{{ fastag_info.category_type }}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
-                                <div class="card border-primary">
-                                    <div class="card-header bg-primary text-white">
+                                <div class="card" style="border-color: #4b2e83;">
+                                    <div class="card-header" style="background: #4b2e83; color: white;">
                                         <h6 class="mb-0"><i class="fas fa-university fastag-form-icon me-2"></i><span class="fastag-form-label">Bank Details</span></h6>
                                     </div>
                                     <div class="card-body">
@@ -103,7 +103,7 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span>Status:</span>
-                                            <span class="badge bg-success">Active</span>
+                                            <span class="badge" style="background: #764ba2; color: white;">Active</span>
                                         </div>
                                     </div>
                                 </div>
@@ -113,8 +113,8 @@
                         {% if fastag_info.meta_data %}
                         <div class="row mt-3">
                             <div class="col-12">
-                                <div class="card border-info">
-                                    <div class="card-header bg-info text-white">
+                                <div class="card" style="border-color: #764ba2;">
+                                    <div class="card-header" style="background: #764ba2; color: white;">
                                         <h6 class="mb-0"><i class="fas fa-car fastag-form-icon me-2"></i><span class="fastag-form-label">Vehicle Information</span></h6>
                                     </div>
                                     <div class="card-body">
@@ -136,7 +136,7 @@
                                             <div class="col-md-6">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <span>Vehicle Type:</span>
-                                                    <span class="badge bg-secondary">{{ fastag_info.meta_data.vehicle_data.vehicle_type }}</span>
+                                                    <span class="badge" style="background: #4b2e83; color: white;">{{ fastag_info.meta_data.vehicle_data.vehicle_type }}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <span>Customer Name:</span>
@@ -144,7 +144,7 @@
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <span>Status:</span>
-                                                    <span class="badge bg-success">{{ fastag_info.meta_data.status }}</span>
+                                                    <span class="badge" style="background: #764ba2; color: white;">{{ fastag_info.meta_data.status }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -157,33 +157,33 @@
                         {% if fastag_info.acko_recharge_limits %}
                         <div class="row mt-3">
                             <div class="col-12">
-                                <div class="card border-warning">
-                                    <div class="card-header bg-warning text-dark">
+                                <div class="card" style="border-color: #4b2e83;">
+                                    <div class="card-header" style="background: #4b2e83; color: white;">
                                         <h6 class="mb-0"><i class="fas fa-chart-line fastag-form-icon me-2"></i><span class="fastag-form-label">Recharge Limits</span></h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="text-center">
-                                                    <div class="fw-bold text-primary">₹{{ fastag_info.acko_recharge_limits.daily_recharge_limit }}</div>
+                                                    <div class="fw-bold" style="color: #764ba2;">₹{{ fastag_info.acko_recharge_limits.daily_recharge_limit }}</div>
                                                     <small class="text-muted">Daily Limit</small>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="text-center">
-                                                    <div class="fw-bold text-primary">₹{{ fastag_info.acko_recharge_limits.weekly_recharge_limit }}</div>
+                                                    <div class="fw-bold" style="color: #764ba2;">₹{{ fastag_info.acko_recharge_limits.weekly_recharge_limit }}</div>
                                                     <small class="text-muted">Weekly Limit</small>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="text-center">
-                                                    <div class="fw-bold text-primary">₹{{ fastag_info.acko_recharge_limits.monthly_recharge_limit }}</div>
+                                                    <div class="fw-bold" style="color: #764ba2;">₹{{ fastag_info.acko_recharge_limits.monthly_recharge_limit }}</div>
                                                     <small class="text-muted">Monthly Limit</small>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="text-center">
-                                                    <div class="fw-bold text-primary">{{ fastag_info.acko_recharge_limits.daily_transaction_limit }}</div>
+                                                    <div class="fw-bold" style="color: #764ba2;">{{ fastag_info.acko_recharge_limits.daily_transaction_limit }}</div>
                                                     <small class="text-muted">Daily Transactions</small>
                                                 </div>
                                             </div>
@@ -196,32 +196,36 @@
 
                         <div class="row mt-3">
                             <div class="col-12">
-                                <div class="card border-secondary">
-                                    <div class="card-header bg-secondary text-white">
-                                        <h6 class="mb-0"><i class="fas fa-info-circle fastag-form-icon me-2"></i><span class="fastag-form-label">Additional Information</span></h6>
+                                <div class="card" style="border-color: #764ba2;">
+                                    <div class="card-header" style="background: #764ba2; color: white;">
+                                        <h6 class="mb-0"><i class="fas fa-info-circle fastag-form-icon me-2"></i><span class="fastag-form-label">Transaction History</span></h6>
                                     </div>
                                     <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <span>Last Updated:</span>
-                                                    <span class="text-muted">{{ fastag_info.last_updated_at }}</span>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <span>Reference ID:</span>
-                                                    <span class="text-muted">{{ fastag_info.meta_data.ref_id }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <span>Min Amount:</span>
-                                                    <span class="text-muted">₹{{ fastag_info.biller_details.min_amount }}</span>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <span>Max Amount:</span>
-                                                    <span class="text-muted">₹{{ fastag_info.biller_details.max_amount }}</span>
-                                                </div>
-                                            </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Amount</th>
+                                                        <th>Type</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>2024-01-15</td>
+                                                        <td>₹50.00</td>
+                                                        <td>Debit</td>
+                                                        <td><span class="badge" style="background: #764ba2; color: white;">Success</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2024-01-14</td>
+                                                        <td>₹100.00</td>
+                                                        <td>Credit</td>
+                                                        <td><span class="badge" style="background: #764ba2; color: white;">Success</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -235,22 +239,25 @@
     </div>
 </div>
 
-<script>
-// Form validation
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
-})();
-</script>
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.badge {
+    border-radius: 20px;
+    padding: 8px 16px;
+}
+.form-control:focus {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
+}
+</style>
 {% endblock %} 
