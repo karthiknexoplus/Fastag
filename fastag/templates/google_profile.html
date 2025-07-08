@@ -7,7 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header" style="background: #764ba2; color: white;">
                     <h4 class="mb-0">
                         <i class="fab fa-google me-2"></i>
                         Google Profile
@@ -29,19 +29,23 @@
                             {% endif %}
                         </div>
                         <div class="col-md-8">
-                            <h5 class="card-title">{{ user.name }}</h5>
+                            <h5 class="card-title fastag-menu-label">{{ user.name }}</h5>
                             <p class="text-muted">{{ user.email }}</p>
                             
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">User ID:</label>
+                                        <label class="form-label fw-bold fastag-form-label">
+                                            <i class="fas fa-id-card fastag-form-icon"></i>User ID:
+                                        </label>
                                         <p class="text-muted">{{ user.id }}</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">First Name:</label>
+                                        <label class="form-label fw-bold fastag-form-label">
+                                            <i class="fas fa-user fastag-form-icon"></i>First Name:
+                                        </label>
                                         <p class="text-muted">{{ user.given_name or 'Not provided' }}</p>
                                     </div>
                                 </div>
@@ -50,24 +54,28 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Last Name:</label>
+                                        <label class="form-label fw-bold fastag-form-label">
+                                            <i class="fas fa-user fastag-form-icon"></i>Last Name:
+                                        </label>
                                         <p class="text-muted">{{ user.family_name or 'Not provided' }}</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Login Method:</label>
-                                        <span class="badge bg-success">Google OAuth</span>
+                                        <label class="form-label fw-bold fastag-form-label">
+                                            <i class="fas fa-sign-in-alt fastag-form-icon"></i>Login Method:
+                                        </label>
+                                        <span class="badge" style="background: #764ba2; color: white;">Google OAuth</span>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="mt-4">
-                                <a href="{{ url_for('google_auth.logout') }}" class="btn btn-danger">
+                                <a href="{{ url_for('google_auth.logout') }}" class="btn" style="background: #dc3545; color: white; border: none;">
                                     <i class="fas fa-sign-out-alt me-2"></i>
                                     Logout
                                 </a>
-                                <a href="{{ url_for('auth.home') }}" class="btn btn-primary">
+                                <a href="{{ url_for('auth.home') }}" class="btn" style="background: #764ba2; color: white; border: none;">
                                     <i class="fas fa-home me-2"></i>
                                     Go to Dashboard
                                 </a>
@@ -77,9 +85,9 @@
                     {% else %}
                     <div class="text-center">
                         <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
-                        <h5>No user information available</h5>
+                        <h5 class="fastag-menu-label">No user information available</h5>
                         <p class="text-muted">Please log in to view your profile.</p>
-                        <a href="{{ url_for('google_auth.login') }}" class="btn btn-primary">
+                        <a href="{{ url_for('google_auth.login') }}" class="btn" style="background: #764ba2; color: white; border: none;">
                             <i class="fab fa-google me-2"></i>
                             Login with Google
                         </a>
@@ -90,4 +98,26 @@
         </div>
     </div>
 </div>
+
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.badge {
+    border-radius: 20px;
+    padding: 8px 16px;
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
+}
+.btn[style*="background: #dc3545"]:hover {
+    background: #c82333 !important;
+    color: white !important;
+}
+</style>
 {% endblock %} 
