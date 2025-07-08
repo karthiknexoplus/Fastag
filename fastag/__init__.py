@@ -14,19 +14,73 @@ def get_rpi_system_info():
         except Exception as e:
             logging.warning(f"System info command failed: {cmd} ({e})")
             return 'N/A'
-    temp = run('/usr/bin/vcgencmd measure_temp')
-    volts = run('/usr/bin/vcgencmd measure_volts')
-    throttled = run('/usr/bin/vcgencmd get_throttled')
+    # Get raw values
+    temp_raw = run('/usr/bin/vcgencmd measure_temp')
+    volts_raw = run('/usr/bin/vcgencmd measure_volts')
+    throttled_raw = run('/usr/bin/vcgencmd get_throttled')
     uptime = run('/usr/bin/uptime -p')
-    mem = run('/usr/bin/free -h | grep Mem')
-    disk = run('/usr/bin/df -h / | tail -1')
+    # RAM: show used/total
+    mem_raw = run('/usr/bin/free -h')
+    ram = 'N/A'
+    if mem_raw and 'Mem:' in mem_raw:
+        for line in mem_raw.splitlines():
+            if line.startswith('Mem:'):
+                parts = line.split()
+                if len(parts) >= 3:
+                    ram = f"{parts[2]} used / {parts[1]} total"
+    # Disk: show used/total
+    disk_raw = run('/usr/bin/df -h /')
+    disk = 'N/A'
+    if disk_raw:
+        lines = disk_raw.splitlines()
+        if len(lines) >= 2:
+            parts = lines[1].split()
+            if len(parts) >= 5:
+                disk = f"{parts[2]} used / {parts[1]} total ({parts[4]} full)"
+    # Parse temp
+    temp = 'N/A'
+    temp_status = ''
+    if temp_raw and 'temp=' in temp_raw:
+        try:
+            tval = float(temp_raw.split('=')[1].replace("'C",''))
+            temp = f"{tval:.1f}°C"
+            if tval < 60:
+                temp_status = 'Normal'
+            elif tval < 75:
+                temp_status = 'High'
+            else:
+                temp_status = 'Critical'
+        except Exception:
+            temp = temp_raw
+    # Parse volts
+    volts = volts_raw.split('=')[1] if volts_raw and '=' in volts_raw else volts_raw
+    # Parse throttled
+    throttled = 'N/A'
+    throttled_explain = ''
+    if throttled_raw and 'throttled=' in throttled_raw:
+        code = throttled_raw.split('=')[1]
+        if code == '0x0':
+            throttled = 'No issues'
+        else:
+            issues = []
+            val = int(code, 16)
+            if val & 0x1: issues.append('Undervoltage detected')
+            if val & 0x2: issues.append('ARM frequency capped')
+            if val & 0x4: issues.append('Currently throttled')
+            if val & 0x8: issues.append('Soft temperature limit active')
+            if val & 0x10000: issues.append('Undervoltage has occurred')
+            if val & 0x20000: issues.append('ARM frequency capping has occurred')
+            if val & 0x40000: issues.append('Throttling has occurred')
+            if val & 0x80000: issues.append('Soft temp limit has occurred')
+            throttled = ', '.join(issues) if issues else code
+    # Compose info
     info = []
-    if temp: info.append(f"Temp: {temp}")
-    if volts: info.append(f"Volt: {volts}")
-    if throttled: info.append(f"Throttled: {throttled}")
-    if uptime: info.append(f"Uptime: {uptime}")
-    if mem: info.append(f"RAM: {mem}")
-    if disk: info.append(f"Disk: {disk}")
+    info.append(f"Temp: <span title='CPU temperature'>{temp}</span> <span style='font-size:0.9em;color:#888;'>(Status: {temp_status})</span>")
+    info.append(f"Volt: <span title='Core voltage'>{volts}</span>")
+    info.append(f"Throttled: <span title='Power/thermal status'>{throttled}</span>")
+    info.append(f"Uptime: <span title='System uptime'>{uptime}</span>")
+    info.append(f"RAM: <span title='RAM usage'>{ram}</span>")
+    info.append(f"Disk: <span title='Disk usage'>{disk}</span>")
     return ' | '.join(info)
 
 def create_app():
