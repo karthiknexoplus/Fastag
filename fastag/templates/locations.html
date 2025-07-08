@@ -2,11 +2,15 @@
 {% block title %}Locations - FASTag Parking{% endblock %}
 {% block content %}
 <div class="container-fluid" style="max-width: 700px;">
-    <h2 class="mb-4 fs-4"><i class="fas fa-map-marker-alt me-2"></i>Locations</h2>
+    <h2 class="mb-4 fs-4">
+        <i class="fas fa-map-marker-alt fastag-menu-icon"></i><span class="fastag-menu-label">Locations</span>
+    </h2>
     <form method="POST" class="card p-3 mb-4 shadow-sm border-0 needs-validation" novalidate>
         <div class="row g-3 align-items-center">
             <div class="col-md-5">
-                <label class="form-label fs-6"><i class="fas fa-building me-1"></i> Name</label>
+                <label class="form-label fastag-form-label">
+                    <i class="fas fa-building fastag-form-icon"></i>Name
+                </label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-building"></i></span>
                     <input type="text" name="name" class="form-control fs-6" required>
@@ -14,7 +18,9 @@
                 </div>
             </div>
             <div class="col-md-7">
-                <label class="form-label fs-6"><i class="fas fa-map me-1"></i> Address</label>
+                <label class="form-label fastag-form-label">
+                    <i class="fas fa-map fastag-form-icon"></i>Address
+                </label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-map"></i></span>
                     <input type="text" name="address" class="form-control fs-6" required>
@@ -23,11 +29,15 @@
             </div>
         </div>
         <div class="mt-3 text-end">
-            <button type="submit" class="btn btn-primary rounded-pill fs-6"><i class="fas fa-plus me-1"></i> Add Location</button>
+            <button type="submit" class="btn rounded-pill fs-6" style="background: #764ba2; color: white; border: none;">
+                <i class="fas fa-plus me-1"></i> Add Location
+            </button>
         </div>
     </form>
     <div class="card p-3 shadow-sm border-0">
-        <h5 class="mb-3 fs-5"><i class="fas fa-list me-2"></i>Saved Locations</h5>
+        <h5 class="mb-3 fs-5">
+            <i class="fas fa-list fastag-menu-icon"></i><span class="fastag-menu-label">Saved Locations</span>
+        </h5>
         <div class="table-responsive">
             <table class="table table-bordered align-middle fs-6">
                 <thead class="table-light">
@@ -45,10 +55,16 @@
                         <td>{{ loc['address'] }}</td>
                         <td>{{ loc['site_id'] }}</td>
                         <td class="text-center">
-                            <a href="{{ url_for('lanes.lanes', location_id=loc['id']) }}" class="text-info me-2" title="Manage Lanes"><i class="fas fa-road" style="font-size:1.05rem;"></i></a>
-                            <a href="{{ url_for('locations.edit_location', id=loc['id']) }}" class="text-primary me-2" title="Edit"><i class="fas fa-pen-to-square" style="font-size:1.05rem;"></i></a>
+                            <a href="{{ url_for('lanes.lanes', location_id=loc['id']) }}" class="me-2" title="Manage Lanes" style="color: #764ba2;">
+                                <i class="fas fa-road" style="font-size:1.05rem;"></i>
+                            </a>
+                            <a href="{{ url_for('locations.edit_location', id=loc['id']) }}" class="me-2" title="Edit" style="color: #764ba2;">
+                                <i class="fas fa-pen-to-square" style="font-size:1.05rem;"></i>
+                            </a>
                             <form method="POST" action="{{ url_for('locations.delete_location', id=loc['id']) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger" title="Delete" onclick="return confirm('Delete this location?');"><i class="fas fa-trash-alt" style="font-size:1.05rem;"></i></button>
+                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline" title="Delete" onclick="return confirm('Delete this location?');" style="color: #dc3545;">
+                                    <i class="fas fa-trash-alt" style="font-size:1.05rem;"></i>
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -60,6 +76,25 @@
         </div>
     </div>
 </div>
+
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.form-control:focus {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+}
+.btn:hover {
+    background: #4b2e83 !important;
+    color: white !important;
+}
+</style>
+
 <script>
 (() => {
   'use strict';
