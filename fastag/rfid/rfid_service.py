@@ -128,7 +128,7 @@ logger = setup_logging()
 
 # Try to import Flask components, but handle gracefully if not available
 try:
-    from app import app, db, VehicleUser, AccessLog, Lane, Device
+    from fastag import app  # Correct import for Flask app
     from fastag.utils.db import get_db
     # Patch SQLAlchemy URI to use absolute path
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
@@ -142,17 +142,14 @@ except ImportError as e:
     class DummyApp:
         def app_context(self):
             return DummyContext()
-    
     class DummyContext:
         def __enter__(self):
             return self
         def __exit__(self, *args):
             pass
-    
     class DummyDB:
         def session(self):
             return DummySession()
-    
     class DummySession:
         def add(self, obj):
             pass
@@ -160,17 +157,14 @@ except ImportError as e:
             pass
         def rollback(self):
             pass
-    
     class DummyUser:
         def __init__(self):
             self.id = None
             self.name = "Unknown"
             self.vehicle_number = "Unknown"
-    
     class DummyAccessLog:
         def __init__(self, **kwargs):
             pass
-    
     # Create dummy instances
     app = DummyApp()
     db = DummyDB()
