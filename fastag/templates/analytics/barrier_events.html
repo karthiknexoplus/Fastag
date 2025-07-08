@@ -91,6 +91,9 @@
                     </tbody>
                 </table>
             </div>
+            <nav>
+                <ul class="pagination justify-content-center" id="barrier-events-pagination"></ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -98,30 +101,66 @@
 
 {% block scripts %}
 <script>
+let barrierEventsData = [];
+let currentPage = 1;
+const perPage = 50;
+
+function renderBarrierEventsPage(page) {
+    const tbody = document.querySelector('#barrier-events-table tbody');
+    tbody.innerHTML = '';
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+    const pageData = barrierEventsData.slice(start, end);
+    if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No data found.</td></tr>';
+        return;
+    }
+    for (const row of pageData) {
+        tbody.innerHTML += `<tr>
+            <td>${row.timestamp || ''}</td>
+            <td>${row.relay_number || ''}</td>
+            <td>${row.action || ''}</td>
+            <td>${row.user || ''}</td>
+            <td>${row.lane_name || row.lane_id || ''}</td>
+            <td>${row.reader_ip || row.reader_id || ''}</td>
+            <td>${row.device_id || ''}</td>
+            <td>${row.source || ''}</td>
+        </tr>`;
+    }
+    renderBarrierEventsPagination();
+}
+
+function renderBarrierEventsPagination() {
+    const totalPages = Math.ceil(barrierEventsData.length / perPage);
+    const pagination = document.getElementById('barrier-events-pagination');
+    pagination.innerHTML = '';
+    if (totalPages <= 1) return;
+    let prevClass = currentPage === 1 ? 'disabled' : '';
+    let nextClass = currentPage === totalPages ? 'disabled' : '';
+    pagination.innerHTML += `<li class="page-item ${prevClass}"><a class="page-link" href="#" onclick="gotoBarrierEventsPage(${currentPage-1});return false;">Previous</a></li>`;
+    for (let i = 1; i <= totalPages; i++) {
+        let active = i === currentPage ? 'active' : '';
+        pagination.innerHTML += `<li class="page-item ${active}"><a class="page-link" href="#" onclick="gotoBarrierEventsPage(${i});return false;">${i}</a></li>`;
+    }
+    pagination.innerHTML += `<li class="page-item ${nextClass}"><a class="page-link" href="#" onclick="gotoBarrierEventsPage(${currentPage+1});return false;">Next</a></li>`;
+}
+
+function gotoBarrierEventsPage(page) {
+    const totalPages = Math.ceil(barrierEventsData.length / perPage);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderBarrierEventsPage(currentPage);
+}
+
 function fetchBarrierEvents(params = {}) {
     const url = new URL('/analytics/api/barrier-events', window.location.origin);
     Object.entries(params).forEach(([k, v]) => { if (v) url.searchParams.set(k, v); });
     fetch(url)
         .then(res => res.json())
         .then(data => {
-            const tbody = document.querySelector('#barrier-events-table tbody');
-            tbody.innerHTML = '';
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No data found.</td></tr>';
-                return;
-            }
-            for (const row of data) {
-                tbody.innerHTML += `<tr>
-                    <td>${row.timestamp || ''}</td>
-                    <td>${row.relay_number || ''}</td>
-                    <td>${row.action || ''}</td>
-                    <td>${row.user || ''}</td>
-                    <td>${row.lane_name || row.lane_id || ''}</td>
-                    <td>${row.reader_ip || row.reader_id || ''}</td>
-                    <td>${row.device_id || ''}</td>
-                    <td>${row.source || ''}</td>
-                </tr>`;
-            }
+            barrierEventsData = data;
+            currentPage = 1;
+            renderBarrierEventsPage(currentPage);
         });
 }
 
