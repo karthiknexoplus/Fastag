@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import subprocess
 import logging
+from markupsafe import Markup
 
 def get_rpi_system_info():
     def run(cmd):
@@ -40,29 +41,38 @@ def get_rpi_system_info():
     # Parse temp
     temp = 'N/A'
     temp_status = ''
+    temp_status_color = '#28a745'  # green
+    temp_icon = '<i class="fas fa-thermometer-half"></i>'
     if temp_raw and 'temp=' in temp_raw:
         try:
             tval = float(temp_raw.split('=')[1].replace("'C",''))
             temp = f"{tval:.1f}°C"
             if tval < 60:
                 temp_status = 'Normal'
+                temp_status_color = '#28a745'  # green
             elif tval < 75:
                 temp_status = 'High'
+                temp_status_color = '#ffc107'  # yellow
             else:
                 temp_status = 'Critical'
+                temp_status_color = '#dc3545'  # red
         except Exception:
             temp = temp_raw
     # Parse volts
     volts = volts_raw.split('=')[1] if volts_raw and '=' in volts_raw else volts_raw
+    volts_icon = '<i class="fas fa-bolt"></i>'
     # Parse throttled
     throttled = 'N/A'
-    throttled_explain = ''
+    throttled_icon = '<i class="fas fa-tachometer-alt"></i>'
+    throttled_color = '#28a745'
     if throttled_raw and 'throttled=' in throttled_raw:
         code = throttled_raw.split('=')[1]
         if code == '0x0':
             throttled = 'No issues'
+            throttled_color = '#28a745'
         else:
             issues = []
+            throttled_color = '#dc3545'
             val = int(code, 16)
             if val & 0x1: issues.append('Undervoltage detected')
             if val & 0x2: issues.append('ARM frequency capped')
@@ -73,14 +83,20 @@ def get_rpi_system_info():
             if val & 0x40000: issues.append('Throttling has occurred')
             if val & 0x80000: issues.append('Soft temp limit has occurred')
             throttled = ', '.join(issues) if issues else code
-    # Compose info
+    # Uptime
+    uptime_icon = '<i class="fas fa-clock"></i>'
+    # RAM
+    ram_icon = '<i class="fas fa-memory"></i>'
+    # Disk
+    disk_icon = '<i class="fas fa-hdd"></i>'
+    # Compose info with icons and badges
     info = []
-    info.append(f"Temp: <span title='CPU temperature'>{temp}</span> <span style='font-size:0.9em;color:#888;'>(Status: {temp_status})</span>")
-    info.append(f"Volt: <span title='Core voltage'>{volts}</span>")
-    info.append(f"Throttled: <span title='Power/thermal status'>{throttled}</span>")
-    info.append(f"Uptime: <span title='System uptime'>{uptime}</span>")
-    info.append(f"RAM: <span title='RAM usage'>{ram}</span>")
-    info.append(f"Disk: <span title='Disk usage'>{disk}</span>")
+    info.append(f"<span style='color:#764ba2;'>{temp_icon} Temp:</span> <span style='color:#333;'>{temp}</span> <span style='background:{temp_status_color};color:#fff;padding:2px 8px;border-radius:8px;font-size:0.85em;margin-left:4px;'>{temp_status}</span>")
+    info.append(f"<span style='color:#764ba2;'>{volts_icon} Volt:</span> <span style='color:#333;'>{volts}</span>")
+    info.append(f"<span style='color:#764ba2;'>{throttled_icon} Throttled:</span> <span style='color:{throttled_color};'>{throttled}</span>")
+    info.append(f"<span style='color:#764ba2;'>{uptime_icon} Uptime:</span> <span style='color:#333;'>{uptime}</span>")
+    info.append(f"<span style='color:#764ba2;'>{ram_icon} RAM:</span> <span style='color:#333;'>{ram}</span>")
+    info.append(f"<span style='color:#764ba2;'>{disk_icon} Disk:</span> <span style='color:#333;'>{disk}</span>")
     return ' | '.join(info)
 
 def create_app():
@@ -124,7 +140,7 @@ def create_app():
     app.teardown_appcontext(close_db)
     @app.context_processor
     def inject_system_info():
-        return {'system_info': get_rpi_system_info()}
+        return {'system_info': Markup(get_rpi_system_info())}
     return app
 
 # Create the app instance for direct import
