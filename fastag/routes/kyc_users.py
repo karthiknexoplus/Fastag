@@ -152,6 +152,44 @@ def api_get_all_kyc_users():
     users_list = [dict(user) for user in users]
     return jsonify({"success": True, "users": users_list}), 200
 
+@kyc_users_bp.route('/api/kyc_users/<int:id>', methods=['PUT'])
+def api_edit_kyc_user(id):
+    """API endpoint to edit a KYC user by ID (for mobile app)"""
+    if not request.is_json:
+        return jsonify({"success": False, "error": "Request must be JSON"}), 400
+    data = request.get_json()
+    required_fields = ["name", "fastag_id", "vehicle_number", "contact_number", "address"]
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"success": False, "error": f"Missing field: {field}"}), 400
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute(
+            'UPDATE kyc_users SET name=?, fastag_id=?, vehicle_number=?, contact_number=?, address=? WHERE id=?',
+            (data["name"], data["fastag_id"], data["vehicle_number"], data["contact_number"], data["address"], id)
+        )
+        db.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": f"No KYC user found with id {id}"}), 404
+        return jsonify({"success": True, "message": "KYC user updated"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@kyc_users_bp.route('/api/kyc_users/<int:id>', methods=['DELETE'])
+def api_delete_kyc_user(id):
+    """API endpoint to delete a KYC user by ID (for mobile app)"""
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM kyc_users WHERE id = ?', (id,))
+        db.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": f"No KYC user found with id {id}"}), 404
+        return jsonify({"success": True, "message": "KYC user deleted"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @kyc_users_bp.route('/kyc_users/edit/<int:id>', methods=['GET', 'POST'])
 def edit_kyc_user(id):
     if 'user' not in session:
