@@ -68,7 +68,7 @@ def create_app():
     app.teardown_appcontext(close_db)
     @app.context_processor
     def inject_system_info():
-        return {'system_info': get_rpi_system_info()}
+        return {'system_info': 'TEST INFO'}
     return app
 
 # Create the app instance for direct import
