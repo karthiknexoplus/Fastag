@@ -188,6 +188,33 @@ def device_status():
         "service": "FASTag Device Lookup API"
     }), 200
 
+@api.route('/status', methods=['GET'])
+def system_status():
+    """
+    Returns system status info (temperature, voltage, throttled, uptime, RAM, disk) as plain text and JSON.
+    """
+    try:
+        from fastag.__init__ import get_rpi_system_info
+        info_str = get_rpi_system_info()
+        # Parse info_str into a dict for JSON
+        # Example: "Temp: 46.7°C Normal | Volt: 0.8700V | Throttled: No issues | Uptime: up 5 minutes | RAM: 206Mi used / 1.8Gi total | Disk: 2.7G used / 15G total (20% full)"
+        info_parts = [part.strip() for part in info_str.split('|')]
+        info_dict = {}
+        for part in info_parts:
+            if ':' in part:
+                key, value = part.split(':', 1)
+                info_dict[key.strip()] = value.strip()
+        return jsonify({
+            "success": True,
+            "info": info_dict,
+            "info_str": info_str
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 @api.route('/device/register', methods=['POST'])
 def device_register():
     """
