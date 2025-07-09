@@ -738,3 +738,25 @@ def export_barrier_events():
         mimetype='text/csv',
         headers={"Content-Disposition": f"attachment;filename={filename}"}
     ) 
+
+@analytics_bp.route('/api/barrier-log', methods=['GET'])
+def api_barrier_log():
+    """
+    Returns barrier events as JSON for external devices/browsers.
+    Query params: start_date, end_date
+    """
+    db = get_db()
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    query = "SELECT * FROM barrier_events WHERE 1=1"
+    params = []
+    if start_date:
+        query += " AND DATE(timestamp) >= ?"
+        params.append(start_date)
+    if end_date:
+        query += " AND DATE(timestamp) <= ?"
+        params.append(end_date)
+    query += " ORDER BY timestamp DESC LIMIT 1000"
+    rows = db.execute(query, params).fetchall()
+    data = [dict(row) for row in rows]
+    return jsonify({"success": True, "count": len(data), "events": data}) 
