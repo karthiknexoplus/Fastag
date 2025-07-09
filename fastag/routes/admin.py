@@ -1,6 +1,7 @@
-from flask import Blueprint, redirect, url_for, session, flash, jsonify, request
+from flask import Blueprint, redirect, url_for, session, flash, jsonify, request, render_template
 import subprocess
 import os
+from fastag.utils.db import get_db
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -20,4 +21,27 @@ def restart_readers():
         if request.is_json:
             return jsonify({'success': False, 'error': str(e)}), 500
         flash('Failed to restart RFID reader services: ' + str(e), 'danger')
-    return redirect(url_for('kyc_users.kyc_users')) 
+    return redirect(url_for('kyc_users.kyc_users'))
+
+@admin_bp.route('/user_approval', methods=['GET', 'POST'])
+def user_approval():
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    if request.method == 'POST':
+        # Approve device and set username/password/assigned_user_id
+        device_id = request.form.get('device_id')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        assigned_user_id = request.form.get('assigned_user_id')
+        if device_id and username and password:
+            db.execute('UPDATE devices SET approved=1, username=?, password=?, assigned_user_id=? WHERE id=?',
+                       (username, password, assigned_user_id, device_id))
+            db.commit()
+            flash('Device approved and user assigned!', 'success')
+        else:
+            flash('All fields are required to approve a device.', 'danger')
+    # List all devices pending approval
+    devices = db.execute('SELECT * FROM devices WHERE approved=0').fetchall()
+    users = db.execute('SELECT id, username FROM users').fetchall()
+    return render_template('user_approval.html', devices=devices, users=users) 

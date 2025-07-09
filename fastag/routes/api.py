@@ -3,6 +3,7 @@ from fastag.utils.db import get_db
 import logging
 import ctypes
 import time
+from fastag.utils.db import log_barrier_event
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -283,13 +284,40 @@ def barrier_control():
         if not relays_to_activate:
             return jsonify({"success": False, "error": "No valid relay numbers provided"}), 400
 
+    user = None
+    if hasattr(request, 'user') and request.user:
+        user = getattr(request, 'user', None)
+    elif 'user' in getattr(request, 'cookies', {}):
+        user = request.cookies.get('user')
     # Activate the relays
     for relay_num in relays_to_activate:
         relay_controller.turn_on(relay_num)
+        log_barrier_event(
+            relay_number=relay_num,
+            action='opened',
+            user=user,
+            lane_id=None,
+            lane_name=None,
+            reader_id=None,
+            reader_ip=None,
+            device_id=None,
+            source='api/barrier-control'
+        )
     import time
     time.sleep(2)  # Keep relays on for 2 seconds
     for relay_num in relays_to_activate:
         relay_controller.turn_off(relay_num)
+        log_barrier_event(
+            relay_number=relay_num,
+            action='closed',
+            user=user,
+            lane_id=None,
+            lane_name=None,
+            reader_id=None,
+            reader_ip=None,
+            device_id=None,
+            source='api/barrier-control'
+        )
 
     return jsonify({"success": True, "activated": relays_to_activate}), 200 
 
@@ -325,3 +353,39 @@ def rfid_rfpower():
                 return jsonify({"reader": reader, "rf_power": new_rf, "status": "success"})
         except Exception as e:
             return jsonify({"error": str(e)}), 500 
+
+@api.route('/register_device', methods=['POST'])
+def register_device():
+    data = request.get_json()
+    required = ['device_id', 'model', 'manufacturer', 'android_version']
+    if not data or not all(k in data for k in required):
+        return jsonify({
+            "error": "Device registration failed: invalid parameters",
+            "code": 400
+        }), 400
+    db = get_db()
+    # Check if device already exists
+    existing = db.execute('SELECT * FROM devices WHERE device_id=?', (data['device_id'],)).fetchone()
+    if existing:
+        return jsonify({"message": "Device registered for approval"}), 200
+    db.execute('INSERT INTO devices (device_id, model, manufacturer, android_version, approved) VALUES (?, ?, ?, ?, 0)',
+               (data['device_id'], data['model'], data['manufacturer'], data['android_version']))
+    db.commit()
+    return jsonify({"message": "Device registered for approval"}), 200
+
+@api.route('/login', methods=['POST'])
+def device_login():
+    data = request.get_json()
+    required = ['device_id', 'username', 'password']
+    if not data or not all(k in data for k in required):
+        return jsonify({
+            "error": "Device login failed: invalid parameters",
+            "code": 400
+        }), 400
+    db = get_db()
+    device = db.execute('SELECT * FROM devices WHERE device_id=? AND username=? AND password=? AND approved=1',
+                        (data['device_id'], data['username'], data['password'])).fetchone()
+    if device:
+        return jsonify({"success": True, "message": "Login successful"}), 200
+    else:
+        return jsonify({"success": False, "message": "Invalid credentials or device not approved"}), 401 

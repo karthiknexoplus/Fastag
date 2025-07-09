@@ -112,6 +112,19 @@ def init_db(db):
             FOREIGN KEY (lane_id) REFERENCES lanes (id),
             FOREIGN KEY (reader_id) REFERENCES readers (id)
         );
+
+        CREATE TABLE IF NOT EXISTS devices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id TEXT UNIQUE NOT NULL,
+            model TEXT,
+            manufacturer TEXT,
+            android_version TEXT,
+            approved INTEGER DEFAULT 0,
+            username TEXT,
+            password TEXT,
+            assigned_user_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     ''')
     db.commit() 
 

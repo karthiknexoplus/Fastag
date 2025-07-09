@@ -121,19 +121,21 @@
     <!-- Analytics Navigation Menu -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card report-card">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-center">
-                        <div class="btn-group" role="group">
-                            <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-chart-line me-2"></i>
-                                Dashboard
-                            </a>
-                            <a href="{{ url_for('analytics.reports') }}" class="btn btn-primary active">
-                                <i class="fas fa-file-alt me-2"></i>
-                                Reports
-                            </a>
-                        </div>
+            <div class="chart-container">
+                <div class="d-flex justify-content-center">
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-outline-primary{% if request.endpoint == 'analytics.dashboard' %} active{% endif %}">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('analytics.reports') }}" class="btn btn-primary{% if request.endpoint == 'analytics.reports' %} active{% endif %}">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Reports
+                        </a>
+                        <a href="{{ url_for('analytics.barrier_events') }}" class="btn btn-outline-primary{% if request.endpoint == 'analytics.barrier_events' %} active{% endif %}">
+                            <i class="fas fa-door-open me-2"></i>
+                            Barrier Events
+                        </a>
                     </div>
                 </div>
             </div>
