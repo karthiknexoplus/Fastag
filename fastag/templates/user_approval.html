@@ -47,5 +47,38 @@
             </table>
         </div>
     </div>
+    <div class="card p-3 shadow-sm border-0 mt-4">
+        <h5 class="mb-3"><i class="fas fa-check fastag-menu-icon"></i><span class="fastag-menu-label">Approved Devices</span></h5>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Device ID</th>
+                        <th>Model</th>
+                        <th>Manufacturer</th>
+                        <th>Android Version</th>
+                        <th>Assigned User</th>
+                        <th>Username</th>
+                        <th>Approved At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in approved_devices %}
+                    <tr>
+                        <td>{{ d['device_id'] }}</td>
+                        <td>{{ d['model'] }}</td>
+                        <td>{{ d['manufacturer'] }}</td>
+                        <td>{{ d['android_version'] }}</td>
+                        <td>{{ d['assigned_username'] or '' }}</td>
+                        <td>{{ d['username'] }}</td>
+                        <td>{{ d['created_at'] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted">No approved devices yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %} 

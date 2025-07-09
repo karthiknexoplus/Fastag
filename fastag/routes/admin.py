@@ -44,4 +44,11 @@ def user_approval():
     # List all devices pending approval
     devices = db.execute('SELECT * FROM devices WHERE approved=0').fetchall()
     users = db.execute('SELECT id, username FROM users').fetchall()
-    return render_template('user_approval.html', devices=devices, users=users) 
+    # List all approved devices with assigned user info
+    approved_devices = db.execute('''
+        SELECT d.*, u.username as assigned_username FROM devices d
+        LEFT JOIN users u ON d.assigned_user_id = u.id
+        WHERE d.approved=1
+        ORDER BY d.created_at DESC
+    ''').fetchall()
+    return render_template('user_approval.html', devices=devices, users=users, approved_devices=approved_devices) 

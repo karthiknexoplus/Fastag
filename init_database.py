@@ -128,6 +128,18 @@ def init_database():
                 FOREIGN KEY (lane_id) REFERENCES lanes (id),
                 FOREIGN KEY (reader_id) REFERENCES readers (id)
             );
+            CREATE TABLE IF NOT EXISTS devices (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id TEXT UNIQUE NOT NULL,
+                model TEXT,
+                manufacturer TEXT,
+                android_version TEXT,
+                approved INTEGER DEFAULT 0,
+                username TEXT,
+                password TEXT,
+                assigned_user_id INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         ''')
         # Example: Add missing column migration (add more as needed)
         # add_column_if_not_exists(cursor, 'kyc_users', 'email', 'TEXT')
