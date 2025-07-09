@@ -29,15 +29,15 @@ def user_approval():
         return redirect(url_for('auth.login'))
     db = get_db()
     if request.method == 'POST':
-        # Approve device and set username/password/assigned_user_id/ip_address
+        # Approve device and set username/password/assigned_user_id/service_ip
         device_id = request.form.get('device_id')
         username = request.form.get('username')
         password = request.form.get('password')
         assigned_user_id = request.form.get('assigned_user_id')
-        ip_address = request.form.get('ip_address')
+        service_ip = request.form.get('service_ip')
         if device_id and username and password:
-            db.execute('UPDATE devices SET approved=1, username=?, password=?, assigned_user_id=?, ip_address=? WHERE id=?',
-                       (username, password, assigned_user_id, ip_address, device_id))
+            db.execute('UPDATE devices SET approved=1, username=?, password=?, assigned_user_id=?, service_ip=? WHERE id=?',
+                       (username, password, assigned_user_id, service_ip, device_id))
             db.commit()
             flash('Device approved and user assigned!', 'success')
         else:
@@ -68,10 +68,10 @@ def edit_device(device_id):
         username = request.form.get('username')
         password = request.form.get('password')
         assigned_user_id = request.form.get('assigned_user_id')
-        ip_address = request.form.get('ip_address')
+        service_ip = request.form.get('service_ip')
         approved = 1 if request.form.get('approved') == 'on' else 0
-        db.execute('''UPDATE devices SET model=?, manufacturer=?, android_version=?, username=?, password=?, assigned_user_id=?, ip_address=?, approved=? WHERE id=?''',
-                   (model, manufacturer, android_version, username, password, assigned_user_id, ip_address, approved, device_id))
+        db.execute('''UPDATE devices SET model=?, manufacturer=?, android_version=?, username=?, password=?, assigned_user_id=?, service_ip=?, approved=? WHERE id=?''',
+                   (model, manufacturer, android_version, username, password, assigned_user_id, service_ip, approved, device_id))
         db.commit()
         flash('Device updated successfully!', 'success')
         return redirect(url_for('admin.user_approval'))

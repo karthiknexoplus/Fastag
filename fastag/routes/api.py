@@ -386,6 +386,6 @@ def device_login():
     device = db.execute('SELECT * FROM devices WHERE device_id=? AND username=? AND password=? AND approved=1',
                         (data['device_id'], data['username'], data['password'])).fetchone()
     if device:
-        return jsonify({"success": True, "message": "Login successful", "ip_address": device['ip_address']}), 200
+        return jsonify({"success": True, "message": "Login successful", "service_ip": device['service_ip']}), 200
     else:
         return jsonify({"success": False, "message": "Invalid credentials or device not approved"}), 401 

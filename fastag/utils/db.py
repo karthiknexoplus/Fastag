@@ -123,7 +123,7 @@ def init_db(db):
             username TEXT,
             password TEXT,
             assigned_user_id INTEGER,
-            ip_address TEXT,
+            service_ip TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     ''')
