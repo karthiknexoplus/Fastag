@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, current_app, send_file
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, current_app, send_file, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from fastag.utils.db import get_db, log_user_login, log_user_action
 import logging
@@ -108,6 +108,45 @@ def audit_log_export():
         writer.writerow([a['username'], a['action'], a['details'], a['action_time']])
     output.seek(0)
     return send_file(io.BytesIO(output.getvalue().encode()), mimetype='text/csv', as_attachment=True, download_name='audit_log.csv')
+
+@auth_bp.route('/api/audit-log', methods=['GET'])
+def api_audit_log():
+    """
+    Returns audit logs (user_actions) as JSON for external devices.
+    Query params: user, action, search, start_date, end_date, page, per_page
+    """
+    db = get_db()
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 20))
+    search = request.args.get('search', '').strip()
+    action_filter = request.args.get('action', '').strip()
+    user_filter = request.args.get('user', '').strip()
+    start_date = request.args.get('start_date', '').strip()
+    end_date = request.args.get('end_date', '').strip()
+    # Build query for actions
+    action_query = 'SELECT * FROM user_actions WHERE 1=1'
+    action_params = []
+    if user_filter:
+        action_query += ' AND username LIKE ?'
+        action_params.append(f'%{user_filter}%')
+    if action_filter:
+        action_query += ' AND action LIKE ?'
+        action_params.append(f'%{action_filter}%')
+    if search:
+        action_query += ' AND (details LIKE ? OR action LIKE ? OR username LIKE ?)'
+        action_params += [f'%{search}%', f'%{search}%', f'%{search}%']
+    if start_date:
+        action_query += ' AND DATE(action_time) >= ?'
+        action_params.append(start_date)
+    if end_date:
+        action_query += ' AND DATE(action_time) <= ?'
+        action_params.append(end_date)
+    action_query += ' ORDER BY action_time DESC LIMIT ? OFFSET ?'
+    action_params += [per_page, (page-1)*per_page]
+    actions = db.execute(action_query, action_params).fetchall()
+    # Convert to dicts
+    data = [dict(a) for a in actions]
+    return jsonify({"success": True, "actions": data, "page": page, "per_page": per_page, "count": len(data)})
 
 @auth_bp.route('/debug/env')
 def debug_env():
