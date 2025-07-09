@@ -51,4 +51,36 @@ def user_approval():
         WHERE d.approved=1
         ORDER BY d.created_at DESC
     ''').fetchall()
-    return render_template('user_approval.html', devices=devices, users=users, approved_devices=approved_devices) 
+    return render_template('user_approval.html', devices=devices, users=users, approved_devices=approved_devices)
+
+@admin_bp.route('/edit_device/<int:device_id>', methods=['GET', 'POST'])
+def edit_device(device_id):
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    device = db.execute('SELECT * FROM devices WHERE id=?', (device_id,)).fetchone()
+    users = db.execute('SELECT id, username FROM users').fetchall()
+    if request.method == 'POST':
+        model = request.form.get('model')
+        manufacturer = request.form.get('manufacturer')
+        android_version = request.form.get('android_version')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        assigned_user_id = request.form.get('assigned_user_id')
+        approved = 1 if request.form.get('approved') == 'on' else 0
+        db.execute('''UPDATE devices SET model=?, manufacturer=?, android_version=?, username=?, password=?, assigned_user_id=?, approved=? WHERE id=?''',
+                   (model, manufacturer, android_version, username, password, assigned_user_id, approved, device_id))
+        db.commit()
+        flash('Device updated successfully!', 'success')
+        return redirect(url_for('admin.user_approval'))
+    return render_template('edit_device.html', device=device, users=users)
+
+@admin_bp.route('/delete_device/<int:device_id>', methods=['POST'])
+def delete_device(device_id):
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    db.execute('DELETE FROM devices WHERE id=?', (device_id,))
+    db.commit()
+    flash('Device deleted successfully!', 'success')
+    return redirect(url_for('admin.user_approval')) 
