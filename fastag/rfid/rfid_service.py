@@ -128,9 +128,10 @@ logger = setup_logging()
 
 # Try to import Flask components, but handle gracefully if not available
 try:
-    from fastag import app  # Correct import for Flask app
+    from fastag import create_app  # Correct import for Flask app
     from fastag.utils.db import get_db
     # Patch SQLAlchemy URI to use absolute path
+    app = create_app()
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
     FLASK_AVAILABLE = True
     logger.info("Flask components imported successfully")
