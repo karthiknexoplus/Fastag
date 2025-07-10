@@ -1,0 +1,166 @@
+{
+  "info": {
+    "_postman_id": "fastag-bank-xml-api-synctime",
+    "name": "Fastag Bank XML API - SyncTime",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "SyncTime Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/xml"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<etc:ReqSyncTime xmlns:etc=\"http://npci.org/etc/schema/\">\n  <Head ver=\"1.0\" ts=\"{{timestamp}}\" orgId=\"{{orgId}}\" msgId=\"{{msgId}}\" />\n  <Signature>...</Signature>\n</etc:ReqSyncTime>"
+        },
+        "url": {
+          "raw": "{{bank_api_url}}",
+          "host": [
+            "{{bank_api_url}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Toll Plaza Heart Beat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/xml"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<etc:TollplazaHbeatReq xmlns:etc=\"http://npci.org/etc/schema/\">\n  <Head msgId=\"{{msgId}}\" orgId=\"{{orgId}}\" ts=\"{{timestamp}}\" ver=\"1.0\" />\n  <Txn id=\"{{txnId}}\" note=\"\" refId=\"\" refUrl=\"\" ts=\"{{timestamp}}\" type=\"Hbt\" orgTxnId=\"\">\n    <Meta>\n      <Meta1 name=\"\" value=\"\"/>\n      <Meta2 name=\"\" value=\"\"/>\n    </Meta>\n    <HbtMsg type=\"ALIVE\" acquirerId=\"\"/>\n    <Plaza geoCode=\"11.00,11.00\" id=\"1234\" name=\"Test Plaza\" subtype=\"State\" type=\"Toll\" address=\"\" fromDistrict=\"\" toDistrict=\"\" agencyCode=\"\">\n      <Lane id=\"1234\" direction=\"E\" readerId=\"\" Status=\"OPEN\" Mode=\"Normal\" laneType=\"Dedicated\"/>\n      <Lane id=\"5678\" direction=\"W\" readerId=\"\" Status=\"CLOSE\" Mode=\"Maintenance\" laneType=\"Hybrid\"/>\n    </Plaza>\n  </Txn>\n  <Signature>...</Signature>\n</etc:TollplazaHbeatReq>"
+        },
+        "url": {
+          "raw": "{{bank_api_heartbeat_url}}",
+          "host": [
+            "{{bank_api_heartbeat_url}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check Transaction Status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/xml"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<etc:ReqChkTxn xmlns:etc=\"http://npci.org/etc/schema/\">\n  <Head ver=\"1.0\" ts=\"{{timestamp}}\" orgId=\"{{orgId}}\" msgId=\"{{msgId}}\"/>\n  <Txn id=\"{{txnId}}\" note=\"\" refId=\"\" refUrl=\"\" ts=\"{{timestamp}}\" type=\"ChkTxn\" orgTxnId=\"\">\n    <TxnStatusReqList>\n      <Status txnId=\"{{status_txnId}}\" txnDate=\"{{status_txnDate}}\" plazaId=\"{{status_plazaId}}\" laneId=\"{{status_laneId}}\"/>\n    </TxnStatusReqList>\n  </Txn>\n  <Signature>...</Signature>\n</etc:ReqChkTxn>"
+        },
+        "url": {
+          "raw": "{{bank_api_checktxn_url}}",
+          "host": [
+            "{{bank_api_checktxn_url}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Request Tag Details",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/xml"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<etc:ReqTagDetails xmlns:etc=\"http://npci.org/etc/schema/\">\n  <Head ver=\"1.0\" ts=\"{{timestamp}}\" orgId=\"{{orgId}}\" msgId=\"{{msgId}}\" />\n  <Txn id=\"{{txnId}}\" note=\"\" refId=\"\" refUrl=\"\" ts=\"{{timestamp}}\" type=\"FETCH\" orgTxnId=\"\">\n    <Vehicle TID=\"{{TID}}\" vehicleRegNo=\"{{vehicleRegNo}}\" tagId=\"{{tagId}}\" />\n  </Txn>\n  <Signature>...</Signature>\n</etc:ReqTagDetails>"
+        },
+        "url": {
+          "raw": "{{bank_api_tagdetails_url}}",
+          "host": [
+            "{{bank_api_tagdetails_url}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Request Pay",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/xml"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<etc:ReqPay xmlns:etc=\"http://npci.org/etc/schema/\">\n  <Head msgId=\"{{msgId}}\" orgId=\"{{orgId}}\" ts=\"{{timestamp}}\" ver=\"1.0\" />\n  <Meta></Meta>\n  <Txn id=\"{{txnId}}\" note=\"\" orgTxnId=\"\" refId=\"\" refUrl=\"\" ts=\"{{timestamp}}\" type=\"DEBIT\">\n    <EntryTxn id=\"{{entryTxnId}}\" tsRead=\"{{timestamp}}\" type=\"DEBIT\" />\n  </Txn>\n  <Plaza geoCode=\"11.00,11.00\" id=\"1234\" name=\"Test Plaza\" subtype=\"State\" type=\"Toll\">\n    <EntryPlaza geoCode=\"11.00,11.00\" id=\"1234\" name=\"Test Plaza\" subtype=\"State\" type=\"Toll\" />\n    <Lane direction=\"N\" id=\"a\" readerId=\"12\" Status=\"OPEN\" laneType=\"Dedicated\" ExitGate=\"\" Floor=\"\" Mode=\"Normal\" />\n    <EntryLane direction=\"N\" id=\"a\" readerId=\"12\" Status=\"OPEN\" Mode=\"Normal\" laneType=\"Dedicated\" EntryGate=\"\" Floor=\"\" />\n    <ReaderVerificationResult publicKeyCVV=\"\" procRestrictionResult=\"\" tagVerified=\"NETC TAG\" ts=\"{{timestamp}}\" txnCounter=\"1234\" vehicleAuth=\"UNKNOWN\">\n      <TagUserMemory>\n        <Detail name=\"TagSignature\" value=\"\" />\n        <Detail name=\"TagVRN\" value=\"XXXXXXXXXXXX\" />\n        <Detail name=\"TagVC\" value=\"04\" />\n      </TagUserMemory>\n    </ReaderVerificationResult>\n  </Plaza>\n  <Vehicle TID=\"{{TID}}\" tagId=\"{{tagId}}\" wim=\"\" staticweight=\"\">\n    <VehicleDetails>\n      <Detail name=\"AVC\" value=\"1001\" />\n      <Detail name=\"LPNumber\" value=\"MH04BY13\" />\n    </VehicleDetails>\n  </Vehicle>\n  <Payment>\n    <Amount curr=\"INR\" value=\"100\" PriceMode=\"DISTANCE\" IsOverWeightCharged=\"FALSE\" PaymentMode=\"Tag\">\n      <OverwightAmount curr=\"INR\" value=\"0\" PaymentMode=\"Tag\"/>\n    </Amount>\n  </Payment>\n  <Signature>...</Signature>\n</etc:ReqPay>"
+        },
+        "url": {
+          "raw": "{{bank_api_pay_url}}",
+          "host": [
+            "{{bank_api_pay_url}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Request Query Exception List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/xml"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<etc:ReqQueryExceptionList xmlns:etc=\"http://npci.org/etc/schema/\">\n  <Head ver=\"1.0\" ts=\"{{timestamp}}\" orgId=\"{{orgId}}\" msgId=\"{{msgId}}\" />\n  <Txn id=\"{{txnId}}\" note=\"\" refId=\"\" refUrl=\"\" ts=\"{{timestamp}}\" type=\"Query\" orgTxnId=\"\">\n    <ExceptionList>\n      <Exception excCode=\"{{excCode1}}\" lastFetchTime=\"{{lastFetchTime1}}\" />\n      <Exception excCode=\"{{excCode2}}\" lastFetchTime=\"{{lastFetchTime2}}\" />\n    </ExceptionList>\n  </Txn>\n  <Signature>...</Signature>\n</etc:ReqQueryExceptionList>"
+        },
+        "url": {
+          "raw": "{{bank_api_exceptionlist_url}}",
+          "host": [
+            "{{bank_api_exceptionlist_url}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "bank_api_url",
+      "value": "https://uat-bank-url.example.com/sync_time"
+    },
+    {
+      "key": "timestamp",
+      "value": "2024-06-07T12:00:00"
+    },
+    {
+      "key": "orgId",
+      "value": "XXXX"
+    },
+    {
+      "key": "msgId",
+      "value": "0001"
+    }
+  ]
+} 

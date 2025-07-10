@@ -169,45 +169,6 @@ def fastag_balance():
     
     return render_template('fastag_balance.html', billers=FASTAG_BILLERS)
 
-@fastag_balance_bp.route('/api/fastag-balance', methods=['GET'])
-def api_fastag_balance():
-    reg_no = request.args.get('reg_no', '').strip().upper()
-    selected_bank = request.args.get('bank', '').strip()
-    if not reg_no:
-        return jsonify({"success": False, "error": "Registration number is required"}), 400
-    if not selected_bank:
-        return jsonify({"success": False, "error": "Bank name is required"}), 400
-    # Find the biller ID for the selected bank
-    biller_id = None
-    for biller in FASTAG_BILLERS:
-        if biller['name'].lower() == selected_bank.lower():
-            biller_id = biller['billerId']
-            break
-    if not biller_id:
-        return jsonify({"success": False, "error": "Invalid bank name"}), 400
-    try:
-        url = "https://www.acko.com/api/app/fastag/"
-        params = {
-            'regNo': reg_no,
-            'billerId': biller_id,
-            'type': 'fastag_balance'
-        }
-        headers = {
-            'accept': '*/*',
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
-        }
-        response = requests.get(url, params=params, headers=headers, timeout=30)
-        if response.status_code == 200:
-            data = response.json()
-            if 'data' in data and data['data']:
-                return jsonify({"success": True, "fastag_info": data['data'][0]})
-            else:
-                return jsonify({"success": False, "error": "No Fastag data found for the provided registration number"}), 404
-        else:
-            return jsonify({"success": False, "error": f"API request failed with status {response.status_code}"}), 500
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
 @fastag_balance_bp.route('/debug_fastag_api', methods=['GET'])
 def debug_fastag_api():
     """Debug route to test the API directly"""
