@@ -146,7 +146,4 @@ def create_app():
     @app.context_processor
     def inject_system_info():
         return {'system_info': Markup(get_rpi_system_info())}
-    return app
-
-# Create the app instance for direct import
-app = create_app() 
+    return app 
