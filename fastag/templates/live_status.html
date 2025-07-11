@@ -141,7 +141,7 @@
             <tbody>
                 <!-- Self Device -->
                 {% if status_data.Self %}
-                <tr class="device-row" onclick="toggleRow('self')">
+                <tr class="device-row" onclick="toggleRow('self', event)">
                     <td>
                         <span class="ts-os-icon {{ get_os_icon(status_data.Self.OS) }}"></span>
                         <b>{{ status_data.Self.HostName }}</b>
@@ -149,7 +149,7 @@
                     </td>
                     <td>
                         {% for ip in status_data.Self.TailscaleIPs %}
-                        <span class="ts-ip-link" onclick="showIpPop(event, '{{ ip }}', 'self')">{{ ip }}</span>
+                        <span class="ts-ip-link no-row-toggle" onclick="showIpPop(event, '{{ ip }}', 'self')">{{ ip }}</span>
                         {% endfor %}
                     </td>
                     <td>{{ status_data.Version }}</td>
@@ -190,7 +190,7 @@
                 {% endif %}
                 <!-- Peer Devices -->
                 {% for peer_key, peer in status_data.Peer.items() %}
-                <tr class="device-row" onclick="toggleRow('{{ peer.ID }}')">
+                <tr class="device-row" onclick="toggleRow('{{ peer.ID }}', event)">
                     <td>
                         <span class="ts-os-icon {{ get_os_icon(peer.OS) }}"></span>
                         <b>{{ peer.HostName }}</b>
@@ -198,7 +198,7 @@
                     </td>
                     <td>
                         {% for ip in peer.TailscaleIPs %}
-                        <span class="ts-ip-link" onclick="showIpPop(event, '{{ ip }}', '{{ peer.ID }}')">{{ ip }}</span>
+                        <span class="ts-ip-link no-row-toggle" onclick="showIpPop(event, '{{ ip }}', '{{ peer.ID }}')">{{ ip }}</span>
                         {% endfor %}
                     </td>
                     <td>{{ status_data.Version }}</td>
@@ -269,7 +269,9 @@ function refreshStatus() {
         });
 }
 
-function toggleRow(id) {
+function toggleRow(id, event) {
+    // Only toggle if not clicking on an element with 'no-row-toggle' class
+    if (event && event.target.classList.contains('no-row-toggle')) return;
     const row = document.getElementById('row-' + id);
     const chevron = document.getElementById('chevron-' + id);
     if (row.style.display === 'none' || row.style.display === '') {
