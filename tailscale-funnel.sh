@@ -51,7 +51,7 @@ start_funnel() {
     pkill -f "tailscale funnel" || true
     
     # Start the funnel
-    if tailscale funnel "$FUNNEL_PORT" >/dev/null 2>&1; then
+    if tailscale funnel --bg "$FUNNEL_PORT" >/dev/null 2>&1; then
         log "SUCCESS: Funnel started successfully"
         log "Funnel URL: https://${FUNNEL_HOSTNAME}.tail1b76dc.ts.net/"
         return 0
