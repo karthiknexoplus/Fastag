@@ -137,13 +137,16 @@
             </h1>
             <p class="text-muted mb-0">Tailscale network device status (table view)</p>
         </div>
-        <button class="btn refresh-btn" onclick="refreshStatus()" id="refreshBtn">
-            <i class="fas fa-sync-alt me-2"></i>
-            <span class="refresh-text">Refresh Status</span>
-            <span class="loading-spinner">
-                <i class="fas fa-spinner fa-spin"></i>
-            </span>
-        </button>
+        <div class="d-flex align-items-center gap-2">
+            <input id="deviceSearch" type="text" class="form-control form-control-sm" style="width: 220px;" placeholder="Search devices..." oninput="filterDevices()">
+            <button class="btn refresh-btn" onclick="refreshStatus()" id="refreshBtn">
+                <i class="fas fa-sync-alt me-2"></i>
+                <span class="refresh-text">Refresh Status</span>
+                <span class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+            </button>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -225,8 +228,13 @@
                     <td>{{ status_data.Version }}</td>
                     <td>{{ peer.OS|title }}</td>
                     <td>
-                        <span class="ts-status-dot ts-status-{{ get_status_color(peer.Online, peer.Active) }}"></span>
-                        {% if peer.Online and peer.Active %}Online{% elif peer.Online %}Connected{% else %}Offline{% endif %}
+                        {% if peer.Online and peer.Active %}
+                            <span class="ts-status-dot ts-status-online"></span>Online
+                        {% elif peer.Online %}
+                            <span class="ts-status-dot ts-status-warning"></span>Connected
+                        {% else %}
+                            <span class="ts-status-dot ts-status-offline"></span>Offline
+                        {% endif %}
                         {% if peer.Expired %}<span class="ts-badge ts-badge-warning">Expired</span>{% endif %}
                         {% if peer.SSH %}<span class="ts-badge ts-badge-ssh">SSH</span>{% endif %}
                         {% if peer.Funnel %}<span class="ts-badge ts-badge-funnel">Funnel</span>{% endif %}
@@ -320,6 +328,28 @@ function copyIp(ip) {
     alert('Copied: ' + ip);
     hideIpPop();
 }
+
+function filterDevices() {
+    const search = document.getElementById('deviceSearch').value.toLowerCase();
+    const rows = document.querySelectorAll('.device-row.main-row');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(search)) {
+            row.style.display = '';
+            // Also show expanded row if open
+            const id = row.querySelector('.ts-os-toggle').getAttribute('onclick').match(/'([^']+)'/)[1];
+            const expanded = document.getElementById('row-' + id);
+            if (expanded && expanded.style.display !== 'none') expanded.style.display = '';
+        } else {
+            row.style.display = 'none';
+            // Hide expanded row too
+            const id = row.querySelector('.ts-os-toggle').getAttribute('onclick').match(/'([^']+)'/)[1];
+            const expanded = document.getElementById('row-' + id);
+            if (expanded) expanded.style.display = 'none';
+        }
+    });
+}
+
 // Auto-refresh every 30 seconds
 setInterval(() => {
     fetch('/api/live_status')
