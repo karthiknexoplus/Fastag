@@ -101,6 +101,17 @@
         box-shadow: none;
     }
     .ts-chevron-btn:focus { outline: none; box-shadow: none; }
+    .ts-os-toggle {
+        cursor: pointer;
+        transition: color 0.2s, box-shadow 0.2s;
+        border-radius: 50%;
+        padding: 0.15em 0.25em;
+    }
+    .ts-os-toggle:hover {
+        color: #fff;
+        background: #764ba2;
+        box-shadow: 0 2px 8px rgba(118,75,162,0.12);
+    }
     @media (max-width: 900px) {
         .ts-table th, .ts-table td { padding: 0.5rem 0.5rem; }
         .ts-table { font-size: 0.93rem; }
@@ -153,7 +164,7 @@
                 {% if status_data.Self %}
                 <tr class="device-row main-row">
                     <td>
-                        <span class="ts-os-icon {{ get_os_icon(status_data.Self.OS) }}"></span>
+                        <span class="ts-os-icon {{ get_os_icon(status_data.Self.OS) }} ts-os-toggle" onclick="toggleRow('self', event)"></span>
                         <b>{{ status_data.Self.HostName }}</b>
                         <div class="text-muted small">{{ status_data.Self.DNSName }}</div>
                     </td>
@@ -168,7 +179,7 @@
                         <span class="ts-status-dot ts-status-online"></span>Online
                     </td>
                     <td>Now</td>
-                    <td><button class="ts-chevron-btn" onclick="toggleRow('self', event)"><i class="fas fa-chevron-right ts-chevron" id="chevron-self"></i></button></td>
+                    <td><!-- chevron removed --></td>
                 </tr>
                 <tr class="expanded-row" id="row-self" style="display:none;" onclick="event.stopPropagation();">
                     <td colspan="7">
@@ -202,7 +213,7 @@
                 {% for peer_key, peer in status_data.Peer.items() %}
                 <tr class="device-row main-row">
                     <td>
-                        <span class="ts-os-icon {{ get_os_icon(peer.OS) }}"></span>
+                        <span class="ts-os-icon {{ get_os_icon(peer.OS) }} ts-os-toggle" onclick="toggleRow('{{ peer.ID }}', event)"></span>
                         <b>{{ peer.HostName }}</b>
                         <div class="text-muted small">{{ peer.DNSName }}</div>
                     </td>
@@ -221,7 +232,7 @@
                         {% if peer.Funnel %}<span class="ts-badge ts-badge-funnel">Funnel</span>{% endif %}
                     </td>
                     <td>{{ format_timestamp(peer.LastSeen) }}</td>
-                    <td><button class="ts-chevron-btn" onclick="toggleRow('{{ peer.ID }}', event)"><i class="fas fa-chevron-right ts-chevron" id="chevron-{{ peer.ID }}"></i></button></td>
+                    <td><!-- chevron removed --></td>
                 </tr>
                 <tr class="expanded-row" id="row-{{ peer.ID }}" style="display:none;" onclick="event.stopPropagation();">
                     <td colspan="7">
@@ -285,10 +296,10 @@ function toggleRow(id, event) {
     const chevron = document.getElementById('chevron-' + id);
     if (row.style.display === 'none' || row.style.display === '') {
         row.style.display = '';
-        chevron.classList.add('expanded');
+        if (chevron) chevron.classList.add('expanded');
     } else {
         row.style.display = 'none';
-        chevron.classList.remove('expanded');
+        if (chevron) chevron.classList.remove('expanded');
     }
 }
 
