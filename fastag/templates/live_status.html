@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+
+{% block title %}Live Status - FASTag Parking{% endblock %}
+
+{% block head %}
+<style>
+    .status-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(80,80,160,0.08);
+        border: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+    }
+    .status-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(80,80,160,0.12);
+    }
+    .device-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px 12px 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .device-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    }
+    .device-content {
+        padding: 1.5rem;
+    }
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-online { background: #d4edda; color: #155724; }
+    .status-offline { background: #f8d7da; color: #721c24; }
+    .status-warning { background: #fff3cd; color: #856404; }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .info-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #764ba2;
+    }
+    .info-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.3rem;
+    }
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+    }
+    .network-info {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    .refresh-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .refresh-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    .loading-spinner {
+        display: none;
+    }
+    .loading .loading-spinner {
+        display: inline-block;
+    }
+    .loading .refresh-text {
+        display: none;
+    }
+    .device-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .ip-list {
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+    }
+    .ip-item {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        margin: 0.2rem 0;
+    }
+    .capabilities-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .capability-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 text-dark fw-bold">
+                <i class="fas fa-wifi text-primary me-2"></i>
+                Live Status
+            </h1>
+            <p class="text-muted mb-0">Real-time Tailscale network device status and connectivity</p>
+        </div>
+        <button class="btn refresh-btn" onclick="refreshStatus()" id="refreshBtn">
+            <i class="fas fa-sync-alt me-2"></i>
+            <span class="refresh-text">Refresh Status</span>
+            <span class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </span>
+        </button>
+    </div>
+
+    {% if status_data %}
+        <!-- Network Overview -->
+        <div class="network-info">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-2">
+                        <i class="fas fa-network-wired me-2"></i>
+                        Network Overview
+                    </h4>
+                    <p class="mb-0">
+                        <strong>Tailnet:</strong> {{ status_data.CurrentTailnet.Name }} | 
+                        <strong>DNS Suffix:</strong> {{ status_data.CurrentTailnet.MagicDNSSuffix }} |
+                        <strong>Version:</strong> {{ status_data.Version }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="status-badge status-online">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Connected
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Device (Self) -->
+        {% if status_data.Self %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="status-card">
+                    <div class="device-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="mb-2">
+                                    <i class="fas fa-server me-2"></i>
+                                    Current Device
+                                </h4>
+                                <h5 class="mb-1">{{ status_data.Self.HostName }}</h5>
+                                <p class="mb-0 opacity-75">{{ status_data.Self.DNSName }}</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="status-badge status-online">
+                                    <i class="fas fa-circle me-1"></i>
+                                    Online
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="device-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-microchip me-1"></i>Operating System
+                                </div>
+                                <div class="info-value">
+                                    <i class="{{ get_os_icon(status_data.Self.OS) }} me-1"></i>
+                                    {{ status_data.Self.OS|title }}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-id-badge me-1"></i>Device ID
+                                </div>
+                                <div class="info-value">{{ status_data.Self.ID }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-clock me-1"></i>Created
+                                </div>
+                                <div class="info-value">{{ format_timestamp(status_data.Self.Created) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-calendar me-1"></i>Key Expiry
+                                </div>
+                                <div class="info-value">{{ format_timestamp(status_data.Self.KeyExpiry) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-download me-1"></i>Received
+                                </div>
+                                <div class="info-value">{{ format_bytes(status_data.Self.RxBytes) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-upload me-1"></i>Sent
+                                </div>
+                                <div class="info-value">{{ format_bytes(status_data.Self.TxBytes) }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- IP Addresses -->
+                        <div class="mt-3">
+                            <h6 class="text-dark fw-bold mb-2">
+                                <i class="fas fa-network-wired me-1"></i>IP Addresses
+                            </h6>
+                            <div class="ip-list">
+                                {% for ip in status_data.Self.TailscaleIPs %}
+                                <div class="ip-item">{{ ip }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Capabilities -->
+                        {% if status_data.Self.Capabilities %}
+                        <div class="mt-3">
+                            <h6 class="text-dark fw-bold mb-2">
+                                <i class="fas fa-shield-alt me-1"></i>Capabilities
+                            </h6>
+                            <div class="capabilities-list">
+                                {% for capability in status_data.Self.Capabilities %}
+                                <span class="capability-badge">{{ capability.split('/')[-1] }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Peer Devices -->
+        {% if status_data.Peer %}
+        <div class="row">
+            <div class="col-12">
+                <h4 class="text-dark fw-bold mb-3">
+                    <i class="fas fa-users me-2"></i>
+                    Connected Devices ({{ status_data.Peer|length }})
+                </h4>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for peer_key, peer in status_data.Peer.items() %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="status-card">
+                    <div class="device-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-1">{{ peer.HostName }}</h5>
+                                <p class="mb-0 opacity-75">{{ peer.DNSName }}</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="status-badge status-{{ get_status_color(peer.Online, peer.Active) }}">
+                                    <i class="fas fa-circle me-1"></i>
+                                    {% if peer.Online and peer.Active %}Online{% elif peer.Online %}Connected{% else %}Offline{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="device-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-microchip me-1"></i>OS
+                                </div>
+                                <div class="info-value">
+                                    <i class="{{ get_os_icon(peer.OS) }} me-1"></i>
+                                    {{ peer.OS|title }}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-id-badge me-1"></i>Device ID
+                                </div>
+                                <div class="info-value">{{ peer.ID }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-clock me-1"></i>Last Seen
+                                </div>
+                                <div class="info-value">{{ format_timestamp(peer.LastSeen) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-calendar me-1"></i>Created
+                                </div>
+                                <div class="info-value">{{ format_timestamp(peer.Created) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-download me-1"></i>Received
+                                </div>
+                                <div class="info-value">{{ format_bytes(peer.RxBytes) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-upload me-1"></i>Sent
+                                </div>
+                                <div class="info-value">{{ format_bytes(peer.TxBytes) }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- IP Addresses -->
+                        {% if peer.TailscaleIPs %}
+                        <div class="mt-3">
+                            <h6 class="text-dark fw-bold mb-2">
+                                <i class="fas fa-network-wired me-1"></i>IP Addresses
+                            </h6>
+                            <div class="ip-list">
+                                {% for ip in peer.TailscaleIPs %}
+                                <div class="ip-item">{{ ip }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Additional Info -->
+                        {% if peer.Expired %}
+                        <div class="mt-2">
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Key Expired
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    {% else %}
+        <!-- Error State -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card p-5 text-center">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h4 class="text-dark mb-2">Unable to Load Status</h4>
+                    <p class="text-muted mb-3">Failed to retrieve Tailscale status information.</p>
+                    <button class="btn refresh-btn" onclick="refreshStatus()">
+                        <i class="fas fa-sync-alt me-2"></i>Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function refreshStatus() {
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('loading');
+    
+    fetch('/api/live_status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to refresh status: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing status:', error);
+            alert('Failed to refresh status. Please try again.');
+        })
+        .finally(() => {
+            btn.classList.remove('loading');
+        });
+}
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+    fetch('/api/live_status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update timestamp or trigger reload if needed
+                console.log('Status updated:', data.timestamp);
+            }
+        })
+        .catch(error => {
+            console.error('Auto-refresh error:', error);
+        });
+}, 30000);
+</script>
+{% endblock %} 
