@@ -5,8 +5,8 @@ Wants=tailscaled.service
 
 [Service]
 Type=simple
-User=ubuntu
-Group=ubuntu
+User=root
+Group=root
 WorkingDirectory=/home/ubuntu/Fastag
 ExecStart=/home/ubuntu/Fastag/tailscale-funnel.sh start
 Restart=always
