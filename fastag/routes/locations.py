@@ -65,9 +65,11 @@ def api_add_location():
         cursor = db.cursor()
         cursor.execute('INSERT INTO locations (name, address, site_id) VALUES (?, ?, ?)', (name, address, site_id))
         db.commit()
-        location_id = cursor.lastrowid
+        # Fetch updated list
+        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations_list = [dict(l) for l in locations]
         logging.info(f"Location added via API: {name} ({site_id})")
-        return {"success": True, "location_id": location_id}, 201
+        return {"success": True, "locations": locations_list}, 200
     except Exception as e:
         logging.error(f"Error adding location via API: {e}")
         return {"success": False, "error": str(e)}, 500
@@ -89,8 +91,11 @@ def api_edit_location(id):
         db.commit()
         if cursor.rowcount == 0:
             return {"success": False, "error": "Location not found"}, 404
+        # Fetch updated list
+        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations_list = [dict(l) for l in locations]
         logging.info(f"Location updated via API: {name} (ID {id})")
-        return {"success": True}, 200
+        return {"success": True, "locations": locations_list}, 200
     except Exception as e:
         logging.error(f"Error editing location via API: {e}")
         return {"success": False, "error": str(e)}, 500
@@ -105,8 +110,11 @@ def api_delete_location(id):
         db.commit()
         if cursor.rowcount == 0:
             return {"success": False, "error": "Location not found"}, 404
+        # Fetch updated list
+        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations_list = [dict(l) for l in locations]
         logging.info(f"Location deleted via API (ID {id})")
-        return {"success": True}, 200
+        return {"success": True, "locations": locations_list}, 200
     except Exception as e:
         logging.error(f"Error deleting location via API: {e}")
         return {"success": False, "error": str(e)}, 500
