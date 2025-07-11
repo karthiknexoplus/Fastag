@@ -133,100 +133,118 @@
     /* Compact Device Cards */
     .device-card {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(80,80,160,0.08);
-        border: 1px solid #f0f0f0;
-        transition: all 0.3s ease;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(80,80,160,0.06);
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
         cursor: pointer;
         position: relative;
         overflow: hidden;
+        height: 80px;
     }
     .device-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(80,80,160,0.12);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(80,80,160,0.1);
     }
     .device-card-header {
-        padding: 1.5rem;
+        padding: 1rem;
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.8rem;
+        height: 100%;
     }
     .device-icon-large {
-        font-size: 2.5rem;
+        font-size: 1.8rem;
         color: #764ba2;
-        min-width: 60px;
+        min-width: 40px;
         text-align: center;
     }
     .device-info {
         flex: 1;
+        min-width: 0;
     }
     .device-name {
         font-weight: 600;
         color: #333;
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .device-dns {
         color: #6c757d;
-        font-size: 0.85rem;
-        margin: 0.2rem 0 0 0;
+        font-size: 0.75rem;
+        margin: 0.1rem 0 0 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .device-status {
         text-align: right;
-        min-width: 80px;
+        min-width: 70px;
+    }
+    .status-badge {
+        padding: 0.25rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
     }
     .device-details {
         display: none;
-        padding: 0 1.5rem 1.5rem 1.5rem;
+        padding: 1rem;
         background: #f8f9fa;
-        margin: 0 -1.5rem -1.5rem -1.5rem;
+        border-top: 1px solid #e9ecef;
     }
     .device-details.expanded {
         display: block;
     }
     .details-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 0.8rem;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.6rem;
     }
     .detail-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem;
+        padding: 0.4rem 0.6rem;
         background: white;
-        border-radius: 6px;
-        border-left: 3px solid #764ba2;
+        border-radius: 4px;
+        border-left: 2px solid #764ba2;
+        font-size: 0.8rem;
     }
     .detail-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: #6c757d;
         font-weight: 500;
     }
     .detail-value {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         color: #333;
         font-weight: 600;
     }
     .ip-list-compact {
         background: white;
-        padding: 0.8rem;
-        border-radius: 6px;
+        padding: 0.6rem;
+        border-radius: 4px;
         margin-top: 0.5rem;
     }
     .ip-item-compact {
         font-family: 'Courier New', monospace;
-        font-size: 0.85rem;
-        margin: 0.2rem 0;
+        font-size: 0.75rem;
+        margin: 0.1rem 0;
         color: #333;
     }
     .expand-indicator {
         position: absolute;
-        bottom: 0.5rem;
-        right: 1rem;
+        bottom: 0.3rem;
+        right: 0.8rem;
         color: #764ba2;
-        font-size: 0.9rem;
-        transition: transform 0.3s ease;
+        font-size: 0.8rem;
+        transition: transform 0.2s ease;
     }
     .expand-indicator.expanded {
         transform: rotate(180deg);
@@ -258,18 +276,18 @@
         <!-- Network Overview -->
         <div class="network-info">
             <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h4 class="mb-2">
+                <div class="col-md-9">
+                    <h5 class="mb-1">
                         <i class="fas fa-network-wired me-2"></i>
                         Network Overview
-                    </h4>
-                    <p class="mb-0">
+                    </h5>
+                    <p class="mb-0 small">
                         <strong>Tailnet:</strong> {{ status_data.CurrentTailnet.Name }} | 
-                        <strong>DNS Suffix:</strong> {{ status_data.CurrentTailnet.MagicDNSSuffix }} |
+                        <strong>DNS:</strong> {{ status_data.CurrentTailnet.MagicDNSSuffix }} |
                         <strong>Version:</strong> {{ status_data.Version }}
                     </p>
                 </div>
-                <div class="col-md-4 text-end">
+                <div class="col-md-3 text-end">
                     <div class="status-badge status-online">
                         <i class="fas fa-check-circle me-1"></i>
                         Connected
@@ -280,18 +298,18 @@
 
         <!-- Current Device (Self) -->
         {% if status_data.Self %}
-        <div class="row mb-4">
+        <div class="row mb-3">
             <div class="col-12">
                 <div class="status-card">
                     <div class="device-header">
                         <div class="row align-items-center">
                             <div class="col-md-8">
-                                <h4 class="mb-2">
+                                <h5 class="mb-1">
                                     <i class="fas fa-server me-2"></i>
                                     Current Device
-                                </h4>
-                                <h5 class="mb-1">{{ status_data.Self.HostName }}</h5>
-                                <p class="mb-0 opacity-75">{{ status_data.Self.DNSName }}</p>
+                                </h5>
+                                <h6 class="mb-1">{{ status_data.Self.HostName }}</h6>
+                                <p class="mb-0 opacity-75 small">{{ status_data.Self.DNSName }}</p>
                             </div>
                             <div class="col-md-4 text-end">
                                 <div class="status-badge status-online">
@@ -305,7 +323,7 @@
                         <div class="info-grid">
                             <div class="info-item">
                                 <div class="info-label">
-                                    <i class="fas fa-microchip me-1"></i>Operating System
+                                    <i class="fas fa-microchip me-1"></i>OS
                                 </div>
                                 <div class="info-value">
                                     <i class="{{ get_os_icon(status_data.Self.OS) }} me-1"></i>
@@ -388,7 +406,7 @@
         
         <div class="row">
             {% for peer_key, peer in status_data.Peer.items() %}
-            <div class="col-lg-4 col-md-6 mb-3">
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-2">
                 <div class="device-card" onclick="toggleDeviceDetails('{{ peer.ID }}')">
                     <div class="device-card-header">
                         <div class="device-icon-large">
