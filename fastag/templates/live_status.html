@@ -164,7 +164,7 @@
                 {% if status_data.Self %}
                 <tr class="device-row main-row">
                     <td>
-                        <span class="ts-os-icon {{ get_os_icon(status_data.Self.OS) }} ts-os-toggle" onclick="toggleRow('self', event)"></span>
+                        <span class="ts-os-icon {{ get_os_icon(status_data.Self.OS) }} ts-os-toggle" onclick="toggleRow('self', event); event.stopPropagation();"></span>
                         <b>{{ status_data.Self.HostName }}</b>
                         <div class="text-muted small">{{ status_data.Self.DNSName }}</div>
                     </td>
@@ -213,7 +213,7 @@
                 {% for peer_key, peer in status_data.Peer.items() %}
                 <tr class="device-row main-row">
                     <td>
-                        <span class="ts-os-icon {{ get_os_icon(peer.OS) }} ts-os-toggle" onclick="toggleRow('{{ peer.ID }}', event)"></span>
+                        <span class="ts-os-icon {{ get_os_icon(peer.OS) }} ts-os-toggle" onclick="toggleRow('{{ peer.ID }}', event); event.stopPropagation();"></span>
                         <b>{{ peer.HostName }}</b>
                         <div class="text-muted small">{{ peer.DNSName }}</div>
                     </td>
@@ -291,7 +291,7 @@ function refreshStatus() {
 }
 
 function toggleRow(id, event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     const row = document.getElementById('row-' + id);
     const chevron = document.getElementById('chevron-' + id);
     if (row.style.display === 'none' || row.style.display === '') {
