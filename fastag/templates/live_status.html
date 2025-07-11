@@ -91,6 +91,16 @@
     .ts-chevron.expanded {
         transform: rotate(90deg);
     }
+    .ts-chevron-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        outline: none;
+        box-shadow: none;
+    }
+    .ts-chevron-btn:focus { outline: none; box-shadow: none; }
     @media (max-width: 900px) {
         .ts-table th, .ts-table td { padding: 0.5rem 0.5rem; }
         .ts-table { font-size: 0.93rem; }
@@ -141,7 +151,7 @@
             <tbody>
                 <!-- Self Device -->
                 {% if status_data.Self %}
-                <tr class="device-row main-row" onclick="toggleRow('self', event)">
+                <tr class="device-row main-row">
                     <td>
                         <span class="ts-os-icon {{ get_os_icon(status_data.Self.OS) }}"></span>
                         <b>{{ status_data.Self.HostName }}</b>
@@ -158,7 +168,7 @@
                         <span class="ts-status-dot ts-status-online"></span>Online
                     </td>
                     <td>Now</td>
-                    <td><i class="fas fa-chevron-right ts-chevron" id="chevron-self"></i></td>
+                    <td><button class="ts-chevron-btn" onclick="toggleRow('self', event)"><i class="fas fa-chevron-right ts-chevron" id="chevron-self"></i></button></td>
                 </tr>
                 <tr class="expanded-row" id="row-self" style="display:none;" onclick="event.stopPropagation();">
                     <td colspan="7">
@@ -190,7 +200,7 @@
                 {% endif %}
                 <!-- Peer Devices -->
                 {% for peer_key, peer in status_data.Peer.items() %}
-                <tr class="device-row main-row" onclick="toggleRow('{{ peer.ID }}', event)">
+                <tr class="device-row main-row">
                     <td>
                         <span class="ts-os-icon {{ get_os_icon(peer.OS) }}"></span>
                         <b>{{ peer.HostName }}</b>
@@ -211,7 +221,7 @@
                         {% if peer.Funnel %}<span class="ts-badge ts-badge-funnel">Funnel</span>{% endif %}
                     </td>
                     <td>{{ format_timestamp(peer.LastSeen) }}</td>
-                    <td><i class="fas fa-chevron-right ts-chevron" id="chevron-{{ peer.ID }}"></i></td>
+                    <td><button class="ts-chevron-btn" onclick="toggleRow('{{ peer.ID }}', event)"><i class="fas fa-chevron-right ts-chevron" id="chevron-{{ peer.ID }}"></i></button></td>
                 </tr>
                 <tr class="expanded-row" id="row-{{ peer.ID }}" style="display:none;" onclick="event.stopPropagation();">
                     <td colspan="7">
@@ -270,8 +280,7 @@ function refreshStatus() {
 }
 
 function toggleRow(id, event) {
-    // Only toggle if not clicking on an element with 'no-row-toggle' class and only on main row
-    if (event && (event.target.classList.contains('no-row-toggle') || !event.currentTarget.classList.contains('main-row'))) return;
+    event.stopPropagation();
     const row = document.getElementById('row-' + id);
     const chevron = document.getElementById('chevron-' + id);
     if (row.style.display === 'none' || row.style.display === '') {
