@@ -141,7 +141,7 @@
             <tbody>
                 <!-- Self Device -->
                 {% if status_data.Self %}
-                <tr class="device-row" onclick="toggleRow('self', event)">
+                <tr class="device-row main-row" onclick="toggleRow('self', event)">
                     <td>
                         <span class="ts-os-icon {{ get_os_icon(status_data.Self.OS) }}"></span>
                         <b>{{ status_data.Self.HostName }}</b>
@@ -160,7 +160,7 @@
                     <td>Now</td>
                     <td><i class="fas fa-chevron-right ts-chevron" id="chevron-self"></i></td>
                 </tr>
-                <tr class="expanded-row" id="row-self" style="display:none;">
+                <tr class="expanded-row" id="row-self" style="display:none;" onclick="event.stopPropagation();">
                     <td colspan="7">
                         <div class="row">
                             <div class="col-md-6">
@@ -190,7 +190,7 @@
                 {% endif %}
                 <!-- Peer Devices -->
                 {% for peer_key, peer in status_data.Peer.items() %}
-                <tr class="device-row" onclick="toggleRow('{{ peer.ID }}', event)">
+                <tr class="device-row main-row" onclick="toggleRow('{{ peer.ID }}', event)">
                     <td>
                         <span class="ts-os-icon {{ get_os_icon(peer.OS) }}"></span>
                         <b>{{ peer.HostName }}</b>
@@ -213,7 +213,7 @@
                     <td>{{ format_timestamp(peer.LastSeen) }}</td>
                     <td><i class="fas fa-chevron-right ts-chevron" id="chevron-{{ peer.ID }}"></i></td>
                 </tr>
-                <tr class="expanded-row" id="row-{{ peer.ID }}" style="display:none;">
+                <tr class="expanded-row" id="row-{{ peer.ID }}" style="display:none;" onclick="event.stopPropagation();">
                     <td colspan="7">
                         <div class="row">
                             <div class="col-md-6">
@@ -270,8 +270,8 @@ function refreshStatus() {
 }
 
 function toggleRow(id, event) {
-    // Only toggle if not clicking on an element with 'no-row-toggle' class
-    if (event && event.target.classList.contains('no-row-toggle')) return;
+    // Only toggle if not clicking on an element with 'no-row-toggle' class and only on main row
+    if (event && (event.target.classList.contains('no-row-toggle') || !event.currentTarget.classList.contains('main-row'))) return;
     const row = document.getElementById('row-' + id);
     const chevron = document.getElementById('chevron-' + id);
     if (row.style.display === 'none' || row.style.display === '') {
