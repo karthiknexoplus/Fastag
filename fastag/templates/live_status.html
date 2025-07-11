@@ -129,6 +129,108 @@
         font-size: 0.75rem;
         font-weight: 500;
     }
+    
+    /* Compact Device Cards */
+    .device-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(80,80,160,0.08);
+        border: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .device-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(80,80,160,0.12);
+    }
+    .device-card-header {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .device-icon-large {
+        font-size: 2.5rem;
+        color: #764ba2;
+        min-width: 60px;
+        text-align: center;
+    }
+    .device-info {
+        flex: 1;
+    }
+    .device-name {
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    .device-dns {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin: 0.2rem 0 0 0;
+    }
+    .device-status {
+        text-align: right;
+        min-width: 80px;
+    }
+    .device-details {
+        display: none;
+        padding: 0 1.5rem 1.5rem 1.5rem;
+        background: #f8f9fa;
+        margin: 0 -1.5rem -1.5rem -1.5rem;
+    }
+    .device-details.expanded {
+        display: block;
+    }
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.8rem;
+    }
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 6px;
+        border-left: 3px solid #764ba2;
+    }
+    .detail-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .detail-value {
+        font-size: 0.9rem;
+        color: #333;
+        font-weight: 600;
+    }
+    .ip-list-compact {
+        background: white;
+        padding: 0.8rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+    }
+    .ip-item-compact {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        margin: 0.2rem 0;
+        color: #333;
+    }
+    .expand-indicator {
+        position: absolute;
+        bottom: 0.5rem;
+        right: 1rem;
+        color: #764ba2;
+        font-size: 0.9rem;
+        transition: transform 0.3s ease;
+    }
+    .expand-indicator.expanded {
+        transform: rotate(180deg);
+    }
 </style>
 {% endblock %}
 
@@ -286,62 +388,56 @@
         
         <div class="row">
             {% for peer_key, peer in status_data.Peer.items() %}
-            <div class="col-lg-6 col-xl-4 mb-4">
-                <div class="status-card">
-                    <div class="device-header">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h5 class="mb-1">{{ peer.HostName }}</h5>
-                                <p class="mb-0 opacity-75">{{ peer.DNSName }}</p>
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="device-card" onclick="toggleDeviceDetails('{{ peer.ID }}')">
+                    <div class="device-card-header">
+                        <div class="device-icon-large">
+                            <i class="{{ get_os_icon(peer.OS) }}"></i>
+                        </div>
+                        <div class="device-info">
+                            <h6 class="device-name">{{ peer.HostName }}</h6>
+                            <p class="device-dns">{{ peer.DNSName }}</p>
+                        </div>
+                        <div class="device-status">
+                            <div class="status-badge status-{{ get_status_color(peer.Online, peer.Active) }}">
+                                <i class="fas fa-circle me-1"></i>
+                                {% if peer.Online and peer.Active %}Online{% elif peer.Online %}Connected{% else %}Offline{% endif %}
                             </div>
-                            <div class="col-md-4 text-end">
-                                <div class="status-badge status-{{ get_status_color(peer.Online, peer.Active) }}">
-                                    <i class="fas fa-circle me-1"></i>
-                                    {% if peer.Online and peer.Active %}Online{% elif peer.Online %}Connected{% else %}Offline{% endif %}
-                                </div>
-                            </div>
+                            {% if peer.Expired %}
+                            <span class="badge bg-warning text-dark mt-1">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Expired
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="device-content">
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <i class="fas fa-microchip me-1"></i>OS
-                                </div>
-                                <div class="info-value">
-                                    <i class="{{ get_os_icon(peer.OS) }} me-1"></i>
-                                    {{ peer.OS|title }}
-                                </div>
+                    
+                    <!-- Expanded Details (Hidden by default) -->
+                    <div class="device-details" id="details-{{ peer.ID }}">
+                        <hr class="my-3">
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">OS:</span>
+                                <span class="detail-value">{{ peer.OS|title }}</span>
                             </div>
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <i class="fas fa-id-badge me-1"></i>Device ID
-                                </div>
-                                <div class="info-value">{{ peer.ID }}</div>
+                            <div class="detail-item">
+                                <span class="detail-label">Device ID:</span>
+                                <span class="detail-value">{{ peer.ID }}</span>
                             </div>
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <i class="fas fa-clock me-1"></i>Last Seen
-                                </div>
-                                <div class="info-value">{{ format_timestamp(peer.LastSeen) }}</div>
+                            <div class="detail-item">
+                                <span class="detail-label">Last Seen:</span>
+                                <span class="detail-value">{{ format_timestamp(peer.LastSeen) }}</span>
                             </div>
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <i class="fas fa-calendar me-1"></i>Created
-                                </div>
-                                <div class="info-value">{{ format_timestamp(peer.Created) }}</div>
+                            <div class="detail-item">
+                                <span class="detail-label">Created:</span>
+                                <span class="detail-value">{{ format_timestamp(peer.Created) }}</span>
                             </div>
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <i class="fas fa-download me-1"></i>Received
-                                </div>
-                                <div class="info-value">{{ format_bytes(peer.RxBytes) }}</div>
+                            <div class="detail-item">
+                                <span class="detail-label">Received:</span>
+                                <span class="detail-value">{{ format_bytes(peer.RxBytes) }}</span>
                             </div>
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <i class="fas fa-upload me-1"></i>Sent
-                                </div>
-                                <div class="info-value">{{ format_bytes(peer.TxBytes) }}</div>
+                            <div class="detail-item">
+                                <span class="detail-label">Sent:</span>
+                                <span class="detail-value">{{ format_bytes(peer.TxBytes) }}</span>
                             </div>
                         </div>
                         
@@ -351,22 +447,18 @@
                             <h6 class="text-dark fw-bold mb-2">
                                 <i class="fas fa-network-wired me-1"></i>IP Addresses
                             </h6>
-                            <div class="ip-list">
+                            <div class="ip-list-compact">
                                 {% for ip in peer.TailscaleIPs %}
-                                <div class="ip-item">{{ ip }}</div>
+                                <div class="ip-item-compact">{{ ip }}</div>
                                 {% endfor %}
                             </div>
                         </div>
                         {% endif %}
-
-                        <!-- Additional Info -->
-                        {% if peer.Expired %}
-                        <div class="mt-2">
-                            <span class="badge bg-warning text-dark">
-                                <i class="fas fa-exclamation-triangle me-1"></i>Key Expired
-                            </span>
-                        </div>
-                        {% endif %}
+                    </div>
+                    
+                    <!-- Expand/Collapse Indicator -->
+                    <div class="expand-indicator">
+                        <i class="fas fa-chevron-down" id="chevron-{{ peer.ID }}"></i>
                     </div>
                 </div>
             </div>
@@ -412,6 +504,21 @@ function refreshStatus() {
         .finally(() => {
             btn.classList.remove('loading');
         });
+}
+
+function toggleDeviceDetails(deviceId) {
+    const detailsElement = document.getElementById(`details-${deviceId}`);
+    const chevronElement = document.getElementById(`chevron-${deviceId}`);
+    
+    if (detailsElement.classList.contains('expanded')) {
+        // Collapse
+        detailsElement.classList.remove('expanded');
+        chevronElement.classList.remove('expanded');
+    } else {
+        // Expand
+        detailsElement.classList.add('expanded');
+        chevronElement.classList.add('expanded');
+    }
 }
 
 // Auto-refresh every 30 seconds
