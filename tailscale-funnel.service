@@ -1,0 +1,22 @@
+[Unit]
+Description=Tailscale Funnel Service
+After=network.target tailscaled.service
+Wants=tailscaled.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Fastag
+ExecStart=/home/ubuntu/Fastag/tailscale-funnel.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables
+Environment=TAILSCALE_FUNNEL_PORT=8000
+Environment=TAILSCALE_FUNNEL_HOSTNAME=pgshospital
+
+[Install]
+WantedBy=multi-user.target 
