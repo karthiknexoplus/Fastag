@@ -145,19 +145,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const fastagFeedback = document.getElementById('fastag-feedback');
     const vehicleFeedback = document.getElementById('vehicle-feedback');
 
-    // Attach event listeners based on feature flag
+    // Remove any previous click handlers
+    fetchVehicleBtn.onclick = null;
+    fetchFastagBtn.onclick = null;
+
     if (!fastagFeaturesEnabled) {
-        fetchVehicleBtn.addEventListener('click', function(e) {
-            showContactMessage();
-            e.preventDefault();
-            return false;
-        });
-        fetchFastagBtn.addEventListener('click', function(e) {
-            showContactMessage();
-            e.preventDefault();
-            return false;
-        });
-        // No fetch logic attached
+        fetchVehicleBtn.onclick = handleFastagMenuClick;
+        fetchFastagBtn.onclick = handleFastagMenuClick;
         return;
     }
 
