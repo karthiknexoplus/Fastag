@@ -297,10 +297,19 @@ def log_access(tag_id, user, status, reason=None):
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         c = conn.cursor()
         c.execute("""
-            INSERT INTO access_logs (user_id, lane_id, device_id, access_time, status, created_at, tag_id, reason)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO access_logs (user_id, device_id, created_at, access_time, status, tag_id, reader_id, lane_id, access_result, reason)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            user['id'] if user else None, LANE_ID, DEVICE_ID, datetime.now(), status, datetime.now(), tag_id, reason
+            user['id'] if user else None,
+            DEVICE_ID,
+            datetime.now(),
+            datetime.now(),
+            status,
+            tag_id,
+            DEVICE_ID,  # reader_id
+            LANE_ID,
+            status,
+            reason
         ))
         conn.commit()
         conn.close()
