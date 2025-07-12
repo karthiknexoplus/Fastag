@@ -133,10 +133,6 @@
 </style>
 
 <script>
-// Set feature flag from template
-var fastagFeaturesEnabledStr = "{{ 'true' if config.FASTAG_FEATURES_ENABLED else 'false' }}";
-const fastagFeaturesEnabled = fastagFeaturesEnabledStr === 'true';
-
 document.addEventListener('DOMContentLoaded', function() {
     const fastagIdInput = document.getElementById('fastag_id');
     const vehicleNumberInput = document.getElementById('vehicle_number');
@@ -144,16 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const fetchFastagBtn = document.getElementById('fetch-fastag-btn');
     const fastagFeedback = document.getElementById('fastag-feedback');
     const vehicleFeedback = document.getElementById('vehicle-feedback');
-
-    // Remove any previous click handlers
-    fetchVehicleBtn.onclick = null;
-    fetchFastagBtn.onclick = null;
-
-    if (!fastagFeaturesEnabled) {
-        fetchVehicleBtn.onclick = handleFastagMenuClick;
-        fetchFastagBtn.onclick = handleFastagMenuClick;
-        return;
-    }
 
     // Fetch vehicle number when FASTag ID button is clicked
     fetchVehicleBtn.addEventListener('click', function() {
