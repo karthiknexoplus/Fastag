@@ -56,19 +56,47 @@ class RFIDReader:
         self.lane_id = lane_id
         self.device_id = device_id
         self.dll_path = dll_path
-        self.connected = False
-        self.dll = None
-        self.handle = None
+        self.objdll = None
+        self.is_connected = False
+        self.connection_attempts = 0
+        self.max_connection_attempts = 5
+        self.last_connection_check = time.time()
+        self.connection_check_interval = 30
+        self.buffer_clear_threshold = 5
 
     def connect(self):
         try:
-            self.dll = ctypes.CDLL(self.dll_path)
-            # Simulate connection logic (replace with actual hardware logic)
-            self.connected = True
-            return True
+            if not self.ip_address:
+                logger.error(f"Reader {self.reader_id}: ✗ IP address is None or empty")
+                self.connection_attempts += 1
+                return False
+            if not os.path.exists(self.dll_path):
+                logger.error(f"Reader {self.reader_id}: ✗ Library file not found: {self.dll_path}")
+                logger.error(f"Reader {self.reader_id}: Current directory: {os.getcwd()}")
+                self.connection_attempts += 1
+                return False
+            self.objdll = ctypes.cdll.LoadLibrary(self.dll_path)
+            logger.info(f"Reader {self.reader_id}: ✓ Library loaded successfully")
+            logger.info(f"Reader {self.reader_id}: Connecting to {self.ip_address} with 60000ms timeout...")
+            result = self.objdll.SWNet_OpenDevice(self.ip_address.encode(), 60000)
+            logger.info(f"Reader {self.reader_id}: Connection result: {result}")
+            if result == 1:
+                logger.info(f"Reader {self.reader_id}: ✓ Connected to {self.ip_address}")
+                self.objdll.SWNet_ClearTagBuf()
+                logger.info(f"Reader {self.reader_id}: ✓ Tag buffer cleared")
+                self.is_connected = True
+                self.connection_attempts = 0
+                self.last_connection_check = time.time()
+                return True
+            else:
+                logger.error(f"Reader {self.reader_id}: ✗ Connection failed with return code {result}")
+                self.connection_attempts += 1
+                self.is_connected = False
+                return False
         except Exception as e:
-            print(f"RFIDReader connect error: {e}")
-            self.connected = False
+            logger.error(f"Reader {self.reader_id}: ✗ Connection error: {str(e)}")
+            self.connection_attempts += 1
+            self.is_connected = False
             return False
 
     def disconnect(self):
@@ -77,10 +105,50 @@ class RFIDReader:
         self.handle = None
 
     def read_tags(self):
-        # Simulate reading tags (replace with actual hardware logic)
-        # Return a list of dicts: [{'tag_id': ..., 'antenna': ..., 'rssi': ...}, ...]
-        # For demo, return empty list
-        return []
+        if not self.is_connected or not self.objdll:
+            return []
+        try:
+            arrBuffer = bytes(9182)
+            iTagLength = ctypes.c_int(0)
+            iTagNumber = ctypes.c_int(0)
+            ret = self.objdll.SWNet_GetTagBuf(arrBuffer, ctypes.byref(iTagLength), ctypes.byref(iTagNumber))
+            tags = []
+            seen_tags = set()
+            if iTagNumber.value > 0:
+                logger.debug(f"Reader {self.reader_id}: Found {iTagNumber.value} tag readings")
+                iIndex = int(0)
+                iLength = int(0)
+                bPackLength = ctypes.c_byte(0)
+                for iIndex in range(0, iTagNumber.value):
+                    bPackLength = arrBuffer[iLength]
+                    tag_type = arrBuffer[1 + iLength + 0]
+                    antenna = arrBuffer[1 + iLength + 1]
+                    tag_id = ""
+                    for i in range(2, bPackLength - 1):
+                        tag_id += f"{arrBuffer[1 + iLength + i]:02X}"
+                    rssi = arrBuffer[1 + iLength + bPackLength - 1]
+                    if tag_id not in seen_tags:
+                        seen_tags.add(tag_id)
+                        logger.info(f"Reader {self.reader_id}: Unique tag detected - ID: {tag_id}, Type: {tag_type}, Antenna: {antenna}, RSSI: {rssi}")
+                        tags.append({
+                            'tag_id': tag_id,
+                            'tag_type': tag_type,
+                            'antenna': antenna,
+                            'rssi': rssi,
+                            'reader_id': self.reader_id,
+                            'lane_id': self.lane_id,
+                            'device_id': self.device_id,
+                            'timestamp': datetime.now()
+                        })
+                    iLength = iLength + bPackLength + 1
+                logger.debug(f"Reader {self.reader_id}: Processed {len(tags)} unique tags from {iTagNumber.value} readings")
+            else:
+                logger.debug(f"Reader {self.reader_id}: No tags detected")
+            return tags
+        except Exception as e:
+            logger.error(f"Reader {self.reader_id}: ✗ Error reading tags: {str(e)}")
+            self.is_connected = False
+            return []
 
 logger = setup_logging('logs/rfid_reader2.log')
 
@@ -156,23 +224,42 @@ if not reader.connect():
 
 logger.info("Reader 2 service started")
 
-RELAY_CONTROL_URL = "http://localhost:5000/api/barrier-control"
-
-COOLDOWN_SECONDS = 10  # Cooldown window for same tag/lane
-CROSS_LANE_SECONDS = 20  # Cross-lane block window
-MAX_DB_RECORDS = 3  # Max DB records per tag/lane per session
-
-# Track last DB insert time and count for each (tag_id, lane_id)
+# Add cooldown, cross-lane, and access logging logic
+COOLDOWN_SECONDS = 10
+CROSS_LANE_SECONDS = 20
+MAX_DB_RECORDS = 3
 last_db_insert = defaultdict(lambda: {'time': 0, 'count': 0})
+tag_cooldowns = {}
+tag_cooldown_duration = 3
+processed_tags = set()
+
+# Relay control (GPIO)
+try:
+    import RPi.GPIO as GPIO
+    RELAY_PINS = [17, 27, 22, 23]
+    GPIO.setmode(GPIO.BCM)
+    for pin in RELAY_PINS:
+        GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(pin, False)
+    def activate_all_relays():
+        for pin in RELAY_PINS:
+            GPIO.output(pin, True)
+        time.sleep(2)
+        for pin in RELAY_PINS:
+            GPIO.output(pin, False)
+except Exception as e:
+    logger.warning(f"GPIO not available: {e}")
+    def activate_all_relays():
+        logger.info("Simulated relay activation (no GPIO)")
+
+# Helper functions
 
 def can_insert_db(tag_id, lane_id):
     now = time.time()
     key = (tag_id, lane_id)
     info = last_db_insert[key]
-    # If already 3 records, do not insert
     if info['count'] >= MAX_DB_RECORDS:
         return False
-    # If last insert <10s ago, do not insert
     if now - info['time'] < COOLDOWN_SECONDS:
         return False
     return True
@@ -191,36 +278,41 @@ def cross_lane_recent(tag_id, current_lane_id):
                 return True
     return False
 
-def activate_all_relays():
-    try:
-        payload = {
-            "lane_id": LANE_ID,
-            "device_id": DEVICE_ID,
-            "action": "open",
-            "timestamp": datetime.now().isoformat()
-        }
-        response = requests.post(RELAY_CONTROL_URL, json=payload, timeout=2)
-        if response.status_code == 200:
-            logger.info("Barrier open command sent via Flask API")
-        else:
-            logger.error(f"API error: {response.status_code} {response.text}")
-    except Exception as e:
-        logger.error(f"Failed to activate relays via API: {e}")
+def is_tag_in_cooldown(tag_id):
+    if tag_id in tag_cooldowns:
+        last_access = tag_cooldowns[tag_id]
+        time_since_last = time.time() - last_access
+        if time_since_last < tag_cooldown_duration:
+            return True, tag_cooldown_duration - time_since_last
+    return False, 0
 
-def log_access(tag_id, status, reason=None):
+def update_tag_cooldown(tag_id):
+    tag_cooldowns[tag_id] = time.time()
+
+def log_access(tag_id, user, status, reason=None):
     try:
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         c = conn.cursor()
-        # Use current project's access_logs table schema
         c.execute("""
-            INSERT INTO access_logs (tag_id, reader_id, lane_id, access_result, reason, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (tag_id, 2, LANE_ID, status, reason, datetime.now()))
+            INSERT INTO access_logs (user_id, lane_id, device_id, access_time, status, created_at, tag_id, reason)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            user['id'] if user else None, LANE_ID, DEVICE_ID, datetime.now(), status, datetime.now(), tag_id, reason
+        ))
         conn.commit()
         conn.close()
-        logger.info(f"Access logged: {status} for tag {tag_id}")
+        logger.info(f"Access log created: {status} for tag {tag_id}")
+        update_db_insert(tag_id, LANE_ID)
     except Exception as e:
-        logger.error(f"Error logging access for tag {tag_id}: {e}")
+        logger.error(f"Error logging access: {str(e)}")
+
+def clear_buffer(reader):
+    try:
+        if reader.is_connected and reader.objdll:
+            reader.objdll.SWNet_ClearTagBuf()
+            logger.info(f"Reader {reader.reader_id}: Tag buffer cleared")
+    except Exception as e:
+        logger.warning(f"Reader {reader.reader_id}: Error clearing buffer: {e}")
 
 def check_tag_in_db(tag_id):
     try:
@@ -243,25 +335,36 @@ def check_tag_in_db(tag_id):
 
 try:
     while True:
-        logger.info("Polling for tags...")
+        logger.info(f"Polling for tags at IP: {READER_IP} (Connected: {reader.is_connected})")
         tags = reader.read_tags()
         now = time.time()
         if tags:
             for tag in tags:
                 tag_id = tag['tag_id']
-                logger.info(f"Tag detected: {tag_id} (Antenna: {tag['antenna']}, RSSI: {tag['rssi']})")
-                user_id, name, vehicle_number = check_tag_in_db(tag_id)
+                # Cooldown check
+                in_cooldown, remaining = is_tag_in_cooldown(tag_id)
+                if in_cooldown:
+                    logger.info(f"Tag {tag_id} is in cooldown - {remaining:.1f}s remaining")
+                    clear_buffer(reader)
+                    continue
                 # Cross-lane check
                 if cross_lane_recent(tag_id, LANE_ID):
-                    log_access(tag_id, 'denied', reason='cross_lane_blocked')
+                    log_access(tag_id, None, 'denied', reason='cross_lane_blocked')
                     logger.info(f"Tag {tag_id} seen in another lane within {CROSS_LANE_SECONDS}s, access not granted.")
+                    clear_buffer(reader)
                     continue
+                # DB check
+                user_id, name, vehicle_number = check_tag_in_db(tag_id)
+                user = {'id': user_id, 'name': name, 'vehicle_number': vehicle_number} if user_id else None
                 if user_id:
-                    log_access(tag_id, 'granted')
+                    log_access(tag_id, user, 'granted')
+                    update_tag_cooldown(tag_id)
                     activate_all_relays()
+                    logger.info(f"Access granted for tag {tag_id}")
                 else:
-                    log_access(tag_id, 'denied', reason='not_found')
+                    log_access(tag_id, None, 'denied', reason='not_found')
                     logger.info(f"Access denied for tag {tag_id}")
+                clear_buffer(reader)
         else:
             logger.info("No tags detected.")
         time.sleep(0.1)
