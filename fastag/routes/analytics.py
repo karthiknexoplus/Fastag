@@ -760,3 +760,79 @@ def api_barrier_log():
     rows = db.execute(query, params).fetchall()
     data = [dict(row) for row in rows]
     return jsonify({"success": True, "count": len(data), "events": data}) 
+
+@analytics_bp.route('/viewonmobile_access_logs', methods=['GET'])
+def viewonmobile_access_logs():
+    db = get_db()
+    # Query params
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    status = request.args.get('status')
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 100))
+    offset = (page - 1) * per_page
+
+    # Build query
+    query = '''
+        SELECT 
+            al.timestamp as access_time,
+            ku.name as user_name,
+            ku.vehicle_number,
+            al.tag_id,
+            l.lane_name,
+            r.reader_ip as device,
+            al.access_result as status
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE 1=1
+    '''
+    params = []
+    if start_date:
+        query += ' AND DATE(al.timestamp) >= ?'
+        params.append(start_date)
+    if end_date:
+        query += ' AND DATE(al.timestamp) <= ?'
+        params.append(end_date)
+    if status:
+        query += ' AND al.access_result = ?'
+        params.append(status)
+    query += ' ORDER BY al.timestamp DESC LIMIT ? OFFSET ?'
+    params += [per_page, offset]
+
+    rows = db.execute(query, params).fetchall()
+
+    # Get total count for pagination
+    count_query = 'SELECT COUNT(*) FROM access_logs al WHERE 1=1'
+    count_params = []
+    if start_date:
+        count_query += ' AND DATE(al.timestamp) >= ?'
+        count_params.append(start_date)
+    if end_date:
+        count_query += ' AND DATE(al.timestamp) <= ?'
+        count_params.append(end_date)
+    if status:
+        count_query += ' AND al.access_result = ?'
+        count_params.append(status)
+    total_count = db.execute(count_query, count_params).fetchone()[0]
+
+    logs = []
+    for row in rows:
+        logs.append({
+            "access_time": row[0],
+            "user": {
+                "name": row[1],
+                "vehicle_number": row[2]
+            },
+            "tag_id": row[3],
+            "lane": row[4],
+            "device": row[5],
+            "status": row[6]
+        })
+
+    return jsonify({
+        "status": "success",
+        "total_count": total_count,
+        "logs": logs
+    }) 
