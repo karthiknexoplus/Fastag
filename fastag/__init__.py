@@ -145,5 +145,8 @@ def create_app():
     app.teardown_appcontext(close_db)
     @app.context_processor
     def inject_system_info():
-        return {'system_info': Markup(get_rpi_system_info())}
+        return {
+            'system_info': Markup(get_rpi_system_info()),
+            'config': app.config
+        }
     return app 

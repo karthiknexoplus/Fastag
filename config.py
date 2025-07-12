@@ -11,6 +11,9 @@ class Config:
     # Google OAuth Configuration
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com')
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', 'GOCSPX-your-nexoplus@1234')
+    
+    # Feature flags
+    FASTAG_FEATURES_ENABLED = os.environ.get('FASTAG_FEATURES_ENABLED', 'true').lower() == 'true'
 
 class ProductionConfig(Config):
     DEBUG = False

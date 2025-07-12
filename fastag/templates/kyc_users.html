@@ -18,8 +18,8 @@
                     <i class="fas fa-tag fastag-form-icon"></i>FASTag ID
                 </label>
                 <div class="input-group">
-                    <input type="text" name="fastag_id" id="fastag_id" class="form-control" required>
-                    <button type="button" class="btn btn-outline-secondary" id="fetch-vehicle-btn" title="Fetch Vehicle Number">
+                    <input type="text" name="fastag_id" id="fastag_id" class="form-control" required {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-vehicle-btn" title="Fetch Vehicle Number" {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
                         <i class="fas fa-car"></i>
                     </button>
                 </div>
@@ -30,8 +30,8 @@
                     <i class="fas fa-car fastag-form-icon"></i>Vehicle Number
                 </label>
                 <div class="input-group">
-                    <input type="text" name="vehicle_number" id="vehicle_number" class="form-control" required>
-                    <button type="button" class="btn btn-outline-secondary" id="fetch-fastag-btn" title="Fetch FASTag ID">
+                    <input type="text" name="vehicle_number" id="vehicle_number" class="form-control" required {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-fastag-btn" title="Fetch FASTag ID" {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
                         <i class="fas fa-tag"></i>
                     </button>
                 </div>
@@ -121,9 +121,22 @@
     border-color: #764ba2 !important;
     color: white !important;
 }
+.form-control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+}
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 </style>
 
 <script>
+function showContactMessage() {
+    alert('Please contact Nexoplus for pricing!');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const fastagIdInput = document.getElementById('fastag_id');
     const vehicleNumberInput = document.getElementById('vehicle_number');
