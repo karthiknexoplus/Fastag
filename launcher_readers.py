@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 import os
-import sqlite3
 import subprocess
 import signal
 import time
 import psutil
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'fastag', 'rfid'))
-from rfid_common import RFIDReader, setup_logging
 
-# Path to DB and service scripts
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instance', 'fastag.db'))
+# List of service files to always start
 SERVICE_FILES = [
     'fastag/rfid/rfid_reader1_service.py',
     'fastag/rfid/rfid_reader2_service.py',
@@ -41,25 +36,9 @@ def stop_all_services():
     # Give time for processes to exit
     time.sleep(2)
 
-# Helper: get readers from DB
-def get_readers_from_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    # Check if readers table exists
-    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='readers'")
-    if not c.fetchone():
-        print("❌ ERROR: 'readers' table does not exist in the database. Please run database initialization first.")
-        conn.close()
-        exit(1)
-    c.execute("SELECT id FROM readers ORDER BY id ASC LIMIT 2")
-    rows = c.fetchall()
-    conn.close()
-    return [row[0] for row in rows]
-
-# Helper: start required service files
-def start_services(reader_ids):
-    for rid in reader_ids:
-        svc = f"fastag/rfid/rfid_reader{rid}_service.py"
+# Helper: start both service files
+def start_services():
+    for svc in SERVICE_FILES:
         if os.path.exists(svc):
             print(f"Starting {svc}...")
             subprocess.Popen(['python3', svc])
@@ -69,9 +48,14 @@ def start_services(reader_ids):
 if __name__ == "__main__":
     print("[Launcher] Stopping all running RFID reader services...")
     stop_all_services()
-    print("[Launcher] Querying DB for active readers...")
-    reader_ids = get_readers_from_db()
-    print(f"[Launcher] Found readers: {reader_ids}")
     print("[Launcher] Starting required services...")
-    start_services(reader_ids)
-    print("[Launcher] Done.") 
+    start_services()
+    print("[Launcher] Done.")
+    # Block forever so systemd service stays alive
+    try:
+        while True:
+            time.sleep(60)
+    except KeyboardInterrupt:
+        print("[Launcher] Received KeyboardInterrupt, exiting...")
+        stop_all_services()
+        print("[Launcher] Exited cleanly.") 
