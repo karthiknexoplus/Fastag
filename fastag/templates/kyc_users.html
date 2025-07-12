@@ -18,8 +18,8 @@
                     <i class="fas fa-tag fastag-form-icon"></i>FASTag ID
                 </label>
                 <div class="input-group">
-                    <input type="text" name="fastag_id" id="fastag_id" class="form-control" required {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
-                    <button type="button" class="btn btn-outline-secondary" id="fetch-vehicle-btn" title="Fetch Vehicle Number" {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
+                    <input type="text" name="fastag_id" id="fastag_id" class="form-control" required>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-vehicle-btn" title="Fetch Vehicle Number" {% if not config.FASTAG_FEATURES_ENABLED %}disabled onclick="showContactMessage(); return false;"{% endif %}>
                         <i class="fas fa-car"></i>
                     </button>
                 </div>
@@ -30,8 +30,8 @@
                     <i class="fas fa-car fastag-form-icon"></i>Vehicle Number
                 </label>
                 <div class="input-group">
-                    <input type="text" name="vehicle_number" id="vehicle_number" class="form-control" required {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
-                    <button type="button" class="btn btn-outline-secondary" id="fetch-fastag-btn" title="Fetch FASTag ID" {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %} {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
+                    <input type="text" name="vehicle_number" id="vehicle_number" class="form-control" required>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-fastag-btn" title="Fetch FASTag ID" {% if not config.FASTAG_FEATURES_ENABLED %}disabled onclick="showContactMessage(); return false;"{% endif %}>
                         <i class="fas fa-tag"></i>
                     </button>
                 </div>
@@ -134,7 +134,8 @@
 
 <script>
 function showContactMessage() {
-    alert('Please contact Nexoplus for pricing!');
+    var modal = new bootstrap.Modal(document.getElementById('contactModal'));
+    modal.show();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -219,4 +220,27 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #764ba2; color: white;">
+        <h5 class="modal-title" id="contactModalLabel"><i class="fas fa-info-circle me-2"></i>Contact Nexoplus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p style="font-size: 1.15rem; color: #764ba2;">
+          <i class="fas fa-phone-alt fa-2x mb-3"></i><br/>
+          Please contact <b>Nexoplus</b> for pricing and feature access!<br/>
+          <span style="font-size:0.95em; color:#555;">Email: <a href="mailto:support@nexoplus.in">support@nexoplus.in</a></span><br/>
+          <span style="font-size:0.95em; color:#555;">Phone: <a href="tel:+919876543210">+91 98765 43210</a></span>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %} 
