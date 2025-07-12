@@ -9,7 +9,6 @@ import logging
 from markupsafe import Markup
 import requests
 import time
-from fastag.rfid.rfid_service import RelayController
 
 def get_rpi_system_info():
     def run(cmd):
@@ -103,6 +102,7 @@ def get_rpi_system_info():
     return ' | '.join(info)
 
 def create_app():
+    from fastag.rfid.rfid_service import RelayController  # moved import here to avoid circular import
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config.Config')
     setup_logging(app.config['LOG_DIR'])
