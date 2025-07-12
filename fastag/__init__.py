@@ -116,6 +116,8 @@ def add_missing_columns():
         c.execute("ALTER TABLE access_logs ADD COLUMN created_at TIMESTAMP;")
     if 'access_time' not in columns:
         c.execute("ALTER TABLE access_logs ADD COLUMN access_time TIMESTAMP;")
+    if 'status' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN status TEXT;")
     conn.commit()
     conn.close()
 
