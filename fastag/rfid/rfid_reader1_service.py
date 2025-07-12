@@ -236,26 +236,17 @@ tag_cooldowns = {}
 tag_cooldown_duration = 3
 processed_tags = set()
 
-# Relay control (GPIO)
-try:
-    import RPi.GPIO as GPIO
-    RELAY_PINS = [26, 20, 21]  # Use only 3 relays as in RelayController
-    GPIO.setmode(GPIO.BCM)
-    for pin in RELAY_PINS:
-        GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin, False)
-    def activate_all_relays():
-        for pin in RELAY_PINS:
-            logger.info(f"Turning ON relay (GPIO pin {pin})...")
-            GPIO.output(pin, True)
-        time.sleep(2)
-        for pin in RELAY_PINS:
-            logger.info(f"Turning OFF relay (GPIO pin {pin})...")
-            GPIO.output(pin, False)
-except Exception as e:
-    logger.warning(f"GPIO not available: {e}")
-    def activate_all_relays():
-        logger.info("Simulated relay activation (no GPIO)")
+# Relay control (use RelayController from relay_controller.py)
+from fastag.rfid.relay_controller import RelayController
+relay_controller = RelayController()
+
+def activate_all_relays():
+    relay_number = 1  # Only use relay 1 for reader 1
+    logger.info(f"Turning ON relay {relay_number} (GPIO pin {relay_controller.pins[relay_number-1]})...")
+    relay_controller.turn_on(relay_number)
+    time.sleep(2)
+    logger.info(f"Turning OFF relay {relay_number} (GPIO pin {relay_controller.pins[relay_number-1]})...")
+    relay_controller.turn_off(relay_number)
 
 # Helper functions
 
