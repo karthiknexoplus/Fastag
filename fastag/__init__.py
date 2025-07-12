@@ -102,7 +102,7 @@ def get_rpi_system_info():
     return ' | '.join(info)
 
 def create_app():
-    from fastag.rfid.rfid_service import RelayController  # moved import here to avoid circular import
+    from fastag.rfid.relay_controller import RelayController  # updated import after moving class
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config.Config')
     setup_logging(app.config['LOG_DIR'])
