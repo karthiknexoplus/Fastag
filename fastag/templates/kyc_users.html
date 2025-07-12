@@ -19,7 +19,7 @@
                 </label>
                 <div class="input-group">
                     <input type="text" name="fastag_id" id="fastag_id" class="form-control" required>
-                    <button type="button" class="btn btn-outline-secondary" id="fetch-vehicle-btn" title="Fetch Vehicle Number" {% if not config.FASTAG_FEATURES_ENABLED %}disabled onclick="showContactMessage(); return false;"{% endif %}>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-vehicle-btn" title="Fetch Vehicle Number" onclick="if (!config.FASTAG_FEATURES_ENABLED) { showContactMessage(); return false; }" {% if not config.FASTAG_FEATURES_ENABLED %}style="opacity:0.5;pointer-events:auto;cursor:not-allowed;"{% endif %}>
                         <i class="fas fa-car"></i>
                     </button>
                 </div>
@@ -31,7 +31,7 @@
                 </label>
                 <div class="input-group">
                     <input type="text" name="vehicle_number" id="vehicle_number" class="form-control" required>
-                    <button type="button" class="btn btn-outline-secondary" id="fetch-fastag-btn" title="Fetch FASTag ID" {% if not config.FASTAG_FEATURES_ENABLED %}disabled onclick="showContactMessage(); return false;"{% endif %}>
+                    <button type="button" class="btn btn-outline-secondary" id="fetch-fastag-btn" title="Fetch FASTag ID" onclick="if (!config.FASTAG_FEATURES_ENABLED) { showContactMessage(); return false; }" {% if not config.FASTAG_FEATURES_ENABLED %}style="opacity:0.5;pointer-events:auto;cursor:not-allowed;"{% endif %}>
                         <i class="fas fa-tag"></i>
                     </button>
                 </div>
