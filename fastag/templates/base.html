@@ -87,21 +87,20 @@
     </style>
     {% block head %}{% endblock %}
     <script>
-    // Set feature flag from template
-    var fastagFeaturesEnabledStr = "{{ 'true' if config.FASTAG_FEATURES_ENABLED else 'false' }}";
-    const fastagFeaturesEnabled = fastagFeaturesEnabledStr === 'true';
-    function showContactMessage() {
-        var modal = new bootstrap.Modal(document.getElementById('contactModal'));
-        modal.show();
-    }
-    function handleFastagMenuClick(event) {
-        if (!fastagFeaturesEnabled) {
-            showContactMessage();
-            if (event) event.preventDefault();
-            return false;
+        // Set feature flag from template
+        window.fastagFeaturesEnabled = "{{ 'true' if config.FASTAG_FEATURES_ENABLED else 'false' }}" === 'true';
+        function showContactMessage() {
+            var modal = new bootstrap.Modal(document.getElementById('contactModal'));
+            modal.show();
         }
-        return true;
-    }
+        function handleFastagMenuClick(event) {
+            if (!window.fastagFeaturesEnabled) {
+                showContactMessage();
+                if (event) event.preventDefault();
+                return false;
+            }
+            return true;
+        }
     </script>
 </head>
 <body>
