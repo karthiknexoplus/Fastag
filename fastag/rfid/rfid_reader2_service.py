@@ -191,13 +191,16 @@ def load_reader_config(reader_id=2):
         logger.error(f"Error loading reader configuration: {e}")
         return None
 
+def strip_leading_zeros(ip):
+    return '.'.join(str(int(octet)) for octet in ip.split('.'))
+
 # Load configuration from database
 config = load_reader_config(2)
 if not config:
     logger.error("Failed to load reader configuration. Exiting.")
     exit(1)
 
-READER_IP = config['reader_ip']
+READER_IP = strip_leading_zeros(config['reader_ip'])
 LANE_ID = config['lane_id']
 DEVICE_ID = config['reader_id']
 
