@@ -114,6 +114,8 @@ def add_missing_columns():
         c.execute("ALTER TABLE access_logs ADD COLUMN device_id INTEGER;")
     if 'created_at' not in columns:
         c.execute("ALTER TABLE access_logs ADD COLUMN created_at TIMESTAMP;")
+    if 'access_time' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN access_time TIMESTAMP;")
     conn.commit()
     conn.close()
 
