@@ -675,158 +675,60 @@ class RFIDService:
         if not reader:
             self.logger.error(f"Reader object for reader_id {reader_id} not found!")
             return
-        # --- Cross-lane check ---
-        if self.cross_lane_recent(tag_id, lane_id):
-            self.log_access_async(tag_id, None, 'cross_lane_blocked', reader_id, lane_id, device_id)
-            self.logger.info(f"Tag {tag_id} seen in another lane within {self.CROSS_LANE_SECONDS}s, access not granted.")
-            return
-        # ✅ CRITICAL: Check cooldown FIRST before any processing
+        # --- Cooldown check ---
         in_cooldown, remaining_time = self.is_tag_in_cooldown(tag_id)
         if in_cooldown:
             self.logger.warning(f"⚠️ Tag {tag_id} is in cooldown - {remaining_time:.1f}s remaining")
             self.logger.info("⚠️ Barrier will NOT open - cooldown period active")
             self.logger.info("=" * 50)
-            
-            # ✅ NEW: Clear buffer immediately for cooldown tags to prevent repeated processing
-            self.logger.debug(f"Reader {reader_id}: Clearing buffer for cooldown tag...")  # Changed to debug
+            self.logger.debug(f"Reader {reader_id}: Clearing buffer for cooldown tag...")
             self.clear_reader_buffer(reader_id)
             return
-        
-        # Create unique key to avoid duplicate processing
-        unique_key = f"{tag_id}_{reader_id}_{int(time.time())}"
-        if unique_key in self.processed_tags:
-            self.logger.debug(f"Skipping duplicate tag processing: {tag_id}")
+        # --- Deduplication check ---
+        if not self.can_insert_db(tag_id, lane_id):
+            self.logger.info(f"DB insert skipped for tag={tag_id} lane={lane_id} (cooldown or max records reached)")
+            self.clear_reader_buffer(reader_id)
             return
-        
-        self.processed_tags.add(unique_key)
-        
-        self.logger.info("=" * 50)
-        self.logger.info("PROCESSING TAG")
-        self.logger.info("=" * 50)
-        self.logger.info(f"Tag ID: {tag_id}")
-        self.logger.info(f"Reader: {reader_id}")
-        self.logger.info(f"Lane: {lane_id}")
-        self.logger.info(f"Device: {device_id}")
-        self.logger.info(f"Timestamp: {tag_data['timestamp']}")
-        self.logger.info(f"Tag Type: {tag_data['tag_type']}")
-        self.logger.info(f"Antenna: {tag_data['antenna']}")
-        self.logger.info(f"RSSI: {tag_data['rssi']}")
-        
-        # Verify tag in database
+        # --- Cross-lane check ---
+        if self.cross_lane_recent(tag_id, lane_id):
+            self.log_access_async(tag_id, None, 'cross_lane_blocked', reader_id, lane_id, device_id)
+            self.update_tag_cooldown(tag_id)
+            self.update_db_insert(tag_id, lane_id)
+            self.logger.info(f"Tag {tag_id} seen in another lane within {self.CROSS_LANE_SECONDS}s, access not granted.")
+            self.clear_reader_buffer(reader_id)
+            return
+        # --- DB check ---
         result = self.verify_tag_in_database(tag_id)
-        
         if result['found']:
             user = result['user']
             self.logger.info(f"✓ {result['message']}")
-            
-            # Update cooldown for this tag BEFORE opening barrier
-            self.update_tag_cooldown(tag_id)
-            self.logger.debug(f"✓ Tag {tag_id} cooldown updated - next access allowed in {self.tag_cooldown_duration}s")  # Changed to debug
-            
-            # Log successful access (async)
             self.log_access_async(tag_id, user, 'granted', reader_id, lane_id, device_id)
-            
-            # Turn all relays ON together
+            self.update_tag_cooldown(tag_id)
+            self.update_db_insert(tag_id, lane_id)
+            self.logger.debug(f"✓ Tag {tag_id} cooldown and deduplication updated - next access allowed in {self.tag_cooldown_duration}s")
             self.logger.info("Activating barrier control...")
             self.logger.info("Turning all relays ON...")
-            for relay_num in range(1, 4):  # Relays 1-3 only
+            for relay_num in range(1, 4):
                 self.relay_controller.turn_on(relay_num)
-            # Keep all relays ON for 2 seconds
             self.logger.info("Keeping all relays ON for 2 seconds...")
             time.sleep(2)
-            # Turn all relays OFF together
             self.logger.info("Turning all relays OFF...")
-            for relay_num in range(1, 4):  # Relays 1-3 only
+            for relay_num in range(1, 4):
                 self.relay_controller.turn_off(relay_num)
             self.logger.info("✓ All relays cycle completed")
             self.logger.info("✓ Access granted - Barrier opened")
-            
-            # Clear reader buffer after successful access
             self.logger.debug(f"Reader {reader_id}: Clearing buffer to prevent old tag processing...")
             if reader.clear_buffer_safely():
-                self.logger.debug(f"Reader {reader_id}: ✓ Buffer cleared successfully")  # Changed to debug
+                self.logger.debug(f"Reader {reader_id}: ✓ Buffer cleared successfully")
             else:
                 self.logger.warning(f"Reader {reader_id}: ⚠️ Buffer clearing failed, but access was granted")
-            
-            # Fetch and cache vehicle number for denied tag_id
-            if tag_id and str(tag_id).startswith('34161'):
-                try:
-                    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-                    c = conn.cursor()
-                    # Check if already cached
-                    c.execute("SELECT vehicle_number FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
-                    row = c.fetchone()
-                    if not row or not row[0]:
-                        url = 'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails'
-                        params = {'SearchType': 'TagId', 'SearchValue': tag_id}
-                        headers = {
-                            'Cookie': 'TS019079a3=01e33451e733cecd29c7729a72c1442509a53f2b9fb40a5401f1e5e193b3b41366044039d88dde62f00c5c41a38c36914e1f1a6cd4'
-                        }
-                        try:
-                            resp = requests.get(url, params=params, headers=headers, timeout=10, verify=False)
-                            if resp.status_code == 200:
-                                data = resp.json()
-                                tag_list = data.get('npcitagDetails', [])
-                                if tag_list:
-                                    vehicle_number = tag_list[0].get('VRN')
-                                    if row:
-                                        c.execute("UPDATE tag_vehicle_cache SET vehicle_number=?, last_updated=CURRENT_TIMESTAMP WHERE tag_id=?", (vehicle_number, tag_id))
-                                    else:
-                                        c.execute("INSERT INTO tag_vehicle_cache (tag_id, vehicle_number) VALUES (?, ?)", (tag_id, vehicle_number))
-                                    conn.commit()
-                                    self.logger.info(f"Cached vehicle number for denied tag {tag_id}: {vehicle_number}")
-                        except Exception as e:
-                            self.logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
-                    conn.close()
-                except Exception as e:
-                    self.logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
         else:
             self.logger.warning(f"✗ {result['message']} (Reader {reader_id})")
-            
-            # Log denied access (async)
             self.log_access_async(tag_id, None, 'denied', reader_id, lane_id, device_id)
-            self.logger.info("✗ Access denied - Barrier remains closed")
-
-            # Update cooldown and DB insert for denied/not_found tags as well
             self.update_tag_cooldown(tag_id)
-            self.logger.debug(f"✓ Tag {tag_id} cooldown updated (denied) - next access allowed in {self.tag_cooldown_duration}s")
             self.update_db_insert(tag_id, lane_id)
-            self.logger.debug(f"✓ DB insert count updated (denied) for tag {tag_id} lane {lane_id}")
-
-            # Fetch and cache vehicle number for denied tag_id
-            if tag_id and str(tag_id).startswith('34161'):
-                try:
-                    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-                    c = conn.cursor()
-                    # Check if already cached
-                    c.execute("SELECT vehicle_number FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
-                    row = c.fetchone()
-                    if not row or not row[0]:
-                        url = 'https://netc-acq.airtelbank.com:9443/MTMSPG/GetTagDetails'
-                        params = {'SearchType': 'TagId', 'SearchValue': tag_id}
-                        headers = {
-                            'Cookie': 'TS019079a3=01e33451e733cecd29c7729a72c1442509a53f2b9fb40a5401f1e5e193b3b41366044039d88dde62f00c5c41a38c36914e1f1a6cd4'
-                        }
-                        try:
-                            resp = requests.get(url, params=params, headers=headers, timeout=10, verify=False)
-                            if resp.status_code == 200:
-                                data = resp.json()
-                                tag_list = data.get('npcitagDetails', [])
-                                if tag_list:
-                                    vehicle_number = tag_list[0].get('VRN')
-                                    if row:
-                                        c.execute("UPDATE tag_vehicle_cache SET vehicle_number=?, last_updated=CURRENT_TIMESTAMP WHERE tag_id=?", (vehicle_number, tag_id))
-                                    else:
-                                        c.execute("INSERT INTO tag_vehicle_cache (tag_id, vehicle_number) VALUES (?, ?)", (tag_id, vehicle_number))
-                                    conn.commit()
-                                    self.logger.info(f"Cached vehicle number for denied tag {tag_id}: {vehicle_number}")
-                        except Exception as e:
-                            self.logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
-                    conn.close()
-                except Exception as e:
-                    self.logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
-            
-            # Also clear buffer for denied access to prevent repeated processing
+            self.logger.debug(f"✓ Tag {tag_id} cooldown and deduplication updated (denied) - next access allowed in {self.tag_cooldown_duration}s")
+            self.logger.info("✗ Access denied - Barrier remains closed")
             self.logger.debug(f"Reader {reader_id}: Clearing buffer after denied access...")
             if reader.clear_buffer_safely():
                 self.logger.debug(f"Reader {reader_id}: ✓ Buffer cleared successfully (denied)")
