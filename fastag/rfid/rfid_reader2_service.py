@@ -239,16 +239,18 @@ processed_tags = set()
 # Relay control (GPIO)
 try:
     import RPi.GPIO as GPIO
-    RELAY_PINS = [17, 27, 22, 23]
+    RELAY_PINS = [26, 20, 21]  # Use only 3 relays as in RelayController
     GPIO.setmode(GPIO.BCM)
     for pin in RELAY_PINS:
         GPIO.setup(pin, GPIO.OUT)
         GPIO.output(pin, False)
     def activate_all_relays():
         for pin in RELAY_PINS:
+            logger.info(f"Turning ON relay (GPIO pin {pin})...")
             GPIO.output(pin, True)
         time.sleep(2)
         for pin in RELAY_PINS:
+            logger.info(f"Turning OFF relay (GPIO pin {pin})...")
             GPIO.output(pin, False)
 except Exception as e:
     logger.warning(f"GPIO not available: {e}")
