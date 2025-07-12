@@ -3,7 +3,8 @@
 # Set variables
 USER_TO_RUN=ubuntu
 WORKDIR="/home/ubuntu/Fastag/fastag/rfid"
-PYTHON_PATH="/usr/bin/python3"
+PYTHON_PATH="/home/ubuntu/Fastag/venv/bin/python"
+VENV_PATH="/home/ubuntu/Fastag/venv/bin"
 LAUNCHER="$WORKDIR/launcher_readers.py"
 SERVICE_FILE="/etc/systemd/system/rfid_readers.service"
 
@@ -46,6 +47,7 @@ After=network.target
 Type=simple
 User=$USER_TO_RUN
 WorkingDirectory=$WORKDIR
+Environment=PATH=$VENV_PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=$PYTHON_PATH $LAUNCHER
 Restart=always
 RestartSec=3
