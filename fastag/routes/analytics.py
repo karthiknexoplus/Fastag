@@ -30,7 +30,7 @@ def get_analytics_data():
     """).fetchone()[0]
     
     # 2. Today's Statistics
-    today_stats = db.execute("""
+    today_stats_row = db.execute("""
         SELECT 
             COUNT(*) as total_events,
             SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as granted,
@@ -38,9 +38,10 @@ def get_analytics_data():
         FROM access_logs 
         WHERE DATE(timestamp) = DATE('now')
     """).fetchone()
+    today_stats = list(today_stats_row) if today_stats_row else [0, 0, 0]
     
     # 3. Hourly Activity (Last 24 hours)
-    hourly_data = db.execute("""
+    hourly_data = [list(row) for row in db.execute("""
         SELECT 
             strftime('%H', timestamp) as hour,
             COUNT(*) as total,
@@ -50,10 +51,10 @@ def get_analytics_data():
         WHERE timestamp >= datetime('now', '-24 hours')
         GROUP BY strftime('%H', timestamp)
         ORDER BY hour
-    """).fetchall()
+    """).fetchall()]
     
     # 4. Lane Utilization
-    lane_utilization = db.execute("""
+    lane_utilization = [list(row) for row in db.execute("""
         SELECT 
             l.lane_name,
             COUNT(*) as total_events,
@@ -65,10 +66,10 @@ def get_analytics_data():
         GROUP BY l.id, l.lane_name
         
         ORDER BY total_events DESC
-    """).fetchall()
+    """).fetchall()]
     
     # 5. Reader Health Status
-    reader_health = db.execute("""
+    reader_health = [list(row) for row in db.execute("""
         SELECT 
             r.id as reader_id,
             r.reader_ip,
@@ -82,10 +83,10 @@ def get_analytics_data():
             AND al.timestamp >= datetime('now', '-24 hours')
         GROUP BY r.id, r.reader_ip, r.type, l.lane_name
         ORDER BY r.id
-    """).fetchall()
+    """).fetchall()]
     
     # 6. Top Users (Most Active Tags)
-    top_users = db.execute("""
+    top_users = [list(row) for row in db.execute("""
         SELECT 
             al.tag_id,
             ku.name as user_name,
@@ -100,10 +101,10 @@ def get_analytics_data():
         GROUP BY al.tag_id, ku.name, ku.vehicle_number
         ORDER BY total_events DESC
         LIMIT 10
-    """).fetchall()
+    """).fetchall()]
     
     # 7. Denied Access Analysis
-    denied_analysis = db.execute("""
+    denied_analysis = [list(row) for row in db.execute("""
         SELECT 
             reason,
             COUNT(*) as count
@@ -112,10 +113,10 @@ def get_analytics_data():
         AND timestamp >= datetime('now', '-7 days')
         GROUP BY reason
         ORDER BY count DESC
-    """).fetchall()
+    """).fetchall()]
     
     # 8. Recent Activity (Last 50 events)
-    recent_activity = db.execute("""
+    recent_activity = [list(row) for row in db.execute("""
         SELECT 
             al.timestamp,
             al.tag_id,
@@ -131,10 +132,10 @@ def get_analytics_data():
         JOIN readers r ON al.reader_id = r.id
         ORDER BY al.timestamp DESC
         LIMIT 50
-    """).fetchall()
+    """).fetchall()]
     
     # 9. Weekly Trends
-    weekly_trends = db.execute("""
+    weekly_trends = [list(row) for row in db.execute("""
         SELECT 
             strftime('%Y-%W', timestamp) as week,
             COUNT(*) as total_events,
@@ -145,10 +146,10 @@ def get_analytics_data():
         GROUP BY strftime('%Y-%W', timestamp)
         ORDER BY week DESC
         LIMIT 8
-    """).fetchall()
+    """).fetchall()]
     
     # 10. Suspicious Activity (Multiple denied attempts)
-    suspicious_activity = db.execute("""
+    suspicious_activity = [list(row) for row in db.execute("""
         SELECT 
             tag_id,
             COUNT(*) as denied_count,
@@ -160,7 +161,7 @@ def get_analytics_data():
         GROUP BY tag_id
         HAVING denied_count > 3
         ORDER BY denied_count DESC
-    """).fetchall()
+    """).fetchall()]
     
     return {
         'current_occupancy': current_occupancy,
