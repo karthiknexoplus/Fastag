@@ -719,7 +719,7 @@ class RFIDService:
             user = result['user']
             self.logger.info(f"✓ {result['message']}")
             
-            # ✅ NEW: Update cooldown for this tag BEFORE opening barrier
+            # Update cooldown for this tag BEFORE opening barrier
             self.update_tag_cooldown(tag_id)
             self.logger.debug(f"✓ Tag {tag_id} cooldown updated - next access allowed in {self.tag_cooldown_duration}s")  # Changed to debug
             
@@ -729,23 +729,20 @@ class RFIDService:
             # Turn all relays ON together
             self.logger.info("Activating barrier control...")
             self.logger.info("Turning all relays ON...")
-            for relay_num in range(1, 5):  # Relays 1-4
+            for relay_num in range(1, 4):  # Relays 1-3 only
                 self.relay_controller.turn_on(relay_num)
-            
             # Keep all relays ON for 2 seconds
             self.logger.info("Keeping all relays ON for 2 seconds...")
             time.sleep(2)
-            
             # Turn all relays OFF together
             self.logger.info("Turning all relays OFF...")
-            for relay_num in range(1, 5):  # Relays 1-4
+            for relay_num in range(1, 4):  # Relays 1-3 only
                 self.relay_controller.turn_off(relay_num)
-            
             self.logger.info("✓ All relays cycle completed")
             self.logger.info("✓ Access granted - Barrier opened")
             
-            # ✅ NEW: Clear reader buffer after successful access
-            self.logger.debug(f"Reader {reader_id}: Clearing buffer to prevent old tag processing...")  # Changed to debug
+            # Clear reader buffer after successful access
+            self.logger.debug(f"Reader {reader_id}: Clearing buffer to prevent old tag processing...")
             if reader.clear_buffer_safely():
                 self.logger.debug(f"Reader {reader_id}: ✓ Buffer cleared successfully")  # Changed to debug
             else:
@@ -783,13 +780,18 @@ class RFIDService:
                     conn.close()
                 except Exception as e:
                     self.logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
-            
         else:
             self.logger.warning(f"✗ {result['message']} (Reader {reader_id})")
             
             # Log denied access (async)
             self.log_access_async(tag_id, None, 'denied', reader_id, lane_id, device_id)
             self.logger.info("✗ Access denied - Barrier remains closed")
+
+            # Update cooldown and DB insert for denied/not_found tags as well
+            self.update_tag_cooldown(tag_id)
+            self.logger.debug(f"✓ Tag {tag_id} cooldown updated (denied) - next access allowed in {self.tag_cooldown_duration}s")
+            self.update_db_insert(tag_id, lane_id)
+            self.logger.debug(f"✓ DB insert count updated (denied) for tag {tag_id} lane {lane_id}")
 
             # Fetch and cache vehicle number for denied tag_id
             if tag_id and str(tag_id).startswith('34161'):
@@ -824,10 +826,10 @@ class RFIDService:
                 except Exception as e:
                     self.logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
             
-            # ✅ NEW: Also clear buffer for denied access to prevent repeated processing
-            self.logger.debug(f"Reader {reader_id}: Clearing buffer after denied access...")  # Changed to debug
+            # Also clear buffer for denied access to prevent repeated processing
+            self.logger.debug(f"Reader {reader_id}: Clearing buffer after denied access...")
             if reader.clear_buffer_safely():
-                self.logger.debug(f"Reader {reader_id}: ✓ Buffer cleared after denied access")  # Changed to debug
+                self.logger.debug(f"Reader {reader_id}: ✓ Buffer cleared successfully (denied)")
             else:
                 self.logger.warning(f"Reader {reader_id}: ⚠️ Buffer clearing failed after denied access")
         
