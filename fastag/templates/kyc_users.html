@@ -134,6 +134,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Get the feature flag from the global variable in base.html
+    var fastagFeaturesEnabled = typeof window.fastagFeaturesEnabled !== 'undefined' ? window.fastagFeaturesEnabled : true;
+
     const fastagIdInput = document.getElementById('fastag_id');
     const vehicleNumberInput = document.getElementById('vehicle_number');
     const fetchVehicleBtn = document.getElementById('fetch-vehicle-btn');
@@ -143,6 +146,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch vehicle number when FASTag ID button is clicked
     fetchVehicleBtn.addEventListener('click', function() {
+        if (!fastagFeaturesEnabled) {
+            alert('Please contact Nexoplus for pricing!');
+            return;
+        }
         const fastagId = fastagIdInput.value.trim();
         if (!fastagId) {
             fastagFeedback.innerHTML = '<span style="color: #dc3545;">Please enter a FASTag ID first</span>';
@@ -175,6 +182,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch FASTag ID when vehicle number button is clicked
     fetchFastagBtn.addEventListener('click', function() {
+        if (!fastagFeaturesEnabled) {
+            alert('Please contact Nexoplus for pricing!');
+            return;
+        }
         const vehicleNumber = vehicleNumberInput.value.trim();
         if (!vehicleNumber) {
             vehicleFeedback.innerHTML = '<span style="color: #dc3545;">Please enter a vehicle number first</span>';
