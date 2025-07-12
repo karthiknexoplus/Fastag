@@ -129,24 +129,24 @@
                     </ul>
                 </div>
                 <div class="dropdown d-inline-block">
-                    <a href="#" class="nav-icon-link dropdown-toggle {% if not config.FASTAG_FEATURES_ENABLED %}disabled{% endif %}" data-bs-toggle="dropdown" title="Fastag" {% if not config.FASTAG_FEATURES_ENABLED %}onclick="showContactMessage(); return false;"{% endif %}>
+                    <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Fastag">
                         <i class="fas fa-tags fastag-menu-icon"></i>
                         <span class="nav-label fastag-menu-label d-none d-md-inline">Fastag</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ url_for('vehicle_finder.find_vehicle') }}">
+                        <li><a class="dropdown-item" href="{{ url_for('vehicle_finder.find_vehicle') }}" onclick="return handleFastagMenuClick(event);">
                             <i class="fas fa-car fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Vehicle</span>
                         </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('bank_finder.find_bank') }}">
+                        <li><a class="dropdown-item" href="{{ url_for('bank_finder.find_bank') }}" onclick="return handleFastagMenuClick(event);">
                             <i class="fas fa-university fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Bank</span>
                         </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('fastag_balance.fastag_balance') }}">
+                        <li><a class="dropdown-item" href="{{ url_for('fastag_balance.fastag_balance') }}" onclick="return handleFastagMenuClick(event);">
                             <i class="fas fa-wallet fastag-submenu-icon"></i><span class="fastag-submenu-label">Fastag Balance</span>
                         </a></li>
-                        <li><a class="dropdown-item" href="/challan">
+                        <li><a class="dropdown-item" href="/challan" onclick="return handleFastagMenuClick(event);">
                             <i class="fas fa-receipt fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Challan</span>
                         </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('fuel_price.fuel_price') }}">
+                        <li><a class="dropdown-item" href="{{ url_for('fuel_price.fuel_price') }}" onclick="return handleFastagMenuClick(event);">
                             <i class="fas fa-gas-pump fastag-submenu-icon"></i><span class="fastag-submenu-label">Find Fuel Price</span>
                         </a></li>
                     </ul>
