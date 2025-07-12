@@ -837,3 +837,209 @@ def viewonmobile_access_logs():
         "total_count": total_count,
         "logs": logs
     }) 
+
+# --- MOBILE ANALYTICS API ENDPOINTS ---
+@analytics_bp.route('/api/mobile/analytics/summary')
+def mobile_analytics_summary():
+    """Summary: entries, exits, denied, inside, overstayed"""
+    db = get_db()
+    today = datetime.now().date()
+    # Entries, exits, denied today
+    stats = db.execute('''
+        SELECT 
+            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits,
+            SUM(CASE WHEN access_result = 'denied' THEN 1 ELSE 0 END) as denied
+        FROM access_logs WHERE DATE(timestamp) = DATE('now')
+    ''').fetchone()
+    entries, exits, denied = stats if stats else (0, 0, 0)
+    # Vehicles currently inside
+    inside = db.execute('''
+        SELECT COUNT(DISTINCT tag_id) FROM access_logs al1
+        WHERE al1.access_result = 'granted'
+        AND al1.timestamp = (
+            SELECT MAX(al2.timestamp) FROM access_logs al2 WHERE al2.tag_id = al1.tag_id
+        )
+    ''').fetchone()[0]
+    # Overstayed (inside > 8h)
+    overstayed = db.execute('''
+        SELECT COUNT(*) FROM (
+            SELECT tag_id, MAX(timestamp) as last_entry
+            FROM access_logs WHERE access_result = 'granted'
+            GROUP BY tag_id
+            HAVING last_entry <= datetime('now', '-8 hours')
+        )
+    ''').fetchone()[0]
+    return jsonify({
+        'date': str(today),
+        'entries': entries,
+        'exits': exits,
+        'denied': denied,
+        'currently_inside': inside,
+        'overstayed': overstayed
+    })
+
+@analytics_bp.route('/api/mobile/analytics/lanes')
+def mobile_analytics_lanes():
+    """Lane-wise stats: entries, exits, denied today"""
+    db = get_db()
+    rows = db.execute('''
+        SELECT l.lane_name, 
+            SUM(CASE WHEN al.access_result = 'granted' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN al.access_result = 'exit' THEN 1 ELSE 0 END) as exits,
+            SUM(CASE WHEN al.access_result = 'denied' THEN 1 ELSE 0 END) as denied
+        FROM access_logs al
+        JOIN lanes l ON al.lane_id = l.id
+        WHERE DATE(al.timestamp) = DATE('now')
+        GROUP BY l.lane_name
+    ''').fetchall()
+    lanes = [dict(lane_name=row[0], entries=row[1], exits=row[2], denied=row[3]) for row in rows]
+    return jsonify({'lanes': lanes})
+
+@analytics_bp.route('/api/mobile/analytics/peak')
+def mobile_analytics_peak():
+    """Peak entry/exit hour, busiest/most denied lane today"""
+    db = get_db()
+    # Peak entry/exit hour
+    peak = db.execute('''
+        SELECT strftime('%H', timestamp) as hour,
+            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits
+        FROM access_logs WHERE DATE(timestamp) = DATE('now')
+        GROUP BY hour ORDER BY entries DESC LIMIT 1
+    ''').fetchone()
+    peak_entry_hour = int(peak[0]) if peak else None
+    peak_exit = db.execute('''
+        SELECT strftime('%H', timestamp) as hour,
+            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits
+        FROM access_logs WHERE DATE(timestamp) = DATE('now')
+        GROUP BY hour ORDER BY exits DESC LIMIT 1
+    ''').fetchone()
+    peak_exit_hour = int(peak_exit[0]) if peak_exit else None
+    # Busiest lane
+    busiest = db.execute('''
+        SELECT l.lane_name, COUNT(*) as cnt FROM access_logs al
+        JOIN lanes l ON al.lane_id = l.id
+        WHERE DATE(al.timestamp) = DATE('now')
+        GROUP BY l.lane_name ORDER BY cnt DESC LIMIT 1
+    ''').fetchone()
+    busiest_lane = busiest[0] if busiest else None
+    # Most denied lane
+    denied = db.execute('''
+        SELECT l.lane_name, COUNT(*) as cnt FROM access_logs al
+        JOIN lanes l ON al.lane_id = l.id
+        WHERE DATE(al.timestamp) = DATE('now') AND al.access_result = 'denied'
+        GROUP BY l.lane_name ORDER BY cnt DESC LIMIT 1
+    ''').fetchone()
+    most_denied_lane = denied[0] if denied else None
+    return jsonify({
+        'peak_entry_hour': peak_entry_hour,
+        'peak_exit_hour': peak_exit_hour,
+        'busiest_lane': busiest_lane,
+        'most_denied_lane': most_denied_lane
+    })
+
+@analytics_bp.route('/api/mobile/analytics/top-tags')
+def mobile_analytics_top_tags():
+    """Top 5 frequent and denied tags today"""
+    db = get_db()
+    top_frequent = db.execute('''
+        SELECT tag_id, COUNT(*) as cnt FROM access_logs
+        WHERE DATE(timestamp) = DATE('now') AND access_result = 'granted'
+        GROUP BY tag_id ORDER BY cnt DESC LIMIT 5
+    ''').fetchall()
+    top_denied = db.execute('''
+        SELECT tag_id, COUNT(*) as cnt FROM access_logs
+        WHERE DATE(timestamp) = DATE('now') AND access_result = 'denied'
+        GROUP BY tag_id ORDER BY cnt DESC LIMIT 5
+    ''').fetchall()
+    return jsonify({
+        'top_frequent_visitors': [{'tag_id': row[0], 'count': row[1]} for row in top_frequent],
+        'top_denied_tags': [{'tag_id': row[0], 'count': row[1]} for row in top_denied]
+    })
+
+@analytics_bp.route('/api/mobile/analytics/durations')
+def mobile_analytics_durations():
+    """Average, shortest, longest parking duration today (in minutes)"""
+    db = get_db()
+    # For each tag, get entry and exit times
+    rows = db.execute('''
+        SELECT tag_id, 
+            MIN(CASE WHEN access_result = 'granted' THEN timestamp END) as entry_time,
+            MAX(CASE WHEN access_result = 'exit' THEN timestamp END) as exit_time
+        FROM access_logs WHERE DATE(timestamp) = DATE('now')
+        GROUP BY tag_id
+        HAVING entry_time IS NOT NULL AND exit_time IS NOT NULL
+    ''').fetchall()
+    durations = []
+    for row in rows:
+        entry = datetime.fromisoformat(row[1]) if row[1] else None
+        exit = datetime.fromisoformat(row[2]) if row[2] else None
+        if entry and exit:
+            durations.append((exit - entry).total_seconds() / 60)
+    avg_dur = int(sum(durations)/len(durations)) if durations else 0
+    min_dur = int(min(durations)) if durations else 0
+    max_dur = int(max(durations)) if durations else 0
+    return jsonify({
+        'average_duration_minutes': avg_dur,
+        'shortest_duration_minutes': min_dur,
+        'longest_duration_minutes': max_dur
+    })
+
+@analytics_bp.route('/api/mobile/analytics/vehicle-history')
+def mobile_analytics_vehicle_history():
+    """All logs for a specific tag (today)"""
+    tag_id = request.args.get('tag_id')
+    if not tag_id:
+        return jsonify({'error': 'tag_id required'}), 400
+    db = get_db()
+    rows = db.execute('''
+        SELECT timestamp, lane_id, access_result, reason FROM access_logs
+        WHERE tag_id = ? AND DATE(timestamp) = DATE('now')
+        ORDER BY timestamp DESC
+    ''', (tag_id,)).fetchall()
+    logs = [dict(timestamp=row[0], lane_id=row[1], event=row[2], reason=row[3]) for row in rows]
+    return jsonify({'tag_id': tag_id, 'logs': logs})
+
+@analytics_bp.route('/api/mobile/analytics/trends')
+def mobile_analytics_trends():
+    """Daily entry/exit/denied counts for last 7 days"""
+    db = get_db()
+    rows = db.execute('''
+        SELECT DATE(timestamp) as date,
+            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits,
+            SUM(CASE WHEN access_result = 'denied' THEN 1 ELSE 0 END) as denied
+        FROM access_logs
+        WHERE timestamp >= datetime('now', '-7 days')
+        GROUP BY DATE(timestamp)
+        ORDER BY date DESC
+    ''').fetchall()
+    trends = [dict(date=row[0], entries=row[1], exits=row[2], denied=row[3]) for row in rows]
+    return jsonify({'trends': trends})
+
+@analytics_bp.route('/api/mobile/analytics/heatmap')
+def mobile_analytics_heatmap():
+    """Hourly entry/exit counts for today"""
+    db = get_db()
+    rows = db.execute('''
+        SELECT strftime('%H', timestamp) as hour,
+            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits
+        FROM access_logs WHERE DATE(timestamp) = DATE('now')
+        GROUP BY hour ORDER BY hour
+    ''').fetchall()
+    hours = [dict(hour=int(row[0]), entries=row[1], exits=row[2]) for row in rows]
+    return jsonify({'hours': hours})
+
+@analytics_bp.route('/api/mobile/analytics/denied-reasons')
+def mobile_analytics_denied_reasons():
+    """Denied counts by reason today"""
+    db = get_db()
+    rows = db.execute('''
+        SELECT reason, COUNT(*) as count FROM access_logs
+        WHERE access_result = 'denied' AND DATE(timestamp) = DATE('now')
+        GROUP BY reason ORDER BY count DESC
+    ''').fetchall()
+    reasons = [dict(reason=row[0], count=row[1]) for row in rows]
+    return jsonify({'reasons': reasons}) 
