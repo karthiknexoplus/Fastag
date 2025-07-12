@@ -2,27 +2,23 @@
 
 # Set variables
 USER_TO_RUN=ubuntu
-WORKDIR="/home/ubuntu/Fastag/fastag/rfid"
-PYTHON_PATH="/home/ubuntu/Fastag/venv/bin/python"
-VENV_PATH="/home/ubuntu/Fastag/venv/bin"
-PYTHONPATH="/home/ubuntu/Fastag"
-LAUNCHER="$WORKDIR/launcher_readers.py"
+PROJECT_ROOT="/home/ubuntu/Fastag"
+WORKDIR="$PROJECT_ROOT"
+PYTHON_PATH="$PROJECT_ROOT/venv/bin/python"
+VENV_PATH="$PROJECT_ROOT/venv/bin"
+PYTHONPATH="$PROJECT_ROOT"
+LAUNCHER="$PROJECT_ROOT/fastag/rfid/launcher_readers.py"
 SERVICE_FILE="/etc/systemd/system/rfid_readers.service"
 
 # 1. Create launcher_readers.py
 cat > "$LAUNCHER" <<EOF
 import subprocess
 import sys
-import os
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-READER1 = os.path.join(BASE_DIR, "rfid_reader1_service.py")
-READER2 = os.path.join(BASE_DIR, "rfid_reader2_service.py")
 
 procs = []
-for script in [READER1, READER2]:
-    print(f"Starting {script} ...")
-    procs.append(subprocess.Popen([sys.executable, script]))
+for module in ["fastag.rfid.rfid_reader1_service", "fastag.rfid.rfid_reader2_service"]:
+    print(f"Starting {module} ...")
+    procs.append(subprocess.Popen([sys.executable, "-m", module]))
 
 try:
     for proc in procs:
