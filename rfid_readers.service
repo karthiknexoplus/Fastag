@@ -1,0 +1,17 @@
+[Unit]
+Description=RFID Readers Service (Fastag)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/Fastag
+ExecStart=/home/ubuntu/Fastag/venv/bin/python3 /home/ubuntu/Fastag/launcher_readers.py
+Restart=always
+RestartSec=5
+User=ubuntu
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=append:/home/ubuntu/Fastag/logs/rfid_readers.log
+StandardError=append:/home/ubuntu/Fastag/logs/rfid_readers.log
+
+[Install]
+WantedBy=multi-user.target 
