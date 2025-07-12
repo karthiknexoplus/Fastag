@@ -101,6 +101,25 @@ def get_rpi_system_info():
     info.append(f"<span style='color:#764ba2;'>{disk_icon} Disk:</span> <span style='color:#333;'>{disk}</span>")
     return ' | '.join(info)
 
+def add_missing_columns():
+    import sqlite3
+    db_path = 'instance/fastag.db'
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute("PRAGMA table_info(access_logs)")
+    columns = [row[1] for row in c.fetchall()]
+    if 'user_id' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN user_id INTEGER;")
+    if 'device_id' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN device_id INTEGER;")
+    if 'created_at' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN created_at TIMESTAMP;")
+    conn.commit()
+    conn.close()
+
+# Call this during initialization
+add_missing_columns()
+
 def create_app():
     from fastag.rfid.relay_controller import RelayController  # updated import after moving class
     app = Flask(__name__, instance_relative_config=True)

@@ -32,6 +32,26 @@ def print_schema_summary(cursor):
         col_list = ', '.join([f"{col[1]} ({col[2]})" for col in cols])
         print(f"  - {table}: {col_list}")
 
+def add_missing_columns():
+    import sqlite3
+    db_path = 'instance/fastag.db'
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    # Get current columns
+    c.execute("PRAGMA table_info(access_logs)")
+    columns = [row[1] for row in c.fetchall()]
+    # Add user_id if missing
+    if 'user_id' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN user_id INTEGER;")
+    # Add device_id if missing
+    if 'device_id' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN device_id INTEGER;")
+    # Add created_at if missing
+    if 'created_at' not in columns:
+        c.execute("ALTER TABLE access_logs ADD COLUMN created_at TIMESTAMP;")
+    conn.commit()
+    conn.close()
+
 def init_database():
     try:
         db_dir = os.path.dirname(DB_PATH)
@@ -150,4 +170,5 @@ def init_database():
         sys.exit(1)
 
 if __name__ == '__main__':
-    init_database() 
+    init_database()
+    add_missing_columns() 
