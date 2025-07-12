@@ -496,90 +496,15 @@ class RFIDService:
         self.logger.info("RFID Service initialized")
         
     def setup_readers(self):
-        self.logger.info("Setting up RFID readers from database...")
-        
-        try:
-            if FLASK_AVAILABLE:
-                # Use Flask database
-                with self.app.app_context():
-                    db = get_db()
-                    # Query readers with their lane and location information
-                    readers_data = db.execute("""
-                        SELECT 
-                            r.id as reader_id,
-                            r.reader_ip,
-                            r.mac_address,
-                            r.type,
-                            r.lane_id,
-                            l.lane_name,
-                            loc.name as location_name
-                        FROM readers r
-                        JOIN lanes l ON r.lane_id = l.id
-                        JOIN locations loc ON l.location_id = loc.id
-                        ORDER BY r.id
-                    """).fetchall()
-            else:
-                # Standalone mode - use direct sqlite3 access
-                conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-                c = conn.cursor()
-                c.execute("""
-                    SELECT 
-                        r.id as reader_id,
-                        r.reader_ip,
-                        r.mac_address,
-                        r.type,
-                        r.lane_id,
-                        l.lane_name,
-                        loc.name as location_name
-                    FROM readers r
-                    JOIN lanes l ON r.lane_id = l.id
-                    JOIN locations loc ON l.location_id = loc.id
-                    ORDER BY r.id
-                """)
-                readers_data = c.fetchall()
-                conn.close()
-            
-            if not readers_data:
-                self.logger.warning("No readers found in database.")
-                return
-            
-            # Clear existing readers
-            self.readers = []
-            
-            for reader_data in readers_data:
-                reader_id = reader_data['reader_id']
-                reader_ip = reader_data['reader_ip']
-                lane_id = reader_data['lane_id']
-                reader_type = reader_data['type']
-                lane_name = reader_data['lane_name']
-                location_name = reader_data['location_name']
-                
-                # Determine DLL path based on reader type or ID
-                if reader_type == 'entry':
-                    dll_path = "./libSWNetClientApi1.so"
-                elif reader_type == 'exit':
-                    dll_path = "./libSWNetClientApi2.so"
-                else:
-                    # Fallback based on reader ID
-                    dll_path = f"./libSWNetClientApi{reader_id}.so"
-                
-                # Create RFID reader instance
-                reader = RFIDReader(
-                    ip_address=reader_ip,
-                    reader_id=reader_id,
-                    lane_id=lane_id,
-                    device_id=reader_id,  # Use reader_id as device_id
-                    dll_path=dll_path
-                )
-                
-                self.readers.append(reader)
-                self.logger.info(f"✓ Configured Reader {reader_id}: {reader_ip} ({reader_type}) - Lane: {lane_name} at {location_name}")
-            
-            self.logger.info(f"✓ Setup {len(self.readers)} readers from database")
-            
-        except Exception as e:
-            self.logger.error(f"✗ Error loading readers from database: {str(e)}")
-            self.readers = []
+        logger.info("Setting up RFID readers...")
+        # NOTE: Database IPs are left unchanged as per user request. Only hardcoded IPs here are updated.
+        # Reader 1: 192.168.1.101
+        reader1 = RFIDReader("192.168.1.101", 1, 1, 1, dll_path="./libSWNetClientApi1.so")
+        self.readers.append(reader1)
+        # Reader 2: 192.168.1.102
+        reader2 = RFIDReader("192.168.1.102", 2, 2, 2, dll_path="./libSWNetClientApi2.so")
+        self.readers.append(reader2)
+        logger.info(f"✓ Setup {len(self.readers)} readers")
     
     def connect_readers(self):
         self.logger.info("Connecting to RFID readers...")
