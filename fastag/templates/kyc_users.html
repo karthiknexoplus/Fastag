@@ -138,6 +138,10 @@ function showContactMessage() {
     modal.show();
 }
 
+// Set feature flag from template
+var fastagFeaturesEnabledStr = "{{ 'true' if config.FASTAG_FEATURES_ENABLED else 'false' }}";
+const fastagFeaturesEnabled = fastagFeaturesEnabledStr === 'true';
+
 document.addEventListener('DOMContentLoaded', function() {
     const fastagIdInput = document.getElementById('fastag_id');
     const vehicleNumberInput = document.getElementById('vehicle_number');
@@ -145,6 +149,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const fetchFastagBtn = document.getElementById('fetch-fastag-btn');
     const fastagFeedback = document.getElementById('fastag-feedback');
     const vehicleFeedback = document.getElementById('vehicle-feedback');
+
+    // Attach event listeners based on feature flag
+    if (!fastagFeaturesEnabled) {
+        fetchVehicleBtn.addEventListener('click', function(e) {
+            showContactMessage();
+            e.preventDefault();
+            return false;
+        });
+        fetchFastagBtn.addEventListener('click', function(e) {
+            showContactMessage();
+            e.preventDefault();
+            return false;
+        });
+        // No fetch logic attached
+        return;
+    }
 
     // Fetch vehicle number when FASTag ID button is clicked
     fetchVehicleBtn.addEventListener('click', function() {
