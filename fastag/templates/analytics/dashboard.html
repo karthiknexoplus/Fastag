@@ -472,6 +472,23 @@ function updateCharts(data) {
     }
 }
 
+function getDisplayName(user) {
+    // user: [tag_id, user_name, vehicle_number, owner_name, model_name, fuel_type, ...]
+    // For top_users: [tag_id, user_name, vehicle_number, owner_name, model_name, fuel_type, total_events, granted, denied, last_activity]
+    // For recent_activity: [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip]
+    // Try vehicle_number, then model_name, then owner_name, then user_name, then tag_id
+    return user[2] || user[4] || user[3] || user[1] || user[0] || 'Unknown';
+}
+
+function getSecondaryInfo(user) {
+    // Show as much as possible: model name, owner name, fuel type
+    let info = [];
+    if (user[4]) info.push(user[4]); // model_name
+    if (user[3]) info.push(user[3]); // owner_name
+    if (user[5]) info.push(user[5]); // fuel_type
+    return info.join(' • ');
+}
+
 function updateTables(data) {
     // Update top users table
     const topUsersTable = document.getElementById('top-users-table');
@@ -479,16 +496,14 @@ function updateTables(data) {
         topUsersTable.innerHTML = data.top_users.map(user => `
             <tr>
                 <td>
-                    <div class="fw-bold">${user[1] || 'Unknown'}</div>
+                    <div class="fw-bold">${getDisplayName(user)}</div>
                     <small class="text-muted">${user[0]}</small>
                 </td>
                 <td>${user[2] || 'N/A'}</td>
+                <td>${user[6]}</td>
                 <td>
-                    <span class="badge bg-primary">${user[3]}</span>
-                </td>
-                <td>
-                    <span class="status-badge ${user[4] > user[5] ? 'status-granted' : 'status-denied'}">
-                        ${user[4] > user[5] ? 'Active' : 'Issues'}
+                    <span class="status-badge ${user[7] > user[8] ? 'status-granted' : 'status-denied'}">
+                        ${user[7] > user[8] ? 'Active' : 'Issues'}
                     </span>
                 </td>
             </tr>
@@ -499,16 +514,15 @@ function updateTables(data) {
     const recentActivity = document.getElementById('recent-activity');
     if (data.recent_activity) {
         recentActivity.innerHTML = data.recent_activity.map(activity => {
-            const userName = activity[4] || 'Unknown User';
-            const vehicleNumber = activity[5] || 'N/A';
-            const displayName = vehicleNumber !== 'N/A' ? vehicleNumber : userName;
-            
+            // [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip]
+            const displayName = activity[5] || activity[7] || activity[6] || activity[4] || activity[1] || 'Unknown';
+            const secondary = [activity[7], activity[6], activity[8]].filter(Boolean).join(' • ');
             return `
                 <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="fw-bold">${displayName}</div>
-                            <small class="text-muted">${activity[1]} • ${activity[6]}</small>
+                            <small class="text-muted">${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
                         </div>
                         <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
                             ${activity[2].toUpperCase()}
