@@ -85,20 +85,21 @@ def get_analytics_data():
         ORDER BY r.id
     """).fetchall()]
     
-    # 6. Top Users (Most Active Tags)
+    # 6. Top Users (Most Active Tags) - with cached vehicle numbers
     top_users = [list(row) for row in db.execute("""
         SELECT 
             al.tag_id,
             ku.name as user_name,
-            ku.vehicle_number,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
             COUNT(*) as total_events,
             SUM(CASE WHEN al.access_result = 'granted' THEN 1 ELSE 0 END) as granted,
             SUM(CASE WHEN al.access_result = 'denied' THEN 1 ELSE 0 END) as denied,
             MAX(al.timestamp) as last_activity
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         WHERE al.timestamp >= datetime('now', '-30 days')
-        GROUP BY al.tag_id, ku.name, ku.vehicle_number
+        GROUP BY al.tag_id, ku.name, ku.vehicle_number, tvc.vehicle_number
         ORDER BY total_events DESC
         LIMIT 10
     """).fetchall()]
@@ -265,13 +266,14 @@ def export_data():
                 al.timestamp,
                 al.tag_id,
                 ku.name as user_name,
-                ku.vehicle_number,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
                 ku.contact_number,
                 l.lane_name,
                 r.reader_ip,
                 al.reason
             FROM access_logs al
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
             WHERE al.access_result = 'granted'
@@ -303,13 +305,14 @@ def export_data():
                 al.timestamp,
                 al.tag_id,
                 ku.name as user_name,
-                ku.vehicle_number,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
                 ku.contact_number,
                 l.lane_name,
                 r.reader_ip,
                 al.reason
             FROM access_logs al
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
             WHERE al.access_result = 'granted'
@@ -340,7 +343,7 @@ def export_data():
         query = """
             SELECT 
                 ku.name as user_name,
-                ku.vehicle_number,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
                 ku.contact_number,
                 ku.address,
                 al.tag_id,
@@ -354,6 +357,7 @@ def export_data():
                 END as status
             FROM access_logs al
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
             WHERE al.access_result = 'granted'
@@ -367,7 +371,7 @@ def export_data():
             query += " AND " + " AND ".join(conditions)
         
         query += """
-            GROUP BY al.tag_id, ku.name, ku.vehicle_number, ku.contact_number, ku.address, l.lane_name, r.reader_ip
+            GROUP BY al.tag_id, ku.name, ku.vehicle_number, tvc.vehicle_number, ku.contact_number, ku.address, l.lane_name, r.reader_ip
             HAVING MAX(al.timestamp) = (
                 SELECT MAX(timestamp) 
                 FROM access_logs al2 
@@ -397,15 +401,16 @@ def export_data():
                 al.access_result,
                 al.reason,
                 ku.name as user_name,
-                ku.vehicle_number,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
                 ku.contact_number,
                 l.lane_name,
                 r.reader_ip
             FROM access_logs al
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
-            WHERE ku.vehicle_number = ?
+            WHERE COALESCE(ku.vehicle_number, tvc.vehicle_number) = ?
         """
         
         conditions = []
