@@ -148,12 +148,25 @@ def get_analytics_data():
     """).fetchall()
     
     # Convert UTC timestamps to IST
-    utc_tz = pytz.UTC
     ist_tz = pytz.timezone('Asia/Kolkata')
     recent_activity = []
     for row in recent_activity_rows:
-        # Convert UTC timestamp to IST
-        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        # Parse the UTC timestamp and convert to IST
+        timestamp_str = row[0]
+        
+        # Handle different timestamp formats
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            # ISO format with Z (UTC)
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            # ISO format without Z, assume UTC
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            # SQLite datetime format, assume UTC
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        
+        # Convert to IST (UTC + 5:30)
         ist_time = utc_time.astimezone(ist_tz)
         ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
         
@@ -197,8 +210,22 @@ def get_analytics_data():
     # Convert UTC timestamps to IST for suspicious activity
     suspicious_activity = []
     for row in suspicious_activity_rows:
-        # Convert UTC timestamp to IST
-        utc_time = datetime.fromisoformat(row[2].replace('Z', '+00:00'))  # last_attempt is at index 2
+        # Parse the UTC timestamp and convert to IST
+        timestamp_str = row[2]  # last_attempt is at index 2
+        
+        # Handle different timestamp formats
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            # ISO format with Z (UTC)
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            # ISO format without Z, assume UTC
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            # SQLite datetime format, assume UTC
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        
+        # Convert to IST (UTC + 5:30)
         ist_time = utc_time.astimezone(ist_tz)
         ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
         
@@ -947,12 +974,26 @@ def viewonmobile_access_logs():
 
     logs = []
     # Create timezone objects
-    utc_tz = pytz.UTC
     ist_tz = pytz.timezone('Asia/Kolkata')
     
     for row in rows:
-        # Convert UTC timestamp to IST
-        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        # Parse the UTC timestamp and convert to IST
+        # The timestamp from database is in UTC format like "2025-07-13T05:03:01Z"
+        timestamp_str = row[0]
+        
+        # Handle different timestamp formats
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            # ISO format with Z (UTC)
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            # ISO format without Z, assume UTC
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            # SQLite datetime format, assume UTC
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        
+        # Convert to IST (UTC + 5:30)
         ist_time = utc_time.astimezone(ist_tz)
         ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
         
@@ -1173,13 +1214,26 @@ def mobile_analytics_vehicle_history():
     ''', (tag_id,)).fetchall()
     
     # Create timezone objects
-    utc_tz = pytz.UTC
     ist_tz = pytz.timezone('Asia/Kolkata')
     
     logs = []
     for row in rows:
-        # Convert UTC timestamp to IST
-        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        # Parse the UTC timestamp and convert to IST
+        timestamp_str = row[0]
+        
+        # Handle different timestamp formats
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            # ISO format with Z (UTC)
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            # ISO format without Z, assume UTC
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            # SQLite datetime format, assume UTC
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        
+        # Convert to IST (UTC + 5:30)
         ist_time = utc_time.astimezone(ist_tz)
         ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
         
@@ -1255,12 +1309,25 @@ def mobile_analytics_denied_logs():
     
     denied_logs = []
     # Create timezone objects
-    utc_tz = pytz.UTC
     ist_tz = pytz.timezone('Asia/Kolkata')
     
     for row in rows:
-        # Convert UTC timestamp to IST
-        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        # Parse the UTC timestamp and convert to IST
+        timestamp_str = row[0]
+        
+        # Handle different timestamp formats
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            # ISO format with Z (UTC)
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            # ISO format without Z, assume UTC
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            # SQLite datetime format, assume UTC
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        
+        # Convert to IST (UTC + 5:30)
         ist_time = utc_time.astimezone(ist_tz)
         ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
         
