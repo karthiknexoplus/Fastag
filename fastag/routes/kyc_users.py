@@ -18,9 +18,21 @@ def kyc_users():
     if request.method == 'POST':
         name = request.form['name']
         fastag_id = request.form['fastag_id']
-        vehicle_number = request.form['vehicle_number']
+        vehicle_number = request.form['vehicle_number'].replace(' ', '').upper() if request.form['vehicle_number'] else ''
         contact_number = request.form['contact_number']
         address = request.form['address']
+        # If fastag_id is empty, try to fetch it using the vehicle_number
+        if not fastag_id and vehicle_number:
+            try:
+                api_url = url_for('kyc_users.fetch_fastag_by_vehicle', vehicle_number=vehicle_number, _external=True)
+                resp = requests.get(api_url, timeout=10, verify=False)
+                if resp.ok:
+                    data = resp.json()
+                    # Assign the first active FASTag ID if available
+                    if data.get('success') and data.get('tags'):
+                        fastag_id = data['tags'][0]['tag_id']
+            except Exception as e:
+                logging.error(f"Error auto-fetching FASTag ID for vehicle {vehicle_number}: {e}")
         try:
             db.execute('INSERT INTO kyc_users (name, fastag_id, vehicle_number, contact_number, address) VALUES (?, ?, ?, ?, ?)',
                        (name, fastag_id, vehicle_number, contact_number, address))
