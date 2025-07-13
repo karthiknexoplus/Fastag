@@ -1,0 +1,7 @@
+[Unit]
+Description=Backup and upload FASTag SQLite DB
+
+[Service]
+Type=oneshot
+User=ubuntu
+ExecStart=/home/ubuntu/Fastag/scripts/backup_and_upload.sh 
