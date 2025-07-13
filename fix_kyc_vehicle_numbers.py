@@ -1,7 +1,8 @@
 import sqlite3
 import requests
 import logging
-from fastag.config import DATABASE
+# Set your database path here. Adjust if needed.
+DATABASE = "instance/fastag.db"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
