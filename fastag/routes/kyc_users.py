@@ -48,21 +48,23 @@ def fetch_vehicle_by_fastag(fastag_id):
         data = response.json()
         
         if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-            # Return ALL tags for this FASTag ID
+            # Return ONLY ACTIVE tags for this FASTag ID
             tags = []
             for tag_detail in data['npcitagDetails']:
-                tags.append({
-                    'tag_id': tag_detail.get('TagID', ''),
-                    'tid': tag_detail.get('TID', ''),
-                    'vehicle_number': tag_detail.get('VRN', ''),
-                    'status': tag_detail.get('TagStatus', ''),  # Use actual TagStatus from API
-                    'bank_name': tag_detail.get('BankId', ''),  # Use BankId field
-                    'issue_date': tag_detail.get('IssueDate', ''),
-                    'exception_code': tag_detail.get('ExceptionCode', ''),
-                    'com_vehicle': tag_detail.get('ComVehicle', ''),
-                    'vehicle_class': tag_detail.get('VehicleClass', ''),
-                    'avc': tag_detail.get('AVC', '')
-                })
+                # Only include tags with status "A" (Active)
+                if tag_detail.get('TagStatus') == 'A':
+                    tags.append({
+                        'tag_id': tag_detail.get('TagID', ''),
+                        'tid': tag_detail.get('TID', ''),
+                        'vehicle_number': tag_detail.get('VRN', ''),
+                        'status': tag_detail.get('TagStatus', ''),
+                        'bank_name': tag_detail.get('BankId', ''),
+                        'issue_date': tag_detail.get('IssueDate', ''),
+                        'exception_code': tag_detail.get('ExceptionCode', ''),
+                        'com_vehicle': tag_detail.get('ComVehicle', ''),
+                        'vehicle_class': tag_detail.get('VehicleClass', ''),
+                        'avc': tag_detail.get('AVC', '')
+                    })
             
             return jsonify({
                 'success': True,
@@ -99,21 +101,23 @@ def fetch_fastag_by_vehicle(vehicle_number):
         data = response.json()
         
         if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-            # Return ALL FASTag IDs for this vehicle number
+            # Return ONLY ACTIVE FASTag IDs for this vehicle number
             tags = []
             for tag_detail in data['npcitagDetails']:
-                tags.append({
-                    'tag_id': tag_detail.get('TagID', ''),
-                    'tid': tag_detail.get('TID', ''),
-                    'vehicle_number': tag_detail.get('VRN', ''),
-                    'status': tag_detail.get('TagStatus', ''),  # Use actual TagStatus from API
-                    'bank_name': tag_detail.get('BankId', ''),  # Use BankId field
-                    'issue_date': tag_detail.get('IssueDate', ''),
-                    'exception_code': tag_detail.get('ExceptionCode', ''),
-                    'com_vehicle': tag_detail.get('ComVehicle', ''),
-                    'vehicle_class': tag_detail.get('VehicleClass', ''),
-                    'avc': tag_detail.get('AVC', '')
-                })
+                # Only include tags with status "A" (Active)
+                if tag_detail.get('TagStatus') == 'A':
+                    tags.append({
+                        'tag_id': tag_detail.get('TagID', ''),
+                        'tid': tag_detail.get('TID', ''),
+                        'vehicle_number': tag_detail.get('VRN', ''),
+                        'status': tag_detail.get('TagStatus', ''),
+                        'bank_name': tag_detail.get('BankId', ''),
+                        'issue_date': tag_detail.get('IssueDate', ''),
+                        'exception_code': tag_detail.get('ExceptionCode', ''),
+                        'com_vehicle': tag_detail.get('ComVehicle', ''),
+                        'vehicle_class': tag_detail.get('VehicleClass', ''),
+                        'avc': tag_detail.get('AVC', '')
+                    })
             
             return jsonify({
                 'success': True,
