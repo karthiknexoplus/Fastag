@@ -42,8 +42,13 @@ def main():
         else:
             logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: NOT FOUND (SKIPPED)")
     conn.commit()
+    # Count users without fastag_id
+    cur.execute("SELECT COUNT(*) FROM kyc_users WHERE fastag_id IS NULL OR fastag_id = ''")
+    missing_fastag_count = cur.fetchone()[0]
     conn.close()
     logging.info(f"Done. Updated {updated} KYC users.")
+    print(f"Number of vehicles without FASTag ID: {missing_fastag_count}")
+    print(f"Expected: 34161")
 
 if __name__ == "__main__":
     main() 
