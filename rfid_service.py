@@ -543,6 +543,11 @@ class RFIDService:
         self.MAX_DB_RECORDS = 3
         self.last_db_insert = defaultdict(lambda: {'time': 0, 'count': 0})  # (tag_id, lane_id): {time, count}
         
+        # Vehicle caching queue and thread
+        self.vehicle_cache_queue = Queue()
+        self.vehicle_cache_thread = None
+        self.vehicle_cache_running = False
+        
         logger.info("RFID Service initialized")
         
     def setup_readers(self):
@@ -736,54 +741,9 @@ class RFIDService:
             else:
                 logger.warning(f"Reader {reader_id}: ⚠️ Buffer clearing failed, but access was granted")
             
-            # Fetch and cache vehicle details for 34161 tags (granted access)
+            # Queue vehicle caching for 34161 tags (granted access) - non-blocking
             if tag_id and str(tag_id).startswith('34161'):
-                try:
-                    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-                    c = conn.cursor()
-                    # Check if already cached
-                    c.execute("SELECT vehicle_number, owner_name, model_name, fuel_type FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
-                    row = c.fetchone()
-                    if not row or not row[0]:
-                        # Use Axis Bank API to fetch vehicle number
-                        url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=TagId&SearchValue={tag_id}'
-                        headers = {
-                            'Cookie': 'axisbiconnect=1067559104.47873.0000'
-                        }
-                        try:
-                            resp = requests.get(url, headers=headers, timeout=15, verify=False)
-                            if resp.status_code == 200:
-                                data = resp.json()
-                                if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-                                    tag_detail = data['npcitagDetails'][0]
-                                    vehicle_number = tag_detail.get('VRN', '')
-                                    if vehicle_number:
-                                        # Fetch additional details from Acko API
-                                        from fastag.rfid.rfid_common import fetch_vehicle_details_from_acko, cache_vehicle_details
-                                        vehicle_details = fetch_vehicle_details_from_acko(vehicle_number)
-                                        
-                                        owner_name = vehicle_details.get('owner_name', '') if vehicle_details else ''
-                                        model_name = vehicle_details.get('model_name', '') if vehicle_details else ''
-                                        fuel_type = vehicle_details.get('fuel_type', '') if vehicle_details else ''
-                                        
-                                        # Cache all details
-                                        if cache_vehicle_details(tag_id, vehicle_number, owner_name, model_name, fuel_type):
-                                            logger.info(f"✓ Cached vehicle details for granted tag {tag_id}: {vehicle_number} - {owner_name} - {model_name} - {fuel_type}")
-                                        else:
-                                            logger.warning(f"Failed to cache vehicle details for tag {tag_id}")
-                                    else:
-                                        logger.warning(f"No vehicle number found for tag {tag_id}")
-                                else:
-                                    logger.warning(f"No tag details found for {tag_id}: {data.get('ErrorMessage', 'Unknown error')}")
-                            else:
-                                logger.error(f"Failed to fetch vehicle number for tag {tag_id}: HTTP {resp.status_code}")
-                        except Exception as e:
-                            logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
-                    else:
-                        logger.info(f"✓ Vehicle details already cached for tag {tag_id}: {row[0]} - {row[1]} - {row[2]} - {row[3]}")
-                    conn.close()
-                except Exception as e:
-                    logger.error(f"Failed to cache vehicle details for tag {tag_id}: {e}")
+                self.queue_vehicle_cache(tag_id, 'granted')
             
         else:
             logger.warning(f"✗ {result['message']} (Reader {reader_id})")
@@ -792,54 +752,9 @@ class RFIDService:
             self.log_access_async(tag_id, None, 'denied', reader_id, lane_id, device_id)
             logger.info("✗ Access denied - Barrier remains closed")
 
-            # Fetch and cache vehicle details for 34161 tags (denied access)
+            # Queue vehicle caching for 34161 tags (denied access) - non-blocking
             if tag_id and str(tag_id).startswith('34161'):
-                try:
-                    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-                    c = conn.cursor()
-                    # Check if already cached
-                    c.execute("SELECT vehicle_number, owner_name, model_name, fuel_type FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
-                    row = c.fetchone()
-                    if not row or not row[0]:
-                        # Use Axis Bank API to fetch vehicle number
-                        url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=TagId&SearchValue={tag_id}'
-                        headers = {
-                            'Cookie': 'axisbiconnect=1067559104.47873.0000'
-                        }
-                        try:
-                            resp = requests.get(url, headers=headers, timeout=15, verify=False)
-                            if resp.status_code == 200:
-                                data = resp.json()
-                                if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-                                    tag_detail = data['npcitagDetails'][0]
-                                    vehicle_number = tag_detail.get('VRN', '')
-                                    if vehicle_number:
-                                        # Fetch additional details from Acko API
-                                        from fastag.rfid.rfid_common import fetch_vehicle_details_from_acko, cache_vehicle_details
-                                        vehicle_details = fetch_vehicle_details_from_acko(vehicle_number)
-                                        
-                                        owner_name = vehicle_details.get('owner_name', '') if vehicle_details else ''
-                                        model_name = vehicle_details.get('model_name', '') if vehicle_details else ''
-                                        fuel_type = vehicle_details.get('fuel_type', '') if vehicle_details else ''
-                                        
-                                        # Cache all details
-                                        if cache_vehicle_details(tag_id, vehicle_number, owner_name, model_name, fuel_type):
-                                            logger.info(f"✓ Cached vehicle details for denied tag {tag_id}: {vehicle_number} - {owner_name} - {model_name} - {fuel_type}")
-                                        else:
-                                            logger.warning(f"Failed to cache vehicle details for tag {tag_id}")
-                                    else:
-                                        logger.warning(f"No vehicle number found for tag {tag_id}")
-                                else:
-                                    logger.warning(f"No tag details found for {tag_id}: {data.get('ErrorMessage', 'Unknown error')}")
-                            else:
-                                logger.error(f"Failed to fetch vehicle number for tag {tag_id}: HTTP {resp.status_code}")
-                        except Exception as e:
-                            logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
-                    else:
-                        logger.info(f"✓ Vehicle details already cached for tag {tag_id}: {row[0]} - {row[1]} - {row[2]} - {row[3]}")
-                    conn.close()
-                except Exception as e:
-                    logger.error(f"Failed to cache vehicle details for tag {tag_id}: {e}")
+                self.queue_vehicle_cache(tag_id, 'denied')
             
             # ✅ NEW: Also clear buffer for denied access to prevent repeated processing
             logger.debug(f"Reader {reader_id}: Clearing buffer after denied access...")  # Changed to debug
@@ -932,6 +847,13 @@ class RFIDService:
             threads.append(thread)
             logger.info(f"✓ Started thread for Reader {reader.reader_id}")
         
+        # Start vehicle cache worker
+        self.vehicle_cache_running = True
+        self.vehicle_cache_thread = threading.Thread(target=self.vehicle_cache_worker)
+        self.vehicle_cache_thread.daemon = True
+        self.vehicle_cache_thread.start()
+        logger.info("🚗 Vehicle cache worker thread started")
+        
         logger.info(f"✓ RFID Service started with {len(threads)} reader threads")
         logger.info("RFID Service is now running and monitoring for tags...")
         logger.info("=" * 60)
@@ -970,6 +892,11 @@ class RFIDService:
         
         # Cleanup GPIO
         self.relay_controller.cleanup()
+        
+        # Stop vehicle cache worker
+        self.vehicle_cache_running = False
+        if self.vehicle_cache_thread and self.vehicle_cache_thread.is_alive():
+            self.vehicle_cache_thread.join(timeout=5) # Give it a moment to finish
         
         logger.info("✓ RFID Service stopped")
 
@@ -1043,6 +970,94 @@ class RFIDService:
         except Exception as e:
             logger.error(f"Reader {reader_id}: ✗ Error during buffer clearing: {str(e)}")
             return False
+
+    def vehicle_cache_worker(self):
+        """Background thread for vehicle caching operations"""
+        logger.info("🚗 Vehicle cache worker thread started")
+        
+        while self.vehicle_cache_running:
+            try:
+                # Get vehicle caching request from queue (non-blocking)
+                try:
+                    request = self.vehicle_cache_queue.get(timeout=1)
+                except:
+                    continue
+                
+                tag_id, access_type = request
+                
+                # Process vehicle caching
+                self._cache_vehicle_details_async(tag_id, access_type)
+                
+                # Mark task as done
+                self.vehicle_cache_queue.task_done()
+                
+            except Exception as e:
+                logger.error(f"Vehicle cache worker error: {e}")
+                time.sleep(1)
+        
+        logger.info("🚗 Vehicle cache worker thread stopped")
+    
+    def _cache_vehicle_details_async(self, tag_id, access_type):
+        """Async vehicle caching - won't block main RFID operations"""
+        try:
+            conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+            c = conn.cursor()
+            
+            # Check if already cached
+            c.execute("SELECT vehicle_number, owner_name, model_name, fuel_type FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
+            row = c.fetchone()
+            
+            if not row or not row[0]:
+                # Use Axis Bank API to fetch vehicle number
+                url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=TagId&SearchValue={tag_id}'
+                headers = {
+                    'Cookie': 'axisbiconnect=1067559104.47873.0000'
+                }
+                
+                try:
+                    resp = requests.get(url, headers=headers, timeout=10, verify=False)  # Reduced timeout
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
+                            tag_detail = data['npcitagDetails'][0]
+                            vehicle_number = tag_detail.get('VRN', '')
+                            if vehicle_number:
+                                # Fetch additional details from Acko API
+                                from fastag.rfid.rfid_common import fetch_vehicle_details_from_acko, cache_vehicle_details
+                                vehicle_details = fetch_vehicle_details_from_acko(vehicle_number)
+                                
+                                owner_name = vehicle_details.get('owner_name', '') if vehicle_details else ''
+                                model_name = vehicle_details.get('model_name', '') if vehicle_details else ''
+                                fuel_type = vehicle_details.get('fuel_type', '') if vehicle_details else ''
+                                
+                                # Cache all details
+                                if cache_vehicle_details(tag_id, vehicle_number, owner_name, model_name, fuel_type):
+                                    logger.info(f"✓ Cached vehicle details for {access_type} tag {tag_id}: {vehicle_number} - {owner_name} - {model_name} - {fuel_type}")
+                                else:
+                                    logger.warning(f"Failed to cache vehicle details for tag {tag_id}")
+                            else:
+                                logger.warning(f"No vehicle number found for tag {tag_id}")
+                        else:
+                            logger.warning(f"No tag details found for {tag_id}: {data.get('ErrorMessage', 'Unknown error')}")
+                    else:
+                        logger.error(f"Failed to fetch vehicle number for tag {tag_id}: HTTP {resp.status_code}")
+                except Exception as e:
+                    logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
+            else:
+                logger.debug(f"✓ Vehicle details already cached for tag {tag_id}: {row[0]} - {row[1]} - {row[2]} - {row[3]}")
+            
+            conn.close()
+            
+        except Exception as e:
+            logger.error(f"Failed to cache vehicle details for tag {tag_id}: {e}")
+    
+    def queue_vehicle_cache(self, tag_id, access_type):
+        """Queue vehicle caching request (non-blocking)"""
+        try:
+            self.vehicle_cache_queue.put((tag_id, access_type), block=False)
+            logger.debug(f"Queued vehicle cache request for tag {tag_id} ({access_type})")
+        except:
+            logger.warning(f"Vehicle cache queue full, skipping cache for tag {tag_id}")
 
 def main():
     logger.info("One Bee RFID Service Starting...")
