@@ -127,11 +127,6 @@
                     <i class="fas fa-id-card"></i>
                     <span class="nav-label d-none d-md-inline">KYC Users</span>
                 </a>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('visitors.visitors_dashboard') }}">
-                    <i class="fas fa-user-friends"></i> Visitors
-                  </a>
-                </li>
                 <div class="dropdown d-inline-block">
                     <a href="{{ url_for('analytics.dashboard') }}" class="nav-icon-link dropdown-toggle {% if request.endpoint.startswith('analytics.') %}active{% endif %}" data-bs-toggle="dropdown" title="Analytics">
                         <i class="fas fa-chart-line"></i>
