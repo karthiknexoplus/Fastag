@@ -557,6 +557,7 @@ def today_denied_details():
         formatted_entries = []
         tag_categories = {'fastag': 0, 'car_oem': 0, 'other': 0}
         unique_tags = set()
+        # Reader stats with bifurcation
         reader_stats = {'entry_readers': {}, 'exit_readers': {}}
         for entry in denied_entries:
             timestamp_str = entry[5]
@@ -582,14 +583,17 @@ def today_denied_details():
                 tag_categories['other'] += 1
             reader_name = f"{entry[8]} ({entry[7]})"
             reader_type = entry[9]
-            if reader_type == 'entry':
-                if reader_name not in reader_stats['entry_readers']:
-                    reader_stats['entry_readers'][reader_name] = 0
-                reader_stats['entry_readers'][reader_name] += 1
+            # --- Bifurcation logic ---
+            stats_dict = reader_stats['entry_readers' if reader_type == 'entry' else 'exit_readers']
+            if reader_name not in stats_dict:
+                stats_dict[reader_name] = {'total': 0, 'fastag': 0, 'car_oem': 0, 'other': 0}
+            stats_dict[reader_name]['total'] += 1
+            if tag_type == 'FASTag':
+                stats_dict[reader_name]['fastag'] += 1
+            elif tag_type == 'CAR OEM':
+                stats_dict[reader_name]['car_oem'] += 1
             else:
-                if reader_name not in reader_stats['exit_readers']:
-                    reader_stats['exit_readers'][reader_name] = 0
-                reader_stats['exit_readers'][reader_name] += 1
+                stats_dict[reader_name]['other'] += 1
             formatted_entries.append({
                 'tag_id': tag_id,
                 'tag_type': tag_type,
@@ -602,10 +606,20 @@ def today_denied_details():
                 'lane_name': entry[7],
                 'reader_name': reader_name
             })
-        entry_readers = [{'reader_name': name, 'count': count} for name, count in reader_stats['entry_readers'].items()]
-        exit_readers = [{'reader_name': name, 'count': count} for name, count in reader_stats['exit_readers'].items()]
-        entry_readers.sort(key=lambda x: x['count'], reverse=True)
-        exit_readers.sort(key=lambda x: x['count'], reverse=True)
+        # Convert to list for frontend
+        def reader_stats_list(stats_dict):
+            return [
+                {
+                    'reader_name': name,
+                    'total': stat['total'],
+                    'fastag': stat['fastag'],
+                    'car_oem': stat['car_oem'],
+                    'other': stat['other']
+                }
+                for name, stat in sorted(stats_dict.items(), key=lambda x: x[1]['total'], reverse=True)
+            ]
+        entry_readers = reader_stats_list(reader_stats['entry_readers'])
+        exit_readers = reader_stats_list(reader_stats['exit_readers'])
         return jsonify({
             'summary': {
                 'fastag_count': tag_categories['fastag'],
