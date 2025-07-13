@@ -493,21 +493,24 @@ function updateTables(data) {
     // Update top users table
     const topUsersTable = document.getElementById('top-users-table');
     if (data.top_users) {
-        topUsersTable.innerHTML = data.top_users.map(user => `
-            <tr>
-                <td>
-                    <div class="fw-bold">${getDisplayName(user)}</div>
-                    <small class="text-muted">${user[0]}</small>
-                </td>
-                <td>${user[2] || 'N/A'}</td>
-                <td>${user[6]}</td>
-                <td>
-                    <span class="status-badge ${user[7] > user[8] ? 'status-granted' : 'status-denied'}">
-                        ${user[7] > user[8] ? 'Active' : 'Issues'}
-                    </span>
-                </td>
-            </tr>
-        `).join('');
+        topUsersTable.innerHTML = data.top_users.map(user => {
+            const secondary = getSecondaryInfo(user);
+            return `
+                <tr>
+                    <td>
+                        <div class="fw-bold">${getDisplayName(user)}</div>
+                        <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
+                    </td>
+                    <td>${user[2] || 'N/A'}</td>
+                    <td>${user[6]}</td>
+                    <td>
+                        <span class="status-badge ${user[7] > user[8] ? 'status-granted' : 'status-denied'}">
+                            ${user[7] > user[8] ? 'Active' : 'Denied'}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     // Update recent activity
