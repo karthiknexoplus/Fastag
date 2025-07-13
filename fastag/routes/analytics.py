@@ -3,6 +3,7 @@ from fastag.utils.db import get_db
 from datetime import datetime, timedelta
 import sqlite3
 import json
+import pytz
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -124,7 +125,7 @@ def get_analytics_data():
     """).fetchall()]
     
     # 8. Recent Activity (Last 50 events) - with cached vehicle details
-    recent_activity = [list(row) for row in db.execute("""
+    recent_activity_rows = db.execute("""
         SELECT 
             al.timestamp,
             al.tag_id,
@@ -144,7 +145,22 @@ def get_analytics_data():
         JOIN readers r ON al.reader_id = r.id
         ORDER BY al.timestamp DESC
         LIMIT 50
-    """).fetchall()]
+    """).fetchall()
+    
+    # Convert UTC timestamps to IST
+    utc_tz = pytz.UTC
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    recent_activity = []
+    for row in recent_activity_rows:
+        # Convert UTC timestamp to IST
+        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Create new row with IST timestamp
+        new_row = list(row)
+        new_row[0] = ist_time_str
+        recent_activity.append(new_row)
     
     # 9. Weekly Trends
     weekly_trends = [list(row) for row in db.execute("""
@@ -161,7 +177,7 @@ def get_analytics_data():
     """).fetchall()]
     
     # 10. Suspicious Activity (Multiple denied attempts) - with vehicle numbers
-    suspicious_activity = [list(row) for row in db.execute("""
+    suspicious_activity_rows = db.execute("""
         SELECT 
             al.tag_id,
             COUNT(*) as denied_count,
@@ -176,7 +192,20 @@ def get_analytics_data():
         GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number
         HAVING denied_count > 3
         ORDER BY denied_count DESC
-    """).fetchall()]
+    """).fetchall()
+    
+    # Convert UTC timestamps to IST for suspicious activity
+    suspicious_activity = []
+    for row in suspicious_activity_rows:
+        # Convert UTC timestamp to IST
+        utc_time = datetime.fromisoformat(row[2].replace('Z', '+00:00'))  # last_attempt is at index 2
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Create new row with IST timestamp
+        new_row = list(row)
+        new_row[2] = ist_time_str
+        suspicious_activity.append(new_row)
     
     return {
         'current_occupancy': current_occupancy,
@@ -264,8 +293,20 @@ def export_data():
         writer = csv.writer(output)
         writer.writerow(['Timestamp', 'Tag ID', 'Access Result', 'Reason', 'User Name', 'Vehicle Number', 'Owner Name', 'Model Name', 'Fuel Type', 'Lane', 'Reader IP'])
         
+        # Convert UTC timestamps to IST
+        utc_tz = pytz.UTC
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        
         for row in rows:
-            writer.writerow(row)
+            # Convert UTC timestamp to IST
+            utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Create new row with IST timestamp
+            new_row = list(row)
+            new_row[0] = ist_time_str
+            writer.writerow(new_row)
         
         filename = f'access_logs_{datetime.now().strftime("%Y%m%d")}.csv'
     
@@ -306,8 +347,20 @@ def export_data():
         writer = csv.writer(output)
         writer.writerow(['Entry Time', 'Tag ID', 'User Name', 'Vehicle Number', 'Owner Name', 'Model Name', 'Fuel Type', 'Contact Number', 'Entry Lane', 'Reader IP', 'Notes'])
         
+        # Convert UTC timestamps to IST
+        utc_tz = pytz.UTC
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        
         for row in rows:
-            writer.writerow(row)
+            # Convert UTC timestamp to IST
+            utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Create new row with IST timestamp
+            new_row = list(row)
+            new_row[0] = ist_time_str
+            writer.writerow(new_row)
         
         filename = f'entry_reports_{datetime.now().strftime("%Y%m%d")}.csv'
     
@@ -345,8 +398,20 @@ def export_data():
         writer = csv.writer(output)
         writer.writerow(['Exit Time', 'Tag ID', 'User Name', 'Vehicle Number', 'Contact Number', 'Exit Lane', 'Reader IP', 'Notes'])
         
+        # Convert UTC timestamps to IST
+        utc_tz = pytz.UTC
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        
         for row in rows:
-            writer.writerow(row)
+            # Convert UTC timestamp to IST
+            utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Create new row with IST timestamp
+            new_row = list(row)
+            new_row[0] = ist_time_str
+            writer.writerow(new_row)
         
         filename = f'exit_reports_{datetime.now().strftime("%Y%m%d")}.csv'
     
@@ -398,8 +463,20 @@ def export_data():
         writer = csv.writer(output)
         writer.writerow(['User Name', 'Vehicle Number', 'Contact Number', 'Address', 'Tag ID', 'Last Activity', 'Entry Lane', 'Entry Reader', 'Status'])
         
+        # Convert UTC timestamps to IST
+        utc_tz = pytz.UTC
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        
         for row in rows:
-            writer.writerow(row)
+            # Convert UTC timestamp to IST (last_activity is at index 5)
+            utc_time = datetime.fromisoformat(row[5].replace('Z', '+00:00'))
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Create new row with IST timestamp
+            new_row = list(row)
+            new_row[5] = ist_time_str
+            writer.writerow(new_row)
         
         filename = f'vehicle_non_exited_{datetime.now().strftime("%Y%m%d")}.csv'
     
@@ -440,8 +517,20 @@ def export_data():
         writer = csv.writer(output)
         writer.writerow(['Timestamp', 'Access Result', 'Reason', 'User Name', 'Vehicle Number', 'Contact Number', 'Lane', 'Reader IP'])
         
+        # Convert UTC timestamps to IST
+        utc_tz = pytz.UTC
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        
         for row in rows:
-            writer.writerow(row)
+            # Convert UTC timestamp to IST
+            utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Create new row with IST timestamp
+            new_row = list(row)
+            new_row[0] = ist_time_str
+            writer.writerow(new_row)
         
         filename = f'vehicle_{vehicle_number}_{datetime.now().strftime("%Y%m%d")}.csv'
     
@@ -857,9 +946,18 @@ def viewonmobile_access_logs():
     total_count = db.execute(count_query, count_params).fetchone()[0]
 
     logs = []
+    # Create timezone objects
+    utc_tz = pytz.UTC
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    
     for row in rows:
+        # Convert UTC timestamp to IST
+        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        
         logs.append({
-            "access_time": row[0],
+            "access_time": ist_time_str,
             "user": {
                 "name": row[1],
                 "vehicle_number": row[2],
@@ -1073,7 +1171,20 @@ def mobile_analytics_vehicle_history():
         WHERE tag_id = ? AND DATE(timestamp) = DATE('now')
         ORDER BY timestamp DESC
     ''', (tag_id,)).fetchall()
-    logs = [dict(timestamp=row[0], lane_id=row[1], event=row[2], reason=row[3]) for row in rows]
+    
+    # Create timezone objects
+    utc_tz = pytz.UTC
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    
+    logs = []
+    for row in rows:
+        # Convert UTC timestamp to IST
+        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        
+        logs.append(dict(timestamp=ist_time_str, lane_id=row[1], event=row[2], reason=row[3]))
+    
     return jsonify({'tag_id': tag_id, 'logs': logs})
 
 @analytics_bp.route('/api/mobile/analytics/trends')
@@ -1143,9 +1254,18 @@ def mobile_analytics_denied_logs():
     ''').fetchall()
     
     denied_logs = []
+    # Create timezone objects
+    utc_tz = pytz.UTC
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    
     for row in rows:
+        # Convert UTC timestamp to IST
+        utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        
         denied_logs.append({
-            'timestamp': row[0],
+            'timestamp': ist_time_str,
             'tag_id': row[1],
             'reason': row[2],
             'vehicle_number': row[3] or 'Unknown',
