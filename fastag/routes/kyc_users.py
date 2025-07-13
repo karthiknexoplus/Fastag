@@ -53,13 +53,15 @@ def fetch_vehicle_by_fastag(fastag_id):
             for tag_detail in data['npcitagDetails']:
                 tags.append({
                     'tag_id': tag_detail.get('TagID', ''),
+                    'tid': tag_detail.get('TID', ''),
                     'vehicle_number': tag_detail.get('VRN', ''),
-                    'status': tag_detail.get('Status', 'A'),  # Default to 'A' (Active)
-                    'bank_name': tag_detail.get('BankName', ''),
-                    'customer_name': tag_detail.get('CustomerName', ''),
-                    'mobile_number': tag_detail.get('MobileNumber', ''),
-                    'email': tag_detail.get('Email', ''),
-                    'address': tag_detail.get('Address', '')
+                    'status': tag_detail.get('TagStatus', ''),  # Use actual TagStatus from API
+                    'bank_name': tag_detail.get('BankId', ''),  # Use BankId field
+                    'issue_date': tag_detail.get('IssueDate', ''),
+                    'exception_code': tag_detail.get('ExceptionCode', ''),
+                    'com_vehicle': tag_detail.get('ComVehicle', ''),
+                    'vehicle_class': tag_detail.get('VehicleClass', ''),
+                    'avc': tag_detail.get('AVC', '')
                 })
             
             return jsonify({
@@ -102,13 +104,15 @@ def fetch_fastag_by_vehicle(vehicle_number):
             for tag_detail in data['npcitagDetails']:
                 tags.append({
                     'tag_id': tag_detail.get('TagID', ''),
+                    'tid': tag_detail.get('TID', ''),
                     'vehicle_number': tag_detail.get('VRN', ''),
-                    'status': tag_detail.get('Status', 'A'),  # Default to 'A' (Active)
-                    'bank_name': tag_detail.get('BankName', ''),
-                    'customer_name': tag_detail.get('CustomerName', ''),
-                    'mobile_number': tag_detail.get('MobileNumber', ''),
-                    'email': tag_detail.get('Email', ''),
-                    'address': tag_detail.get('Address', '')
+                    'status': tag_detail.get('TagStatus', ''),  # Use actual TagStatus from API
+                    'bank_name': tag_detail.get('BankId', ''),  # Use BankId field
+                    'issue_date': tag_detail.get('IssueDate', ''),
+                    'exception_code': tag_detail.get('ExceptionCode', ''),
+                    'com_vehicle': tag_detail.get('ComVehicle', ''),
+                    'vehicle_class': tag_detail.get('VehicleClass', ''),
+                    'avc': tag_detail.get('AVC', '')
                 })
             
             return jsonify({
