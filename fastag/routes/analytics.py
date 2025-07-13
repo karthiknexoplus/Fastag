@@ -458,121 +458,15 @@ def today_granted_details():
 
 @analytics_bp.route('/api/today-denied-details')
 def today_denied_details():
-    """API endpoint to get today's denied entries with categorization"""
     try:
         db = get_db()
-        
-        # Get today's denied entries with vehicle details
-        denied_entries = db.execute("""
-            SELECT 
-                al.tag_id,
-                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
-                COALESCE(ku.name, tvc.owner_name) as owner_name,
-                tvc.model_name,
-                tvc.fuel_type,
-                al.timestamp,
-                al.reason,
-                l.lane_name,
-                r.reader_ip,
-                r.type as reader_type
+        unique_tags = db.execute("""
+            SELECT COUNT(DISTINCT al.tag_id)
             FROM access_logs al
-            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
-            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
-            JOIN lanes l ON al.lane_id = l.id
-            JOIN readers r ON al.reader_id = r.id
             WHERE al.access_result = 'denied'
             AND DATE(al.timestamp) = DATE('now')
-            ORDER BY al.timestamp DESC
-        """).fetchall()
-        
-        # Convert UTC timestamps to IST and categorize tags
-        ist_tz = pytz.timezone('Asia/Kolkata')
-        formatted_entries = []
-        tag_categories = {'fastag': 0, 'car_oem': 0, 'other': 0}
-        unique_tags = set()
-        reader_stats = {'entry_readers': {}, 'exit_readers': {}}
-        
-        for entry in denied_entries:
-            # Parse the UTC timestamp and convert to IST
-            timestamp_str = entry[5]  # timestamp
-            
-            # Handle different timestamp formats
-            if 'T' in timestamp_str and 'Z' in timestamp_str:
-                # ISO format with Z (UTC)
-                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            elif 'T' in timestamp_str:
-                # ISO format without Z, assume UTC
-                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
-            else:
-                # SQLite datetime format, assume UTC
-                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-                utc_time = utc_time.replace(tzinfo=pytz.UTC)
-            
-            # Convert to IST
-            ist_time = utc_time.astimezone(ist_tz)
-            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-            
-            # Categorize tag type
-            tag_id = entry[0]
-            unique_tags.add(tag_id)
-            
-            if tag_id.startswith('34161'):
-                tag_type = 'FASTag'
-                tag_categories['fastag'] += 1
-            elif tag_id.startswith('E20'):
-                tag_type = 'CAR OEM'
-                tag_categories['car_oem'] += 1
-            else:
-                tag_type = 'Other'
-                tag_categories['other'] += 1
-            
-            # Track reader statistics
-            reader_name = f"{entry[8]} ({entry[7]})"  # reader_ip (lane_name)
-            reader_type = entry[9]  # reader_type
-            
-            if reader_type == 'entry':
-                if reader_name not in reader_stats['entry_readers']:
-                    reader_stats['entry_readers'][reader_name] = 0
-                reader_stats['entry_readers'][reader_name] += 1
-            else:
-                if reader_name not in reader_stats['exit_readers']:
-                    reader_stats['exit_readers'][reader_name] = 0
-                reader_stats['exit_readers'][reader_name] += 1
-            
-            formatted_entries.append({
-                'tag_id': tag_id,
-                'tag_type': tag_type,
-                'vehicle_number': entry[1],
-                'owner_name': entry[2],
-                'model_name': entry[3],
-                'fuel_type': entry[4],
-                'timestamp': ist_time_str,
-                'reason': entry[6],
-                'lane_name': entry[7],
-                'reader_name': reader_name
-            })
-        
-        # Convert reader stats to lists for easier frontend handling
-        entry_readers = [{'reader_name': name, 'count': count} for name, count in reader_stats['entry_readers'].items()]
-        exit_readers = [{'reader_name': name, 'count': count} for name, count in reader_stats['exit_readers'].items()]
-        
-        # Sort by count descending
-        entry_readers.sort(key=lambda x: x['count'], reverse=True)
-        exit_readers.sort(key=lambda x: x['count'], reverse=True)
-        
-        return jsonify({
-            'summary': {
-                'fastag_count': tag_categories['fastag'],
-                'car_oem_count': tag_categories['car_oem'],
-                'other_count': tag_categories['other'],
-                'unique_tags': len(unique_tags)
-            },
-            'reader_stats': {
-                'entry_readers': entry_readers,
-                'exit_readers': exit_readers
-            },
-            'entries': formatted_entries
-        })
+        """).fetchone()[0]
+        return jsonify({'unique_tags': unique_tags})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1660,143 +1554,13 @@ def mobile_analytics_denied_logs():
 
 @analytics_bp.route('/api/total-events-today-details')
 def total_events_today_details():
-    """API endpoint to get today's events summary and breakdown"""
     try:
         db = get_db()
-        # Get all today's events with details
-        rows = db.execute("""
-            SELECT 
-                al.timestamp,
-                al.tag_id,
-                al.access_result,
-                al.reason,
-                ku.name as user_name,
-                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
-                COALESCE(ku.name, tvc.owner_name) as owner_name,
-                tvc.model_name,
-                tvc.fuel_type,
-                l.lane_name,
-                r.reader_ip,
-                r.type as reader_type
+        unique_tags = db.execute("""
+            SELECT COUNT(DISTINCT al.tag_id)
             FROM access_logs al
-            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
-            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
-            JOIN lanes l ON al.lane_id = l.id
-            JOIN readers r ON al.reader_id = r.id
             WHERE DATE(al.timestamp) = DATE('now')
-            ORDER BY al.timestamp ASC
-        """).fetchall()
-
-        ist_tz = pytz.timezone('Asia/Kolkata')
-        hour_stats = {}
-        reader_stats = {}
-        tag_type_counts = {'fastag': 0, 'car_oem': 0, 'other': 0}
-        unique_tags = set()
-        detailed_entries = []
-
-        for row in rows:
-            # Parse and convert timestamp to IST
-            timestamp_str = row[0]
-            if 'T' in timestamp_str and 'Z' in timestamp_str:
-                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            elif 'T' in timestamp_str:
-                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
-            else:
-                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-                utc_time = utc_time.replace(tzinfo=pytz.UTC)
-            ist_time = utc_time.astimezone(ist_tz)
-            hour = ist_time.strftime('%H')
-            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-
-            tag_id = row[1]
-            access_result = row[2]
-            reader_type = row[11]
-            reader_name = f"{row[10]} ({row[9]})"  # reader_ip (lane_name)
-
-            # Tag type
-            if tag_id.startswith('34161'):
-                tag_type = 'FASTag'
-                tag_type_counts['fastag'] += 1
-            elif tag_id.startswith('E20'):
-                tag_type = 'CAR OEM'
-                tag_type_counts['car_oem'] += 1
-            else:
-                tag_type = 'Other'
-                tag_type_counts['other'] += 1
-            unique_tags.add(tag_id)
-
-            # Hourly stats
-            if hour not in hour_stats:
-                hour_stats[hour] = {
-                    'total': 0, 'granted': 0, 'denied': 0,
-                    'fastag': 0, 'car_oem': 0, 'other': 0
-                }
-            hour_stats[hour]['total'] += 1
-            if access_result == 'granted':
-                hour_stats[hour]['granted'] += 1
-            else:
-                hour_stats[hour]['denied'] += 1
-            if tag_type == 'FASTag':
-                hour_stats[hour]['fastag'] += 1
-            elif tag_type == 'CAR OEM':
-                hour_stats[hour]['car_oem'] += 1
-            else:
-                hour_stats[hour]['other'] += 1
-
-            # Reader stats
-            if reader_name not in reader_stats:
-                reader_stats[reader_name] = {'count': 0, 'type': reader_type}
-            reader_stats[reader_name]['count'] += 1
-
-            # Detailed event
-            detailed_entries.append({
-                'tag_id': tag_id,
-                'tag_type': tag_type,
-                'vehicle_number': row[5],
-                'owner_name': row[6],
-                'model_name': row[7],
-                'fuel_type': row[8],
-                'timestamp': ist_time_str,
-                'reason': row[3],
-                'lane_name': row[9],
-                'reader_name': reader_name,
-                'access_result': access_result
-            })
-
-        # Find peak hour
-        peak_hour = max(hour_stats.items(), key=lambda x: x[1]['total'])[0] if hour_stats else None
-        # Find reader with most reads
-        top_reader = max(reader_stats.items(), key=lambda x: x[1]['count'])[0] if reader_stats else None
-
-        # Prepare hour-wise list for frontend
-        hour_wise = []
-        for h in sorted(hour_stats.keys()):
-            hour_wise.append({
-                'hour': h,
-                **hour_stats[h]
-            })
-
-        # Prepare reader stats list
-        reader_stats_list = []
-        for name, stat in sorted(reader_stats.items(), key=lambda x: x[1]['count'], reverse=True):
-            reader_stats_list.append({
-                'reader_name': name,
-                'type': stat['type'],
-                'count': stat['count']
-            })
-
-        return jsonify({
-            'summary': {
-                'fastag_count': tag_type_counts['fastag'],
-                'car_oem_count': tag_type_counts['car_oem'],
-                'other_count': tag_type_counts['other'],
-                'unique_tags': len(unique_tags),
-                'peak_hour': peak_hour,
-                'top_reader': top_reader
-            },
-            'hour_wise': hour_wise,
-            'reader_stats': reader_stats_list,
-            'entries': detailed_entries
-        })
+        """).fetchone()[0]
+        return jsonify({'unique_tags': unique_tags})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500 
+        return jsonify({'error': str(e)}), 500
