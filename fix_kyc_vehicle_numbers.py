@@ -28,10 +28,13 @@ def main():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    # Find users with empty or null fastag_id
-    cur.execute("SELECT * FROM kyc_users WHERE fastag_id IS NULL OR fastag_id = ''")
+    # Find users with empty/null fastag_id or fastag_id not starting with '34161'
+    cur.execute("SELECT * FROM kyc_users WHERE fastag_id IS NULL OR fastag_id = '' OR fastag_id NOT LIKE '34161%'")
     users = cur.fetchall()
-    logging.info(f"Found {len(users)} users with empty or null fastag_id.")
+    logging.info(f"Found {len(users)} users with missing or invalid fastag_id.")
+    print("Users to process (id, name, vehicle_number, fastag_id):")
+    for user in users:
+        print(user['id'], user['name'], user['vehicle_number'], user['fastag_id'])
     updated = 0
     for user in users:
         old_vrn = user['vehicle_number']
@@ -40,7 +43,7 @@ def main():
             logging.info(f"User ID {user['id']}: No vehicle number, skipping.")
             continue
         fastag_id = fetch_active_fastag_id(cleaned_vrn)
-        if fastag_id:
+        if fastag_id and fastag_id.startswith('34161'):
             logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: {fastag_id} (UPDATED)")
             cur.execute(
                 "UPDATE kyc_users SET vehicle_number=?, fastag_id=? WHERE id=?",
@@ -48,14 +51,14 @@ def main():
             )
             updated += 1
         else:
-            logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: NOT FOUND (SKIPPED)")
+            logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: NOT FOUND or does not start with 34161 (SKIPPED)")
     conn.commit()
-    # Count users without fastag_id
-    cur.execute("SELECT COUNT(*) FROM kyc_users WHERE fastag_id IS NULL OR fastag_id = ''")
+    # Count users without fastag_id or not starting with 34161
+    cur.execute("SELECT COUNT(*) FROM kyc_users WHERE fastag_id IS NULL OR fastag_id = '' OR fastag_id NOT LIKE '34161%'")
     missing_fastag_count = cur.fetchone()[0]
     conn.close()
     logging.info(f"Done. Updated {updated} KYC users.")
-    print(f"Number of vehicles without FASTag ID: {missing_fastag_count}")
+    print(f"Number of vehicles without valid FASTag ID: {missing_fastag_count}")
     print(f"Expected: 34161")
 
 if __name__ == "__main__":
