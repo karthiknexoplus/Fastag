@@ -19,8 +19,8 @@ def get_analytics_data():
     month_ago = today - timedelta(days=30)
     
     # 1. Current Occupancy
-    current_occupancy = db.execute("""
-        SELECT COUNT(DISTINCT tag_id) as count
+    current_occupancy_rows = db.execute("""
+        SELECT al1.tag_id
         FROM access_logs al1
         WHERE al1.access_result = 'granted'
         AND al1.timestamp = (
@@ -28,7 +28,26 @@ def get_analytics_data():
             FROM access_logs al2
             WHERE al2.tag_id = al1.tag_id
         )
-    """).fetchone()[0]
+    """).fetchall()
+    current_occupancy = len(current_occupancy_rows)
+    # Breakdown by tag type
+    occ_fastag = 0
+    occ_car_oem = 0
+    occ_other = 0
+    for row in current_occupancy_rows:
+        tag_id = row[0]
+        if tag_id.startswith('34161'):
+            occ_fastag += 1
+        elif tag_id.startswith('E20'):
+            occ_car_oem += 1
+        else:
+            occ_other += 1
+    current_occupancy_breakdown = {
+        'fastag': occ_fastag,
+        'car_oem': occ_car_oem,
+        'other': occ_other,
+        'total': current_occupancy
+    }
     
     # 2. Today's Statistics
     today_stats_row = db.execute("""
@@ -325,6 +344,7 @@ def get_analytics_data():
 
     return {
         'current_occupancy': current_occupancy,
+        'current_occupancy_breakdown': current_occupancy_breakdown,
         'today_stats': {
             'total': today_stats[0],
             'granted': today_stats[1],

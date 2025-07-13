@@ -570,7 +570,15 @@ function loadAnalyticsData() {
 }
 
 function updateStats(data) {
-    document.getElementById('current-occupancy').textContent = data.current_occupancy || 0;
+    // Current Occupancy with breakdown
+    const occ = data.current_occupancy_breakdown || {};
+    document.getElementById('current-occupancy').innerHTML = `
+        <div>${occ.total ?? '-'}</div>
+        <div style="font-size:0.9rem;">
+            <span style="color:#28a745;">FASTag: ${occ.fastag ?? '-'}</span> |
+            <span style="color:#007bff;">OEM: ${occ.car_oem ?? '-'}</span> |
+            <span style="color:#ff9800;">Other: ${occ.other ?? '-'}</span>
+        </div>`;
     document.getElementById('today-granted').textContent = data.today_stats?.granted || 0;
     // Unique Tags Denied Today
     const denied = data.unique_tags_denied_breakdown || {};
