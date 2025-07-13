@@ -30,7 +30,8 @@ def kyc_users():
         except Exception as e:
             flash('Error adding KYC user: ' + str(e), 'danger')
     users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
-    return render_template('kyc_users.html', users=users)
+    total_users = len(users)
+    return render_template('kyc_users.html', users=users, total_users=total_users)
 
 @kyc_users_bp.route('/api/kyc/fetch-vehicle/<fastag_id>')
 def fetch_vehicle_by_fastag(fastag_id):
