@@ -210,10 +210,11 @@
             </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stats-card warning h-100">
+            <div class="card stats-card warning h-100" style="cursor: pointer;" onclick="showTodayDeniedDetails()">
                 <div class="card-body text-center">
                     <div class="stats-number" id="today-denied">-</div>
                     <div class="stats-label">Today's Denied</div>
+                    <small class="text-white-50">Click for details</small>
                 </div>
             </div>
         </div>
@@ -842,6 +843,148 @@ function showTodayGrantedDetails() {
             modal.show();
         });
 }
+
+function showTodayDeniedDetails() {
+    fetch('/analytics/api/today-denied-details')
+        .then(response => response.json())
+        .then(data => {
+            const modal = new bootstrap.Modal(document.getElementById('todayDeniedModal'));
+            const modalBody = document.getElementById('todayDeniedModalBody');
+            
+            // Create summary section
+            let summaryHtml = `
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.fastag_count}</h4>
+                                <small>FASTag (34161)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.car_oem_count}</h4>
+                                <small>CAR's OEM (E20)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.other_count}</h4>
+                                <small>Other Tags</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.unique_tags}</h4>
+                                <small>Unique Tags</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Create reader statistics section
+            let readerStatsHtml = `
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-sign-in-alt text-primary"></i> Entry Reader Statistics</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Reader</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.reader_stats.entry_readers.map(reader => `
+                                        <tr>
+                                            <td>${reader.reader_name}</td>
+                                            <td>${reader.count}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-sign-out-alt text-danger"></i> Exit Reader Statistics</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Reader</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.reader_stats.exit_readers.map(reader => `
+                                        <tr>
+                                            <td>${reader.reader_name}</td>
+                                            <td>${reader.count}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Create detailed entries table
+            let entriesHtml = `
+                <h6><i class="fas fa-list text-secondary"></i> Detailed Denied Entries</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Tag ID</th>
+                                <th>Type</th>
+                                <th>Vehicle</th>
+                                <th>Owner</th>
+                                <th>Reason</th>
+                                <th>Reader</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.entries.map(entry => `
+                                <tr>
+                                    <td>${entry.tag_id}</td>
+                                    <td>
+                                        <span class="badge ${entry.tag_type === 'FASTag' ? 'bg-primary' : entry.tag_type === 'CAR OEM' ? 'bg-success' : 'bg-warning'}">
+                                            ${entry.tag_type}
+                                        </span>
+                                    </td>
+                                    <td>${entry.vehicle_number || 'N/A'}</td>
+                                    <td>${entry.owner_name || 'N/A'}</td>
+                                    <td>${entry.reason}</td>
+                                    <td>${entry.reader_name}</td>
+                                    <td>${entry.timestamp}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            modalBody.innerHTML = summaryHtml + readerStatsHtml + entriesHtml;
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error loading today denied details:', error);
+            const modal = new bootstrap.Modal(document.getElementById('todayDeniedModal'));
+            document.getElementById('todayDeniedModalBody').innerHTML = 
+                '<p class="text-center text-danger">Error loading data. Please try again.</p>';
+            modal.show();
+        });
+}
 </script>
 
 <!-- Current Occupancy Details Modal -->
@@ -879,6 +1022,30 @@ function showTodayGrantedDetails() {
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="todayGrantedModalBody">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Denied Details Modal -->
+<div class="modal fade" id="todayDeniedModal" tabindex="-1" aria-labelledby="todayDeniedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #fa709a; color: white;">
+                <h5 class="modal-title" id="todayDeniedModalLabel">
+                    <i class="fas fa-times-circle me-2"></i>Today's Denied Entries Analysis
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="todayDeniedModalBody">
                 <div class="text-center">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
