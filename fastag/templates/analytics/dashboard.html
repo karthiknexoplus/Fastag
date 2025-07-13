@@ -241,11 +241,11 @@
         <div class="col-xl-4 mb-3">
             <div class="chart-container">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-road text-primary me-2"></i>
-                    Lane Utilization
+                    <i class="fas fa-microchip text-primary me-2"></i>
+                    Reader Health (Events by Type)
                 </h5>
                 <div class="chart-wrapper-small">
-                    <canvas id="laneChart"></canvas>
+                    <canvas id="readerHealthChart"></canvas>
                 </div>
             </div>
         </div>
@@ -328,7 +328,7 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script>
-let hourlyChart, laneChart;
+let hourlyChart, readerHealthChart;
 
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -393,36 +393,36 @@ function initializeCharts() {
         }
     });
 
-    // Lane Chart
-    const laneCtx = document.getElementById('laneChart').getContext('2d');
-    laneChart = new Chart(laneCtx, {
-        type: 'doughnut',
+    // Reader Health Chart
+    const readerHealthCtx = document.getElementById('readerHealthChart').getContext('2d');
+    readerHealthChart = new Chart(readerHealthCtx, {
+        type: 'bar',
         data: {
             labels: [],
             datasets: [{
+                label: 'Events (24h)',
                 data: [],
-                backgroundColor: [
-                    '#667eea', '#764ba2', '#f093fb', '#f5576c',
-                    '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
-                ]
+                backgroundColor: '#667eea',
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 10,
-                        padding: 8
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const idx = context.dataIndex;
+                            const type = readerHealthChart.data.labels[idx].split(' - ')[0];
+                            return `${type}: ${context.parsed.y} events`;
+                        }
                     }
                 }
             },
-            elements: {
-                arc: {
-                    borderWidth: 2
-                }
+            scales: {
+                x: { title: { display: true, text: 'Reader Type' } },
+                y: { beginAtZero: true, title: { display: true, text: 'Events (24h)' } }
             }
         }
     });
@@ -461,14 +461,14 @@ function updateCharts(data) {
         hourlyChart.update();
     }
 
-    // Update lane chart
-    if (data.lane_utilization) {
-        const labels = data.lane_utilization.map(item => item[0]);
-        const dataValues = data.lane_utilization.map(item => item[1]);
-        
-        laneChart.data.labels = labels;
-        laneChart.data.datasets[0].data = dataValues;
-        laneChart.update();
+    // Update reader health chart
+    if (data.reader_health) {
+        // Show type and IP for each reader
+        const labels = data.reader_health.map(item => `${item[2]} (${item[1]})`); // type (ip)
+        const dataValues = data.reader_health.map(item => item[4]); // events_last_24h
+        readerHealthChart.data.labels = labels;
+        readerHealthChart.data.datasets[0].data = dataValues;
+        readerHealthChart.update();
     }
 }
 
