@@ -48,13 +48,25 @@ def fetch_vehicle_by_fastag(fastag_id):
         data = response.json()
         
         if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-            # Extract vehicle number from the first tag detail
-            tag_detail = data['npcitagDetails'][0]
-            vehicle_number = tag_detail.get('VRN', '')
+            # Return ALL tags for this FASTag ID
+            tags = []
+            for tag_detail in data['npcitagDetails']:
+                tags.append({
+                    'tag_id': tag_detail.get('TagID', ''),
+                    'vehicle_number': tag_detail.get('VRN', ''),
+                    'status': tag_detail.get('Status', 'A'),  # Default to 'A' (Active)
+                    'bank_name': tag_detail.get('BankName', ''),
+                    'customer_name': tag_detail.get('CustomerName', ''),
+                    'mobile_number': tag_detail.get('MobileNumber', ''),
+                    'email': tag_detail.get('Email', ''),
+                    'address': tag_detail.get('Address', '')
+                })
+            
             return jsonify({
                 'success': True,
-                'vehicle_number': vehicle_number,
-                'fastag_id': fastag_id
+                'fastag_id': fastag_id,
+                'tags': tags,
+                'total_tags': len(tags)
             })
         else:
             return jsonify({
@@ -85,13 +97,25 @@ def fetch_fastag_by_vehicle(vehicle_number):
         data = response.json()
         
         if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-            # Extract FASTag ID from the first tag detail
-            tag_detail = data['npcitagDetails'][0]
-            fastag_id = tag_detail.get('TagID', '')
+            # Return ALL FASTag IDs for this vehicle number
+            tags = []
+            for tag_detail in data['npcitagDetails']:
+                tags.append({
+                    'tag_id': tag_detail.get('TagID', ''),
+                    'vehicle_number': tag_detail.get('VRN', ''),
+                    'status': tag_detail.get('Status', 'A'),  # Default to 'A' (Active)
+                    'bank_name': tag_detail.get('BankName', ''),
+                    'customer_name': tag_detail.get('CustomerName', ''),
+                    'mobile_number': tag_detail.get('MobileNumber', ''),
+                    'email': tag_detail.get('Email', ''),
+                    'address': tag_detail.get('Address', '')
+                })
+            
             return jsonify({
                 'success': True,
-                'fastag_id': fastag_id,
-                'vehicle_number': vehicle_number
+                'vehicle_number': vehicle_number,
+                'tags': tags,
+                'total_tags': len(tags)
             })
         else:
             return jsonify({
