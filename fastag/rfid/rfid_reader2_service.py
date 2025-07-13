@@ -374,11 +374,96 @@ try:
                     update_db_insert(tag_id, LANE_ID)
                     activate_all_relays()
                     logger.info(f"Access granted for tag {tag_id}")
+                    
+                    # Fetch and cache vehicle number for 34161 tags (granted access)
+                    if tag_id and str(tag_id).startswith('34161'):
+                        try:
+                            conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+                            c = conn.cursor()
+                            # Check if already cached
+                            c.execute("SELECT vehicle_number FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
+                            row = c.fetchone()
+                            if not row or not row[0]:
+                                # Use Axis Bank API to fetch vehicle number
+                                url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=TagId&SearchValue={tag_id}'
+                                headers = {
+                                    'Cookie': 'axisbiconnect=1067559104.47873.0000'
+                                }
+                                try:
+                                    resp = requests.get(url, headers=headers, timeout=15, verify=False)
+                                    if resp.status_code == 200:
+                                        data = resp.json()
+                                        if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
+                                            tag_detail = data['npcitagDetails'][0]
+                                            vehicle_number = tag_detail.get('VRN', '')
+                                            if vehicle_number:
+                                                if row:
+                                                    c.execute("UPDATE tag_vehicle_cache SET vehicle_number=?, last_updated=CURRENT_TIMESTAMP WHERE tag_id=?", (vehicle_number, tag_id))
+                                                else:
+                                                    c.execute("INSERT INTO tag_vehicle_cache (tag_id, vehicle_number) VALUES (?, ?)", (tag_id, vehicle_number))
+                                                conn.commit()
+                                                logger.info(f"✓ Cached vehicle number for granted tag {tag_id}: {vehicle_number}")
+                                            else:
+                                                logger.warning(f"No vehicle number found for tag {tag_id}")
+                                        else:
+                                            logger.warning(f"No tag details found for {tag_id}: {data.get('ErrorMessage', 'Unknown error')}")
+                                    else:
+                                        logger.error(f"Failed to fetch vehicle number for tag {tag_id}: HTTP {resp.status_code}")
+                                except Exception as e:
+                                    logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
+                            else:
+                                logger.info(f"✓ Vehicle number already cached for tag {tag_id}: {row[0]}")
+                            conn.close()
+                        except Exception as e:
+                            logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
                 else:
                     log_access(tag_id, None, 'denied', reason='not_found')
                     update_tag_cooldown(tag_id)
                     update_db_insert(tag_id, LANE_ID)
                     logger.info(f"Access denied for tag {tag_id}")
+                    
+                    # Fetch and cache vehicle number for 34161 tags (denied access)
+                    if tag_id and str(tag_id).startswith('34161'):
+                        try:
+                            conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+                            c = conn.cursor()
+                            # Check if already cached
+                            c.execute("SELECT vehicle_number FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
+                            row = c.fetchone()
+                            if not row or not row[0]:
+                                # Use Axis Bank API to fetch vehicle number
+                                url = f'https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=TagId&SearchValue={tag_id}'
+                                headers = {
+                                    'Cookie': 'axisbiconnect=1067559104.47873.0000'
+                                }
+                                try:
+                                    resp = requests.get(url, headers=headers, timeout=15, verify=False)
+                                    if resp.status_code == 200:
+                                        data = resp.json()
+                                        if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
+                                            tag_detail = data['npcitagDetails'][0]
+                                            vehicle_number = tag_detail.get('VRN', '')
+                                            if vehicle_number:
+                                                if row:
+                                                    c.execute("UPDATE tag_vehicle_cache SET vehicle_number=?, last_updated=CURRENT_TIMESTAMP WHERE tag_id=?", (vehicle_number, tag_id))
+                                                else:
+                                                    c.execute("INSERT INTO tag_vehicle_cache (tag_id, vehicle_number) VALUES (?, ?)", (tag_id, vehicle_number))
+                                                conn.commit()
+                                                logger.info(f"✓ Cached vehicle number for denied tag {tag_id}: {vehicle_number}")
+                                            else:
+                                                logger.warning(f"No vehicle number found for tag {tag_id}")
+                                        else:
+                                            logger.warning(f"No tag details found for {tag_id}: {data.get('ErrorMessage', 'Unknown error')}")
+                                    else:
+                                        logger.error(f"Failed to fetch vehicle number for tag {tag_id}: HTTP {resp.status_code}")
+                                except Exception as e:
+                                    logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
+                            else:
+                                logger.info(f"✓ Vehicle number already cached for tag {tag_id}: {row[0]}")
+                            conn.close()
+                        except Exception as e:
+                            logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
+                    
                 clear_buffer(reader)
         else:
             logger.info("No tags detected.")
