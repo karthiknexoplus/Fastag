@@ -26,19 +26,23 @@ def main():
     cur.execute("SELECT * FROM kyc_users WHERE vehicle_number LIKE '% %'")
     users = cur.fetchall()
     logging.info(f"Found {len(users)} users with spaces in vehicle_number.")
+    updated = 0
     for user in users:
         old_vrn = user['vehicle_number']
         cleaned_vrn = old_vrn.replace(' ', '').upper()
         fastag_id = fetch_active_fastag_id(cleaned_vrn)
-        logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: {fastag_id}")
-        # Update only if something changed
-        cur.execute(
-            "UPDATE kyc_users SET vehicle_number=?, fastag_id=? WHERE id=?",
-            (cleaned_vrn, fastag_id or user['fastag_id'], user['id'])
-        )
+        if fastag_id:
+            logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: {fastag_id} (UPDATED)")
+            cur.execute(
+                "UPDATE kyc_users SET vehicle_number=?, fastag_id=? WHERE id=?",
+                (cleaned_vrn, fastag_id, user['id'])
+            )
+            updated += 1
+        else:
+            logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: NOT FOUND (SKIPPED)")
     conn.commit()
     conn.close()
-    logging.info("Done updating KYC users.")
+    logging.info(f"Done. Updated {updated} KYC users.")
 
 if __name__ == "__main__":
     main() 
