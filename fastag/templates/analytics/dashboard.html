@@ -225,9 +225,9 @@
         </div>
     </div>
 
-    <!-- FASTag vs Non-FASTag Pie Chart and Overstayed Vehicles Stat Card -->
+    <!-- FASTag vs Non-FASTag Pie Chart, Overstayed Vehicles, Unique Vehicles, Entry/Exit Trend -->
     <div class="row mb-4">
-        <div class="col-xl-4 col-md-6 mb-3">
+        <div class="col-xl-3 col-md-6 mb-3">
             <div class="chart-container">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-chart-pie text-primary me-2"></i>
@@ -243,6 +243,25 @@
                 <div class="card-body text-center">
                     <div class="stats-number" id="overstayed-vehicles">-</div>
                     <div class="stats-label">Overstayed Vehicles</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-3">
+            <div class="card stats-card info h-100">
+                <div class="card-body text-center">
+                    <div class="stats-number" id="unique-vehicles-today">-</div>
+                    <div class="stats-label">Unique Vehicles Today</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5 col-md-12 mb-3">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-chart-line text-primary me-2"></i>
+                    Entry/Exit Trend (Today)
+                </h5>
+                <div class="chart-wrapper-small">
+                    <canvas id="entryExitTrendChart"></canvas>
                 </div>
             </div>
         </div>
@@ -351,7 +370,7 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script>
-let hourlyChart, readerHealthChart, fastagPieChart;
+let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart;
 
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -475,6 +494,62 @@ function initializeCharts() {
             }
         }
     });
+
+    // Entry/Exit Trend Chart
+    const entryExitTrendCtx = document.getElementById('entryExitTrendChart').getContext('2d');
+    entryExitTrendChart = new Chart(entryExitTrendCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Entries',
+                    data: [],
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Exits',
+                    data: [],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 10
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        maxTicksLimit: 6
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxTicksLimit: 12
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    radius: 3
+                }
+            }
+        }
+    });
 }
 
 function loadAnalyticsData() {
@@ -496,6 +571,7 @@ function updateStats(data) {
     document.getElementById('today-denied').textContent = data.today_stats?.denied || 0;
     document.getElementById('total-events').textContent = data.today_stats?.total || 0;
     document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
+    document.getElementById('unique-vehicles-today').textContent = data.unique_vehicles_today ?? '-';
 }
 
 function updateCharts(data) {
@@ -528,6 +604,17 @@ function updateCharts(data) {
             data.fastag_vs_nonfastag.nonfastag
         ];
         fastagPieChart.update();
+    }
+
+    // Update Entry/Exit Trend Chart
+    if (data.entry_exit_trend) {
+        const labels = data.entry_exit_trend.map(item => item[0] + ':00');
+        const entries = data.entry_exit_trend.map(item => item[1]);
+        const exits = data.entry_exit_trend.map(item => item[2]);
+        entryExitTrendChart.data.labels = labels;
+        entryExitTrendChart.data.datasets[0].data = entries;
+        entryExitTrendChart.data.datasets[1].data = exits;
+        entryExitTrendChart.update();
     }
 }
 

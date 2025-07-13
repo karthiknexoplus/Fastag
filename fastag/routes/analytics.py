@@ -257,6 +257,22 @@ def get_analytics_data():
         )
     ''').fetchone()[0]
 
+    # --- Unique Vehicles Today ---
+    unique_vehicles_today = db.execute('''
+        SELECT COUNT(DISTINCT tag_id) FROM access_logs WHERE DATE(timestamp) = DATE('now')
+    ''').fetchone()[0]
+
+    # --- Recent Entry/Exit Trend (today, per hour) ---
+    entry_exit_trend = [list(row) for row in db.execute('''
+        SELECT strftime('%H', timestamp) as hour,
+            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits
+        FROM access_logs
+        WHERE DATE(timestamp) = DATE('now')
+        GROUP BY hour
+        ORDER BY hour
+    ''').fetchall()]
+
     return {
         'current_occupancy': current_occupancy,
         'today_stats': {
@@ -273,7 +289,9 @@ def get_analytics_data():
         'weekly_trends': weekly_trends,
         'suspicious_activity': suspicious_activity,
         'fastag_vs_nonfastag': fastag_vs_nonfastag,
-        'overstayed': overstayed
+        'overstayed': overstayed,
+        'unique_vehicles_today': unique_vehicles_today,
+        'entry_exit_trend': entry_exit_trend
     }
 
 @analytics_bp.route('/dashboard')
