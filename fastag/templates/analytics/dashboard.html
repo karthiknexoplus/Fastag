@@ -994,88 +994,99 @@ function showTotalEventsTodayDetails() {
             const modal = new bootstrap.Modal(document.getElementById('totalEventsTodayModal'));
             const modalBody = document.getElementById('totalEventsTodayModalBody');
 
-            if (data.summary) {
-                modalBody.innerHTML = `
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h4>${data.summary.fastag_count}</h4>
-                                    <small>FASTag (34161)</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h4>${data.summary.car_oem_count}</h4>
-                                    <small>CAR's OEM (E20)</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body text-center">
-                                    <h4>${data.summary.other_count}</h4>
-                                    <small>Other Tags</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body text-center">
-                                    <h4>${data.summary.unique_tags}</h4>
-                                    <small>Unique Tags</small>
-                                </div>
+            // Summary cards
+            let summaryHtml = `
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.fastag_count}</h4>
+                                <small>FASTag (34161)</small>
                             </div>
                         </div>
                     </div>
-                `;
-            } else {
-                modalBody.innerHTML = '<p class="text-center text-muted">No summary data available.</p>';
-            }
-
-            if (data.entries) {
-                let entriesHtml = `
-                    <h6><i class="fas fa-list text-secondary"></i> Detailed Events</h6>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Tag ID</th>
-                                    <th>Type</th>
-                                    <th>Vehicle</th>
-                                    <th>Owner</th>
-                                    <th>Reason</th>
-                                    <th>Reader</th>
-                                    <th>Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.entries.map(entry => `
-                                    <tr>
-                                        <td>${entry.tag_id}</td>
-                                        <td>
-                                            <span class="badge ${entry.tag_type === 'FASTag' ? 'bg-primary' : entry.tag_type === 'CAR OEM' ? 'bg-success' : 'bg-warning'}">
-                                                ${entry.tag_type}
-                                            </span>
-                                        </td>
-                                        <td>${entry.vehicle_number || 'N/A'}</td>
-                                        <td>${entry.owner_name || 'N/A'}</td>
-                                        <td>${entry.reason}</td>
-                                        <td>${entry.reader_name}</td>
-                                        <td>${entry.timestamp}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.car_oem_count}</h4>
+                                <small>CAR's OEM (E20)</small>
+                            </div>
+                        </div>
                     </div>
-                `;
-                modalBody.innerHTML += entriesHtml;
-            } else {
-                modalBody.innerHTML += '<p class="text-center text-muted">No detailed event data available.</p>';
-            }
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.other_count}</h4>
+                                <small>Other Tags</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h4>${data.summary.unique_tags}</h4>
+                                <small>Unique Tags</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
 
+            // Hour-wise summary table
+            let hourTable = `<h6 class="mt-4 mb-2"><i class="fas fa-clock text-primary"></i> Hour-wise Summary</h6>
+                <div class="table-responsive mb-3">
+                <table class="table table-bordered table-sm align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Hour</th>
+                            <th>Total</th>
+                            <th>Granted</th>
+                            <th>Denied</th>
+                            <th>FASTag</th>
+                            <th>CAR OEM</th>
+                            <th>Other</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.hour_wise.map(row => `
+                            <tr${data.summary.peak_hour === row.hour ? ' style=\'background:#e0f7fa;font-weight:bold;\'' : ''}>
+                                <td>${row.hour}:00</td>
+                                <td>${row.total}</td>
+                                <td class="text-success">${row.granted}</td>
+                                <td class="text-danger">${row.denied}</td>
+                                <td>${row.fastag}</td>
+                                <td>${row.car_oem}</td>
+                                <td>${row.other}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                </div>`;
+
+            // Reader summary table
+            let readerTable = `<h6 class="mt-4 mb-2"><i class="fas fa-microchip text-primary"></i> Reader Summary</h6>
+                <div class="table-responsive mb-3">
+                <table class="table table-bordered table-sm align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Reader</th>
+                            <th>Type</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.reader_stats.map(reader => `
+                            <tr${data.summary.top_reader === reader.reader_name ? ' style=\'background:#fff3cd;font-weight:bold;\'' : ''}>
+                                <td>${reader.reader_name}</td>
+                                <td>${reader.type}</td>
+                                <td>${reader.count}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                </div>`;
+
+            modalBody.innerHTML = summaryHtml + hourTable + readerTable;
             modal.show();
         })
         .catch(error => {
