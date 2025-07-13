@@ -572,8 +572,24 @@ function loadAnalyticsData() {
 function updateStats(data) {
     document.getElementById('current-occupancy').textContent = data.current_occupancy || 0;
     document.getElementById('today-granted').textContent = data.today_stats?.granted || 0;
-    document.getElementById('today-denied').textContent = data.today_stats?.denied || 0;
-    document.getElementById('total-events').textContent = data.today_stats?.total || 0;
+    // Unique Tags Denied Today
+    const denied = data.unique_tags_denied_breakdown || {};
+    document.getElementById('today-denied').innerHTML = `
+        <div>${denied.total ?? '-'}</div>
+        <div style="font-size:0.9rem;">
+            <span style="color:#28a745;">FASTag: ${denied.fastag ?? '-'}</span> |
+            <span style="color:#007bff;">OEM: ${denied.car_oem ?? '-'}</span> |
+            <span style="color:#ff9800;">Other: ${denied.other ?? '-'}</span>
+        </div>`;
+    // Unique Tags Today
+    const total = data.unique_tags_breakdown || {};
+    document.getElementById('total-events').innerHTML = `
+        <div>${total.total ?? '-'}</div>
+        <div style="font-size:0.9rem;">
+            <span style="color:#28a745;">FASTag: ${total.fastag ?? '-'}</span> |
+            <span style="color:#007bff;">OEM: ${total.car_oem ?? '-'}</span> |
+            <span style="color:#ff9800;">Other: ${total.other ?? '-'}</span>
+        </div>`;
     document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
     document.getElementById('unique-vehicles-today').textContent = data.unique_vehicles_today ?? '-';
 }

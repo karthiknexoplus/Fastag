@@ -273,6 +273,56 @@ def get_analytics_data():
         ORDER BY hour
     ''').fetchall()]
 
+    # --- Unique Tags Breakdown (all events today) ---
+    unique_tags_rows = db.execute('''
+        SELECT tag_id FROM access_logs WHERE DATE(timestamp) = DATE('now')
+    ''').fetchall()
+    unique_tags_set = set()
+    fastag_count = 0
+    car_oem_count = 0
+    other_count = 0
+    for row in unique_tags_rows:
+        tag_id = row[0]
+        if tag_id not in unique_tags_set:
+            unique_tags_set.add(tag_id)
+            if tag_id.startswith('34161'):
+                fastag_count += 1
+            elif tag_id.startswith('E20'):
+                car_oem_count += 1
+            else:
+                other_count += 1
+    unique_tags_breakdown = {
+        'fastag': fastag_count,
+        'car_oem': car_oem_count,
+        'other': other_count,
+        'total': len(unique_tags_set)
+    }
+
+    # --- Unique Tags Denied Breakdown (denied events today) ---
+    denied_tags_rows = db.execute('''
+        SELECT tag_id FROM access_logs WHERE DATE(timestamp) = DATE('now') AND access_result = 'denied'
+    ''').fetchall()
+    denied_tags_set = set()
+    denied_fastag_count = 0
+    denied_car_oem_count = 0
+    denied_other_count = 0
+    for row in denied_tags_rows:
+        tag_id = row[0]
+        if tag_id not in denied_tags_set:
+            denied_tags_set.add(tag_id)
+            if tag_id.startswith('34161'):
+                denied_fastag_count += 1
+            elif tag_id.startswith('E20'):
+                denied_car_oem_count += 1
+            else:
+                denied_other_count += 1
+    unique_tags_denied_breakdown = {
+        'fastag': denied_fastag_count,
+        'car_oem': denied_car_oem_count,
+        'other': denied_other_count,
+        'total': len(denied_tags_set)
+    }
+
     return {
         'current_occupancy': current_occupancy,
         'today_stats': {
@@ -291,7 +341,9 @@ def get_analytics_data():
         'fastag_vs_nonfastag': fastag_vs_nonfastag,
         'overstayed': overstayed,
         'unique_vehicles_today': unique_vehicles_today,
-        'entry_exit_trend': entry_exit_trend
+        'entry_exit_trend': entry_exit_trend,
+        'unique_tags_breakdown': unique_tags_breakdown,
+        'unique_tags_denied_breakdown': unique_tags_denied_breakdown
     }
 
 @analytics_bp.route('/dashboard')
