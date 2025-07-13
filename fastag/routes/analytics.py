@@ -103,19 +103,23 @@ def get_analytics_data():
         LIMIT 10
     """).fetchall()]
     
-    # 7. Denied Access Analysis
+    # 7. Denied Access Analysis (with cached vehicle numbers)
     denied_analysis = [list(row) for row in db.execute("""
         SELECT 
-            reason,
-            COUNT(*) as count
-        FROM access_logs 
-        WHERE access_result = 'denied' 
-        AND timestamp >= datetime('now', '-7 days')
-        GROUP BY reason
+            al.reason,
+            COUNT(*) as count,
+            COUNT(DISTINCT al.tag_id) as unique_tags,
+            GROUP_CONCAT(DISTINCT COALESCE(ku.vehicle_number, tvc.vehicle_number)) as vehicle_numbers
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        WHERE al.access_result = 'denied' 
+        AND al.timestamp >= datetime('now', '-7 days')
+        GROUP BY al.reason
         ORDER BY count DESC
     """).fetchall()]
     
-    # 8. Recent Activity (Last 50 events)
+    # 8. Recent Activity (Last 50 events) - with cached vehicle numbers
     recent_activity = [list(row) for row in db.execute("""
         SELECT 
             al.timestamp,
@@ -123,11 +127,12 @@ def get_analytics_data():
             al.access_result,
             al.reason,
             ku.name as user_name,
-            ku.vehicle_number,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
             l.lane_name,
             r.reader_ip
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
         ORDER BY al.timestamp DESC
@@ -148,17 +153,20 @@ def get_analytics_data():
         LIMIT 8
     """).fetchall()]
     
-    # 10. Suspicious Activity (Multiple denied attempts)
+    # 10. Suspicious Activity (Multiple denied attempts) - with vehicle numbers
     suspicious_activity = [list(row) for row in db.execute("""
         SELECT 
-            tag_id,
+            al.tag_id,
             COUNT(*) as denied_count,
-            MAX(timestamp) as last_attempt,
-            GROUP_CONCAT(reason) as reasons
-        FROM access_logs 
-        WHERE access_result = 'denied' 
-        AND timestamp >= datetime('now', '-24 hours')
-        GROUP BY tag_id
+            MAX(al.timestamp) as last_attempt,
+            GROUP_CONCAT(al.reason) as reasons,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        WHERE al.access_result = 'denied' 
+        AND al.timestamp >= datetime('now', '-24 hours')
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number
         HAVING denied_count > 3
         ORDER BY denied_count DESC
     """).fetchall()]
@@ -220,11 +228,12 @@ def export_data():
                 al.access_result,
                 al.reason,
                 ku.name as user_name,
-                ku.vehicle_number,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
                 l.lane_name,
                 r.reader_ip
             FROM access_logs al
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
         """
@@ -607,9 +616,10 @@ def export_data():
                 COUNT(*) as denied_count,
                 COUNT(DISTINCT al.tag_id) as unique_vehicles,
                 MAX(al.timestamp) as last_attempt,
-                GROUP_CONCAT(DISTINCT ku.vehicle_number) as vehicle_numbers
+                GROUP_CONCAT(DISTINCT COALESCE(ku.vehicle_number, tvc.vehicle_number)) as vehicle_numbers
             FROM access_logs al
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             WHERE al.access_result = 'denied'
         """
         
@@ -778,13 +788,14 @@ def viewonmobile_access_logs():
         SELECT 
             al.timestamp as access_time,
             ku.name as user_name,
-            ku.vehicle_number,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
             al.tag_id,
             l.lane_name,
             r.reader_ip as device,
             al.access_result as status
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
         WHERE 1=1
@@ -805,7 +816,14 @@ def viewonmobile_access_logs():
     rows = db.execute(query, params).fetchall()
 
     # Get total count for pagination
-    count_query = 'SELECT COUNT(*) FROM access_logs al WHERE 1=1'
+    count_query = '''
+        SELECT COUNT(*) FROM access_logs al 
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE 1=1
+    '''
     count_params = []
     if start_date:
         count_query += ' AND DATE(al.timestamp) >= ?'
@@ -941,21 +959,35 @@ def mobile_analytics_peak():
 
 @analytics_bp.route('/api/mobile/analytics/top-tags')
 def mobile_analytics_top_tags():
-    """Top 5 frequent and denied tags today"""
+    """Top 5 frequent and denied tags today with vehicle numbers"""
     db = get_db()
     top_frequent = db.execute('''
-        SELECT tag_id, COUNT(*) as cnt FROM access_logs
-        WHERE DATE(timestamp) = DATE('now') AND access_result = 'granted'
-        GROUP BY tag_id ORDER BY cnt DESC LIMIT 5
+        SELECT 
+            al.tag_id, 
+            COUNT(*) as cnt,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        WHERE DATE(al.timestamp) = DATE('now') AND al.access_result = 'granted'
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number 
+        ORDER BY cnt DESC LIMIT 5
     ''').fetchall()
     top_denied = db.execute('''
-        SELECT tag_id, COUNT(*) as cnt FROM access_logs
-        WHERE DATE(timestamp) = DATE('now') AND access_result = 'denied'
-        GROUP BY tag_id ORDER BY cnt DESC LIMIT 5
+        SELECT 
+            al.tag_id, 
+            COUNT(*) as cnt,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        WHERE DATE(al.timestamp) = DATE('now') AND al.access_result = 'denied'
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number 
+        ORDER BY cnt DESC LIMIT 5
     ''').fetchall()
     return jsonify({
-        'top_frequent_visitors': [{'tag_id': row[0], 'count': row[1]} for row in top_frequent],
-        'top_denied_tags': [{'tag_id': row[0], 'count': row[1]} for row in top_denied]
+        'top_frequent_visitors': [{'tag_id': row[0], 'count': row[1], 'vehicle_number': row[2] or 'Unknown'} for row in top_frequent],
+        'top_denied_tags': [{'tag_id': row[0], 'count': row[1], 'vehicle_number': row[2] or 'Unknown'} for row in top_denied]
     })
 
 @analytics_bp.route('/api/mobile/analytics/durations')
@@ -1042,4 +1074,45 @@ def mobile_analytics_denied_reasons():
         GROUP BY reason ORDER BY count DESC
     ''').fetchall()
     reasons = [dict(reason=row[0], count=row[1]) for row in rows]
-    return jsonify({'reasons': reasons}) 
+    return jsonify({'reasons': reasons})
+
+@analytics_bp.route('/api/mobile/analytics/denied-logs')
+def mobile_analytics_denied_logs():
+    """Detailed denied logs with vehicle numbers (today)"""
+    db = get_db()
+    rows = db.execute('''
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            al.reason,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            ku.name as user_name,
+            l.lane_name,
+            r.reader_ip
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.access_result = 'denied' 
+        AND DATE(al.timestamp) = DATE('now')
+        ORDER BY al.timestamp DESC
+    ''').fetchall()
+    
+    denied_logs = []
+    for row in rows:
+        denied_logs.append({
+            'timestamp': row[0],
+            'tag_id': row[1],
+            'reason': row[2],
+            'vehicle_number': row[3] or 'Unknown',
+            'user_name': row[4] or 'Unknown',
+            'lane_name': row[5],
+            'reader_ip': row[6]
+        })
+    
+    return jsonify({
+        'date': datetime.now().date().isoformat(),
+        'total_denied': len(denied_logs),
+        'denied_logs': denied_logs
+    }) 

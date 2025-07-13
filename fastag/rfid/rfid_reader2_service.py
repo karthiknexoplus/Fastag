@@ -352,9 +352,16 @@ try:
                     logger.info(f"Tag {tag_id} is in cooldown - {remaining:.1f}s remaining")
                     clear_buffer(reader)
                     continue
+                # Deduplication check
+                if not can_insert_db(tag_id, LANE_ID):
+                    logger.info(f"DB insert skipped for tag={tag_id} lane={LANE_ID} (cooldown or max records reached)")
+                    clear_buffer(reader)
+                    continue
                 # Cross-lane check
                 if cross_lane_recent(tag_id, LANE_ID):
                     log_access(tag_id, None, 'denied', reason='cross_lane_blocked')
+                    update_tag_cooldown(tag_id)
+                    update_db_insert(tag_id, LANE_ID)
                     logger.info(f"Tag {tag_id} seen in another lane within {CROSS_LANE_SECONDS}s, access not granted.")
                     clear_buffer(reader)
                     continue
@@ -364,10 +371,13 @@ try:
                 if user_id:
                     log_access(tag_id, user, 'granted')
                     update_tag_cooldown(tag_id)
+                    update_db_insert(tag_id, LANE_ID)
                     activate_all_relays()
                     logger.info(f"Access granted for tag {tag_id}")
                 else:
                     log_access(tag_id, None, 'denied', reason='not_found')
+                    update_tag_cooldown(tag_id)
+                    update_db_insert(tag_id, LANE_ID)
                     logger.info(f"Access denied for tag {tag_id}")
                 clear_buffer(reader)
         else:
