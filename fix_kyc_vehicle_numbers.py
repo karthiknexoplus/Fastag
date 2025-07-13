@@ -28,14 +28,17 @@ def main():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    # Find users with spaces in vehicle_number
-    cur.execute("SELECT * FROM kyc_users WHERE vehicle_number LIKE '% %'")
+    # Find users with empty or null fastag_id
+    cur.execute("SELECT * FROM kyc_users WHERE fastag_id IS NULL OR fastag_id = ''")
     users = cur.fetchall()
-    logging.info(f"Found {len(users)} users with spaces in vehicle_number.")
+    logging.info(f"Found {len(users)} users with empty or null fastag_id.")
     updated = 0
     for user in users:
         old_vrn = user['vehicle_number']
-        cleaned_vrn = old_vrn.replace(' ', '').upper()
+        cleaned_vrn = old_vrn.replace(' ', '').upper() if old_vrn else ''
+        if not cleaned_vrn:
+            logging.info(f"User ID {user['id']}: No vehicle number, skipping.")
+            continue
         fastag_id = fetch_active_fastag_id(cleaned_vrn)
         if fastag_id:
             logging.info(f"User ID {user['id']}: {old_vrn} -> {cleaned_vrn}, FASTag: {fastag_id} (UPDATED)")
