@@ -8,13 +8,18 @@ DATABASE = "instance/fastag.db"
 logging.basicConfig(level=logging.INFO)
 
 def fetch_active_fastag_id(vehicle_number):
-    url = f"http://127.0.0.1:5000/api/kyc/fetch-fastag/{vehicle_number}"
+    url = f"https://acquirerportal.axisbank.co.in/MTMSPG/GetTagDetails?SearchType=VRN&SearchValue={vehicle_number.upper()}"
+    headers = {
+        'Cookie': 'axisbiconnect=1034004672.47873.0000'
+    }
     try:
-        resp = requests.get(url, timeout=10, verify=False)
+        resp = requests.get(url, headers=headers, timeout=15, verify=False)
         if resp.ok:
             data = resp.json()
-            if data.get('success') and data.get('tags'):
-                return data['tags'][0]['tag_id']
+            if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
+                for tag_detail in data['npcitagDetails']:
+                    if tag_detail.get('TagStatus') == 'A':
+                        return tag_detail.get('TagID', None)
     except Exception as e:
         logging.error(f"Error fetching FASTag ID for {vehicle_number}: {e}")
     return None
