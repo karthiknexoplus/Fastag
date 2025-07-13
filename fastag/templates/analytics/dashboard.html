@@ -851,7 +851,14 @@ function showTodayDeniedDetails() {
         .then(data => {
             const modal = new bootstrap.Modal(document.getElementById('todayDeniedModal'));
             const modalBody = document.getElementById('todayDeniedModalBody');
-            modalBody.innerHTML = `<div class='text-center'><h2 class='display-4 mb-3'>${data.unique_tags}</h2><div class='fs-5 text-muted'>Unique Tags Denied Today</div></div>`;
+            let html = `<div class='text-center'><h2 class='display-4 mb-3'>${data.summary.unique_tags}</h2><div class='fs-5 text-muted'>Unique Tags Denied Today</div></div>`;
+            html += `<div class='row mb-4 mt-3'>
+                <div class='col-md-4'><div class='card stats-card h-100 d-flex align-items-center justify-content-center' style='min-height:90px;'><div class='card-body p-2 text-center'><div class='stats-number' style='font-size:2rem;'>${data.summary.fastag_count}</div><div class='stats-label'>FASTag (34161)</div></div></div></div>
+                <div class='col-md-4'><div class='card stats-card success h-100 d-flex align-items-center justify-content-center' style='min-height:90px;'><div class='card-body p-2 text-center'><div class='stats-number' style='font-size:2rem;'>${data.summary.car_oem_count}</div><div class='stats-label'>CAR's OEM (E20)</div></div></div></div>
+                <div class='col-md-4'><div class='card stats-card warning h-100 d-flex align-items-center justify-content-center' style='min-height:90px;'><div class='card-body p-2 text-center'><div class='stats-number' style='font-size:2rem;'>${data.summary.other_count}</div><div class='stats-label'>Other Tags</div></div></div></div>
+            </div>`;
+            html += `<div class='row mb-4'><div class='col-md-6'><h6><i class='fas fa-sign-in-alt text-primary'></i> Entry Reader Statistics</h6><div class='table-responsive'><table class='table table-sm'><thead><tr><th>Reader</th><th>Count</th></tr></thead><tbody>${data.reader_stats.entry_readers.map(reader => `<tr><td>${reader.reader_name}</td><td>${reader.count}</td></tr>`).join('')}</tbody></table></div></div><div class='col-md-6'><h6><i class='fas fa-sign-out-alt text-danger'></i> Exit Reader Statistics</h6><div class='table-responsive'><table class='table table-sm'><thead><tr><th>Reader</th><th>Count</th></tr></thead><tbody>${data.reader_stats.exit_readers.map(reader => `<tr><td>${reader.reader_name}</td><td>${reader.count}</td></tr>`).join('')}</tbody></table></div></div></div>`;
+            modalBody.innerHTML = html;
             modal.show();
         })
         .catch(error => {
@@ -869,7 +876,15 @@ function showTotalEventsTodayDetails() {
         .then(data => {
             const modal = new bootstrap.Modal(document.getElementById('totalEventsTodayModal'));
             const modalBody = document.getElementById('totalEventsTodayModalBody');
-            modalBody.innerHTML = `<div class='text-center'><h2 class='display-4 mb-3'>${data.unique_tags}</h2><div class='fs-5 text-muted'>Unique Tags Today</div></div>`;
+            let html = `<div class='text-center'><h2 class='display-4 mb-3'>${data.summary.unique_tags}</h2><div class='fs-5 text-muted'>Unique Tags Today</div></div>`;
+            html += `<div class='row mb-4 mt-3'>
+                <div class='col-md-4'><div class='card stats-card h-100 d-flex align-items-center justify-content-center' style='min-height:90px;'><div class='card-body p-2 text-center'><div class='stats-number' style='font-size:2rem;'>${data.summary.fastag_count}</div><div class='stats-label'>FASTag (34161)</div></div></div></div>
+                <div class='col-md-4'><div class='card stats-card success h-100 d-flex align-items-center justify-content-center' style='min-height:90px;'><div class='card-body p-2 text-center'><div class='stats-number' style='font-size:2rem;'>${data.summary.car_oem_count}</div><div class='stats-label'>CAR's OEM (E20)</div></div></div></div>
+                <div class='col-md-4'><div class='card stats-card warning h-100 d-flex align-items-center justify-content-center' style='min-height:90px;'><div class='card-body p-2 text-center'><div class='stats-number' style='font-size:2rem;'>${data.summary.other_count}</div><div class='stats-label'>Other Tags</div></div></div></div>
+            </div>`;
+            html += `<h6 class='mt-4 mb-2'><i class='fas fa-clock text-primary'></i> Hour-wise Summary</h6><div class='table-responsive mb-3'><table class='table table-bordered table-sm align-middle text-center'><thead class='table-light'><tr><th>Hour</th><th>Total</th><th>Granted</th><th>Denied</th><th>FASTag</th><th>CAR OEM</th><th>Other</th></tr></thead><tbody>${data.hour_wise.map(row => `<tr${data.summary.peak_hour === row.hour ? " style='background:#e0f7fa;font-weight:bold;'" : ''}><td>${row.hour}:00</td><td>${row.total}</td><td class='text-success'>${row.granted}</td><td class='text-danger'>${row.denied}</td><td>${row.fastag}</td><td>${row.car_oem}</td><td>${row.other}</td></tr>`).join('')}</tbody></table></div>`;
+            html += `<h6 class='mt-4 mb-2'><i class='fas fa-microchip text-primary'></i> Reader Summary</h6><div class='table-responsive mb-3'><table class='table table-bordered table-sm align-middle text-center'><thead class='table-light'><tr><th>Reader</th><th>Type</th><th>Count</th></tr></thead><tbody>${data.reader_stats.map(reader => `<tr${data.summary.top_reader === reader.reader_name ? " style='background:#fff3cd;font-weight:bold;'" : ''}><td>${reader.reader_name}</td><td>${reader.type}</td><td>${reader.count}</td></tr>`).join('')}</tbody></table></div>`;
+            modalBody.innerHTML = html;
             modal.show();
         })
         .catch(error => {
