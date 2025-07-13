@@ -800,3 +800,45 @@
 [2025-07-13 10:56:29,551] INFO in google_auth: Google OAuth initialized successfully
 [2025-07-13 10:56:29,642] WARNING in _internal:  * Debugger is active!
 [2025-07-13 10:56:29,649] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-13 11:03:33,750] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/analytics.py', reloading
+[2025-07-13 11:03:33,837] INFO in _internal:  * Restarting with stat
+[2025-07-13 11:03:34,164] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-13 11:03:34,164] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-13 11:03:34,164] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-13 11:03:34,164] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-13 11:03:34,344] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-13 11:03:34,344] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-13 11:03:34,426] WARNING in _internal:  * Debugger is active!
+[2025-07-13 11:03:34,434] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-13 11:06:30,646] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/analytics.py', reloading
+[2025-07-13 11:06:30,715] INFO in _internal:  * Restarting with stat
+[2025-07-13 11:06:31,039] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-13 11:06:31,039] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-13 11:06:31,039] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-13 11:06:31,039] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-13 11:06:31,219] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-13 11:06:31,219] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-13 11:06:31,302] WARNING in _internal:  * Debugger is active!
+[2025-07-13 11:06:31,309] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-13 11:08:28,701] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/analytics.py', reloading
+[2025-07-13 11:08:28,783] INFO in _internal:  * Restarting with stat
+[2025-07-13 11:08:29,093] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-13 11:08:29,093] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-13 11:08:29,093] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-13 11:08:29,093] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-13 11:08:29,266] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-13 11:08:29,266] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-13 11:08:29,352] WARNING in _internal:  * Debugger is active!
+[2025-07-13 11:08:29,359] INFO in _internal:  * Debugger PIN: 811-367-504
+[2025-07-13 12:46:37,008] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-13 12:46:37,008] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-13 12:46:37,009] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-13 12:46:37,009] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-13 12:46:37,228] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-13 12:46:37,228] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-13 12:46:42,279] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.2:5000
+[2025-07-13 12:46:42,279] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-07-13 12:46:47,735] INFO in _internal: 127.0.0.1 - - [13/Jul/2025 12:46:47] "GET /analytics/api/current-occupancy-details HTTP/1.1" 200 -

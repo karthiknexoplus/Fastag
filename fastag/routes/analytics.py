@@ -308,6 +308,154 @@ def analytics_data():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@analytics_bp.route('/api/current-occupancy-details')
+def current_occupancy_details():
+    """API endpoint to get current occupancy details"""
+    try:
+        db = get_db()
+        
+        # Get vehicles currently in the parking lot (granted access but no exit)
+        vehicles = db.execute("""
+            SELECT 
+                al1.tag_id,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+                COALESCE(ku.name, tvc.owner_name) as owner_name,
+                tvc.model_name,
+                tvc.fuel_type,
+                al1.timestamp as entry_time,
+                l.lane_name,
+                ROUND((julianday('now') - julianday(al1.timestamp)) * 24, 1) as duration_hours
+            FROM access_logs al1
+            LEFT JOIN kyc_users ku ON al1.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al1.tag_id = tvc.tag_id
+            JOIN lanes l ON al1.lane_id = l.id
+            WHERE al1.access_result = 'granted'
+            AND al1.timestamp = (
+                SELECT MAX(al2.timestamp)
+                FROM access_logs al2
+                WHERE al2.tag_id = al1.tag_id
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM access_logs al3
+                WHERE al3.tag_id = al1.tag_id
+                AND al3.timestamp > al1.timestamp
+                AND al3.access_result = 'denied'
+            )
+            ORDER BY al1.timestamp DESC
+        """).fetchall()
+        
+        # Convert UTC timestamps to IST
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        formatted_vehicles = []
+        
+        for vehicle in vehicles:
+            # Parse the UTC timestamp and convert to IST
+            timestamp_str = vehicle[5]  # entry_time
+            
+            # Handle different timestamp formats
+            if 'T' in timestamp_str and 'Z' in timestamp_str:
+                # ISO format with Z (UTC)
+                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif 'T' in timestamp_str:
+                # ISO format without Z, assume UTC
+                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+            else:
+                # SQLite datetime format, assume UTC
+                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                utc_time = utc_time.replace(tzinfo=pytz.UTC)
+            
+            # Convert to IST
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Format duration
+            duration_hours = vehicle[7] or 0
+            if duration_hours < 1:
+                duration = f"{int(duration_hours * 60)} minutes"
+            else:
+                duration = f"{duration_hours:.1f} hours"
+            
+            formatted_vehicles.append({
+                'tag_id': vehicle[0],
+                'vehicle_number': vehicle[1],
+                'owner_name': vehicle[2],
+                'model_name': vehicle[3],
+                'fuel_type': vehicle[4],
+                'entry_time': ist_time_str,
+                'lane_name': vehicle[6],
+                'duration': duration
+            })
+        
+        return jsonify({'vehicles': formatted_vehicles})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@analytics_bp.route('/api/today-granted-details')
+def today_granted_details():
+    """API endpoint to get today's granted entries details"""
+    try:
+        db = get_db()
+        
+        # Get today's granted entries with vehicle details
+        vehicles = db.execute("""
+            SELECT 
+                al.tag_id,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+                COALESCE(ku.name, tvc.owner_name) as owner_name,
+                tvc.model_name,
+                tvc.fuel_type,
+                al.timestamp as entry_time,
+                l.lane_name,
+                r.reader_ip
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+            JOIN lanes l ON al.lane_id = l.id
+            JOIN readers r ON al.reader_id = r.id
+            WHERE al.access_result = 'granted'
+            AND DATE(al.timestamp) = DATE('now')
+            ORDER BY al.timestamp DESC
+        """).fetchall()
+        
+        # Convert UTC timestamps to IST
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        formatted_vehicles = []
+        
+        for vehicle in vehicles:
+            # Parse the UTC timestamp and convert to IST
+            timestamp_str = vehicle[5]  # entry_time
+            
+            # Handle different timestamp formats
+            if 'T' in timestamp_str and 'Z' in timestamp_str:
+                # ISO format with Z (UTC)
+                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif 'T' in timestamp_str:
+                # ISO format without Z, assume UTC
+                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+            else:
+                # SQLite datetime format, assume UTC
+                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                utc_time = utc_time.replace(tzinfo=pytz.UTC)
+            
+            # Convert to IST
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            formatted_vehicles.append({
+                'tag_id': vehicle[0],
+                'vehicle_number': vehicle[1],
+                'owner_name': vehicle[2],
+                'model_name': vehicle[3],
+                'fuel_type': vehicle[4],
+                'entry_time': ist_time_str,
+                'lane_name': vehicle[6],
+                'reader_ip': vehicle[7]
+            })
+        
+        return jsonify({'vehicles': formatted_vehicles})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @analytics_bp.route('/reports')
 def reports():
     """Reports page"""

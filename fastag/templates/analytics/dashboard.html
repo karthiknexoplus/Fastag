@@ -192,18 +192,20 @@
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stats-card h-100">
+            <div class="card stats-card h-100" style="cursor: pointer;" onclick="showCurrentOccupancyDetails()">
                 <div class="card-body text-center">
                     <div class="stats-number" id="current-occupancy">-</div>
                     <div class="stats-label">Current Occupancy</div>
+                    <small class="text-white-50">Click for details</small>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stats-card success h-100">
+            <div class="card stats-card success h-100" style="cursor: pointer;" onclick="showTodayGrantedDetails()">
                 <div class="card-body text-center">
                     <div class="stats-number" id="today-granted">-</div>
                     <div class="stats-label">Today's Granted</div>
+                    <small class="text-white-50">Click for details</small>
                 </div>
             </div>
         </div>
@@ -741,5 +743,152 @@ function refreshData() {
         btn.disabled = false;
     }, 1000);
 }
+
+// Modal functions for clickable cards
+function showCurrentOccupancyDetails() {
+    fetch('/analytics/api/current-occupancy-details')
+        .then(response => response.json())
+        .then(data => {
+            const modal = new bootstrap.Modal(document.getElementById('currentOccupancyModal'));
+            const modalBody = document.getElementById('currentOccupancyModalBody');
+            
+            if (data.vehicles && data.vehicles.length > 0) {
+                modalBody.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle</th>
+                                    <th>Owner</th>
+                                    <th>Model</th>
+                                    <th>Entry Time</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.vehicles.map(vehicle => `
+                                    <tr>
+                                        <td>${vehicle.vehicle_number || vehicle.tag_id}</td>
+                                        <td>${vehicle.owner_name || 'N/A'}</td>
+                                        <td>${vehicle.model_name || 'N/A'}</td>
+                                        <td>${vehicle.entry_time}</td>
+                                        <td>${vehicle.duration}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                modalBody.innerHTML = '<p class="text-center text-muted">No vehicles currently in the parking lot.</p>';
+            }
+            
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error loading current occupancy details:', error);
+            const modal = new bootstrap.Modal(document.getElementById('currentOccupancyModal'));
+            document.getElementById('currentOccupancyModalBody').innerHTML = 
+                '<p class="text-center text-danger">Error loading data. Please try again.</p>';
+            modal.show();
+        });
+}
+
+function showTodayGrantedDetails() {
+    fetch('/analytics/api/today-granted-details')
+        .then(response => response.json())
+        .then(data => {
+            const modal = new bootstrap.Modal(document.getElementById('todayGrantedModal'));
+            const modalBody = document.getElementById('todayGrantedModalBody');
+            
+            if (data.vehicles && data.vehicles.length > 0) {
+                modalBody.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle</th>
+                                    <th>Owner</th>
+                                    <th>Model</th>
+                                    <th>Entry Time</th>
+                                    <th>Lane</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.vehicles.map(vehicle => `
+                                    <tr>
+                                        <td>${vehicle.vehicle_number || vehicle.tag_id}</td>
+                                        <td>${vehicle.owner_name || 'N/A'}</td>
+                                        <td>${vehicle.model_name || 'N/A'}</td>
+                                        <td>${vehicle.entry_time}</td>
+                                        <td>${vehicle.lane_name || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                modalBody.innerHTML = '<p class="text-center text-muted">No granted entries today.</p>';
+            }
+            
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error loading today granted details:', error);
+            const modal = new bootstrap.Modal(document.getElementById('todayGrantedModal'));
+            document.getElementById('todayGrantedModalBody').innerHTML = 
+                '<p class="text-center text-danger">Error loading data. Please try again.</p>';
+            modal.show();
+        });
+}
 </script>
+
+<!-- Current Occupancy Details Modal -->
+<div class="modal fade" id="currentOccupancyModal" tabindex="-1" aria-labelledby="currentOccupancyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #667eea; color: white;">
+                <h5 class="modal-title" id="currentOccupancyModalLabel">
+                    <i class="fas fa-car me-2"></i>Current Occupancy Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="currentOccupancyModalBody">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Granted Details Modal -->
+<div class="modal fade" id="todayGrantedModal" tabindex="-1" aria-labelledby="todayGrantedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #4facfe; color: white;">
+                <h5 class="modal-title" id="todayGrantedModalLabel">
+                    <i class="fas fa-check-circle me-2"></i>Today's Granted Entries
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="todayGrantedModalBody">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 
