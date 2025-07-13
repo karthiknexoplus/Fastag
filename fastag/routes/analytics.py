@@ -1750,6 +1750,9 @@ def total_events_today_details():
         tag_type_counts = {'fastag': 0, 'car_oem': 0, 'other': 0}
         unique_tags = set()
         detailed_entries = []
+        # Reader stats with bifurcation for unique tags
+        reader_stats_bifurc = {}
+        tag_seen_per_reader = {}
         for row in rows:
             timestamp_str = row[0]
             if 'T' in timestamp_str and 'Z' in timestamp_str:
@@ -1776,6 +1779,7 @@ def total_events_today_details():
                 tag_type = 'Other'
                 tag_type_counts['other'] += 1
             unique_tags.add(tag_id)
+            # Hourly stats
             if hour not in hour_stats:
                 hour_stats[hour] = {
                     'total': 0, 'granted': 0, 'denied': 0,
@@ -1792,9 +1796,18 @@ def total_events_today_details():
                 hour_stats[hour]['car_oem'] += 1
             else:
                 hour_stats[hour]['other'] += 1
-            if reader_name not in reader_stats:
-                reader_stats[reader_name] = {'count': 0, 'type': reader_type}
-            reader_stats[reader_name]['count'] += 1
+            # Reader stats bifurcation (unique tags per reader)
+            if reader_name not in reader_stats_bifurc:
+                reader_stats_bifurc[reader_name] = {'type': reader_type, 'tags': set(), 'fastag': set(), 'car_oem': set(), 'other': set()}
+            if tag_id not in reader_stats_bifurc[reader_name]['tags']:
+                reader_stats_bifurc[reader_name]['tags'].add(tag_id)
+                if tag_type == 'FASTag':
+                    reader_stats_bifurc[reader_name]['fastag'].add(tag_id)
+                elif tag_type == 'CAR OEM':
+                    reader_stats_bifurc[reader_name]['car_oem'].add(tag_id)
+                else:
+                    reader_stats_bifurc[reader_name]['other'].add(tag_id)
+            # For detailed entries
             detailed_entries.append({
                 'tag_id': tag_id,
                 'tag_type': tag_type,
@@ -1809,19 +1822,23 @@ def total_events_today_details():
                 'access_result': access_result
             })
         peak_hour = max(hour_stats.items(), key=lambda x: x[1]['total'])[0] if hour_stats else None
-        top_reader = max(reader_stats.items(), key=lambda x: x[1]['count'])[0] if reader_stats else None
+        top_reader = max(reader_stats_bifurc.items(), key=lambda x: len(x[1]['tags']))[0] if reader_stats_bifurc else None
         hour_wise = []
         for h in sorted(hour_stats.keys()):
             hour_wise.append({
                 'hour': h,
                 **hour_stats[h]
             })
+        # Convert reader stats to list with bifurcation counts
         reader_stats_list = []
-        for name, stat in sorted(reader_stats.items(), key=lambda x: x[1]['count'], reverse=True):
+        for name, stat in sorted(reader_stats_bifurc.items(), key=lambda x: len(x[1]['tags']), reverse=True):
             reader_stats_list.append({
                 'reader_name': name,
                 'type': stat['type'],
-                'count': stat['count']
+                'total': len(stat['tags']),
+                'fastag': len(stat['fastag']),
+                'car_oem': len(stat['car_oem']),
+                'other': len(stat['other'])
             })
         return jsonify({
             'summary': {
