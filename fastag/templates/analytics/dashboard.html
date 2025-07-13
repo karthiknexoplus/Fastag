@@ -498,20 +498,26 @@ function updateTables(data) {
     // Update recent activity
     const recentActivity = document.getElementById('recent-activity');
     if (data.recent_activity) {
-        recentActivity.innerHTML = data.recent_activity.map(activity => `
-            <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="fw-bold">${activity[4] || 'Unknown User'}</div>
-                        <small class="text-muted">${activity[1]} • ${activity[6]}</small>
+        recentActivity.innerHTML = data.recent_activity.map(activity => {
+            const userName = activity[4] || 'Unknown User';
+            const vehicleNumber = activity[5] || 'N/A';
+            const displayName = vehicleNumber !== 'N/A' ? vehicleNumber : userName;
+            
+            return `
+                <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">${displayName}</div>
+                            <small class="text-muted">${activity[1]} • ${activity[6]}</small>
+                        </div>
+                        <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
+                            ${activity[2].toUpperCase()}
+                        </span>
                     </div>
-                    <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
-                        ${activity[2].toUpperCase()}
-                    </span>
+                    <small class="text-muted">${new Date(activity[0]).toLocaleString()}</small>
                 </div>
-                <small class="text-muted">${new Date(activity[0]).toLocaleString()}</small>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     // Update reader health table
