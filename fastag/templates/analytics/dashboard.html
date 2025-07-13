@@ -225,6 +225,21 @@
         </div>
     </div>
 
+    <!-- FASTag vs Non-FASTag Pie Chart -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-3">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-chart-pie text-primary me-2"></i>
+                    FASTag vs Non-FASTag (Today)
+                </h5>
+                <div class="chart-wrapper-small">
+                    <canvas id="fastagPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts Row -->
     <div class="row mb-4">
         <div class="col-xl-8 mb-3">
@@ -328,7 +343,7 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script>
-let hourlyChart, readerHealthChart;
+let hourlyChart, readerHealthChart, fastagPieChart;
 
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -426,6 +441,32 @@ function initializeCharts() {
             }
         }
     });
+
+    // FASTag vs Non-FASTag Pie Chart
+    const fastagPieCtx = document.getElementById('fastagPieChart').getContext('2d');
+    fastagPieChart = new Chart(fastagPieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['FASTag', 'Non-FASTag'],
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['#28a745', '#dc3545'],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 10
+                    }
+                }
+            }
+        }
+    });
 }
 
 function loadAnalyticsData() {
@@ -469,6 +510,15 @@ function updateCharts(data) {
         readerHealthChart.data.labels = labels;
         readerHealthChart.data.datasets[0].data = dataValues;
         readerHealthChart.update();
+    }
+
+    // Update FASTag vs Non-FASTag Pie Chart
+    if (data.fastag_vs_nonfastag) {
+        fastagPieChart.data.datasets[0].data = [
+            data.fastag_vs_nonfastag.fastag,
+            data.fastag_vs_nonfastag.nonfastag
+        ];
+        fastagPieChart.update();
     }
 }
 

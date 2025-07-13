@@ -234,6 +234,19 @@ def get_analytics_data():
         new_row[2] = ist_time_str
         suspicious_activity.append(new_row)
     
+    # --- FASTag vs Non-FASTag (today) ---
+    fastag_vs_nonfastag_row = db.execute('''
+        SELECT
+            SUM(CASE WHEN tag_id LIKE '34161%' THEN 1 ELSE 0 END) as fastag_count,
+            SUM(CASE WHEN tag_id NOT LIKE '34161%' THEN 1 ELSE 0 END) as nonfastag_count
+        FROM access_logs
+        WHERE DATE(timestamp) = DATE('now')
+    ''').fetchone()
+    fastag_vs_nonfastag = {
+        'fastag': fastag_vs_nonfastag_row[0] or 0,
+        'nonfastag': fastag_vs_nonfastag_row[1] or 0
+    }
+
     return {
         'current_occupancy': current_occupancy,
         'today_stats': {
@@ -248,7 +261,8 @@ def get_analytics_data():
         'denied_analysis': denied_analysis,
         'recent_activity': recent_activity,
         'weekly_trends': weekly_trends,
-        'suspicious_activity': suspicious_activity
+        'suspicious_activity': suspicious_activity,
+        'fastag_vs_nonfastag': fastag_vs_nonfastag
     }
 
 @analytics_bp.route('/dashboard')
