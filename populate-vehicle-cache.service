@@ -1,0 +1,16 @@
+[Unit]
+Description=Populate Enhanced Vehicle Cache
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Fastag
+ExecStart=/home/ubuntu/Fastag/venv/bin/python /home/ubuntu/Fastag/populate_enhanced_vehicle_cache.py
+StandardOutput=journal
+StandardError=journal
+Restart=no
+
+[Install]
+WantedBy=multi-user.target 

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Populate Vehicle Cache every 5 minutes
+Requires=populate-vehicle-cache.service
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Unit=populate-vehicle-cache.service
+
+[Install]
+WantedBy=timers.target 
