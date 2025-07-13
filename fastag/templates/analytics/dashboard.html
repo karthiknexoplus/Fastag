@@ -225,7 +225,7 @@
         </div>
     </div>
 
-    <!-- FASTag vs Non-FASTag Pie Chart -->
+    <!-- FASTag vs Non-FASTag Pie Chart and Overstayed Vehicles Stat Card -->
     <div class="row mb-4">
         <div class="col-xl-4 col-md-6 mb-3">
             <div class="chart-container">
@@ -235,6 +235,14 @@
                 </h5>
                 <div class="chart-wrapper-small">
                     <canvas id="fastagPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-3">
+            <div class="card stats-card danger h-100">
+                <div class="card-body text-center">
+                    <div class="stats-number" id="overstayed-vehicles">-</div>
+                    <div class="stats-label">Overstayed Vehicles</div>
                 </div>
             </div>
         </div>
@@ -487,6 +495,7 @@ function updateStats(data) {
     document.getElementById('today-granted').textContent = data.today_stats?.granted || 0;
     document.getElementById('today-denied').textContent = data.today_stats?.denied || 0;
     document.getElementById('total-events').textContent = data.today_stats?.total || 0;
+    document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
 }
 
 function updateCharts(data) {

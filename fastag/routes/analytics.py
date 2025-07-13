@@ -247,6 +247,16 @@ def get_analytics_data():
         'nonfastag': fastag_vs_nonfastag_row[1] or 0
     }
 
+    # --- Overstayed Vehicles (inside > 8h) ---
+    overstayed = db.execute('''
+        SELECT COUNT(*) FROM (
+            SELECT tag_id, MAX(timestamp) as last_entry
+            FROM access_logs WHERE access_result = 'granted'
+            GROUP BY tag_id
+            HAVING last_entry <= datetime('now', '-8 hours')
+        )
+    ''').fetchone()[0]
+
     return {
         'current_occupancy': current_occupancy,
         'today_stats': {
@@ -262,7 +272,8 @@ def get_analytics_data():
         'recent_activity': recent_activity,
         'weekly_trends': weekly_trends,
         'suspicious_activity': suspicious_activity,
-        'fastag_vs_nonfastag': fastag_vs_nonfastag
+        'fastag_vs_nonfastag': fastag_vs_nonfastag,
+        'overstayed': overstayed
     }
 
 @analytics_bp.route('/dashboard')
