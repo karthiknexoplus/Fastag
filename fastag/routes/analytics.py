@@ -85,12 +85,15 @@ def get_analytics_data():
         ORDER BY r.id
     """).fetchall()]
     
-    # 6. Top Users (Most Active Tags) - with cached vehicle numbers
+    # 6. Top Users (Most Active Tags) - with cached vehicle details
     top_users = [list(row) for row in db.execute("""
         SELECT 
             al.tag_id,
             ku.name as user_name,
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type,
             COUNT(*) as total_events,
             SUM(CASE WHEN al.access_result = 'granted' THEN 1 ELSE 0 END) as granted,
             SUM(CASE WHEN al.access_result = 'denied' THEN 1 ELSE 0 END) as denied,
@@ -99,7 +102,7 @@ def get_analytics_data():
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         WHERE al.timestamp >= datetime('now', '-30 days')
-        GROUP BY al.tag_id, ku.name, ku.vehicle_number, tvc.vehicle_number
+        GROUP BY al.tag_id, ku.name, ku.vehicle_number, tvc.vehicle_number, tvc.owner_name, tvc.model_name, tvc.fuel_type
         ORDER BY total_events DESC
         LIMIT 10
     """).fetchall()]
@@ -120,7 +123,7 @@ def get_analytics_data():
         ORDER BY count DESC
     """).fetchall()]
     
-    # 8. Recent Activity (Last 50 events) - with cached vehicle numbers
+    # 8. Recent Activity (Last 50 events) - with cached vehicle details
     recent_activity = [list(row) for row in db.execute("""
         SELECT 
             al.timestamp,
@@ -129,6 +132,9 @@ def get_analytics_data():
             al.reason,
             ku.name as user_name,
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type,
             l.lane_name,
             r.reader_ip
         FROM access_logs al
@@ -230,6 +236,9 @@ def export_data():
                 al.reason,
                 ku.name as user_name,
                 COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+                COALESCE(ku.name, tvc.owner_name) as owner_name,
+                tvc.model_name,
+                tvc.fuel_type,
                 l.lane_name,
                 r.reader_ip
             FROM access_logs al
@@ -253,7 +262,7 @@ def export_data():
         # Create CSV
         output = StringIO()
         writer = csv.writer(output)
-        writer.writerow(['Timestamp', 'Tag ID', 'Access Result', 'Reason', 'User Name', 'Vehicle Number', 'Lane', 'Reader IP'])
+        writer.writerow(['Timestamp', 'Tag ID', 'Access Result', 'Reason', 'User Name', 'Vehicle Number', 'Owner Name', 'Model Name', 'Fuel Type', 'Lane', 'Reader IP'])
         
         for row in rows:
             writer.writerow(row)
@@ -267,6 +276,9 @@ def export_data():
                 al.tag_id,
                 ku.name as user_name,
                 COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+                COALESCE(ku.name, tvc.owner_name) as owner_name,
+                tvc.model_name,
+                tvc.fuel_type,
                 ku.contact_number,
                 l.lane_name,
                 r.reader_ip,
@@ -292,7 +304,7 @@ def export_data():
         
         output = StringIO()
         writer = csv.writer(output)
-        writer.writerow(['Entry Time', 'Tag ID', 'User Name', 'Vehicle Number', 'Contact Number', 'Entry Lane', 'Reader IP', 'Notes'])
+        writer.writerow(['Entry Time', 'Tag ID', 'User Name', 'Vehicle Number', 'Owner Name', 'Model Name', 'Fuel Type', 'Contact Number', 'Entry Lane', 'Reader IP', 'Notes'])
         
         for row in rows:
             writer.writerow(row)
@@ -794,6 +806,9 @@ def viewonmobile_access_logs():
             al.timestamp as access_time,
             ku.name as user_name,
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type,
             al.tag_id,
             l.lane_name,
             r.reader_ip as device,
@@ -847,12 +862,15 @@ def viewonmobile_access_logs():
             "access_time": row[0],
             "user": {
                 "name": row[1],
-                "vehicle_number": row[2]
+                "vehicle_number": row[2],
+                "owner_name": row[3],
+                "model_name": row[4],
+                "fuel_type": row[5]
             },
-            "tag_id": row[3],
-            "lane": row[4],
-            "device": row[5],
-            "status": row[6]
+            "tag_id": row[6],
+            "lane": row[7],
+            "device": row[8],
+            "status": row[9]
         })
 
     return jsonify({
@@ -964,35 +982,55 @@ def mobile_analytics_peak():
 
 @analytics_bp.route('/api/mobile/analytics/top-tags')
 def mobile_analytics_top_tags():
-    """Top 5 frequent and denied tags today with vehicle numbers"""
+    """Top 5 frequent and denied tags today with vehicle details"""
     db = get_db()
     top_frequent = db.execute('''
         SELECT 
             al.tag_id, 
             COUNT(*) as cnt,
-            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         WHERE DATE(al.timestamp) = DATE('now') AND al.access_result = 'granted'
-        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number 
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name, tvc.model_name, tvc.fuel_type
         ORDER BY cnt DESC LIMIT 5
     ''').fetchall()
     top_denied = db.execute('''
         SELECT 
             al.tag_id, 
             COUNT(*) as cnt,
-            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         WHERE DATE(al.timestamp) = DATE('now') AND al.access_result = 'denied'
-        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number 
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name, tvc.model_name, tvc.fuel_type
         ORDER BY cnt DESC LIMIT 5
     ''').fetchall()
     return jsonify({
-        'top_frequent_visitors': [{'tag_id': row[0], 'count': row[1], 'vehicle_number': row[2] or 'Unknown'} for row in top_frequent],
-        'top_denied_tags': [{'tag_id': row[0], 'count': row[1], 'vehicle_number': row[2] or 'Unknown'} for row in top_denied]
+        'top_frequent_visitors': [{
+            'tag_id': row[0], 
+            'count': row[1], 
+            'vehicle_number': row[2] or 'Unknown',
+            'owner_name': row[3] or 'Unknown',
+            'model_name': row[4] or 'Unknown',
+            'fuel_type': row[5] or 'Unknown'
+        } for row in top_frequent],
+        'top_denied_tags': [{
+            'tag_id': row[0], 
+            'count': row[1], 
+            'vehicle_number': row[2] or 'Unknown',
+            'owner_name': row[3] or 'Unknown',
+            'model_name': row[4] or 'Unknown',
+            'fuel_type': row[5] or 'Unknown'
+        } for row in top_denied]
     })
 
 @analytics_bp.route('/api/mobile/analytics/durations')

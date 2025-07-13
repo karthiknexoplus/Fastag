@@ -375,13 +375,13 @@ try:
                     activate_all_relays()
                     logger.info(f"Access granted for tag {tag_id}")
                     
-                    # Fetch and cache vehicle number for 34161 tags (granted access)
+                    # Fetch and cache vehicle details for 34161 tags (granted access)
                     if tag_id and str(tag_id).startswith('34161'):
                         try:
                             conn = sqlite3.connect(DB_PATH, check_same_thread=False)
                             c = conn.cursor()
                             # Check if already cached
-                            c.execute("SELECT vehicle_number FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
+                            c.execute("SELECT vehicle_number, owner_name, model_name, fuel_type FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
                             row = c.fetchone()
                             if not row or not row[0]:
                                 # Use Axis Bank API to fetch vehicle number
@@ -397,12 +397,19 @@ try:
                                             tag_detail = data['npcitagDetails'][0]
                                             vehicle_number = tag_detail.get('VRN', '')
                                             if vehicle_number:
-                                                if row:
-                                                    c.execute("UPDATE tag_vehicle_cache SET vehicle_number=?, last_updated=CURRENT_TIMESTAMP WHERE tag_id=?", (vehicle_number, tag_id))
+                                                # Fetch additional details from Acko API
+                                                from fastag.rfid.rfid_common import fetch_vehicle_details_from_acko, cache_vehicle_details
+                                                vehicle_details = fetch_vehicle_details_from_acko(vehicle_number)
+                                                
+                                                owner_name = vehicle_details.get('owner_name', '') if vehicle_details else ''
+                                                model_name = vehicle_details.get('model_name', '') if vehicle_details else ''
+                                                fuel_type = vehicle_details.get('fuel_type', '') if vehicle_details else ''
+                                                
+                                                # Cache all details
+                                                if cache_vehicle_details(tag_id, vehicle_number, owner_name, model_name, fuel_type):
+                                                    logger.info(f"✓ Cached vehicle details for granted tag {tag_id}: {vehicle_number} - {owner_name} - {model_name} - {fuel_type}")
                                                 else:
-                                                    c.execute("INSERT INTO tag_vehicle_cache (tag_id, vehicle_number) VALUES (?, ?)", (tag_id, vehicle_number))
-                                                conn.commit()
-                                                logger.info(f"✓ Cached vehicle number for granted tag {tag_id}: {vehicle_number}")
+                                                    logger.warning(f"Failed to cache vehicle details for tag {tag_id}")
                                             else:
                                                 logger.warning(f"No vehicle number found for tag {tag_id}")
                                         else:
@@ -412,23 +419,23 @@ try:
                                 except Exception as e:
                                     logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
                             else:
-                                logger.info(f"✓ Vehicle number already cached for tag {tag_id}: {row[0]}")
+                                logger.info(f"✓ Vehicle details already cached for tag {tag_id}: {row[0]} - {row[1]} - {row[2]} - {row[3]}")
                             conn.close()
                         except Exception as e:
-                            logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
+                            logger.error(f"Failed to cache vehicle details for tag {tag_id}: {e}")
                 else:
                     log_access(tag_id, None, 'denied', reason='not_found')
                     update_tag_cooldown(tag_id)
                     update_db_insert(tag_id, LANE_ID)
                     logger.info(f"Access denied for tag {tag_id}")
                     
-                    # Fetch and cache vehicle number for 34161 tags (denied access)
+                    # Fetch and cache vehicle details for 34161 tags (denied access)
                     if tag_id and str(tag_id).startswith('34161'):
                         try:
                             conn = sqlite3.connect(DB_PATH, check_same_thread=False)
                             c = conn.cursor()
                             # Check if already cached
-                            c.execute("SELECT vehicle_number FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
+                            c.execute("SELECT vehicle_number, owner_name, model_name, fuel_type FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
                             row = c.fetchone()
                             if not row or not row[0]:
                                 # Use Axis Bank API to fetch vehicle number
@@ -444,12 +451,19 @@ try:
                                             tag_detail = data['npcitagDetails'][0]
                                             vehicle_number = tag_detail.get('VRN', '')
                                             if vehicle_number:
-                                                if row:
-                                                    c.execute("UPDATE tag_vehicle_cache SET vehicle_number=?, last_updated=CURRENT_TIMESTAMP WHERE tag_id=?", (vehicle_number, tag_id))
+                                                # Fetch additional details from Acko API
+                                                from fastag.rfid.rfid_common import fetch_vehicle_details_from_acko, cache_vehicle_details
+                                                vehicle_details = fetch_vehicle_details_from_acko(vehicle_number)
+                                                
+                                                owner_name = vehicle_details.get('owner_name', '') if vehicle_details else ''
+                                                model_name = vehicle_details.get('model_name', '') if vehicle_details else ''
+                                                fuel_type = vehicle_details.get('fuel_type', '') if vehicle_details else ''
+                                                
+                                                # Cache all details
+                                                if cache_vehicle_details(tag_id, vehicle_number, owner_name, model_name, fuel_type):
+                                                    logger.info(f"✓ Cached vehicle details for denied tag {tag_id}: {vehicle_number} - {owner_name} - {model_name} - {fuel_type}")
                                                 else:
-                                                    c.execute("INSERT INTO tag_vehicle_cache (tag_id, vehicle_number) VALUES (?, ?)", (tag_id, vehicle_number))
-                                                conn.commit()
-                                                logger.info(f"✓ Cached vehicle number for denied tag {tag_id}: {vehicle_number}")
+                                                    logger.warning(f"Failed to cache vehicle details for tag {tag_id}")
                                             else:
                                                 logger.warning(f"No vehicle number found for tag {tag_id}")
                                         else:
@@ -459,10 +473,10 @@ try:
                                 except Exception as e:
                                     logger.error(f"Failed to fetch vehicle number for tag {tag_id}: {e}")
                             else:
-                                logger.info(f"✓ Vehicle number already cached for tag {tag_id}: {row[0]}")
+                                logger.info(f"✓ Vehicle details already cached for tag {tag_id}: {row[0]} - {row[1]} - {row[2]} - {row[3]}")
                             conn.close()
                         except Exception as e:
-                            logger.error(f"Failed to cache vehicle number for tag {tag_id}: {e}")
+                            logger.error(f"Failed to cache vehicle details for tag {tag_id}: {e}")
                     
                 clear_buffer(reader)
         else:
