@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_from_directory
+from flask import Blueprint, request, jsonify, send_from_directory, render_template
 from fastag.utils.db import get_db
 import os
 from datetime import datetime
@@ -98,4 +98,30 @@ def list_visitors():
 
 @visitors_bp.route('/api/visitor-image/<filename>')
 def visitor_image(filename):
-    return send_from_directory(VISITOR_IMG_DIR, filename) 
+    return send_from_directory(VISITOR_IMG_DIR, filename)
+
+@visitors_bp.route('/visitors')
+def visitors_dashboard():
+    db = get_db()
+    visitors = db.execute('''
+        SELECT v.id, v.name, v.mobile, ku.name, vc.name, v.entry_time, v.entry_image_path,
+               v.exit_time, v.exit_image_path, v.status
+        FROM visitors v
+        LEFT JOIN kyc_users ku ON v.beneficiary_id = ku.id
+        LEFT JOIN visitor_categories vc ON v.category_id = vc.id
+        ORDER BY v.entry_time DESC
+    ''').fetchall()
+    categories = db.execute('SELECT id, name FROM visitor_categories ORDER BY name').fetchall()
+    beneficiaries = db.execute('SELECT id, name FROM kyc_users ORDER BY name').fetchall()
+    def img_url(path):
+        return f"/api/visitor-image/{path}" if path else None
+    visitor_objs = [
+        {
+            'id': r[0], 'name': r[1], 'mobile': r[2], 'beneficiary': r[3], 'category': r[4],
+            'entry_time': r[5], 'entry_image_url': img_url(r[6]),
+            'exit_time': r[7], 'exit_image_url': img_url(r[8]), 'status': r[9]
+        } for r in visitors
+    ]
+    category_objs = [{'id': c[0], 'name': c[1]} for c in categories]
+    beneficiary_objs = [{'id': b[0], 'name': b[1]} for b in beneficiaries]
+    return render_template('visitors.html', visitors=visitor_objs, categories=category_objs, beneficiaries=beneficiary_objs) 
