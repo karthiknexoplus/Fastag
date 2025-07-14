@@ -273,9 +273,10 @@ def export_kyc_users_csv():
     writer = csv.writer(si)
     writer.writerow(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At'])
     for user in users:
+        user_dict = dict(user)
         writer.writerow([
-            user['id'], user['name'], user['fastag_id'], user['vehicle_number'],
-            user['contact_number'], user['address'], user.get('created_at', '')
+            user_dict.get('id', ''), user_dict.get('name', ''), user_dict.get('fastag_id', ''), user_dict.get('vehicle_number', ''),
+            user_dict.get('contact_number', ''), user_dict.get('address', ''), user_dict.get('created_at', '')
         ])
     output = si.getvalue()
     return Response(
@@ -297,9 +298,10 @@ def export_kyc_users_xlsx():
     ws.title = 'KYC Users'
     ws.append(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At'])
     for user in users:
+        user_dict = dict(user)
         ws.append([
-            user['id'], user['name'], user['fastag_id'], user['vehicle_number'],
-            user['contact_number'], user['address'], user.get('created_at', '')
+            user_dict.get('id', ''), user_dict.get('name', ''), user_dict.get('fastag_id', ''), user_dict.get('vehicle_number', ''),
+            user_dict.get('contact_number', ''), user_dict.get('address', ''), user_dict.get('created_at', '')
         ])
     output = io.BytesIO()
     wb.save(output)
