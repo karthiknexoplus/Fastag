@@ -32,8 +32,8 @@
 </div>
 <script>
 function fetchCurrentRF() {
-    const reader = document.getElementById('reader').value;
-    fetch(`/api/rfid/rfpower?reader=${reader}`)
+    const reader_id = document.getElementById('reader').value;
+    fetch(`/api/rfid/rfpower?reader_id=${reader_id}`)
         .then(res => res.json())
         .then(data => {
             if (data.rf_power !== undefined) {
@@ -49,19 +49,19 @@ document.addEventListener('DOMContentLoaded', fetchCurrentRF);
 
 document.getElementById('rfpower-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const reader = parseInt(document.getElementById('reader').value);
+    const reader_id = parseInt(document.getElementById('reader').value);
     const new_rf = parseInt(document.getElementById('new-rf').value);
     const feedback = document.getElementById('rfpower-feedback');
     feedback.innerHTML = '';
     fetch('/api/rfid/rfpower', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reader, rf_power: new_rf })
+        body: JSON.stringify({ reader_id, rf_power: new_rf })
     })
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for Reader ${data.reader}.</div>`;
+            feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for Reader ${data.reader_id}.</div>`;
             fetchCurrentRF();
         } else {
             feedback.innerHTML = `<div class='alert alert-danger'>${data.error || 'Failed to set RF Power.'}</div>`;
