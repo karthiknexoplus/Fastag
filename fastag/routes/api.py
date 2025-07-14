@@ -15,28 +15,39 @@ RFID_IPS = {1: '192.168.1.101', 2: '192.168.1.102'}
 
 class RFIDDevice:
     def __init__(self, ip):
-        self.ip = ip
-        # Load the actual RFID device library
+        self.ip = ip.encode()  # Ensure bytes
+        self.port = 60000
         self.lib = ctypes.cdll.LoadLibrary('./libSWNetClientApi.so')
+        # Set argtypes/restype
+        self.lib.SWNet_OpenDevice.argtypes = [ctypes.c_char_p, ctypes.c_int]
+        self.lib.SWNet_OpenDevice.restype = ctypes.c_int
+        self.lib.SWNet_ReadDeviceOneParam.argtypes = [ctypes.c_ubyte, ctypes.c_ubyte, ctypes.POINTER(ctypes.c_ubyte)]
+        self.lib.SWNet_ReadDeviceOneParam.restype = ctypes.c_int
+        self.lib.SWNet_SetDeviceOneParam.argtypes = [ctypes.c_ubyte, ctypes.c_ubyte, ctypes.c_ubyte]
+        self.lib.SWNet_SetDeviceOneParam.restype = ctypes.c_int
+        self.lib.SWNet_CloseDevice.restype = ctypes.c_int
+
     def __enter__(self):
-        # Connect to device (if needed)
+        # Open device connection
+        if self.lib.SWNet_OpenDevice(self.ip, self.port) == 0:
+            raise Exception("Failed to open device")
         return self
+
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # Disconnect/cleanup (if needed)
-        pass
+        # Close device connection
+        self.lib.SWNet_CloseDevice()
+
     def get_rf_power(self):
         value = ctypes.c_ubyte()
-        # Real hardware call
         result = self.lib.SWNet_ReadDeviceOneParam(0xFF, 0x05, ctypes.byref(value))
         if result == 0:
             return None
         return int(value.value)
+
     def set_rf_power(self, new_rf):
-        # Real hardware call
         result = self.lib.SWNet_SetDeviceOneParam(0xFF, 0x05, new_rf)
         if result == 0:
             return False
-        # Retry up to 5 times to confirm
         for _ in range(5):
             time.sleep(0.5)
             rf_power = self.get_rf_power()
