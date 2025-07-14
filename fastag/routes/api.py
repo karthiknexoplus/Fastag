@@ -28,31 +28,42 @@ class RFIDDevice:
         self.lib.SWNet_CloseDevice.restype = ctypes.c_int
 
     def __enter__(self):
+        logging.info(f"Opening device connection to {self.ip} on port {self.port}")
         # Open device connection
         if self.lib.SWNet_OpenDevice(self.ip, self.port) == 0:
+            logging.error(f"Failed to open device {self.ip}")
             raise Exception("Failed to open device")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        logging.info(f"Closing device connection to {self.ip}")
         # Close device connection
         self.lib.SWNet_CloseDevice()
 
     def get_rf_power(self):
+        logging.info(f"Attempting to get RF power for device {self.ip}")
         value = ctypes.c_ubyte()
         result = self.lib.SWNet_ReadDeviceOneParam(0xFF, 0x05, ctypes.byref(value))
+        logging.info(f"SWNet_ReadDeviceOneParam result: {result}, value: {value.value}")
         if result == 0:
+            logging.error("Failed to read RF Power from device")
             return None
         return int(value.value)
 
     def set_rf_power(self, new_rf):
+        logging.info(f"Attempting to set RF power to {new_rf} for device {self.ip}")
         result = self.lib.SWNet_SetDeviceOneParam(0xFF, 0x05, new_rf)
+        logging.info(f"SWNet_SetDeviceOneParam result: {result}")
         if result == 0:
+            logging.error("Failed to set RF Power on device")
             return False
         for _ in range(5):
             time.sleep(0.5)
             rf_power = self.get_rf_power()
             if rf_power == new_rf:
+                logging.info(f"Confirmed RF Power set to {new_rf} for device {self.ip}")
                 return True
+        logging.error(f"Failed to confirm RF Power set to {new_rf} for device {self.ip}")
         return False
 
 @api.route('/device/lookup', methods=['POST'])
@@ -305,10 +316,7 @@ def barrier_control():
 
 @api.route('/api/rfid/rfpower', methods=['GET', 'POST'])
 def rfid_rfpower():
-    """
-    GET: /api/rfid/rfpower?reader_id=<id>
-    POST: JSON {"reader_id": <id>, "rf_power": 1-30}
-    """
+    logging.info(f"/api/rfid/rfpower endpoint called. Method: {request.method}, Args: {request.args}, JSON: {request.get_json(force=False, silent=True)}")
     db = get_db()
     if request.method == 'GET':
         reader_id = request.args.get('reader_id', type=int)
@@ -325,6 +333,7 @@ def rfid_rfpower():
                     return jsonify({"error": "Failed to read RF Power."}), 500
                 return jsonify({"reader_id": reader_id, "rf_power": rf_power})
         except Exception as e:
+            logging.exception(f"Exception in GET /api/rfid/rfpower: {e}")
             return jsonify({"error": str(e)}), 500
     elif request.method == 'POST':
         data = request.get_json(force=True)
@@ -343,6 +352,7 @@ def rfid_rfpower():
                     return jsonify({"error": "Failed to set or confirm RF Power."}), 500
                 return jsonify({"reader_id": reader_id, "rf_power": new_rf, "status": "success"})
         except Exception as e:
+            logging.exception(f"Exception in POST /api/rfid/rfpower: {e}")
             return jsonify({"error": str(e)}), 500 
 
 @api.route('/status', methods=['GET'])
