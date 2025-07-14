@@ -322,7 +322,7 @@ def barrier_control():
 def rfid_rfpower():
     logging.info(f"/api/rfid/rfpower endpoint called. Method: {request.method}, Args: {request.args}, JSON: {request.get_json(force=False, silent=True)}")
     if request.method == 'GET':
-        reader_id = request.args.get('reader_id', type=int)
+        reader_id = request.args.get('reader', type=int)
         if not reader_id:
             return jsonify({"error": "Missing or invalid reader_id."}), 400
         row = get_db().execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
