@@ -318,7 +318,7 @@ def barrier_control():
 
     return jsonify({"success": True, "activated": relays_to_activate}), 200 
 
-@api.route('/api/rfid/rfpower', methods=['GET', 'POST'])
+@api.route('/rfid/rfpower', methods=['GET', 'POST'])
 def rfid_rfpower():
     logging.info(f"/api/rfid/rfpower endpoint called. Method: {request.method}, Args: {request.args}, JSON: {request.get_json(force=False, silent=True)}")
     db = get_db()
