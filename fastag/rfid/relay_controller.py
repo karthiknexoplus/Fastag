@@ -24,11 +24,11 @@ class RelayController:
         try:
             self.logger.info("Setting up GPIO mode (BCM)...")
             GPIO.setmode(GPIO.BCM)
-            self.logger.info("Configuring relay pins (Active-High)...")
+            self.logger.info("Configuring relay pins (Active-Low, HIGH=OFF, LOW=ON)...")
             for pin in self.pins:
                 GPIO.setup(pin, GPIO.OUT)
-                GPIO.output(pin, False)  # Initialize to OFF state (LOW for active-high)
-            self.logger.info("✓ GPIO initialized successfully (Active-High configuration)")
+                GPIO.output(pin, GPIO.HIGH)  # Set to OFF state (HIGH for active-low)
+            self.logger.info("✓ GPIO initialized successfully (Active-Low configuration)")
         except Exception as e:
             self.logger.error(f"✗ GPIO initialization error: {str(e)}")
     
@@ -75,7 +75,7 @@ class RelayController:
         try:
             self.logger.info("Turning OFF all relays...")
             for pin in self.pins:
-                GPIO.output(pin, False)  # LOW for active-high relays (turns OFF)
+                GPIO.output(pin, GPIO.HIGH)  # HIGH for active-low relays (turns OFF)
             self.logger.info("✓ All relays turned OFF")
         except Exception as e:
             self.logger.error(f"✗ Error turning off all relays: {str(e)}")
