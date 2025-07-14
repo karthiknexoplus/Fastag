@@ -56,6 +56,38 @@
             </div>
         </div>
     </form>
+    <div class="card p-3 shadow-sm border-0 mb-3">
+        <button class="btn btn-outline-secondary btn-sm mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterTab" aria-expanded="false" aria-controls="filterTab">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <div class="collapse" id="filterTab">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="filter_name" value="{{ request.args.get('filter_name', '') }}" class="form-control" placeholder="Name">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">FASTag ID</label>
+                    <input type="text" name="filter_fastag_id" value="{{ request.args.get('filter_fastag_id', '') }}" class="form-control" placeholder="FASTag ID">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Vehicle Number</label>
+                    <input type="text" name="filter_vehicle_number" value="{{ request.args.get('filter_vehicle_number', '') }}" class="form-control" placeholder="Vehicle Number">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" name="filter_contact_number" value="{{ request.args.get('filter_contact_number', '') }}" class="form-control" placeholder="Contact Number">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="filter_address" value="{{ request.args.get('filter_address', '') }}" class="form-control" placeholder="Address">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Apply</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="card p-3 shadow-sm border-0">
         <h5 class="mb-3">
             <i class="fas fa-list fastag-menu-icon"></i><span class="fastag-menu-label">KYC Users List (Total: {{ total_users }})</span>

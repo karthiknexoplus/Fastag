@@ -37,7 +37,30 @@ def kyc_users():
             flash('KYC user added!', 'success')
         except Exception as e:
             flash('Error adding KYC user: ' + str(e), 'danger')
-    users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
+    # Filtering logic
+    filters = []
+    params = []
+    if request.method == 'GET':
+        if request.args.get('filter_name'):
+            filters.append('name LIKE ?')
+            params.append(f"%{request.args.get('filter_name')}%")
+        if request.args.get('filter_fastag_id'):
+            filters.append('fastag_id LIKE ?')
+            params.append(f"%{request.args.get('filter_fastag_id')}%")
+        if request.args.get('filter_vehicle_number'):
+            filters.append('vehicle_number LIKE ?')
+            params.append(f"%{request.args.get('filter_vehicle_number')}%")
+        if request.args.get('filter_contact_number'):
+            filters.append('contact_number LIKE ?')
+            params.append(f"%{request.args.get('filter_contact_number')}%")
+        if request.args.get('filter_address'):
+            filters.append('address LIKE ?')
+            params.append(f"%{request.args.get('filter_address')}%")
+    query = 'SELECT * FROM kyc_users'
+    if filters:
+        query += ' WHERE ' + ' AND '.join(filters)
+    query += ' ORDER BY created_at DESC'
+    users = db.execute(query, params).fetchall()
     total_users = len(users)
     return render_template('kyc_users.html', users=users, total_users=total_users)
 
