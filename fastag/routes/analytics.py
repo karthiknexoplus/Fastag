@@ -156,7 +156,8 @@ def get_analytics_data():
             tvc.model_name,
             tvc.fuel_type,
             l.lane_name,
-            r.reader_ip
+            r.reader_ip,
+            r.type as reader_type
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id

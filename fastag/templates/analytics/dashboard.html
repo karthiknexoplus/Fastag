@@ -696,6 +696,7 @@ function updateTables(data) {
             if (activity[7]) secondaryInfo.push(`Model: ${activity[7]}`);
             if (activity[8]) secondaryInfo.push(`Fuel: ${activity[8]}`);
             if (activity[9]) secondaryInfo.push(`Lane: ${activity[9]}`);
+            if (activity[11]) secondaryInfo.push(`Type: ${activity[11].charAt(0).toUpperCase() + activity[11].slice(1)}`); // Add reader type
             const secondary = secondaryInfo.join(' • ');
             let notFastag = '';
             if (!activity[1].startsWith('34161')) {
