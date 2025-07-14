@@ -664,32 +664,16 @@ function getSecondaryInfo(user) {
     return info.join(' • ');
 }
 
-function getCarImageUrl(brand, modelName) {
-    if (!brand || !modelName) return '/static/logo.png';
-    let normalized = (brand + '_' + modelName)
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .replace(/^_+|_+$/g, '');
-    const exts = ['jpeg', 'jpg', 'png', 'webp', 'avif'];
-    for (let ext of exts) {
-        let url = `/car_images/${normalized}.${ext}`;
-        return url;
-    }
-    return '/static/logo.png';
-}
-
 function updateTables(data) {
     // Update top users table
     const topUsersTable = document.getElementById('top-users-table');
     if (data.top_users) {
         topUsersTable.innerHTML = data.top_users.map(user => {
             const secondary = getSecondaryInfo(user);
-            const brand = user[user.length - 1];
-            const modelName = user[4];
             return `
                 <tr>
                     <td style="width:48px;">
-                        <img src="${getCarImageUrl(brand, modelName)}" alt="Car" style="height:32px;width:auto;border-radius:4px;" onerror="this.onerror=null;this.src='/static/logo.png';">
+                        <img src="/static/logo.png" alt="Car" style="height:32px;width:auto;border-radius:4px;">
                     </td>
                     <td>
                         <div class="fw-bold">${getDisplayName(user)}</div>
@@ -721,13 +705,11 @@ function updateTables(data) {
             if (!activity[1].startsWith('34161')) {
                 notFastag = 'NOT a FASTAG • ';
             }
-            const brand = activity[activity.length - 1];
-            const modelName = activity[7];
             return `
                 <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="d-flex align-items-center">
-                            <img src="${getCarImageUrl(brand, modelName)}" alt="Car" style="height:28px;width:auto;border-radius:4px;margin-right:8px;" onerror="this.onerror=null;this.src='/static/logo.png';">
+                            <img src="/static/logo.png" alt="Car" style="height:28px;width:auto;border-radius:4px;margin-right:8px;">
                             <div>
                                 <div class="fw-bold">${displayName}</div>
                                 <small class="text-muted">${notFastag}Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>

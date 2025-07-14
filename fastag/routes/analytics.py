@@ -105,52 +105,8 @@ def get_analytics_data():
         ORDER BY r.id
     """).fetchall()]
     
-    def guess_brand(model_name):
-        if not model_name:
-            return None
-        model_name = model_name.lower()
-        # Add more mappings as needed
-        mapping = [
-            (['swift', 'dzire', 'baleno', 'alto', 'ciaz', 'ertiga', 'wagon', 'vitara', 's-presso', 'ignis', 'fronx', 'jimny', 'invicto', 'eeco'], 'marutisuzuki'),
-            (['punch', 'nexon', 'safari', 'harrier', 'altroz', 'tigor', 'tiago', 'curvv', 'avinya', 'sierra'], 'tata'),
-            (['q3', 'q5', 'q7', 'q8', 'a4', 'a6', 'a8', 'e-tron', 'rs5', 's5'], 'audi'),
-            (['x1', 'x3', 'x5', 'x7', 'm2', 'm4', 'm5', 'm8', 'z4', 'i4', 'ix1', 'm340i', '3-series', '5-series', '7-series'], 'bmw'),
-            (['creta', 'venue', 'alcazar', 'i20', 'verna', 'tucson', 'exter', 'aura', 'ioniq', 'grand', 'stargazer'], 'hyundai'),
-            (['scorpio', 'thar', 'xuv', 'bolero', 'marazzo', 'pik-up', 'be-6'], 'mahindra'),
-            (['fortuner', 'innova', 'glanza', 'camry', 'hilux', 'hycross', 'rumion', 'vellfire', 'taisor', 'bz4x', 'hyryder', 'land-cruiser'], 'toyota'),
-            (['seltos', 'sonet', 'carens', 'carnival', 'ev6', 'ev9', 'ev5', 'ev3', 'syros', 'tasman'], 'kia'),
-            (['kwid', 'kiger', 'triber', 'duster', 'boreal', 'bigster'], 'renault'),
-            (['slavia', 'kodiaq', 'kushak', 'octavia', 'superb', 'enyaq', 'elroq'], 'skoda'),
-            (['ecosport', 'figo', 'aspire', 'endeavour', 'mustang'], 'ford'),
-            (['compass', 'meridian', 'wrangler', 'avenger', 'grand-cherokee'], 'jeep'),
-            (['astor', 'hector', 'gloster', 'zs', 'comet', 'cyberster', 'majestor', 'windsor'], 'mg'),
-            (['defender', 'discovery', 'range-rover', 'velar', 'evoque', 'sport'], 'landrover'),
-            (['lx', 'es', 'rx', 'nx', 'lm'], 'lexus'),
-            (['phantom', 'cullinan', 'spectre'], 'rolls-royce'),
-            (['bentayga'], 'bentley'),
-            (['ghibli', 'levante', 'quattroporte', 'granturismo', 'grecale', 'mc20'], 'maserati'),
-            (['roma', 'portofino', 'f8', '296', 'purosangue'], 'ferrari'),
-            (['emira', 'eletre', 'emeya'], 'lotus'),
-            (['panamera', 'cayenne', 'macan', '911', 'taycan'], 'porsche'),
-            (['countryman', 'cooper'], 'mini'),
-            (['vantage', 'db11', 'db12', 'dbx', 'vanquish'], 'astonmartin'),
-            (['720s', '750s', 'gt'], 'mclaren'),
-            (['revuelto', 'urus', 'temerario'], 'lamborghini'),
-            (['mu-x', 'v-cross'], 'isuzu'),
-            (['trax', 'gurkha'], 'forcemotors'),
-            (['seal', 'atto', 'emax', 'sealion'], 'byd'),
-            (['basalt', 'aircross', 'c3', 'c5'], 'citroen'),
-            (['magnite', 'qashqai', 'x-trail'], 'nissan'),
-        ]
-        for keywords, brand in mapping:
-            for kw in keywords:
-                if kw in model_name:
-                    return brand
-        return None
-
     # 6. Top Users (Most Active Tags) - with cached vehicle details
-    top_users = []
-    for row in db.execute("""
+    top_users = [list(row) for row in db.execute("""
         SELECT 
             al.tag_id,
             ku.name as user_name,
@@ -169,9 +125,7 @@ def get_analytics_data():
         GROUP BY al.tag_id, ku.name, ku.vehicle_number, tvc.vehicle_number, tvc.owner_name, tvc.model_name, tvc.fuel_type
         ORDER BY total_events DESC
         LIMIT 10
-    """).fetchall():
-        brand = guess_brand(row[4])
-        top_users.append(list(row) + [brand])
+    """).fetchall()]
     
     # 7. Denied Access Analysis (with cached vehicle numbers)
     denied_analysis = [list(row) for row in db.execute("""
@@ -238,8 +192,6 @@ def get_analytics_data():
         # Create new row with IST timestamp
         new_row = list(row)
         new_row[0] = ist_time_str
-        brand = guess_brand(row[7])
-        new_row[7] = brand
         recent_activity.append(new_row)
     
     # 9. Weekly Trends
