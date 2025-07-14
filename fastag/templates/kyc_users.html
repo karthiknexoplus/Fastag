@@ -59,6 +59,12 @@
     <div class="card p-3 shadow-sm border-0">
         <h5 class="mb-3">
             <i class="fas fa-list fastag-menu-icon"></i><span class="fastag-menu-label">KYC Users List (Total: {{ total_users }})</span>
+            <a href="{{ url_for('kyc_users.export_kyc_users_csv') }}" class="btn btn-outline-success btn-sm ms-2" title="Export as CSV">
+                <i class="fas fa-file-csv"></i>
+            </a>
+            <a href="{{ url_for('kyc_users.export_kyc_users_xlsx') }}" class="btn btn-outline-primary btn-sm ms-1" title="Export as Excel">
+                <i class="fas fa-file-excel"></i>
+            </a>
         </h5>
         <div class="table-responsive">
             <table class="table table-bordered align-middle">

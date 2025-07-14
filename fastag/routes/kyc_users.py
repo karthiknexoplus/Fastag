@@ -1,9 +1,15 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify, Response, send_file
 from fastag.utils.db import get_db
 import logging
 import requests
 import re
 import urllib3
+import io
+import csv
+try:
+    import openpyxl
+except ImportError:
+    openpyxl = None
 
 # Disable SSL warnings for this specific API
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -256,3 +262,51 @@ def delete_kyc_user(id):
     logging.info(f"KYC user deleted (ID {id})")
     flash('KYC user deleted!', 'info')
     return redirect(url_for('kyc_users.kyc_users')) 
+
+@kyc_users_bp.route('/kyc_users/export/csv', methods=['GET'])
+def export_kyc_users_csv():
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
+    si = io.StringIO()
+    writer = csv.writer(si)
+    writer.writerow(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At'])
+    for user in users:
+        writer.writerow([
+            user['id'], user['name'], user['fastag_id'], user['vehicle_number'],
+            user['contact_number'], user['address'], user.get('created_at', '')
+        ])
+    output = si.getvalue()
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=kyc_users.csv'}
+    )
+
+@kyc_users_bp.route('/kyc_users/export/xlsx', methods=['GET'])
+def export_kyc_users_xlsx():
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    if openpyxl is None:
+        return 'openpyxl is not installed on the server', 500
+    db = get_db()
+    users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'KYC Users'
+    ws.append(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At'])
+    for user in users:
+        ws.append([
+            user['id'], user['name'], user['fastag_id'], user['vehicle_number'],
+            user['contact_number'], user['address'], user.get('created_at', '')
+        ])
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='kyc_users.xlsx'
+    ) 
