@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify, Response
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify
 from fastag.utils.db import get_db
 import logging
 import requests
@@ -30,7 +30,8 @@ def kyc_users():
         except Exception as e:
             flash('Error adding KYC user: ' + str(e), 'danger')
     users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
-    return render_template('kyc_users.html', users=users)
+    total_users = len(users)
+    return render_template('kyc_users.html', users=users, total_users=total_users)
 
 @kyc_users_bp.route('/api/kyc/fetch-vehicle/<fastag_id>')
 def fetch_vehicle_by_fastag(fastag_id):
@@ -48,13 +49,29 @@ def fetch_vehicle_by_fastag(fastag_id):
         data = response.json()
         
         if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-            # Extract vehicle number from the first tag detail
-            tag_detail = data['npcitagDetails'][0]
-            vehicle_number = tag_detail.get('VRN', '')
+            # Return ONLY ACTIVE tags for this FASTag ID
+            tags = []
+            for tag_detail in data['npcitagDetails']:
+                # Only include tags with status "A" (Active)
+                if tag_detail.get('TagStatus') == 'A':
+                    tags.append({
+                        'tag_id': tag_detail.get('TagID', ''),
+                        'tid': tag_detail.get('TID', ''),
+                        'vehicle_number': tag_detail.get('VRN', ''),
+                        'status': tag_detail.get('TagStatus', ''),
+                        'bank_name': tag_detail.get('BankId', ''),
+                        'issue_date': tag_detail.get('IssueDate', ''),
+                        'exception_code': tag_detail.get('ExceptionCode', ''),
+                        'com_vehicle': tag_detail.get('ComVehicle', ''),
+                        'vehicle_class': tag_detail.get('VehicleClass', ''),
+                        'avc': tag_detail.get('AVC', '')
+                    })
+            
             return jsonify({
                 'success': True,
-                'vehicle_number': vehicle_number,
-                'fastag_id': fastag_id
+                'fastag_id': fastag_id,
+                'tags': tags,
+                'total_tags': len(tags)
             })
         else:
             return jsonify({
@@ -85,13 +102,29 @@ def fetch_fastag_by_vehicle(vehicle_number):
         data = response.json()
         
         if data.get('ErrorMessage') == 'NONE' and data.get('npcitagDetails'):
-            # Extract FASTag ID from the first tag detail
-            tag_detail = data['npcitagDetails'][0]
-            fastag_id = tag_detail.get('TagID', '')
+            # Return ONLY ACTIVE FASTag IDs for this vehicle number
+            tags = []
+            for tag_detail in data['npcitagDetails']:
+                # Only include tags with status "A" (Active)
+                if tag_detail.get('TagStatus') == 'A':
+                    tags.append({
+                        'tag_id': tag_detail.get('TagID', ''),
+                        'tid': tag_detail.get('TID', ''),
+                        'vehicle_number': tag_detail.get('VRN', ''),
+                        'status': tag_detail.get('TagStatus', ''),
+                        'bank_name': tag_detail.get('BankId', ''),
+                        'issue_date': tag_detail.get('IssueDate', ''),
+                        'exception_code': tag_detail.get('ExceptionCode', ''),
+                        'com_vehicle': tag_detail.get('ComVehicle', ''),
+                        'vehicle_class': tag_detail.get('VehicleClass', ''),
+                        'avc': tag_detail.get('AVC', '')
+                    })
+            
             return jsonify({
                 'success': True,
-                'fastag_id': fastag_id,
-                'vehicle_number': vehicle_number
+                'vehicle_number': vehicle_number,
+                'tags': tags,
+                'total_tags': len(tags)
             })
         else:
             return jsonify({
@@ -106,7 +139,7 @@ def fetch_fastag_by_vehicle(vehicle_number):
             'error': f"API request failed: {str(e)}"
         }), 400
 
-@kyc_users_bp.route('push/api/kyc_users', methods=['POST'])
+@kyc_users_bp.route('/api/kyc_users', methods=['POST'])
 def api_add_kyc_user():
     """API endpoint to add a KYC user (for mobile app)"""
     from fastag.utils.db import get_db
@@ -223,29 +256,3 @@ def delete_kyc_user(id):
     logging.info(f"KYC user deleted (ID {id})")
     flash('KYC user deleted!', 'info')
     return redirect(url_for('kyc_users.kyc_users')) 
-
-@kyc_users_bp.route('/kyc_users/export', methods=['GET'])
-def export_kyc_users():
-    if 'user' not in session:
-        return redirect(url_for('auth.login'))
-    db = get_db()
-    users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
-    def generate():
-        import csv
-        from io import StringIO
-        si = StringIO()
-        writer = csv.writer(si)
-        writer.writerow(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At'])
-        for user in users:
-            writer.writerow([
-                user['id'], user['name'], user['fastag_id'], user['vehicle_number'],
-                user['contact_number'], user['address'], user.get('created_at', '')
-            ])
-        return si.getvalue()
-    return Response(
-        generate(),
-        mimetype='text/csv',
-        headers={
-            'Content-Disposition': 'attachment; filename=kyc_users.csv'
-        }
-    ) 
