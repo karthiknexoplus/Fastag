@@ -254,8 +254,7 @@ def can_insert_db(tag_id, lane_id):
     now = time.time()
     key = (tag_id, lane_id)
     info = last_db_insert[key]
-    if info['count'] >= MAX_DB_RECORDS:
-        return False
+    # Removed max records check
     if now - info['time'] < COOLDOWN_SECONDS:
         return False
     return True

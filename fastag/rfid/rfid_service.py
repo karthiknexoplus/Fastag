@@ -621,8 +621,7 @@ class RFIDService:
         now = time.time()
         key = (tag_id, lane_id)
         info = self.last_db_insert[key]
-        if info['count'] >= self.MAX_DB_RECORDS:
-            return False
+        # Removed max records check
         if now - info['time'] < self.COOLDOWN_SECONDS:
             return False
         return True
