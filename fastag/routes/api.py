@@ -66,6 +66,10 @@ class RFIDDevice:
         logging.error(f"Failed to confirm RF Power set to {new_rf} for device {self.ip}")
         return False
 
+def strip_leading_zeros_ip(ip):
+    # Split by '.', remove leading zeros from each octet, and rejoin
+    return '.'.join(str(int(part)) for part in ip.split('.'))
+
 @api.route('/device/lookup', methods=['POST'])
 def device_lookup():
     """
@@ -325,7 +329,7 @@ def rfid_rfpower():
         row = db.execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
         if not row:
             return jsonify({"error": "Reader not found."}), 404
-        reader_ip = row['reader_ip']
+        reader_ip = strip_leading_zeros_ip(row['reader_ip'])
         try:
             with RFIDDevice(reader_ip) as dev:
                 rf_power = dev.get_rf_power()
@@ -344,7 +348,7 @@ def rfid_rfpower():
         row = db.execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
         if not row:
             return jsonify({"error": "Reader not found."}), 404
-        reader_ip = row['reader_ip']
+        reader_ip = strip_leading_zeros_ip(row['reader_ip'])
         try:
             with RFIDDevice(reader_ip) as dev:
                 success = dev.set_rf_power(new_rf)
