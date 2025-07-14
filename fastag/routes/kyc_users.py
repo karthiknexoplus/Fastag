@@ -6,6 +6,8 @@ import re
 import urllib3
 import io
 import csv
+import pytz
+from datetime import datetime
 try:
     import openpyxl
 except ImportError:
@@ -271,12 +273,24 @@ def export_kyc_users_csv():
     users = db.execute('SELECT * FROM kyc_users ORDER BY created_at DESC').fetchall()
     si = io.StringIO()
     writer = csv.writer(si)
-    writer.writerow(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At'])
+    writer.writerow(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At (IST)'])
+    utc = pytz.UTC
+    ist = pytz.timezone('Asia/Kolkata')
     for user in users:
         user_dict = dict(user)
+        created_at_utc = user_dict.get('created_at', '')
+        created_at_ist = ''
+        if created_at_utc:
+            try:
+                dt_utc = datetime.strptime(created_at_utc, '%Y-%m-%d %H:%M:%S')
+                dt_utc = utc.localize(dt_utc)
+                dt_ist = dt_utc.astimezone(ist)
+                created_at_ist = dt_ist.strftime('%d/%m/%Y %H:%M')
+            except Exception:
+                created_at_ist = created_at_utc
         writer.writerow([
             user_dict.get('id', ''), user_dict.get('name', ''), user_dict.get('fastag_id', ''), user_dict.get('vehicle_number', ''),
-            user_dict.get('contact_number', ''), user_dict.get('address', ''), user_dict.get('created_at', '')
+            user_dict.get('contact_number', ''), user_dict.get('address', ''), created_at_ist
         ])
     output = si.getvalue()
     return Response(
@@ -296,12 +310,24 @@ def export_kyc_users_xlsx():
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'KYC Users'
-    ws.append(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At'])
+    ws.append(['ID', 'Name', 'FASTag ID', 'Vehicle Number', 'Contact Number', 'Address', 'Created At (IST)'])
+    utc = pytz.UTC
+    ist = pytz.timezone('Asia/Kolkata')
     for user in users:
         user_dict = dict(user)
+        created_at_utc = user_dict.get('created_at', '')
+        created_at_ist = ''
+        if created_at_utc:
+            try:
+                dt_utc = datetime.strptime(created_at_utc, '%Y-%m-%d %H:%M:%S')
+                dt_utc = utc.localize(dt_utc)
+                dt_ist = dt_utc.astimezone(ist)
+                created_at_ist = dt_ist.strftime('%d/%m/%Y %H:%M')
+            except Exception:
+                created_at_ist = created_at_utc
         ws.append([
             user_dict.get('id', ''), user_dict.get('name', ''), user_dict.get('fastag_id', ''), user_dict.get('vehicle_number', ''),
-            user_dict.get('contact_number', ''), user_dict.get('address', ''), user_dict.get('created_at', '')
+            user_dict.get('contact_number', ''), user_dict.get('address', ''), created_at_ist
         ])
     output = io.BytesIO()
     wb.save(output)
