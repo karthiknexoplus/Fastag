@@ -309,6 +309,7 @@
                     <table class="table table-modern">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>User</th>
                                 <th>Vehicle</th>
                                 <th>Events</th>
@@ -664,6 +665,18 @@ function getSecondaryInfo(user) {
 }
 
 function updateTables(data) {
+    // Add this function for mapping model name to image URL
+    function getCarImageUrl(modelName) {
+        if (!modelName) return '/static/logo.png'; // fallback image
+        let normalized = modelName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        const exts = ['jpeg', 'jpg', 'png', 'webp', 'avif'];
+        for (let ext of exts) {
+            let url = `/car_images/${normalized}.${ext}`;
+            // We optimistically return the first possible URL; browser will fallback if 404
+            return url;
+        }
+        return '/static/logo.png';
+    }
     // Update top users table
     const topUsersTable = document.getElementById('top-users-table');
     if (data.top_users) {
@@ -671,6 +684,9 @@ function updateTables(data) {
             const secondary = getSecondaryInfo(user);
             return `
                 <tr>
+                    <td style="width:48px;">
+                        <img src="${getCarImageUrl(user[4])}" alt="Car" style="height:32px;width:auto;border-radius:4px;" onerror="this.onerror=null;this.src='/static/logo.png';">
+                    </td>
                     <td>
                         <div class="fw-bold">${getDisplayName(user)}</div>
                         <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
@@ -691,29 +707,26 @@ function updateTables(data) {
     const recentActivity = document.getElementById('recent-activity');
     if (data.recent_activity) {
         recentActivity.innerHTML = data.recent_activity.map(activity => {
-            // [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip]
             const displayName = activity[5] || activity[7] || activity[6] || activity[4] || activity[1] || 'Unknown';
-            
-            // Build comprehensive secondary info
             const secondaryInfo = [];
-            if (activity[6]) secondaryInfo.push(`Owner: ${activity[6]}`); // owner_name
-            if (activity[7]) secondaryInfo.push(`Model: ${activity[7]}`); // model_name
-            if (activity[8]) secondaryInfo.push(`Fuel: ${activity[8]}`); // fuel_type
-            if (activity[9]) secondaryInfo.push(`Lane: ${activity[9]}`); // lane_name
+            if (activity[6]) secondaryInfo.push(`Owner: ${activity[6]}`);
+            if (activity[7]) secondaryInfo.push(`Model: ${activity[7]}`);
+            if (activity[8]) secondaryInfo.push(`Fuel: ${activity[8]}`);
+            if (activity[9]) secondaryInfo.push(`Lane: ${activity[9]}`);
             const secondary = secondaryInfo.join(' • ');
-
-            // If tag_id does not start with 34161, add NOT a FASTAG
             let notFastag = '';
             if (!activity[1].startsWith('34161')) {
                 notFastag = 'NOT a FASTAG • ';
             }
-            
             return `
                 <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="fw-bold">${displayName}</div>
-                            <small class="text-muted">${notFastag}Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
+                        <div class="d-flex align-items-center">
+                            <img src="${getCarImageUrl(activity[7])}" alt="Car" style="height:28px;width:auto;border-radius:4px;margin-right:8px;" onerror="this.onerror=null;this.src='/static/logo.png';">
+                            <div>
+                                <div class="fw-bold">${displayName}</div>
+                                <small class="text-muted">${notFastag}Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
+                            </div>
                         </div>
                         <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
                             ${activity[2].toUpperCase()}
