@@ -17,7 +17,7 @@ class RFIDDevice:
     def __init__(self, ip):
         self.ip = ip.encode()  # Ensure bytes
         self.port = 60000
-        self.lib = ctypes.cdll.LoadLibrary('./libSWNetClientApi.so')
+        self.lib = ctypes.cdll.LoadLibrary('fastag/rfid/libSWNetClientApi.so')
         # Set argtypes/restype
         self.lib.SWNet_OpenDevice.argtypes = [ctypes.c_char_p, ctypes.c_int]
         self.lib.SWNet_OpenDevice.restype = ctypes.c_int
