@@ -309,7 +309,6 @@
                     <table class="table table-modern">
                         <thead>
                             <tr>
-                                <th></th>
                                 <th>User</th>
                                 <th>Vehicle</th>
                                 <th>Events</th>
@@ -672,9 +671,6 @@ function updateTables(data) {
             const secondary = getSecondaryInfo(user);
             return `
                 <tr>
-                    <td style="width:48px;">
-                        <img src="/static/logo.png" alt="Car" style="height:32px;width:auto;border-radius:4px;">
-                    </td>
                     <td>
                         <div class="fw-bold">${getDisplayName(user)}</div>
                         <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
@@ -708,12 +704,9 @@ function updateTables(data) {
             return `
                 <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div class="d-flex align-items-center">
-                            <img src="/static/logo.png" alt="Car" style="height:28px;width:auto;border-radius:4px;margin-right:8px;">
-                            <div>
-                                <div class="fw-bold">${displayName}</div>
-                                <small class="text-muted">${notFastag}Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
-                            </div>
+                        <div>
+                            <div class="fw-bold">${displayName}</div>
+                            <small class="text-muted">${notFastag}Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
                         </div>
                         <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
                             ${activity[2].toUpperCase()}
