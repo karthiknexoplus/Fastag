@@ -321,43 +321,47 @@ def barrier_control():
 @api.route('/rfid/rfpower', methods=['GET', 'POST'])
 def rfid_rfpower():
     logging.info(f"/api/rfid/rfpower endpoint called. Method: {request.method}, Args: {request.args}, JSON: {request.get_json(force=False, silent=True)}")
-    db = get_db()
-    if request.method == 'GET':
-        reader_id = request.args.get('reader_id', type=int)
-        if not reader_id:
-            return jsonify({"error": "Missing or invalid reader_id."}), 400
-        row = db.execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
-        if not row:
-            return jsonify({"error": "Reader not found."}), 404
-        reader_ip = strip_leading_zeros_ip(row['reader_ip'])
-        try:
-            with RFIDDevice(reader_ip) as dev:
-                rf_power = dev.get_rf_power()
-                if rf_power is None:
-                    return jsonify({"error": "Failed to read RF Power."}), 500
-                return jsonify({"reader_id": reader_id, "rf_power": rf_power})
-        except Exception as e:
-            logging.exception(f"Exception in GET /api/rfid/rfpower: {e}")
-            return jsonify({"error": str(e)}), 500
-    elif request.method == 'POST':
-        data = request.get_json(force=True)
-        reader_id = data.get('reader_id')
-        new_rf = data.get('rf_power')
-        if not reader_id or not isinstance(new_rf, int) or not (1 <= new_rf <= 30):
-            return jsonify({"error": "Invalid input. 'reader_id' and 'rf_power' (1-30) required."}), 400
-        row = db.execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
-        if not row:
-            return jsonify({"error": "Reader not found."}), 404
-        reader_ip = strip_leading_zeros_ip(row['reader_ip'])
-        try:
-            with RFIDDevice(reader_ip) as dev:
-                success = dev.set_rf_power(new_rf)
-                if not success:
-                    return jsonify({"error": "Failed to set or confirm RF Power."}), 500
-                return jsonify({"reader_id": reader_id, "rf_power": new_rf, "status": "success"})
-        except Exception as e:
-            logging.exception(f"Exception in POST /api/rfid/rfpower: {e}")
-            return jsonify({"error": str(e)}), 500 
+    try:
+        if request.method == 'GET':
+            # Accept both 'reader_id' and 'reader' as valid parameters
+            reader_id = request.args.get('reader_id') or request.args.get('reader')
+            if not reader_id:
+                return jsonify({"error": "Missing or invalid reader_id."}), 400
+            row = get_db().execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
+            if not row:
+                return jsonify({"error": "Reader not found."}), 404
+            reader_ip = strip_leading_zeros_ip(row['reader_ip'])
+            try:
+                with RFIDDevice(reader_ip) as dev:
+                    rf_power = dev.get_rf_power()
+                    if rf_power is None:
+                        return jsonify({"error": "Failed to read RF Power."}), 500
+                    return jsonify({"reader_id": reader_id, "rf_power": rf_power})
+            except Exception as e:
+                logging.exception(f"Exception in GET /api/rfid/rfpower: {e}")
+                return jsonify({"error": str(e)}), 500
+        elif request.method == 'POST':
+            data = request.get_json(force=False, silent=True) or {}
+            # Accept both 'reader_id' and 'reader' as valid keys
+            reader_id = data.get('reader_id') or data.get('reader')
+            if not reader_id:
+                return jsonify({"error": "Missing or invalid reader_id."}), 400
+            new_rf = data.get('rf_power')
+            if not isinstance(new_rf, int) or not (1 <= new_rf <= 30):
+                return jsonify({"error": "Invalid input. 'rf_power' (1-30) required."}), 400
+            row = get_db().execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
+            if not row:
+                return jsonify({"error": "Reader not found."}), 404
+            reader_ip = strip_leading_zeros_ip(row['reader_ip'])
+            try:
+                with RFIDDevice(reader_ip) as dev:
+                    success = dev.set_rf_power(new_rf)
+                    if not success:
+                        return jsonify({"error": "Failed to set or confirm RF Power."}), 500
+                    return jsonify({"reader_id": reader_id, "rf_power": new_rf, "status": "success"})
+            except Exception as e:
+                logging.exception(f"Exception in POST /api/rfid/rfpower: {e}")
+                return jsonify({"error": str(e)}), 500 
 
 @api.route('/status', methods=['GET'])
 def system_status():
