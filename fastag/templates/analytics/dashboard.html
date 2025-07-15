@@ -149,6 +149,25 @@
     .feed-filter {
         margin-bottom: 10px;
     }
+    .feed-equal-height {
+        height: 480px;
+        max-height: 480px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    @media (max-width: 1200px) {
+        .feed-equal-height {
+            height: 400px;
+            max-height: 400px;
+        }
+    }
+    @media (max-width: 768px) {
+        .feed-equal-height {
+            height: 320px;
+            max-height: 320px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -303,12 +322,12 @@
     <!-- Tables Row -->
     <div class="row">
         <div class="col-xl-4 mb-4">
-            <div class="chart-container">
+            <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-users text-primary me-2"></i>
                     Top Active Users
                 </h5>
-                <div class="table-responsive">
+                <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                     <table class="table table-modern">
                         <thead>
                             <tr>
@@ -328,7 +347,7 @@
             </div>
         </div>
         <div class="col-xl-4 mb-4">
-            <div class="chart-container">
+            <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-exclamation-triangle text-primary me-2"></i>
                     Recent Activity
@@ -336,13 +355,13 @@
                 <div class="feed-filter mb-2">
                     <input type="text" class="form-control form-control-sm" placeholder="Filter by any field..." oninput="filterFeed('recent-activity', this.value)">
                 </div>
-                <div id="recent-activity" style="max-height: 400px; overflow-y: auto;">
+                <div id="recent-activity" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
         </div>
         <div class="col-xl-4 mb-4">
-            <div class="chart-container">
+            <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-ban text-danger me-2"></i>
                     Denied FASTag (Last 24h, Unique)
@@ -350,7 +369,7 @@
                 <div class="feed-filter mb-2">
                     <input type="text" class="form-control form-control-sm" placeholder="Filter by any field..." oninput="filterFeed('denied-fastag-activity-feed', this.value)">
                 </div>
-                <div id="denied-fastag-activity-feed" style="max-height: 400px; overflow-y: auto;">
+                <div id="denied-fastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
@@ -360,7 +379,7 @@
     <!-- Denied Non-FASTag Feed Row -->
     <div class="row">
         <div class="col-xl-4 offset-xl-8 mb-4">
-            <div class="chart-container">
+            <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-ban text-warning me-2"></i>
                     Denied Non-FASTag (Last 24h, Unique)
@@ -368,7 +387,7 @@
                 <div class="feed-filter mb-2">
                     <input type="text" class="form-control form-control-sm" placeholder="Filter by any field..." oninput="filterFeed('denied-nonfastag-activity-feed', this.value)">
                 </div>
-                <div id="denied-nonfastag-activity-feed" style="max-height: 400px; overflow-y: auto;">
+                <div id="denied-nonfastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
