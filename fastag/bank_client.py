@@ -443,8 +443,8 @@ if __name__ == '__main__':
     # Use realistic test data for vehicle_info
     vehicle_info = {
         'TID': '',
-        'vehicleRegNo': '',
-        'tagId': '34161FA8203289724C58D6A0'
+        'vehicleRegNo': 'KA04MJ6369',
+        'tagId': ''
     }
     # Use numeric string for msgId and txnId as in ICD sample
     numeric_id = '00000000000000000314'
