@@ -203,6 +203,9 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     vehicle.set('TID', vehicle_info.get('TID', ''))
     vehicle.set('vehicleRegNo', vehicle_info.get('vehicleRegNo', ''))
     vehicle.set('tagId', vehicle_info.get('tagId', ''))
+    # Add optional Meta element with a Tag child
+    meta = ET.SubElement(root, 'Meta')
+    ET.SubElement(meta, 'Tag', {'name': 'test', 'value': 'testval'})
     # Add MessageSignature and licensekey as last children of root
     ET.SubElement(root, 'MessageSignature').text = ''  # Placeholder, can be filled with signature if needed
     ET.SubElement(root, 'licensekey').text = ''
