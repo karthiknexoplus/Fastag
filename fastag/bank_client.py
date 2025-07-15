@@ -241,7 +241,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
     print('Request XML (unsigned):')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("DEBUG: Skipping digital signature (not required by bank).")
-    url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
+    url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/etc/ReqTagDetails/1.0')
     headers = {'Content-Type': 'application/xml'}
     response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
     try:
@@ -437,7 +437,7 @@ if __name__ == '__main__':
     print('--- Tag Details API Test ---')
     print("DEBUG: Running latest bank_client.py")
     # Set the UAT endpoint for IDFC
-    os.environ['BANK_API_TAGDETAILS_URL'] = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+    os.environ['BANK_API_TAGDETAILS_URL'] = 'https://etolluatapi.idfcfirstbank.com/etc/ReqTagDetails/1.0'
     orgId = 'PGSH'
     plazaId = '712764'
     agencyId = 'TCABO'
