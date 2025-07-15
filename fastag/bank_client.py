@@ -233,7 +233,7 @@ def sign_xml(xml_data):
 
 def send_tag_details(msgId, orgId, vehicle_info):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    txnId = str(uuid.uuid4())[:22]
+    txnId = msgId  # Use the same numeric string for txnId as in ICD sample
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
     print('Request XML (unsigned):')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
@@ -442,9 +442,13 @@ if __name__ == '__main__':
     plazaGeoCode = '11.0185,76.9778'
     # Use realistic test data for vehicle_info
     vehicle_info = {
+        'TID': '',
+        'vehicleRegNo': '',
         'tagId': '34161FA8203289724C58D6A0'
     }
-    msgId = str(uuid.uuid4())[:12]
+    # Use numeric string for msgId and txnId as in ICD sample
+    numeric_id = '00000000000000000314'
+    msgId = numeric_id
     try:
         response = send_tag_details(msgId, orgId, vehicle_info)
         print('Response:')
