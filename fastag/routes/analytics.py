@@ -256,11 +256,11 @@ def get_analytics_data():
         new_row[2] = ist_time_str
         suspicious_activity.append(new_row)
     
-    # --- FASTag vs Non-FASTag (today) ---
+    # --- FASTag vs Non-FASTag (today, unique tags) ---
     fastag_vs_nonfastag_row = db.execute('''
         SELECT
-            SUM(CASE WHEN tag_id LIKE '34161%' THEN 1 ELSE 0 END) as fastag_count,
-            SUM(CASE WHEN tag_id NOT LIKE '34161%' THEN 1 ELSE 0 END) as nonfastag_count
+            COUNT(DISTINCT CASE WHEN tag_id LIKE '34161%' THEN tag_id END) as fastag_count,
+            COUNT(DISTINCT CASE WHEN tag_id NOT LIKE '34161%' THEN tag_id END) as nonfastag_count
         FROM access_logs
         WHERE DATE(timestamp) = DATE('now')
     ''').fetchone()
