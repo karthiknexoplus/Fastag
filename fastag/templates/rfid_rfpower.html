@@ -33,7 +33,7 @@
 <script>
 function fetchCurrentRF() {
     const reader_id = document.getElementById('reader').value;
-    fetch(`/api/rfid/rfpower?reader_id=${reader_id}`)
+    fetch(`/api/rfid/rfpower?reader=${reader_id}`)
         .then(res => res.json())
         .then(data => {
             if (data.rf_power !== undefined) {
