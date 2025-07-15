@@ -336,6 +336,20 @@
             </div>
         </div>
     </div>
+    <!-- Denied FASTag (Last 24h, Unique) Section -->
+    <div class="row">
+        <div class="col-xl-12 mb-4">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-ban text-danger me-2"></i>
+                    Denied FASTag (Last 24 Hours, Unique)
+                </h5>
+                <div id="denied-fastag-unique-section">
+                    <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Reader Health -->
     <div class="row">
@@ -377,14 +391,6 @@
 let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart;
 
 // Initialize charts
-document.addEventListener('DOMContentLoaded', function() {
-    initializeCharts();
-    loadAnalyticsData();
-    
-    // Auto-refresh every 30 seconds
-    setInterval(loadAnalyticsData, 30000);
-});
-
 function initializeCharts() {
     // Hourly Chart
     const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
@@ -780,6 +786,51 @@ function updateTables(data) {
         }).join('');
     }
 
+    // Update denied FASTag unique section
+    const deniedFastagUniqueSection = document.getElementById('denied-fastag-unique-section');
+    if (data.denied_fastag_unique) {
+        deniedFastagUniqueSection.innerHTML = data.denied_fastag_unique.map(item => {
+            // item: [tag_id, vehicle_number, owner_name, model_name, fuel_type, timestamp, reason]
+            let fastagFeaturesEnabled = window.fastagFeaturesEnabled;
+            let vehicleNumber = 'N/A';
+            if (item[1]) {
+                vehicleNumber = item[1];
+            } else if (!fastagFeaturesEnabled) {
+                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the vehicle number</span>";
+            }
+            let modelName = 'N/A';
+            if (item[3]) {
+                modelName = item[3];
+            } else if (!fastagFeaturesEnabled) {
+                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the model</span>";
+            }
+            let ownerName = 'N/A';
+            if (item[2]) {
+                ownerName = item[2];
+            } else if (!fastagFeaturesEnabled) {
+                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the owner</span>";
+            }
+            let secondaryInfo = [];
+            if (modelName !== 'N/A') secondaryInfo.push(`Model: ${modelName}`);
+            if (ownerName !== 'N/A') secondaryInfo.push(`Owner: ${ownerName}`);
+            if (item[4]) secondaryInfo.push(`Fuel: ${item[4]}`);
+            if (item[6]) secondaryInfo.push(`Reason: ${item[6]}`);
+            const secondary = secondaryInfo.join(' • ');
+            return `
+                <div class="activity-item denied">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">${vehicleNumber}</div>
+                            <small class="text-muted">Tag: ${item[0]}${secondary ? ' • ' + secondary : ''}</small>
+                        </div>
+                        <span class="status-badge status-denied">Denied</span>
+                    </div>
+                    <small class="text-muted">${new Date(item[5]).toLocaleString()}</small>
+                </div>
+            `;
+        }).join('');
+    }
+
     // Update reader health table
     const readerHealthTable = document.getElementById('reader-health-table');
     if (data.reader_health) {
@@ -802,6 +853,32 @@ function updateTables(data) {
             `;
         }).join('');
     }
+}
+
+function loadDeniedFastagUnique() {
+    const section = document.getElementById('denied-fastag-unique-section');
+    section.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    fetch('/analytics/api/denied-fastag-unique')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                section.innerHTML = `<div class='text-danger'>${data.error}</div>`;
+                return;
+            }
+            if (!data.results || data.results.length === 0) {
+                section.innerHTML = '<div class="text-center text-muted">No denied FASTag tags in the last 24 hours.</div>';
+                return;
+            }
+            let html = `<div class='table-responsive'><table class='table table-modern table-sm'><thead><tr><th>Tag ID</th><th>Vehicle Number</th><th>Owner</th><th>Model</th><th>Fuel</th><th>Denied At</th><th>Reason</th></tr></thead><tbody>`;
+            for (const item of data.results) {
+                html += `<tr><td>${item.tag_id}</td><td>${item.vehicle_number || '-'}</td><td>${item.owner_name || '-'}</td><td>${item.model_name || '-'}</td><td>${item.fuel_type || '-'}</td><td>${item.timestamp}</td><td>${item.reason || '-'}</td></tr>`;
+            }
+            html += '</tbody></table></div>';
+            section.innerHTML = html;
+        })
+        .catch(err => {
+            section.innerHTML = `<div class='text-danger'>Error loading denied FASTag data</div>`;
+        });
 }
 
 function refreshData() {
