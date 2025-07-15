@@ -678,7 +678,7 @@ function updateTables(data) {
             } else if (fastagFeaturesEnabled && user[3]) {
                 vehicleNumber = user[3];
             } else if (!fastagFeaturesEnabled) {
-                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee Technology Pvt Ltd for pricing to view the vehicle number<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
+                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the vehicle number<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
             }
             // Model logic: show KYC, else cache if enabled
             let modelName = 'N/A';
@@ -687,7 +687,7 @@ function updateTables(data) {
             } else if (fastagFeaturesEnabled && user[5]) {
                 modelName = user[5];
             } else if (!fastagFeaturesEnabled) {
-                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee Technology Pvt Ltd for pricing to view the model<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
+                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the model<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
             }
             // Owner logic: show KYC, else cache if enabled
             let ownerName = 'N/A';
@@ -696,7 +696,7 @@ function updateTables(data) {
             } else if (fastagFeaturesEnabled && user[4]) {
                 ownerName = user[4];
             } else if (!fastagFeaturesEnabled) {
-                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee Technology Pvt Ltd for pricing to view the owner<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
+                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the owner<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
             }
             // Compose secondary info
             let secondary = [modelName, ownerName, user[6] ? user[6] : ''].filter(Boolean).join(' • ');
@@ -730,7 +730,7 @@ function updateTables(data) {
             if (isGranted && activity[12]) {
                 vehicleNumber = activity[12];
             } else if (!fastagFeaturesEnabled) {
-                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee Technology Pvt Ltd for pricing to view the vehicle number<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
+                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the vehicle number<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
             } else if (activity[5]) {
                 vehicleNumber = activity[5];
             }
@@ -739,7 +739,7 @@ function updateTables(data) {
             if (isGranted && activity[12] && activity[7]) {
                 modelName = activity[7];
             } else if (!fastagFeaturesEnabled) {
-                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee Technology Pvt Ltd for pricing to view the model<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
+                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the model<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
             } else if (activity[7]) {
                 modelName = activity[7];
             }
@@ -748,7 +748,7 @@ function updateTables(data) {
             if (isGranted && activity[12] && activity[6]) {
                 ownerName = activity[6];
             } else if (!fastagFeaturesEnabled) {
-                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee Technology Pvt Ltd for pricing to view the owner<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
+                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the owner<br/>Mobile: 9500850000<br/>Website: <a href='https://www.onebee.in' target='_blank'>www.onebee.in</a></span>";
             } else if (activity[6]) {
                 ownerName = activity[6];
             }
@@ -850,8 +850,8 @@ function showCurrentOccupancyDetails() {
                                 ${data.vehicles.map(vehicle => `
                                     <tr>
                                         <td>${vehicle.vehicle_number || vehicle.tag_id}</td>
-                                        <td>${fastagFeaturesEnabled ? (vehicle.owner_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee Technology Pvt Ltd for pricing</span>'}</td>
-                                        <td>${fastagFeaturesEnabled ? (vehicle.model_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee Technology Pvt Ltd for pricing</span>'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.owner_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee for pricing</span>'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.model_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee for pricing</span>'}</td>
                                         <td>${vehicle.entry_time}</td>
                                         <td>${vehicle.duration}</td>
                                     </tr>
@@ -898,8 +898,8 @@ function showTodayGrantedDetails() {
                                 ${data.vehicles.map(vehicle => `
                                     <tr>
                                         <td>${vehicle.vehicle_number || vehicle.tag_id}</td>
-                                        <td>${fastagFeaturesEnabled ? (vehicle.owner_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee Technology Pvt Ltd for pricing</span>'}</td>
-                                        <td>${fastagFeaturesEnabled ? (vehicle.model_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee Technology Pvt Ltd for pricing</span>'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.owner_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee for pricing</span>'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.model_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Onebee for pricing</span>'}</td>
                                         <td>${vehicle.entry_time}</td>
                                         <td>${vehicle.lane_name || 'N/A'}</td>
                                     </tr>
