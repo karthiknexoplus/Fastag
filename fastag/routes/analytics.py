@@ -1858,3 +1858,64 @@ def total_events_today_details():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@analytics_bp.route('/api/denied-fastag-activity-feed')
+def denied_fastag_activity_feed():
+    """Return a feed of unique denied FASTag events (last 24h), deduped by tag_id or vehicle_number, for activity feed display."""
+    try:
+        db = get_db()
+        denied_rows = db.execute('''
+            SELECT 
+                al.tag_id,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+                COALESCE(ku.name, tvc.owner_name) as owner_name,
+                tvc.model_name,
+                tvc.fuel_type,
+                al.timestamp,
+                al.reason
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+            WHERE al.access_result = 'denied'
+                AND al.tag_id LIKE '34161%'
+                AND al.timestamp >= datetime('now', '-24 hours')
+            ORDER BY al.timestamp DESC
+        ''').fetchall()
+        seen_tag_ids = set()
+        seen_vehicle_numbers = set()
+        unique_entries = []
+        for row in denied_rows:
+            tag_id = row[0]
+            vehicle_number = row[1]
+            if tag_id in seen_tag_ids or (vehicle_number and vehicle_number in seen_vehicle_numbers):
+                continue
+            seen_tag_ids.add(tag_id)
+            if vehicle_number:
+                seen_vehicle_numbers.add(vehicle_number)
+            unique_entries.append({
+                'tag_id': tag_id,
+                'vehicle_number': vehicle_number,
+                'owner_name': row[2],
+                'model_name': row[3],
+                'fuel_type': row[4],
+                'timestamp': row[5],
+                'reason': row[6],
+            })
+        # Convert timestamps to IST
+        import pytz
+        from datetime import datetime
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        for entry in unique_entries:
+            timestamp_str = entry['timestamp']
+            if 'T' in timestamp_str and 'Z' in timestamp_str:
+                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif 'T' in timestamp_str:
+                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+            else:
+                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                utc_time = utc_time.replace(tzinfo=pytz.UTC)
+            ist_time = utc_time.astimezone(ist_tz)
+            entry['timestamp'] = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        return jsonify({'results': unique_entries, 'count': len(unique_entries)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

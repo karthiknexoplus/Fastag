@@ -299,7 +299,7 @@
 
     <!-- Tables Row -->
     <div class="row">
-        <div class="col-xl-6 mb-4">
+        <div class="col-xl-4 mb-4">
             <div class="chart-container">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-users text-primary me-2"></i>
@@ -324,13 +324,24 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-6 mb-4">
+        <div class="col-xl-4 mb-4">
             <div class="chart-container">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-exclamation-triangle text-primary me-2"></i>
                     Recent Activity
                 </h5>
                 <div id="recent-activity" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 mb-4">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-ban text-danger me-2"></i>
+                    Denied FASTag (Last 24h, Unique)
+                </h5>
+                <div id="denied-fastag-activity-feed" style="max-height: 400px; overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
@@ -780,6 +791,52 @@ function updateTables(data) {
         }).join('');
     }
 
+    // Update denied FASTag activity feed
+    const deniedFastagActivityFeed = document.getElementById('denied-fastag-activity-feed');
+    if (data.denied_fastag_activity_feed) {
+        deniedFastagActivityFeed.innerHTML = data.denied_fastag_activity_feed.map(activity => {
+            // activity: [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip]
+            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
+            let vehicleNumber = 'N/A';
+            if (fastagFeaturesEnabled && activity[5]) {
+                vehicleNumber = activity[5];
+            } else if (!fastagFeaturesEnabled) {
+                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the vehicle number</span>";
+            }
+            let modelName = 'N/A';
+            if (fastagFeaturesEnabled && activity[7]) {
+                modelName = activity[7];
+            } else if (!fastagFeaturesEnabled) {
+                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the model</span>";
+            }
+            let ownerName = 'N/A';
+            if (fastagFeaturesEnabled && activity[6]) {
+                ownerName = activity[6];
+            } else if (!fastagFeaturesEnabled) {
+                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the owner</span>";
+            }
+            let secondaryInfo = [];
+            if (modelName !== 'N/A') secondaryInfo.push(`Model: ${modelName}`);
+            if (ownerName !== 'N/A') secondaryInfo.push(`Owner: ${ownerName}`);
+            if (activity[8]) secondaryInfo.push(`Fuel: ${activity[8]}`);
+            if (activity[9]) secondaryInfo.push(`Lane: ${activity[9]}`);
+            if (activity[11]) secondaryInfo.push(`Type: ${activity[11].charAt(0).toUpperCase() + activity[11].slice(1)}`);
+            const secondary = secondaryInfo.join(' • ');
+            return `
+                <div class="activity-item denied">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">${vehicleNumber}</div>
+                            <small class="text-muted">Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
+                        </div>
+                        <span class="status-badge status-denied">DENIED</span>
+                    </div>
+                    <small class="text-muted">${new Date(activity[0]).toLocaleString()}</small>
+                </div>
+            `;
+        }).join('');
+    }
+
     // Update reader health table
     const readerHealthTable = document.getElementById('reader-health-table');
     if (data.reader_health) {
@@ -823,6 +880,51 @@ function refreshData() {
         spinner.style.display = 'none';
         btn.disabled = false;
     }, 1000);
+}
+
+function loadDeniedFastagActivityFeed() {
+    const feed = document.getElementById('denied-fastag-activity-feed');
+    feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    fetch('/analytics/api/denied-fastag-activity-feed')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                feed.innerHTML = `<div class='text-danger'>${data.error}</div>`;
+                return;
+            }
+            if (!data.results || data.results.length === 0) {
+                feed.innerHTML = '<div class="text-center text-muted">No denied FASTag tags in the last 24 hours.</div>';
+                return;
+            }
+            feed.innerHTML = data.results.map(item => {
+                let vehicleNumber = item.vehicle_number || '-';
+                let modelName = item.model_name || '-';
+                let ownerName = item.owner_name || '-';
+                let fuelType = item.fuel_type || '-';
+                let reason = item.reason || '-';
+                let secondary = [
+                    modelName !== '-' ? `Model: ${modelName}` : '',
+                    ownerName !== '-' ? `Owner: ${ownerName}` : '',
+                    fuelType !== '-' ? `Fuel: ${fuelType}` : '',
+                    reason !== '-' ? `Reason: ${reason}` : ''
+                ].filter(Boolean).join(' • ');
+                return `
+                    <div class="activity-item denied">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-bold">${vehicleNumber}</div>
+                                <small class="text-muted">Tag: ${item.tag_id}${secondary ? ' • ' + secondary : ''}</small>
+                            </div>
+                            <span class="status-badge status-denied">DENIED</span>
+                        </div>
+                        <small class="text-muted">${item.timestamp}</small>
+                    </div>
+                `;
+            }).join('');
+        })
+        .catch(err => {
+            feed.innerHTML = `<div class='text-danger'>Error loading denied FASTag data</div>`;
+        });
 }
 
 // Modal functions for clickable cards
