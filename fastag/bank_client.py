@@ -380,5 +380,40 @@ def parse_query_exception_list_response(xml_response):
 
 if __name__ == '__main__':
     # Example usage
-    result = send_sync_time(ver='1.0', orgId='XXXX', msgId='0001')
-    print(result) 
+    # result = send_sync_time(ver='1.0', orgId='XXXX', msgId='0001')
+    # print(result)
+    import os
+    import sys
+    print('--- Tag Details API Test ---')
+    # Set the UAT endpoint for IDFC
+    os.environ['BANK_API_TAGDETAILS_URL'] = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+    # Required fields from your config
+    orgId = 'PGSH'
+    plazaId = '712764'
+    agencyId = 'TCABO'
+    acquirerId = '727274'
+    plazaGeoCode = '11.0185,76.9778'
+    # Dummy vehicle info (replace with real test data as needed)
+    vehicle_info = {
+        'regNo': 'TN01AB1234',
+        'tagId': '1234567890ABCDEF12345678',
+        'tid': 'TID1234567890',
+        'vehicleClass': '4',
+        'avc': '2',
+        'exceptionCode': '',
+        'comVehicle': 'N',
+        'bankName': 'IDFC',
+        'issueDate': '2024-06-01',
+        'plazaId': plazaId,
+        'agencyId': agencyId,
+        'acquirerId': acquirerId,
+        'plazaGeoCode': plazaGeoCode
+    }
+    msgId = str(uuid.uuid4())[:12]
+    try:
+        response = send_tag_details(msgId, orgId, vehicle_info, signature_placeholder='...')
+        print('Response:')
+        print(response)
+    except Exception as e:
+        print('Error sending Tag Details request:', e)
+        sys.exit(1) 
