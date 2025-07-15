@@ -239,11 +239,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/api/kyc/fetch-fastag/${encodeURIComponent(vehicleNumber)}`)
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    fastagIdInput.value = data.fastag_id;
+                if (data.success && data.tags && data.tags.length > 0) {
+                    fastagIdInput.value = data.tags[0].tag_id;
                     vehicleFeedback.innerHTML = '<span style="color: #28a745;">FASTag ID fetched successfully!</span>';
                 } else {
-                    vehicleFeedback.innerHTML = `<span style="color: #dc3545;">${data.error}</span>`;
+                    fastagIdInput.value = '';
+                    vehicleFeedback.innerHTML = `<span style="color: #dc3545;">${data.error || 'No FASTag found for this vehicle.'}</span>`;
                 }
             })
             .catch(error => {
