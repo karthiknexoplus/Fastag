@@ -669,31 +669,42 @@ function updateTables(data) {
     const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
     if (data.top_users) {
         topUsersTable.innerHTML = data.top_users.map(user => {
-            // Mask owner/model if feature disabled
-            let secondary = '';
-            if (fastagFeaturesEnabled) {
-                secondary = getSecondaryInfo(user);
-            } else {
-                secondary = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing</span>";
-            }
-            // Vehicle number logic: show only if from kyc_users (not tag_id, not empty)
+            // user: [tag_id, user_name, kyc_vehicle_number, cache_vehicle_number, owner_name, model_name, fuel_type, total_events, granted, denied, last_activity]
+            let fastagFeaturesEnabled = window.fastagFeaturesEnabled;
+            // Vehicle number logic: show only if from kyc_users
             let vehicleNumber = 'N/A';
-            if (user[2] && user[2] !== user[0]) {
+            if (user[2]) {
                 vehicleNumber = user[2];
             } else if (!fastagFeaturesEnabled) {
-                vehicleNumber = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing</span>";
+                vehicleNumber = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing to view the vehicle number</span>";
             }
+            // Model logic: show only if from kyc_users
+            let modelName = 'N/A';
+            if (user[2] && user[5]) {
+                modelName = user[5];
+            } else if (!fastagFeaturesEnabled) {
+                modelName = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing to view the model</span>";
+            }
+            // Owner logic: show only if from kyc_users
+            let ownerName = 'N/A';
+            if (user[2] && user[4]) {
+                ownerName = user[4];
+            } else if (!fastagFeaturesEnabled) {
+                ownerName = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing to view the owner</span>";
+            }
+            // Compose secondary info
+            let secondary = [modelName, ownerName, user[6] ? user[6] : ''].filter(Boolean).join(' • ');
             return `
                 <tr>
                     <td>
-                        <div class="fw-bold">${getDisplayName(user)}</div>
+                        <div class="fw-bold">${vehicleNumber}</div>
                         <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
                     </td>
                     <td>${vehicleNumber}</td>
-                    <td>${user[6]}</td>
+                    <td>${user[7]}</td>
                     <td>
-                        <span class="status-badge ${user[7] > user[8] ? 'status-granted' : 'status-denied'}">
-                            ${user[7] > user[8] ? 'Active' : 'Denied'}
+                        <span class="status-badge ${user[8] > user[9] ? 'status-granted' : 'status-denied'}">
+                            ${user[8] > user[9] ? 'Active' : 'Denied'}
                         </span>
                     </td>
                 </tr>

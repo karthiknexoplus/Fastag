@@ -110,7 +110,8 @@ def get_analytics_data():
         SELECT 
             al.tag_id,
             ku.name as user_name,
-            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            ku.vehicle_number as kyc_vehicle_number,
+            tvc.vehicle_number as cache_vehicle_number,
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             tvc.fuel_type,
