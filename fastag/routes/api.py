@@ -56,15 +56,17 @@ class RFIDDevice:
         logging.info(f"SWNet_SetDeviceOneParam result: {result}")
         if result == 0:
             logging.error("Failed to set RF Power on device")
-            return False
-        for _ in range(5):
-            time.sleep(0.5)
+            return {"success": False, "confirmed": False, "rf_power": None}
+        last_rf = None
+        for _ in range(10):
+            time.sleep(1)
             rf_power = self.get_rf_power()
+            last_rf = rf_power
             if rf_power == new_rf:
                 logging.info(f"Confirmed RF Power set to {new_rf} for device {self.ip}")
-                return True
-        logging.error(f"Failed to confirm RF Power set to {new_rf} for device {self.ip}")
-        return False
+                return {"success": True, "confirmed": True, "rf_power": rf_power}
+        logging.warning(f"Set command succeeded but failed to confirm RF Power set to {new_rf} for device {self.ip}. Last read: {last_rf}")
+        return {"success": True, "confirmed": False, "rf_power": last_rf}
 
 def strip_leading_zeros_ip(ip):
     # Split by '.', remove leading zeros from each octet, and rejoin
@@ -351,10 +353,19 @@ def rfid_rfpower():
         reader_ip = strip_leading_zeros_ip(row['reader_ip'])
         try:
             with RFIDDevice(reader_ip) as dev:
-                success = dev.set_rf_power(new_rf)
-                if not success:
-                    return jsonify({"error": "Failed to set or confirm RF Power."}), 500
-                return jsonify({"reader_id": reader_id, "rf_power": new_rf, "status": "success"})
+                result = dev.set_rf_power(new_rf)
+                if not result["success"]:
+                    return jsonify({"error": "Failed to set RF Power on device."}), 500
+                if result["confirmed"]:
+                    return jsonify({"reader_id": reader_id, "rf_power": new_rf, "status": "success"})
+                else:
+                    return jsonify({
+                        "reader_id": reader_id,
+                        "rf_power": result["rf_power"],
+                        "requested_rf_power": new_rf,
+                        "status": "warning",
+                        "warning": "Set command succeeded but could not confirm new value within 10 seconds. Please check manually."
+                    }), 200
         except Exception as e:
             logging.exception(f"Exception in POST /api/rfid/rfpower: {e}")
             return jsonify({"error": str(e)}), 500 
