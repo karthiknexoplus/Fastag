@@ -385,7 +385,7 @@ def system_status():
             "error": str(e)
         }), 500 
 
-@api.route('/api/all_data', methods=['GET'])
+@api.route('/all_data', methods=['GET'])
 def get_all_data():
     """
     Returns all locations, lanes, readers, and kyc_users in a single response.
