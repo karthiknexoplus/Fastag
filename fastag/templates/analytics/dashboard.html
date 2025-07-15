@@ -347,20 +347,6 @@
             </div>
         </div>
     </div>
-    <!-- Denied Non-FASTag Feed Row -->
-    <div class="row">
-        <div class="col-xl-4 offset-xl-8 mb-4">
-            <div class="chart-container">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-ban text-warning me-2"></i>
-                    Denied Non-FASTag (Last 24h, Unique)
-                </h5>
-                <div id="denied-nonfastag-activity-feed" style="max-height: 400px; overflow-y: auto;">
-                    <div class="text-center text-muted">Loading...</div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Reader Health -->
     <div class="row">
@@ -406,12 +392,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     loadAnalyticsData();
     loadDeniedFastagActivityFeed();
-    loadDeniedNonfastagActivityFeed();
     
     // Auto-refresh every 30 seconds
     setInterval(loadAnalyticsData, 30000);
     setInterval(loadDeniedFastagActivityFeed, 30000);
-    setInterval(loadDeniedNonfastagActivityFeed, 30000);
 });
 
 function initializeCharts() {
@@ -854,51 +838,6 @@ function updateTables(data) {
         }).join('');
     }
 
-    // Update denied Non-FASTag activity feed
-    const deniedNonfastagActivityFeed = document.getElementById('denied-nonfastag-activity-feed');
-    if (data.denied_nonfastag_activity_feed) {
-        deniedNonfastagActivityFeed.innerHTML = data.denied_nonfastag_activity_feed.map(activity => {
-            // activity: [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip]
-            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
-            let vehicleNumber = 'N/A';
-            if (fastagFeaturesEnabled && activity.vehicle_number) {
-                vehicleNumber = activity.vehicle_number;
-            } else if (!fastagFeaturesEnabled) {
-                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the vehicle number</span>";
-            }
-            let modelName = 'N/A';
-            if (fastagFeaturesEnabled && activity.model_name) {
-                modelName = activity.model_name;
-            } else if (!fastagFeaturesEnabled) {
-                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the model</span>";
-            }
-            let ownerName = 'N/A';
-            if (fastagFeaturesEnabled && activity.owner_name) {
-                ownerName = activity.owner_name;
-            } else if (!fastagFeaturesEnabled) {
-                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the owner</span>";
-            }
-            let secondaryInfo = [];
-            if (modelName !== 'N/A') secondaryInfo.push(`Model: ${modelName}`);
-            if (ownerName !== 'N/A') secondaryInfo.push(`Owner: ${ownerName}`);
-            if (activity.fuel_type) secondaryInfo.push(`Fuel: ${activity.fuel_type}`);
-            if (activity.reason) secondaryInfo.push(`Reason: ${activity.reason}`);
-            const secondary = secondaryInfo.join(' • ');
-            return `
-                <div class="activity-item denied">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="fw-bold">${vehicleNumber}</div>
-                            <small class="text-muted">Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
-                        </div>
-                        <span class="status-badge status-denied">DENIED</span>
-                    </div>
-                    <small class="text-muted">${activity.timestamp}</small>
-                </div>
-            `;
-        }).join('');
-    }
-
     // Update reader health table
     const readerHealthTable = document.getElementById('reader-health-table');
     if (data.reader_health) {
@@ -1000,65 +939,6 @@ function loadDeniedFastagActivityFeed() {
         })
         .catch(err => {
             feed.innerHTML = `<div class='text-danger'>Error loading denied FASTag data</div>`;
-        });
-}
-
-function loadDeniedNonfastagActivityFeed() {
-    const feed = document.getElementById('denied-nonfastag-activity-feed');
-    feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
-    fetch('/analytics/api/denied-nonfastag-activity-feed')
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                feed.innerHTML = `<div class='text-danger'>${data.error}</div>`;
-                return;
-            }
-            if (!data.results || data.results.length === 0) {
-                feed.innerHTML = '<div class="text-center text-muted">No denied Non-FASTag tags in the last 24 hours.</div>';
-                return;
-            }
-            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
-            feed.innerHTML = data.results.map(item => {
-                let vehicleNumber = 'N/A';
-                if (item.vehicle_number) {
-                    vehicleNumber = item.vehicle_number;
-                } else if (!fastagFeaturesEnabled) {
-                    vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the vehicle number</span>";
-                }
-                let modelName = 'N/A';
-                if (item.model_name) {
-                    modelName = item.model_name;
-                } else if (!fastagFeaturesEnabled) {
-                    modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the model</span>";
-                }
-                let ownerName = 'N/A';
-                if (item.owner_name) {
-                    ownerName = item.owner_name;
-                } else if (!fastagFeaturesEnabled) {
-                    ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the owner</span>";
-                }
-                let secondaryInfo = [];
-                if (modelName !== 'N/A') secondaryInfo.push(`Model: ${modelName}`);
-                if (ownerName !== 'N/A') secondaryInfo.push(`Owner: ${ownerName}`);
-                if (item.fuel_type) secondaryInfo.push(`Fuel: ${item.fuel_type}`);
-                if (item.reason) secondaryInfo.push(`Reason: ${item.reason}`);
-                const secondary = secondaryInfo.join(' • ');
-                return `
-                    <div class="activity-item denied">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="fw-bold">${vehicleNumber}</div>
-                                <small class="text-muted">Tag: ${item.tag_id}${secondary ? ' • ' + secondary : ''}</small>
-                            </div>
-                            <span class="status-badge status-denied">DENIED</span>
-                        </div>
-                        <small class="text-muted">${item.timestamp}</small>
-                    </div>
-                `;
-            }).join('');
-        })
-        .catch(err => {
-            feed.innerHTML = `<div class='text-danger'>Error loading denied Non-FASTag data</div>`;
         });
 }
 
