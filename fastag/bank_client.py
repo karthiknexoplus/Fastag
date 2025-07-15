@@ -212,7 +212,7 @@ def send_tag_details(msgId, orgId, vehicle_info, signature_placeholder='...'):
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=xml_data, headers=headers, timeout=10)
+    response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
     response.raise_for_status()
     return response.content
 
