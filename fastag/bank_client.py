@@ -237,14 +237,10 @@ def send_tag_details(msgId, orgId, vehicle_info):
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
     print('Request XML (unsigned):')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
-    print("DEBUG: About to sign XML...")
-    signed_xml = sign_xml(xml_data)
-    print("DEBUG: Signed XML generated.")
-    print('Request XML (signed):')
-    print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+    print("DEBUG: Skipping digital signature (not required by bank).")
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
+    response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
