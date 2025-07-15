@@ -268,7 +268,9 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(res => res.json())
     .then(data => {
       if (data.status === 'success') {
-        feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for Reader ${data.reader}.</div>`;
+        // Use readerIdToType to get the type string
+        const typeStr = readerIdToType[readerId] || 'Unknown';
+        feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for ${typeStr} Reader.</div>`;
         document.getElementById('modal-current-rf').value = data.rf_power;
       } else {
         feedback.innerHTML = `<div class='alert alert-danger'>${data.error || 'Failed to set RF Power.'}</div>`;
