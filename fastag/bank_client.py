@@ -13,8 +13,8 @@ PROD_URL = os.getenv('BANK_API_PROD_URL', 'https://prod-bank-url.example.com/syn
 # Choose environment: 'UAT' or 'PROD'
 BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 
-PRIVATE_KEY_PATH = "/home/ubuntu/certs/fastag.onebee.in/rsa-privkey.pem"
-CERT_PATH = "/home/ubuntu/certs/fastag.onebee.in/rsa-cert.pem"
+PRIVATE_KEY_PATH = "certs/rsa-privkey.pem"
+CERT_PATH = "certs/rsa-cert.pem"
 
 
 def get_bank_url():
