@@ -203,11 +203,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/api/kyc/fetch-vehicle/${encodeURIComponent(fastagId)}`)
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    vehicleNumberInput.value = data.vehicle_number;
+                if (data.success && data.tags && data.tags.length > 0) {
+                    vehicleNumberInput.value = data.tags[0].vehicle_number;
                     fastagFeedback.innerHTML = '<span style="color: #28a745;">Vehicle number fetched successfully!</span>';
                 } else {
-                    fastagFeedback.innerHTML = `<span style="color: #dc3545;">${data.error}</span>`;
+                    vehicleNumberInput.value = '';
+                    fastagFeedback.innerHTML = `<span style="color: #dc3545;">${data.error || 'No vehicle number found for this FASTag ID.'}</span>`;
                 }
             })
             .catch(error => {
