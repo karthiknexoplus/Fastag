@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/api/rfid/rfpower', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reader: readerId, rf_power: new_rf })
+      body: JSON.stringify({ reader_id: readerId, rf_power: new_rf })
     })
     .then(res => res.json())
     .then(data => {

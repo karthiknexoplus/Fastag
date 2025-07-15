@@ -204,7 +204,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"reader\": 1,\n    \"rf_power\": 15\n}"
+							"raw": "{\n    \"reader_id\": 1,\n    \"rf_power\": 15\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/rfid/rfpower",
