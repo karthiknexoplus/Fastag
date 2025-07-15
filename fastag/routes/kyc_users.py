@@ -98,9 +98,11 @@ def fetch_vehicle_by_fastag(fastag_id):
                         'avc': tag_detail.get('AVC', '')
                     })
             
+            vehicle_number = tags[0]['vehicle_number'] if tags else ''
             return jsonify({
                 'success': True,
                 'fastag_id': fastag_id,
+                'vehicle_number': vehicle_number,
                 'tags': tags,
                 'total_tags': len(tags)
             })
