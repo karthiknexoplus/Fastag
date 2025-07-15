@@ -241,9 +241,18 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success && data.tags && data.tags.length > 0) {
                     fastagIdInput.value = data.tags[0].tag_id;
+                    // Fill status field if it exists
+                    var statusInput = document.getElementById('fastag_status');
+                    if (statusInput) {
+                        statusInput.value = data.tags[0].status || '';
+                    }
                     vehicleFeedback.innerHTML = '<span style="color: #28a745;">FASTag ID fetched successfully!</span>';
                 } else {
                     fastagIdInput.value = '';
+                    var statusInput = document.getElementById('fastag_status');
+                    if (statusInput) {
+                        statusInput.value = '';
+                    }
                     vehicleFeedback.innerHTML = `<span style="color: #dc3545;">${data.error || 'No FASTag found for this vehicle.'}</span>`;
                 }
             })
