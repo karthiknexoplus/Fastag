@@ -771,7 +771,7 @@ function showCurrentOccupancyDetails() {
         .then(data => {
             const modal = new bootstrap.Modal(document.getElementById('currentOccupancyModal'));
             const modalBody = document.getElementById('currentOccupancyModalBody');
-            
+            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             if (data.vehicles && data.vehicles.length > 0) {
                 modalBody.innerHTML = `
                     <div class="table-responsive">
@@ -789,8 +789,8 @@ function showCurrentOccupancyDetails() {
                                 ${data.vehicles.map(vehicle => `
                                     <tr>
                                         <td>${vehicle.vehicle_number || vehicle.tag_id}</td>
-                                        <td>${vehicle.owner_name || 'N/A'}</td>
-                                        <td>${vehicle.model_name || 'N/A'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.owner_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Nexoplus for pricing</span>'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.model_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Nexoplus for pricing</span>'}</td>
                                         <td>${vehicle.entry_time}</td>
                                         <td>${vehicle.duration}</td>
                                     </tr>
@@ -802,7 +802,6 @@ function showCurrentOccupancyDetails() {
             } else {
                 modalBody.innerHTML = '<p class="text-center text-muted">No vehicles currently in the parking lot.</p>';
             }
-            
             modal.show();
         })
         .catch(error => {
@@ -820,7 +819,7 @@ function showTodayGrantedDetails() {
         .then(data => {
             const modal = new bootstrap.Modal(document.getElementById('todayGrantedModal'));
             const modalBody = document.getElementById('todayGrantedModalBody');
-            
+            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             if (data.vehicles && data.vehicles.length > 0) {
                 modalBody.innerHTML = `
                     <div class="table-responsive">
@@ -838,8 +837,8 @@ function showTodayGrantedDetails() {
                                 ${data.vehicles.map(vehicle => `
                                     <tr>
                                         <td>${vehicle.vehicle_number || vehicle.tag_id}</td>
-                                        <td>${vehicle.owner_name || 'N/A'}</td>
-                                        <td>${vehicle.model_name || 'N/A'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.owner_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Nexoplus for pricing</span>'}</td>
+                                        <td>${fastagFeaturesEnabled ? (vehicle.model_name || 'N/A') : '<span class=\'text-muted\'><i class=\'fas fa-lock\'></i> Contact Nexoplus for pricing</span>'}</td>
                                         <td>${vehicle.entry_time}</td>
                                         <td>${vehicle.lane_name || 'N/A'}</td>
                                     </tr>
@@ -851,7 +850,6 @@ function showTodayGrantedDetails() {
             } else {
                 modalBody.innerHTML = '<p class="text-center text-muted">No granted entries today.</p>';
             }
-            
             modal.show();
         })
         .catch(error => {
