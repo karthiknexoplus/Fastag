@@ -49,11 +49,11 @@ document.addEventListener('DOMContentLoaded', fetchCurrentRF);
 
 document.getElementById('rfpower-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const reader_id = parseInt(document.getElementById('reader').value);
-    const new_rf = parseInt(document.getElementById('new-rf').value);
+    const reader_id = Number(document.getElementById('reader').value);
+    const new_rf = Number(document.getElementById('new-rf').value);
     const feedback = document.getElementById('rfpower-feedback');
     feedback.innerHTML = '';
-    if (isNaN(reader_id) || isNaN(new_rf) || new_rf < 1 || new_rf > 30) {
+    if (!Number.isInteger(reader_id) || !Number.isInteger(new_rf) || new_rf < 1 || new_rf > 30) {
         feedback.innerHTML = "<div class='alert alert-danger'>Please select a reader and enter a valid RF Power (1-30).</div>";
         return;
     }
@@ -65,7 +65,7 @@ document.getElementById('rfpower-form').addEventListener('submit', function(e) {
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for Reader ${data.reader_id}.</div>`;
+            feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for Reader ${data.reader_id}.`;
             fetchCurrentRF();
         } else {
             feedback.innerHTML = `<div class='alert alert-danger'>${data.error || 'Failed to set RF Power.'}</div>`;
