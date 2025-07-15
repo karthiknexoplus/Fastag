@@ -215,8 +215,8 @@ def sign_xml(xml_data):
         private_key = key_file.read()
     with open(CERT_PATH, "rb") as cert_file:
         cert = cert_file.read()
-    # Sign the XML (detached signature)
-    signer = XMLSigner(method="detached", signature_algorithm="rsa-sha256")
+    # Sign the XML (default method)
+    signer = XMLSigner(signature_algorithm="rsa-sha256")
     signed_root = signer.sign(root, key=private_key, cert=cert, reference_uri=None)
     # Move the <ds:Signature> content into the <Signature> element as text
     # Find the generated <ds:Signature> element
