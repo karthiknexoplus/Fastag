@@ -384,3 +384,31 @@ def system_status():
             "success": False,
             "error": str(e)
         }), 500 
+
+@api.route('/api/all_data', methods=['GET'])
+def get_all_data():
+    """
+    Returns all locations, lanes, readers, and kyc_users in a single response.
+    """
+    try:
+        db = get_db()
+        locations = db.execute('SELECT * FROM locations').fetchall()
+        lanes = db.execute('SELECT * FROM lanes').fetchall()
+        readers = db.execute('SELECT * FROM readers').fetchall()
+        kyc_users = db.execute('SELECT * FROM kyc_users').fetchall()
+
+        locations_list = [dict(l) for l in locations]
+        lanes_list = [dict(l) for l in lanes]
+        readers_list = [dict(r) for r in readers]
+        kyc_users_list = [dict(u) for u in kyc_users]
+
+        return jsonify({
+            'success': True,
+            'locations': locations_list,
+            'lanes': lanes_list,
+            'readers': readers_list,
+            'kyc_users': kyc_users_list
+        }), 200
+    except Exception as e:
+        logger.error(f"Error in /api/all_data: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500 
