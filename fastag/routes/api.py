@@ -342,6 +342,7 @@ def rfid_rfpower():
         data = request.get_json(force=False, silent=True) or {}
         reader_id = data.get('reader_id')
         new_rf = data.get('rf_power')
+        logging.info(f"POST /api/rfid/rfpower received: data={data}, reader_id={reader_id} (type {type(reader_id)}), rf_power={new_rf} (type {type(new_rf)})")
         if not reader_id or not isinstance(new_rf, int) or not (1 <= new_rf <= 30):
             return jsonify({"error": "Invalid input. 'reader_id' and 'rf_power' (1-30) required."}), 400
         row = get_db().execute('SELECT reader_ip FROM readers WHERE id = ?', (reader_id,)).fetchone()
