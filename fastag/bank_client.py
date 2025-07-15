@@ -396,19 +396,7 @@ if __name__ == '__main__':
     plazaGeoCode = '11.0185,76.9778'
     # Use realistic test data for vehicle_info
     vehicle_info = {
-        'regNo': 'TN01AB1234',           # Use a valid test vehicle number
-        'tagId': '1234567890ABCDEF12345678',  # Use a valid test Tag ID
-        'tid': 'TID1234567890',          # Use a valid test TID
-        'vehicleClass': '4',             # Use a valid vehicle class as per ICD
-        'avc': '2',                      # Use a valid AVC code
-        'exceptionCode': '',             # Optional, leave blank if not needed
-        'comVehicle': 'N',               # 'Y' or 'N'
-        'bankName': 'IDFC',              # Bank name
-        'issueDate': '2024-06-01',       # Issue date in YYYY-MM-DD
-        'plazaId': plazaId,
-        'agencyId': agencyId,
-        'acquirerId': acquirerId,
-        'plazaGeoCode': plazaGeoCode
+        'tagId': '34161FA8203289724C58D6A0'
     }
     msgId = str(uuid.uuid4())[:12]
     try:
