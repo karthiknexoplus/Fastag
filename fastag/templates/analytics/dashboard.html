@@ -168,6 +168,25 @@
             max-height: 320px;
         }
     }
+    .dashboard-row-equal-height {
+        height: 340px;
+        max-height: 340px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    @media (max-width: 1200px) {
+        .dashboard-row-equal-height {
+            height: 260px;
+            max-height: 260px;
+        }
+    }
+    @media (max-width: 768px) {
+        .dashboard-row-equal-height {
+            height: 200px;
+            max-height: 200px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -254,7 +273,7 @@
     <!-- FASTag vs Non-FASTag Pie Chart, Overstayed Vehicles, Unique Vehicles, Entry/Exit Trend -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="chart-container">
+            <div class="chart-container dashboard-row-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-chart-pie text-primary me-2"></i>
                     FASTag vs Non-FASTag (Today)
@@ -264,24 +283,24 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-2 col-md-6 mb-3">
-            <div class="card stats-card danger h-100">
-                <div class="card-body text-center">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card danger h-100 dashboard-row-equal-height">
+                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center h-100">
                     <div class="stats-number" id="overstayed-vehicles">-</div>
                     <div class="stats-label">Overstayed Vehicles</div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-2 col-md-6 mb-3">
-            <div class="card stats-card info h-100">
-                <div class="card-body text-center">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card info h-100 dashboard-row-equal-height">
+                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center h-100">
                     <div class="stats-number" id="unique-vehicles-today">-</div>
                     <div class="stats-label">Unique Vehicles Today</div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-5 col-md-12 mb-3">
-            <div class="chart-container">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="chart-container dashboard-row-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-chart-line text-primary me-2"></i>
                     Entry/Exit Trend (Today)
