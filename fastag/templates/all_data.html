@@ -5,14 +5,15 @@
     <h2 class="mb-4 fs-4">
         <i class="fas fa-database fastag-menu-icon"></i><span class="fastag-menu-label">All Data</span>
     </h2>
-    <form method="post" class="mb-4 d-flex align-items-center gap-2">
-        <select name="device" class="form-select" style="max-width: 300px;" required>
+    <form method="post" class="mb-4 d-flex align-items-center gap-2" id="deviceForm">
+        <select name="device" class="form-select" style="max-width: 300px;" required onchange="this.form.submit();">
             <option value="">Select Device</option>
             {% for d in devices %}
                 <option value="{{ d.name }}" {% if selected == d.name %}selected{% endif %}>{{ d.name }}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-download"></i> Get</button>
+        <input type="hidden" name="get_data" value="0" id="getDataInput">
+        <button type="submit" class="btn btn-primary" onclick="document.getElementById('getDataInput').value='1';"><i class="fas fa-download"></i> Get</button>
     </form>
     {% if error %}
         <div class="alert alert-danger">{{ error }}</div>

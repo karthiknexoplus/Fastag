@@ -4,6 +4,7 @@ import logging
 from fastag.routes.live_status import get_tailscale_status
 from fastag.utils.db import get_db
 from datetime import datetime
+import json
 
 all_data_bp = Blueprint('all_data', __name__)
 
@@ -32,12 +33,20 @@ def all_data():
     if 'user' not in session:
         return render_template('login.html')
     devices = get_device_list()
-    selected = None
+    selected = request.values.get('device')
     data = None
     error = None
     db = get_db()
-    if request.method == 'POST':
-        selected = request.form.get('device')
+    # Always try to load from DB if a device is selected
+    if selected:
+        row = db.execute('SELECT data FROM all_data_cache WHERE device=?', (selected,)).fetchone()
+        if row:
+            try:
+                data = json.loads(row['data'])
+            except Exception:
+                data = None
+    # Only fetch new data if POST and user clicked Get
+    if request.method == 'POST' and request.form.get('get_data') == '1':
         # Find DNS for selected
         device = next((d for d in devices if d['name'] == selected), None)
         if device and device['dns']:
@@ -56,14 +65,4 @@ def all_data():
                 error = f"Request failed: {e}"
         else:
             error = "Device not found or DNS missing."
-    # On GET or if no new fetch, try to load from DB
-    if not data and selected:
-        row = db.execute('SELECT data FROM all_data_cache WHERE device=?', (selected,)).fetchone()
-        if row:
-            try:
-                data = row['data']
-                import json
-                data = json.loads(data)
-            except Exception:
-                data = None
     return render_template('all_data.html', devices=devices, selected=selected, data=data, error=error) 
