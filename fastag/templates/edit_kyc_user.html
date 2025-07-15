@@ -119,11 +119,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/api/kyc/fetch-vehicle/${encodeURIComponent(fastagId)}`)
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    vehicleNumberInput.value = data.vehicle_number;
+                if (data.success && data.tags && data.tags.length > 0) {
+                    vehicleNumberInput.value = data.tags[0].vehicle_number;
                     fastagFeedback.innerHTML = '<span style="color: #28a745;">Vehicle number fetched successfully!</span>';
                 } else {
-                    fastagFeedback.innerHTML = `<span style="color: #dc3545;">${data.error}</span>`;
+                    vehicleNumberInput.value = '';
+                    fastagFeedback.innerHTML = `<span style=\"color: #dc3545;\">${data.error || 'No vehicle number found for this FASTag ID.'}</span>`;
                 }
             })
             .catch(error => {
@@ -155,11 +156,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/api/kyc/fetch-fastag/${encodeURIComponent(vehicleNumber)}`)
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    fastagIdInput.value = data.fastag_id;
+                if (data.success && data.tags && data.tags.length > 0) {
+                    fastagIdInput.value = data.tags[0].tag_id;
                     fastagFeedback.innerHTML = '<span style="color: #28a745;">FASTag ID fetched successfully!</span>';
                 } else {
-                    fastagFeedback.innerHTML = `<span style="color: #dc3545;">${data.error}</span>`;
+                    fastagIdInput.value = '';
+                    fastagFeedback.innerHTML = `<span style=\"color: #dc3545;\">${data.error || 'No FASTag found for this vehicle.'}</span>`;
                 }
             })
             .catch(error => {
