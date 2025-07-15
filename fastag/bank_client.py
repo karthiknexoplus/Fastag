@@ -237,7 +237,9 @@ def send_tag_details(msgId, orgId, vehicle_info):
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
     print('Request XML (unsigned):')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    print("DEBUG: About to sign XML...")
     signed_xml = sign_xml(xml_data)
+    print("DEBUG: Signed XML generated.")
     print('Request XML (signed):')
     print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
@@ -417,6 +419,7 @@ def parse_query_exception_list_response(xml_response):
 
 if __name__ == '__main__':
     print('--- Tag Details API Test ---')
+    print("DEBUG: Running latest bank_client.py")
     # Set the UAT endpoint for IDFC
     os.environ['BANK_API_TAGDETAILS_URL'] = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
     orgId = 'PGSH'
