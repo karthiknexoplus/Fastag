@@ -396,7 +396,7 @@ if __name__ == '__main__':
     plazaGeoCode = '11.0185,76.9778'
     # Use realistic test data for vehicle_info
     vehicle_info = {
-        'tagId': '34161FA8203289724C58D6A0'
+        'tagId': '1234567890ABCDEF12345678'
     }
     msgId = str(uuid.uuid4())[:12]
     try:
