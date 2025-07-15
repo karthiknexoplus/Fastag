@@ -19,7 +19,7 @@
                     <input type="text" class="form-control" id="current-rf" readonly>
                 </div>
                 <div class="col-md-4">
-                    <label for="new-rf" class="form-label">Set New RF Power (1-30)</label>
+                    <label for="new-rf" class="form-label">push  New RF Power (1-30)</label>
                     <input type="number" class="form-control" id="new-rf" name="new_rf" min="1" max="30" placeholder="Enter value" required>
                 </div>
                 <div class="col-12 mt-3">
@@ -53,6 +53,10 @@ document.getElementById('rfpower-form').addEventListener('submit', function(e) {
     const new_rf = parseInt(document.getElementById('new-rf').value);
     const feedback = document.getElementById('rfpower-feedback');
     feedback.innerHTML = '';
+    if (isNaN(reader_id) || isNaN(new_rf) || new_rf < 1 || new_rf > 30) {
+        feedback.innerHTML = "<div class='alert alert-danger'>Please select a reader and enter a valid RF Power (1-30).</div>";
+        return;
+    }
     fetch('/api/rfid/rfpower', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
