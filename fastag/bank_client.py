@@ -218,20 +218,19 @@ def sign_xml(xml_data):
     # Sign the XML (default method)
     signer = XMLSigner(signature_algorithm="rsa-sha256")
     signed_root = signer.sign(root, key=private_key, cert=cert, reference_uri=None)
-    # Move the <ds:Signature> content into the <Signature> element as text
-    # Find the generated <ds:Signature> element
-    signature_elem = signed_root.find(".//{http://www.w3.org/2000/09/xmldsig#}Signature")
-    # Find the <Signature> placeholder
+    # Remove the empty <Signature> placeholder from the original XML
     placeholder = signed_root.find(".//Signature")
-    if signature_elem is not None and placeholder is not None:
-        # Replace the placeholder's text with the string of the ds:Signature element
-        placeholder.clear()
-        # Insert the ds:Signature element as a child of <Signature>
-        placeholder.append(signature_elem)
-        # Remove the original ds:Signature from its old location
-        parent = signature_elem.getparent()
-        if parent is not None:
-            parent.remove(signature_elem)
+    if placeholder is not None:
+        parent = placeholder.getparent()
+        parent.remove(placeholder)
+    # Find the generated <ds:Signature> element
+    ds_signature = signed_root.find(".//{http://www.w3.org/2000/09/xmldsig#}Signature")
+    if ds_signature is not None:
+        # Create a new <Signature> element (no namespace)
+        new_sig = etree.Element("Signature")
+        new_sig.append(ds_signature)
+        # Insert the new <Signature> element as the last child of the root
+        signed_root.append(new_sig)
     return etree.tostring(signed_root)
 
 def send_tag_details(msgId, orgId, vehicle_info):
