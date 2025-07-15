@@ -3,6 +3,8 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 import uuid
+from signxml import XMLSigner
+from lxml import etree
 
 # Configurable URLs (set via environment variable or config file)
 UAT_URL = os.getenv('BANK_API_UAT_URL', 'https://uat-bank-url.example.com/sync_time')
@@ -176,7 +178,7 @@ def parse_check_txn_response(xml_response):
     }
 
 
-def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info, signature_placeholder='...'):
+def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     root = ET.Element('etc:ReqTagDetails', {'xmlns:etc': 'http://npci.org/etc/schema/'})
     head = ET.SubElement(root, 'Head', {
         'ver': '1.0',
@@ -193,26 +195,54 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info, signature_p
         'type': 'FETCH',
         'orgTxnId': ''
     })
-    # Only add non-empty vehicle_info fields
     vehicle = ET.SubElement(txn, 'Vehicle')
     for k, v in vehicle_info.items():
         if v:
             vehicle.set(k, v)
+    # Add empty Signature element (will be replaced after signing)
     signature = ET.SubElement(root, 'Signature')
-    signature.text = signature_placeholder
+    signature.text = ''
     return ET.tostring(root, encoding='utf-8', method='xml')
 
+def sign_xml(xml_data):
+    # Parse XML with lxml
+    root = etree.fromstring(xml_data)
+    # Load private key and cert
+    with open(PRIVATE_KEY_PATH, "rb") as key_file:
+        private_key = key_file.read()
+    with open(CERT_PATH, "rb") as cert_file:
+        cert = cert_file.read()
+    # Sign the XML (enveloped signature)
+    signer = XMLSigner(method="enveloped", signature_algorithm="rsa-sha256")
+    signed_root = signer.sign(root, key=private_key, cert=cert, reference_uri=None)
+    # Move the <ds:Signature> content into the <Signature> element as text
+    # Find the generated <ds:Signature> element
+    signature_elem = signed_root.find(".//{http://www.w3.org/2000/09/xmldsig#}Signature")
+    # Find the <Signature> placeholder
+    placeholder = signed_root.find(".//Signature")
+    if signature_elem is not None and placeholder is not None:
+        # Replace the placeholder's text with the string of the ds:Signature element
+        placeholder.clear()
+        # Insert the ds:Signature element as a child of <Signature>
+        placeholder.append(signature_elem)
+        # Remove the original ds:Signature from its old location
+        parent = signature_elem.getparent()
+        if parent is not None:
+            parent.remove(signature_elem)
+    return etree.tostring(signed_root)
 
-def send_tag_details(msgId, orgId, vehicle_info, signature_placeholder='...'):
-    # Use timezone-aware UTC
+def send_tag_details(msgId, orgId, vehicle_info):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
-    xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info, signature_placeholder)
-    print('Request XML:')
+    xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
+    print('Request XML (unsigned):')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    signed_xml = sign_xml(xml_data)
+    print('Request XML (signed):')
+    print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
+    response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
     response.raise_for_status()
     return response.content
 
@@ -400,7 +430,7 @@ if __name__ == '__main__':
     }
     msgId = str(uuid.uuid4())[:12]
     try:
-        response = send_tag_details(msgId, orgId, vehicle_info, signature_placeholder='...')
+        response = send_tag_details(msgId, orgId, vehicle_info)
         print('Response:')
         print(response.decode() if isinstance(response, bytes) else response)
     except Exception as e:
