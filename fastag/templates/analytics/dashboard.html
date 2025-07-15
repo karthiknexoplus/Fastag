@@ -420,10 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     loadAnalyticsData();
     loadDeniedFastagActivityFeed();
-    
-    // Auto-refresh every 30 seconds
-    setInterval(loadAnalyticsData, 30000);
-    setInterval(loadDeniedFastagActivityFeed, 30000);
+    // Removed all setInterval auto-refreshes for analytics and feeds
 });
 
 function initializeCharts() {
