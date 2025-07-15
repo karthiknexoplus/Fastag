@@ -3,7 +3,7 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 import uuid
-from signxml import XMLSigner
+from signxml import XMLSigner, XMLVerifier
 from lxml import etree
 
 # Configurable URLs (set via environment variable or config file)
@@ -248,6 +248,18 @@ def send_tag_details(msgId, orgId, vehicle_info):
     headers = {'Content-Type': 'application/xml'}
     response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
     response.raise_for_status()
+    # --- Signature Verification ---
+    cert_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'etolluatsigner_Public.crt.txt')
+    cert_path = os.path.normpath(cert_path)
+    try:
+        from lxml import etree
+        with open(cert_path, 'rb') as f:
+            cert = f.read()
+        verified_data = XMLVerifier().verify(response.content, x509_cert=cert).signed_xml
+        print("[Signature Verification] Signature is valid!")
+        print(etree.tostring(verified_data, pretty_print=True).decode())
+    except Exception as e:
+        print("[Signature Verification] Signature verification failed:", e)
     return response.content
 
 
@@ -438,5 +450,6 @@ if __name__ == '__main__':
         response = send_tag_details(msgId, orgId, vehicle_info)
         print('Response:')
         print(response.decode() if isinstance(response, bytes) else response)
+        # Signature verification is already done in send_tag_details
     except Exception as e:
         print('Error sending Tag Details request:', e) 
