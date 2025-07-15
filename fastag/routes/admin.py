@@ -29,15 +29,17 @@ def user_approval():
         return redirect(url_for('auth.login'))
     db = get_db()
     if request.method == 'POST':
-        # Approve device and set username/password/assigned_user_id/service_ip
+        # Approve device and set username/password/assigned_user_id/service_ip, from_date, to_date
         device_id = request.form.get('device_id')
         username = request.form.get('username')
         password = request.form.get('password')
         assigned_user_id = request.form.get('assigned_user_id')
         service_ip = request.form.get('service_ip')
-        if device_id and username and password:
-            db.execute('UPDATE devices SET approved=1, username=?, password=?, assigned_user_id=?, service_ip=? WHERE id=?',
-                       (username, password, assigned_user_id, service_ip, device_id))
+        from_date = request.form.get('from_date')
+        to_date = request.form.get('to_date')
+        if device_id and username and password and from_date and to_date:
+            db.execute('UPDATE devices SET approved=1, username=?, password=?, assigned_user_id=?, service_ip=?, from_date=?, to_date=? WHERE id=?',
+                       (username, password, assigned_user_id, service_ip, from_date, to_date, device_id))
             db.commit()
             flash('Device approved and user assigned!', 'success')
         else:
@@ -52,7 +54,22 @@ def user_approval():
         WHERE d.approved=1
         ORDER BY d.created_at DESC
     ''').fetchall()
-    return render_template('user_approval.html', devices=devices, users=users, approved_devices=approved_devices)
+    from datetime import datetime
+    today = datetime.now().date()
+    # Calculate days left for each approved device
+    approved_devices_with_days = []
+    for dev in approved_devices:
+        days_left = None
+        if dev['to_date']:
+            try:
+                to_date_obj = datetime.strptime(dev['to_date'], '%Y-%m-%d').date()
+                days_left = (to_date_obj - today).days
+            except Exception:
+                days_left = None
+        dev_dict = dict(dev)
+        dev_dict['days_left'] = days_left
+        approved_devices_with_days.append(dev_dict)
+    return render_template('user_approval.html', devices=devices, users=users, approved_devices=approved_devices_with_days)
 
 @admin_bp.route('/edit_device/<int:device_id>', methods=['GET', 'POST'])
 def edit_device(device_id):
@@ -70,8 +87,10 @@ def edit_device(device_id):
         assigned_user_id = request.form.get('assigned_user_id')
         service_ip = request.form.get('service_ip')
         approved = 1 if request.form.get('approved') == 'on' else 0
-        db.execute('''UPDATE devices SET model=?, manufacturer=?, android_version=?, username=?, password=?, assigned_user_id=?, service_ip=?, approved=? WHERE id=?''',
-                   (model, manufacturer, android_version, username, password, assigned_user_id, service_ip, approved, device_id))
+        from_date = request.form.get('from_date')
+        to_date = request.form.get('to_date')
+        db.execute('''UPDATE devices SET model=?, manufacturer=?, android_version=?, username=?, password=?, assigned_user_id=?, service_ip=?, approved=?, from_date=?, to_date=? WHERE id=?''',
+                   (model, manufacturer, android_version, username, password, assigned_user_id, service_ip, approved, from_date, to_date, device_id))
         db.commit()
         flash('Device updated successfully!', 'success')
         return redirect(url_for('admin.user_approval'))

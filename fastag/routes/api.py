@@ -413,6 +413,18 @@ def device_login():
     device = db.execute('SELECT * FROM devices WHERE device_id=? AND username=? AND password=? AND approved=1',
                         (data['device_id'], data['username'], data['password'])).fetchone()
     if device:
+        from datetime import datetime
+        today = datetime.now().date()
+        from_date = device['from_date']
+        to_date = device['to_date']
+        if from_date and to_date:
+            try:
+                from_date_obj = datetime.strptime(from_date, '%Y-%m-%d').date()
+                to_date_obj = datetime.strptime(to_date, '%Y-%m-%d').date()
+                if not (from_date_obj <= today <= to_date_obj):
+                    return jsonify({"success": False, "message": "Device approval expired or not yet valid"}), 403
+            except Exception:
+                return jsonify({"success": False, "message": "Device approval date error"}), 403
         return jsonify({"success": True, "message": "Login successful", "service_ip": device['service_ip']}), 200
     else:
         return jsonify({"success": False, "message": "Invalid credentials or device not approved"}), 401 

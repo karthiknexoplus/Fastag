@@ -39,6 +39,10 @@
                         <td><input type="text" name="username" class="form-control" required></td>
                         <td><input type="password" name="password" class="form-control" required></td>
                         <td><input type="text" name="service_ip" class="form-control" value="{{ d['service_ip'] or '' }}" placeholder="e.g. 192.168.1.100"></td>
+                        <td>
+                            <input type="date" name="from_date" class="form-control" required>
+                            <input type="date" name="to_date" class="form-control" required>
+                        </td>
                         <td class="text-center">
                             <button type="submit" class="btn btn-success btn-sm rounded-circle" data-bs-toggle="tooltip" title="Approve"><i class="fas fa-check"></i></button>
                             <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
@@ -67,7 +71,9 @@
                         <th>Android Version</th>
                         <th>Assigned User</th>
                         <th>Username</th>
-                        <th>Approved At</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th>Days Left</th>
                         <th>Service IP <i class="fas fa-network-wired fastag-menu-icon" title="Service IP"></i></th>
                         <th>Action</th>
                     </tr>
@@ -81,7 +87,9 @@
                         <td>{{ d['android_version'] }}</td>
                         <td>{{ d['assigned_username'] or '' }}</td>
                         <td>{{ d['username'] }}</td>
-                        <td>{{ d['created_at'] }}</td>
+                        <td>{{ d['from_date'] or '' }}</td>
+                        <td>{{ d['to_date'] or '' }}</td>
+                        <td>{% if d['days_left'] is not none %}{{ d['days_left'] }}{% else %}N/A{% endif %}</td>
                         <td>{{ d['service_ip'] or '' }}</td>
                         <td class="text-center">
                             <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
@@ -91,7 +99,7 @@
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="7" class="text-center text-muted">No approved devices yet.</td></tr>
+                    <tr><td colspan="11" class="text-center text-muted">No approved devices yet.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
