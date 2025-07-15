@@ -676,13 +676,20 @@ function updateTables(data) {
             } else {
                 secondary = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing</span>";
             }
+            // Vehicle number logic: show only if from kyc_users (not tag_id, not empty)
+            let vehicleNumber = 'N/A';
+            if (user[2] && user[2] !== user[0]) {
+                vehicleNumber = user[2];
+            } else if (!fastagFeaturesEnabled) {
+                vehicleNumber = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing</span>";
+            }
             return `
                 <tr>
                     <td>
                         <div class="fw-bold">${getDisplayName(user)}</div>
                         <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
                     </td>
-                    <td>${user[2] || 'N/A'}</td>
+                    <td>${vehicleNumber}</td>
                     <td>${user[6]}</td>
                     <td>
                         <span class="status-badge ${user[7] > user[8] ? 'status-granted' : 'status-denied'}">
