@@ -13,6 +13,9 @@ PROD_URL = os.getenv('BANK_API_PROD_URL', 'https://prod-bank-url.example.com/syn
 # Choose environment: 'UAT' or 'PROD'
 BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 
+PRIVATE_KEY_PATH = "/home/ubuntu/certs/fastag.onebee.in/privkey.pem"
+CERT_PATH = "/home/ubuntu/certs/fastag.onebee.in/cert.pem"
+
 
 def get_bank_url():
     if BANK_ENV.upper() == 'PROD':
