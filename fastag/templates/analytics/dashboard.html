@@ -666,9 +666,16 @@ function getSecondaryInfo(user) {
 function updateTables(data) {
     // Update top users table
     const topUsersTable = document.getElementById('top-users-table');
+    const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
     if (data.top_users) {
         topUsersTable.innerHTML = data.top_users.map(user => {
-            const secondary = getSecondaryInfo(user);
+            // Mask owner/model if feature disabled
+            let secondary = '';
+            if (fastagFeaturesEnabled) {
+                secondary = getSecondaryInfo(user);
+            } else {
+                secondary = "<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing</span>";
+            }
             return `
                 <tr>
                     <td>
@@ -690,10 +697,16 @@ function updateTables(data) {
     const recentActivity = document.getElementById('recent-activity');
     if (data.recent_activity) {
         recentActivity.innerHTML = data.recent_activity.map(activity => {
+            // Mask owner/model if feature disabled
+            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             const displayName = activity[5] || activity[7] || activity[6] || activity[4] || activity[1] || 'Unknown';
-            const secondaryInfo = [];
-            if (activity[6]) secondaryInfo.push(`Owner: ${activity[6]}`);
-            if (activity[7]) secondaryInfo.push(`Model: ${activity[7]}`);
+            let secondaryInfo = [];
+            if (fastagFeaturesEnabled) {
+                if (activity[6]) secondaryInfo.push(`Owner: ${activity[6]}`);
+                if (activity[7]) secondaryInfo.push(`Model: ${activity[7]}`);
+            } else {
+                secondaryInfo.push("<span class='text-muted'><i class='fas fa-lock'></i> Contact Nexoplus for pricing</span>");
+            }
             if (activity[8]) secondaryInfo.push(`Fuel: ${activity[8]}`);
             if (activity[9]) secondaryInfo.push(`Lane: ${activity[9]}`);
             if (activity[11]) secondaryInfo.push(`Type: ${activity[11].charAt(0).toUpperCase() + activity[11].slice(1)}`); // Add reader type
