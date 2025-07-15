@@ -391,9 +391,11 @@ let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart;
 document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     loadAnalyticsData();
+    loadDeniedFastagActivityFeed();
     
     // Auto-refresh every 30 seconds
     setInterval(loadAnalyticsData, 30000);
+    setInterval(loadDeniedFastagActivityFeed, 30000);
 });
 
 function initializeCharts() {
