@@ -199,14 +199,10 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
         'orgTxnId': ''
     })
     vehicle = ET.SubElement(txn, 'Vehicle')
-    # Use 'TagID' (capitalized) for the attribute if present
-    for k, v in vehicle_info.items():
-        if v:
-            if k.lower() == 'tagid':
-                vehicle.set('TagID', v)
-            else:
-                vehicle.set(k, v)
-    # Do NOT add the <Signature /> element
+    # Always include all three attributes as per ICD: TID, vehicleRegNo, tagId (lowercase)
+    vehicle.set('TID', vehicle_info.get('TID', ''))
+    vehicle.set('vehicleRegNo', vehicle_info.get('vehicleRegNo', ''))
+    vehicle.set('tagId', vehicle_info.get('tagId', ''))
     return ET.tostring(root, encoding='utf-8', method='xml')
 
 def sign_xml(xml_data):
