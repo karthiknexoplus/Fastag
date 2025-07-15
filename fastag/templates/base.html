@@ -90,6 +90,13 @@
                     <i class="fas fa-home"></i>
                     <span class="nav-label d-none d-md-inline">Dashboard</span>
                 </a>
+                {% if session.get('user') %}
+                <a href="{{ url_for('all_data.all_data') }}" class="nav-icon-link {% if request.endpoint == 'all_data.all_data' %}active{% endif %}" title="All Data">
+                    <i class="fas fa-database"></i>
+                    <span class="nav-label d-none d-md-inline">All Data</span>
+                </a>
+                {% endif %}
+                {% if not session.get('user') %}
                 <a href="{{ url_for('locations.locations') }}" class="nav-icon-link {% if request.endpoint == 'locations.locations' %}active{% endif %}" title="Locations">
                     <i class="fas fa-map-marker-alt"></i>
                     <span class="nav-label d-none d-md-inline">Locations</span>
@@ -97,18 +104,6 @@
                 <a href="{{ url_for('lanes.lanes') }}" class="nav-icon-link {% if request.endpoint == 'lanes.lanes' %}active{% endif %}" title="Lanes">
                     <i class="fas fa-road"></i>
                     <span class="nav-label d-none d-md-inline">Lanes</span>
-                </a>
-                <a href="{{ url_for('kyc_users.kyc_users') }}" class="nav-icon-link {% if request.endpoint == 'kyc_users.kyc_users' %}active{% endif %}" title="KYC Users">
-                    <i class="fas fa-id-card"></i>
-                    <span class="nav-label d-none d-md-inline">KYC Users</span>
-                </a>
-                <a href="{{ url_for('live_status.live_status') }}" class="nav-icon-link {% if request.endpoint == 'live_status.live_status' %}active{% endif %}" title="Live Status">
-                    <i class="fas fa-wifi"></i>
-                    <span class="nav-label d-none d-md-inline">Live Status</span>
-                </a>
-                <a href="{{ url_for('admin.user_approval') }}" class="nav-icon-link {% if request.endpoint == 'admin.user_approval' %}active{% endif %}" title="User Approval">
-                    <i class="fas fa-user-check fastag-menu-icon"></i>
-                    <span class="nav-label d-none d-md-inline">User Approval</span>
                 </a>
                 <div class="dropdown d-inline-block">
                     <a href="{{ url_for('analytics.dashboard') }}" class="nav-icon-link dropdown-toggle {% if request.endpoint.startswith('analytics.') %}active{% endif %}" data-bs-toggle="dropdown" title="Analytics">
@@ -127,6 +122,19 @@
                         </a></li>
                     </ul>
                 </div>
+                {% endif %}
+                <a href="{{ url_for('kyc_users.kyc_users') }}" class="nav-icon-link {% if request.endpoint == 'kyc_users.kyc_users' %}active{% endif %}" title="KYC Users">
+                    <i class="fas fa-id-card"></i>
+                    <span class="nav-label d-none d-md-inline">KYC Users</span>
+                </a>
+                <a href="{{ url_for('live_status.live_status') }}" class="nav-icon-link {% if request.endpoint == 'live_status.live_status' %}active{% endif %}" title="Live Status">
+                    <i class="fas fa-wifi"></i>
+                    <span class="nav-label d-none d-md-inline">Live Status</span>
+                </a>
+                <a href="{{ url_for('admin.user_approval') }}" class="nav-icon-link {% if request.endpoint == 'admin.user_approval' %}active{% endif %}" title="User Approval">
+                    <i class="fas fa-user-check fastag-menu-icon"></i>
+                    <span class="nav-label d-none d-md-inline">User Approval</span>
+                </a>
                 <div class="dropdown d-inline-block">
                     <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Fastag">
                         <i class="fas fa-tags fastag-menu-icon"></i>

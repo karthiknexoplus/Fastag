@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}All Data - FASTag Parking{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width: 900px;">
+    <h2 class="mb-4 fs-4">
+        <i class="fas fa-database fastag-menu-icon"></i><span class="fastag-menu-label">All Data</span>
+    </h2>
+    <form method="post" class="mb-4 d-flex align-items-center gap-2">
+        <select name="device" class="form-select" style="max-width: 300px;" required>
+            <option value="">Select Device</option>
+            {% for d in devices %}
+                <option value="{{ d.name }}" {% if selected == d.name %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-download"></i> Get</button>
+    </form>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    {% if data %}
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm border-0">
+                <h5 class="mb-2 fs-6"><i class="fas fa-users fastag-menu-icon"></i> KYC Users</h5>
+                <div style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-sm table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr><th>Name</th><th>Vehicle</th><th>Contact</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for u in data.kyc_users %}
+                        <tr>
+                            <td>{{ u.name }}</td>
+                            <td>{{ u.vehicle_number }}</td>
+                            <td>{{ u.contact_number }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm border-0 mb-3">
+                <h5 class="mb-2 fs-6"><i class="fas fa-road fastag-menu-icon"></i> Lanes</h5>
+                <ul class="list-group list-group-flush small">
+                    {% for l in data.lanes %}
+                    <li class="list-group-item">{{ l.lane_name }} (Location ID: {{ l.location_id }})</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card p-3 shadow-sm border-0 mb-3">
+                <h5 class="mb-2 fs-6"><i class="fas fa-map-marker-alt fastag-menu-icon"></i> Locations</h5>
+                <ul class="list-group list-group-flush small">
+                    {% for loc in data.locations %}
+                    <li class="list-group-item">{{ loc.name }} - {{ loc.address }} (Site: {{ loc.site_id }})</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card p-3 shadow-sm border-0">
+                <h5 class="mb-2 fs-6"><i class="fas fa-microchip fastag-menu-icon"></i> Readers</h5>
+                <ul class="list-group list-group-flush small">
+                    {% for r in data.readers %}
+                    <li class="list-group-item">{{ r.reader_ip }} ({{ r.type|capitalize }}) Lane ID: {{ r.lane_id }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

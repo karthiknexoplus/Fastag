@@ -162,5 +162,19 @@ def init_database():
         print(f"❌ Database initialization/migration failed: {e}")
         sys.exit(1)
 
+def create_all_data_cache_table():
+    conn = sqlite3.connect('instance/fastag.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS all_data_cache (
+            device TEXT PRIMARY KEY,
+            data TEXT,
+            updated_at TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
 if __name__ == '__main__':
-    init_database() 
+    init_database()
+    create_all_data_cache_table() 
