@@ -187,6 +187,25 @@
             max-height: 200px;
         }
     }
+    .chart-row-equal-height {
+        height: 400px;
+        max-height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    @media (max-width: 1200px) {
+        .chart-row-equal-height {
+            height: 320px;
+            max-height: 320px;
+        }
+    }
+    @media (max-width: 768px) {
+        .chart-row-equal-height {
+            height: 220px;
+            max-height: 220px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -315,7 +334,7 @@
     <!-- Charts Row -->
     <div class="row mb-4">
         <div class="col-xl-8 mb-3">
-            <div class="chart-container">
+            <div class="chart-container chart-row-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-clock text-primary me-2"></i>
                     Hourly Activity (Last 24 Hours)
@@ -326,7 +345,7 @@
             </div>
         </div>
         <div class="col-xl-4 mb-3">
-            <div class="chart-container">
+            <div class="chart-container chart-row-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-microchip text-primary me-2"></i>
                     Reader Health (Events by Type)
