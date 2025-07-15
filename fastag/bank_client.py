@@ -243,7 +243,11 @@ def send_tag_details(msgId, orgId, vehicle_info):
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
     headers = {'Content-Type': 'application/xml'}
     response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as e:
+        print("Error details from bank:", response.text)
+        raise
     # --- Signature Verification (for response) ---
     cert_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'etolluatsigner_Public.crt.txt')
     cert_path = os.path.normpath(cert_path)
