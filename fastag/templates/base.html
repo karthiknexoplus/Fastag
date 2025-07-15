@@ -131,10 +131,11 @@
                     <i class="fas fa-wifi"></i>
                     <span class="nav-label d-none d-md-inline">Live Status</span>
                 </a>
-                <a href="{{ url_for('admin.user_approval') }}" class="nav-icon-link {% if request.endpoint == 'admin.user_approval' %}active{% endif %}" title="User Approval">
+                {# Remove or comment out the User Approval menu item #}
+                {# <a href="{{ url_for('admin.user_approval') }}" class="nav-icon-link {% if request.endpoint == 'admin.user_approval' %}active{% endif %}" title="User Approval">
                     <i class="fas fa-user-check fastag-menu-icon"></i>
                     <span class="nav-label d-none d-md-inline">User Approval</span>
-                </a>
+                </a> #}
                 <div class="dropdown d-inline-block">
                     <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Fastag">
                         <i class="fas fa-tags fastag-menu-icon"></i>

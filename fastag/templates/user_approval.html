@@ -1,108 +1,143 @@
 {% extends 'base.html' %}
 {% block title %}User Approval - FASTag Parking{% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width: 900px;">
-    <h2 class="mb-4"><i class="fas fa-user-check fastag-menu-icon me-2"></i><span class="fastag-menu-label">User Approval</span></h2>
-    <div class="card p-3 shadow-sm border-0">
-        <h5 class="mb-3"><i class="fas fa-list fastag-menu-icon"></i><span class="fastag-menu-label">Pending Devices</span></h5>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Device ID</th>
-                        <th>Model</th>
-                        <th>Manufacturer</th>
-                        <th>Android Version</th>
-                        <th>Assign User</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                        <th>Service IP <i class="fas fa-network-wired fastag-menu-icon" title="Service IP"></i></th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d in devices %}
-                    <tr>
-                        <form method="POST">
-                        <td>{{ d['device_id'] }}<input type="hidden" name="device_id" value="{{ d['id'] }}"></td>
-                        <td>{{ d['model'] }}</td>
-                        <td>{{ d['manufacturer'] }}</td>
-                        <td>{{ d['android_version'] }}</td>
-                        <td>
-                            <select name="assigned_user_id" class="form-select">
-                                <option value="">-- None --</option>
-                                {% for u in users %}
-                                <option value="{{ u['id'] }}">{{ u['username'] }}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td><input type="text" name="username" class="form-control" required></td>
-                        <td><input type="password" name="password" class="form-control" required></td>
-                        <td><input type="text" name="service_ip" class="form-control" value="{{ d['service_ip'] or '' }}" placeholder="e.g. 192.168.1.100"></td>
-                        <td>
-                            <input type="date" name="from_date" class="form-control" required>
-                            <input type="date" name="to_date" class="form-control" required>
-                        </td>
-                        <td class="text-center">
-                            <button type="submit" class="btn btn-success btn-sm rounded-circle" data-bs-toggle="tooltip" title="Approve"><i class="fas fa-check"></i></button>
-                            <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
-                            <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this device?');">
-                                <button type="submit" class="btn btn-danger btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </td>
-                        </form>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="8" class="text-center text-muted">No devices pending approval.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 text-dark fw-bold">
+                <i class="fas fa-user-check text-primary me-2"></i>
+                User Approval
+            </h1>
+            <p class="text-muted mb-0">Manage device approvals and monitor expiring devices</p>
         </div>
     </div>
-    <div class="card p-3 shadow-sm border-0 mt-4">
-        <h5 class="mb-3"><i class="fas fa-check fastag-menu-icon"></i><span class="fastag-menu-label">Approved Devices</span></h5>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Device ID</th>
-                        <th>Model</th>
-                        <th>Manufacturer</th>
-                        <th>Android Version</th>
-                        <th>Assigned User</th>
-                        <th>Username</th>
-                        <th>From Date</th>
-                        <th>To Date</th>
-                        <th>Days Left</th>
-                        <th>Service IP <i class="fas fa-network-wired fastag-menu-icon" title="Service IP"></i></th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d in approved_devices %}
-                    <tr>
-                        <td>{{ d['device_id'] }}</td>
-                        <td>{{ d['model'] }}</td>
-                        <td>{{ d['manufacturer'] }}</td>
-                        <td>{{ d['android_version'] }}</td>
-                        <td>{{ d['assigned_username'] or '' }}</td>
-                        <td>{{ d['username'] }}</td>
-                        <td>{{ d['from_date'] or '' }}</td>
-                        <td>{{ d['to_date'] or '' }}</td>
-                        <td>{% if d['days_left'] is not none %}{{ d['days_left'] }}{% else %}N/A{% endif %}</td>
-                        <td>{{ d['service_ip'] or '' }}</td>
-                        <td class="text-center">
-                            <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
-                            <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this device?');">
-                                <button type="submit" class="btn btn-danger btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card p-3 shadow-sm border-0 mb-3">
+                <h5 class="mb-2 fs-6"><i class="fas fa-list fastag-menu-icon"></i> Pending Devices</h5>
+                <div style="max-height: 220px; overflow-y: auto;">
+                <table class="table table-sm table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Model</th>
+                            <th>Manufacturer</th>
+                            <th>Android</th>
+                            <th>Assign User</th>
+                            <th>Username</th>
+                            <th>Password</th>
+                            <th>Service IP</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in devices %}
+                        <tr>
+                            <form method="POST">
+                            <td>{{ d['device_id'] }}<input type="hidden" name="device_id" value="{{ d['id'] }}"></td>
+                            <td>{{ d['model'] }}</td>
+                            <td>{{ d['manufacturer'] }}</td>
+                            <td>{{ d['android_version'] }}</td>
+                            <td>
+                                <select name="assigned_user_id" class="form-select form-select-sm">
+                                    <option value="">-- None --</option>
+                                    {% for u in users %}
+                                    <option value="{{ u['id'] }}">{{ u['username'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td><input type="text" name="username" class="form-control form-control-sm" required></td>
+                            <td><input type="password" name="password" class="form-control form-control-sm" required></td>
+                            <td><input type="text" name="service_ip" class="form-control form-control-sm" value="{{ d['service_ip'] or '' }}" placeholder="e.g. 192.168.1.100"></td>
+                            <td><input type="date" name="from_date" class="form-control form-control-sm" required></td>
+                            <td><input type="date" name="to_date" class="form-control form-control-sm" required></td>
+                            <td class="text-center">
+                                <button type="submit" class="btn btn-success btn-sm rounded-circle" data-bs-toggle="tooltip" title="Approve"><i class="fas fa-check"></i></button>
+                                <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
+                                <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this device?');">
+                                    <button type="submit" class="btn btn-danger btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
                             </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="11" class="text-center text-muted">No approved devices yet.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="11" class="text-center text-muted">No devices pending approval.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            <div class="card p-3 shadow-sm border-0">
+                <h5 class="mb-2 fs-6"><i class="fas fa-check fastag-menu-icon"></i> Approved Devices</h5>
+                <div style="max-height: 220px; overflow-y: auto;">
+                <table class="table table-sm table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Model</th>
+                            <th>User</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Days Left</th>
+                            <th>Service IP</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in approved_devices %}
+                        <tr>
+                            <td>{{ d['device_id'] }}</td>
+                            <td>{{ d['model'] }}</td>
+                            <td>{{ d['assigned_username'] or '' }}</td>
+                            <td>{{ d['from_date'] or '' }}</td>
+                            <td>{{ d['to_date'] or '' }}</td>
+                            <td>{% if d['days_left'] is not none %}{{ d['days_left'] }}{% else %}N/A{% endif %}</td>
+                            <td>{{ d['service_ip'] or '' }}</td>
+                            <td class="text-center">
+                                <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
+                                <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this device?');">
+                                    <button type="submit" class="btn btn-danger btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="8" class="text-center text-muted">No approved devices yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card p-3 shadow-sm border-0 mb-3">
+                <h5 class="mb-2 fs-6"><i class="fas fa-exclamation-triangle text-warning"></i> Devices Expiring Soon</h5>
+                <div style="max-height: 220px; overflow-y: auto;">
+                <table class="table table-sm table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Device ID</th>
+                            <th>User</th>
+                            <th>To Date</th>
+                            <th>Days Left</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in expiring_devices %}
+                        <tr>
+                            <td>{{ d['device_id'] }}</td>
+                            <td>{{ d['assigned_username'] or '' }}</td>
+                            <td>{{ d['to_date'] or '' }}</td>
+                            <td>{% if d['days_left'] is not none %}{{ d['days_left'] }}{% else %}N/A{% endif %}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted">No devices expiring soon.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
