@@ -150,16 +150,16 @@
         margin-bottom: 10px;
     }
     .feed-equal-height {
-        height: 480px;
-        max-height: 480px;
+        height: 640px;
+        max-height: 640px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
     }
     @media (max-width: 1200px) {
         .feed-equal-height {
-            height: 400px;
-            max-height: 400px;
+            height: 480px;
+            max-height: 480px;
         }
     }
     @media (max-width: 768px) {
@@ -370,24 +370,6 @@
                     <input type="text" class="form-control form-control-sm" placeholder="Filter by any field..." oninput="filterFeed('denied-fastag-activity-feed', this.value)">
                 </div>
                 <div id="denied-fastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
-                    <div class="text-center text-muted">Loading...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Denied Non-FASTag Feed Row -->
-    <div class="row">
-        <div class="col-xl-4 offset-xl-8 mb-4">
-            <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-ban text-warning me-2"></i>
-                    Denied Non-FASTag (Last 24h, Unique)
-                </h5>
-                <div class="feed-filter mb-2">
-                    <input type="text" class="form-control form-control-sm" placeholder="Filter by any field..." oninput="filterFeed('denied-nonfastag-activity-feed', this.value)">
-                </div>
-                <div id="denied-nonfastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
