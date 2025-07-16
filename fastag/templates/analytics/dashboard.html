@@ -859,13 +859,26 @@ function updateTables(data) {
     // Update denied FASTag activity feed
     const deniedFastagActivityFeed = document.getElementById('denied-fastag-activity-feed');
     if (data.denied_fastag_activity_feed) {
-        deniedFastagActivityFeed.innerHTML = data.denied_fastag_activity_feed.map(activity => {
-            // activity: [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip]
+        deniedFastagActivityFeed.innerHTML = data.denied_fastag_activity_feed.map(activityRaw => {
+            // Normalize: if activity is an array, convert to object with expected keys
+            let activity = activityRaw;
+            if (Array.isArray(activityRaw)) {
+                // Fallback: map array to object keys (update keys as per backend order if needed)
+                activity = {
+                    tag_id: activityRaw[0],
+                    vehicle_number: activityRaw[1],
+                    owner_name: activityRaw[2],
+                    model_name: activityRaw[3],
+                    fuel_type: activityRaw[4],
+                    timestamp: activityRaw[5],
+                    reason: activityRaw[6]
+                };
+            }
             const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             let vehicleNumber = 'N/A';
             let modelName = 'N/A';
             let ownerName = 'N/A';
-            // Mask all FASTag details if feature is disabled and tag_id starts with '34161'
+            // Robust masking: always mask for FASTag if feature is disabled
             if (!fastagFeaturesEnabled && activity.tag_id && activity.tag_id.startsWith('34161')) {
                 vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the vehicle number</span>";
                 modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing to view the model</span>";
