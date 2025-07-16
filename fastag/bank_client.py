@@ -517,16 +517,23 @@ ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__))
 def parse_list_participant_response(xml_response):
     import xml.etree.ElementTree as ET
     try:
-        # Verify XML signature using signxml and the provided certificate
+        # Verify XML signature using signxml and the provided certificate, using lxml.etree
         from signxml import XMLVerifier
         try:
             with open(ETOLL_SIGNER_CERT_PATH, 'rb') as cert_file:
                 cert = cert_file.read()
-            # signxml expects bytes, so ensure xml_response is bytes
+            # signxml expects bytes or lxml.etree element
             if isinstance(xml_response, str):
-                xml_response = xml_response.encode()
-            XMLVerifier().verify(xml_response, x509_cert=cert)
+                xml_response_bytes = xml_response.encode()
+            else:
+                xml_response_bytes = xml_response
+            # Parse with lxml
+            xml_doc = etree.fromstring(xml_response_bytes)
+            XMLVerifier().verify(xml_doc, x509_cert=cert)
         except Exception as ve:
+            import traceback
+            print('Signature verification failed:')
+            traceback.print_exc()
             return {'error': f'Signature verification failed: {ve}'}
         ns = {'etc': 'http://npci.org/etc/schema/'}
         root = ET.fromstring(xml_response)
@@ -573,6 +580,9 @@ def parse_list_participant_response(xml_response):
                 result['participants'].append(dict(p.attrib))
         return result
     except Exception as e:
+        import traceback
+        print('Exception in parse_list_participant_response:')
+        traceback.print_exc()
         return {'error': f'Failed to parse response: {e}'}
 
 
