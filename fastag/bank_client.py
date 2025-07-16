@@ -21,6 +21,8 @@ BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 PRIVATE_KEY_PATH = "private.txt"
 CERT_PATH = "SSL certificate.txt"
 
+VERIFY_SIGNATURE = True  # Set to False to skip signature verification (e.g., for UAT if bank signatures are invalid)
+
 
 def get_bank_url():
     if BANK_ENV.upper() == 'PROD':
@@ -517,24 +519,25 @@ ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__))
 def parse_list_participant_response(xml_response):
     import xml.etree.ElementTree as ET
     try:
-        # Verify XML signature using signxml and the provided certificate, using lxml.etree
         from signxml import XMLVerifier
-        try:
-            with open(ETOLL_SIGNER_CERT_PATH, 'rb') as cert_file:
-                cert = cert_file.read()
-            # signxml expects bytes or lxml.etree element
-            if isinstance(xml_response, str):
-                xml_response_bytes = xml_response.encode()
-            else:
-                xml_response_bytes = xml_response
-            # Parse with lxml
-            xml_doc = etree.fromstring(xml_response_bytes)
-            XMLVerifier().verify(xml_doc, x509_cert=cert)
-        except Exception as ve:
-            import traceback
-            print('Signature verification failed:')
-            traceback.print_exc()
-            return {'error': f'Signature verification failed: {ve}'}
+        if VERIFY_SIGNATURE:
+            try:
+                with open(ETOLL_SIGNER_CERT_PATH, 'rb') as cert_file:
+                    cert = cert_file.read()
+                if isinstance(xml_response, str):
+                    xml_response_bytes = xml_response.encode()
+                else:
+                    xml_response_bytes = xml_response
+                from lxml import etree
+                xml_doc = etree.fromstring(xml_response_bytes)
+                XMLVerifier().verify(xml_doc, x509_cert=cert)
+            except Exception as ve:
+                import traceback
+                print('Signature verification failed:')
+                traceback.print_exc()
+                return {'error': f'Signature verification failed: {ve}'}
+        else:
+            print('WARNING: Skipping signature verification (VERIFY_SIGNATURE is False)')
         ns = {'etc': 'http://npci.org/etc/schema/'}
         root = ET.fromstring(xml_response)
         # Find Head and Txn with namespace
