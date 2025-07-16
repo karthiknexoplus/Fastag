@@ -1085,6 +1085,7 @@ if __name__ == '__main__':
             url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
             headers = {'Content-Type': 'application/xml'}
             response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
+            print('HTTP Status Code:', response.status_code)
             print('Response:')
             print(response.content.decode() if isinstance(response.content, bytes) else response.content)
             parsed = parse_heartbeat_response(response.content)
