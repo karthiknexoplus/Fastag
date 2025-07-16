@@ -488,7 +488,7 @@ if __name__ == '__main__':
     # Set the UAT endpoint for SyncTime
     sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
     ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-    sync_msgId = now.strftime('%Y%m%d%H%M%S')  # Use timestamp as unique msgId
+    sync_msgId = '0001'  # Use simple numeric msgId as in ICD sample
     # Build unsigned XML
     sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
     ET.SubElement(sync_root, 'Head', {
