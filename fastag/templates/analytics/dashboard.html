@@ -206,6 +206,10 @@
             max-height: 220px;
         }
     }
+    .section-locked {
+        opacity: 0.6;
+        pointer-events: none; /* Disable clicks */
+    }
 </style>
 {% endblock %}
 
@@ -746,7 +750,6 @@ function updateTables(data) {
     if (data.top_users) {
         topUsersTable.innerHTML = data.top_users.map(user => {
             // user: [tag_id, user_name, kyc_vehicle_number, cache_vehicle_number, owner_name, model_name, fuel_type, total_events, granted, denied, last_activity]
-            let fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             // Vehicle number logic: show KYC, else cache if enabled
             let vehicleNumber = 'N/A';
             if (user[2]) {
@@ -798,8 +801,6 @@ function updateTables(data) {
     if (data.recent_activity) {
         recentActivity.innerHTML = data.recent_activity.map(activity => {
             // Mask vehicle/model/owner if feature disabled and not from kyc_users, but for GRANTED show if from kyc_users
-            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
-            // activity: [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip, event_type, kyc_vehicle_number]
             const isGranted = activity[2] === 'granted';
             // Vehicle number
             let vehicleNumber = 'N/A';
@@ -858,7 +859,16 @@ function updateTables(data) {
 
     // Update denied FASTag activity feed
     const deniedFastagActivityFeed = document.getElementById('denied-fastag-activity-feed');
-    if (data.denied_fastag_activity_feed) {
+    if (!fastagFeaturesEnabled) {
+        deniedFastagActivityFeed.innerHTML = `
+            <div class="text-center text-muted" style="opacity:0.6; padding: 2em;">
+                <i class="fas fa-lock fa-2x mb-2"></i><br>
+                Contact Onebee for pricing to view denied FASTag details.
+            </div>
+        `;
+        // Optionally, add a faded look to the whole section
+        deniedFastagActivityFeed.parentElement.classList.add('section-locked');
+    } else if (data.denied_fastag_activity_feed) {
         deniedFastagActivityFeed.innerHTML = data.denied_fastag_activity_feed.map(activityRaw => {
             // Normalize: always coerce to object with all expected keys
             let activity = {};
@@ -884,7 +894,6 @@ function updateTables(data) {
                     reason: activityRaw.reason || ''
                 };
             }
-            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             let vehicleNumber = 'N/A';
             let modelName = 'N/A';
             let ownerName = 'N/A';
@@ -929,7 +938,6 @@ function updateTables(data) {
     if (data.denied_nonfastag_activity_feed) {
         deniedNonFastagActivityFeed.innerHTML = data.denied_nonfastag_activity_feed.map(activity => {
             // activity: [timestamp, tag_id, access_result, reason, user_name, vehicle_number, owner_name, model_name, fuel_type, lane_name, reader_ip]
-            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             let vehicleNumber = 'N/A';
             if (fastagFeaturesEnabled && activity.vehicle_number) {
                 vehicleNumber = activity.vehicle_number;
