@@ -468,9 +468,13 @@ if __name__ == '__main__':
         'vehicleRegNo': 'KA04MJ6369',
         'tagId': ''
     }
-    # Use numeric string for msgId and txnId as in ICD sample
-    numeric_id = '00000000000000000314'
-    msgId = numeric_id
+    # Generate a unique transaction ID (TxnId) as per ICD format
+    from datetime import datetime
+    now = datetime.now()
+    # Example: PlazaID (6) + LaneID (3, use 001 for now) + DateTime (DDMMYYHHMMSS)
+    lane_id = '001'
+    txn_id = f"{plazaId}{lane_id}{now.strftime('%d%m%y%H%M%S')}"
+    msgId = txn_id  # Use the same value for msgId
     try:
         response = send_tag_details(msgId, orgId, vehicle_info)
         print('Response:')
