@@ -1069,6 +1069,7 @@ if __name__ == '__main__':
         headers = {'Content-Type': 'application/xml'}
         try:
             sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
+            print('HTTP Status Code:', sync_response.status_code)
             print('SyncTime Response:')
             parsed = parse_sync_time_response(sync_response.content)
             print('Minimal Response:', parsed)
