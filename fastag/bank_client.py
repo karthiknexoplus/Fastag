@@ -1307,11 +1307,14 @@ if __name__ == '__main__':
         ]
         try:
             response_content = send_query_exception_list_icd(msgId, orgId, exception_list)
-            parsed = parse_query_exception_list_response(response_content)
-            print('\n--- Parsed Query Exception List Response ---')
-            for k, v in parsed.items():
-                print(f"{k}: {v}")
-            print('-------------------------------\n')
+            try:
+                parsed = parse_query_exception_list_response(response_content)
+                print('\n--- Parsed Query Exception List Response ---')
+                for k, v in parsed.items():
+                    print(f"{k}: {v}")
+                print('-------------------------------\n')
+            except Exception as e:
+                print('Could not parse response as XML:', e)
         except Exception as e:
             print('Error sending Query Exception List request:', e)
     else:
