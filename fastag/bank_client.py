@@ -21,7 +21,7 @@ BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 PRIVATE_KEY_PATH = "private.txt"
 CERT_PATH = "SSL certificate.txt"
 
-VERIFY_SIGNATURE = True  # Set to False to skip signature verification (e.g., for UAT if bank signatures are invalid)
+VERIFY_SIGNATURE = False  # Set to True to enable signature verification (recommended for production)
 
 
 def get_bank_url():
