@@ -50,6 +50,32 @@ def send_sync_time(ver, orgId, msgId, signature_placeholder='...'):
     return parse_sync_time_response(response.content)
 
 
+# Error code to reason mapping (partial, add more as needed)
+ERROR_CODE_REASON = {
+    '101': 'Version Empty or not 1.0',
+    '102': 'Timestamp empty or not in ISO Format',
+    '103': 'orgId is not available in Database',
+    '104': 'msgId is not in correct format or empty',
+    '105': 'Txn Id is empty or not in correct format',
+    '106': 'TagId is not in correct format or empty',
+    '108': 'Org Id is empty or not in correct format',
+    '112': 'TID is empty or not in correct format',
+    '124': 'OrgId is Inactive',
+    '125': 'TagId is not present in Database',
+    '144': 'Txn Type is empty or not in the list of types',
+    '186': 'VEHICLE DETAILS are not in correct format',
+    '202': 'Meta Element is missing',
+    '205': 'Future Timestamp should not be acceptable',
+    '213': 'Sign Auth is not valid',
+    '261': 'Signature is not found in request',
+    '263': 'Signature is invalid',
+    '814': 'Duplicate request',
+    '999': 'No Response Message / Unknown Error',
+    '5153': 'Unknown Error Occur Please contact Acquirer Bank',
+    '9999': 'Unknown Error Occur Please contact Acquirer',
+    # Add more as needed
+}
+
 def parse_sync_time_response(xml_response):
     import xml.etree.ElementTree as ET
     ns = {'etc': 'http://npci.org/etc/schema/'}
@@ -57,18 +83,22 @@ def parse_sync_time_response(xml_response):
         root = ET.fromstring(xml_response)
         head = root.find('Head')
         resp = root.find('Resp')
+        resp_code = resp.attrib.get('respCode') if resp is not None else None
         result = {
             'msgId': head.attrib.get('msgId') if head is not None else None,
             'orgId': head.attrib.get('orgId') if head is not None else None,
             'ts': head.attrib.get('ts') if head is not None else None,
             'ver': head.attrib.get('ver') if head is not None else None,
-            'respCode': resp.attrib.get('respCode') if resp is not None else None,
+            'respCode': resp_code,
             'result': resp.attrib.get('result') if resp is not None else None,
             'serverTime': None
         }
         time_elem = resp.find('Time') if resp is not None else None
         if time_elem is not None:
             result['serverTime'] = time_elem.attrib.get('serverTime')
+        # Add reason if respCode is present
+        if resp_code:
+            result['reason'] = ERROR_CODE_REASON.get(resp_code, 'Unknown error code')
         return result
     except Exception as e:
         return {'error': f'Failed to parse response: {e}'}
