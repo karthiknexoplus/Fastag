@@ -287,6 +287,105 @@ ERROR_CODE_REASON = {
     # Add more as needed
 }
 
+# --- Toll Plaza Heart Beat API ---
+def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta=None, signature_placeholder='...'):
+    """
+    Build the Toll Plaza Heart Beat XML request.
+    plaza_info: dict with keys: geoCode, id, name, subtype, type, address, fromDistrict, toDistrict, agencyCode
+    lanes: list of dicts, each with keys: id, direction, readerId, Status, Mode, laneType
+    meta: list of dicts, e.g. [{"name": "", "value": ""}]
+    """
+    root = ET.Element('etc:TollplazaHbeatReq', {'xmlns:etc': 'http://npci.org/etc/schema/'})
+    ET.SubElement(root, 'Head', {
+        'msgId': msgId,
+        'orgId': orgId,
+        'ts': ts,
+        'ver': '1.0'
+    })
+    txn = ET.SubElement(root, 'Txn', {
+        'id': txn_id,
+        'note': '',
+        'refId': '',
+        'refUrl': '',
+        'ts': ts,
+        'type': 'Hbt',
+        'orgTxnId': ''
+    })
+    meta_elem = ET.SubElement(txn, 'Meta')
+    if meta:
+        for i, m in enumerate(meta, 1):
+            ET.SubElement(meta_elem, f'Meta{i}', m)
+    else:
+        # Add empty Meta1 and Meta2 for ICD compliance
+        ET.SubElement(meta_elem, 'Meta1', {'name': '', 'value': ''})
+        ET.SubElement(meta_elem, 'Meta2', {'name': '', 'value': ''})
+    ET.SubElement(txn, 'HbtMsg', {'type': 'ALIVE', 'acquirerId': acquirer_id})
+    plaza = ET.SubElement(txn, 'Plaza', plaza_info)
+    for lane in lanes:
+        ET.SubElement(plaza, 'Lane', lane)
+    signature = ET.SubElement(root, 'Signature')
+    signature.text = signature_placeholder
+    return ET.tostring(root, encoding='utf-8', method='xml')
+
+def send_heartbeat(msgId, orgId, acquirer_id, plaza_info, lanes, meta=None, signature_placeholder='...'):
+    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+    txn_id = str(uuid.uuid4())[:22]
+    xml_data = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta, signature_placeholder)
+    url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
+    headers = {'Content-Type': 'application/xml'}
+    if SIGN_REQUEST:
+        print("DEBUG: About to sign Heart Beat XML...")
+        signed_xml = sign_xml(xml_data)
+        print("DEBUG: Signed Heart Beat XML generated.")
+        payload = signed_xml
+    else:
+        print('WARNING: Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
+        payload = xml_data
+    response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as e:
+        print("Error details from bank:", response.text)
+        raise
+    return response.content
+
+def parse_heartbeat_response(xml_response):
+    try:
+        from lxml import etree
+        tree = ET.fromstring(xml_response)
+        head = tree.find('Head')
+        txn = tree.find('Txn')
+        resp = txn.find('Resp') if txn is not None else None
+        signature = tree.find('Signature')
+        # Optionally verify signature
+        if VERIFY_SIGNATURE and signature is not None:
+            try:
+                with open(ETOLL_SIGNER_CERT_PATH, 'rb') as cert_file:
+                    cert = cert_file.read()
+                xml_doc = etree.fromstring(xml_response)
+                from signxml import XMLVerifier
+                XMLVerifier().verify(xml_doc, x509_cert=cert)
+                print('[Signature Verification] Heart Beat response signature is valid!')
+            except Exception as ve:
+                print('[Signature Verification] Heart Beat response signature verification failed:', ve)
+        return {
+            'msgId': head.attrib.get('msgId') if head is not None else None,
+            'orgId': head.attrib.get('orgId') if head is not None else None,
+            'ts': head.attrib.get('ts') if head is not None else None,
+            'ver': head.attrib.get('ver') if head is not None else None,
+            'txnId': txn.attrib.get('id') if txn is not None else None,
+            'result': resp.attrib.get('result') if resp is not None else None,
+            'respCode': resp.attrib.get('respCode') if resp is not None else None,
+            'reason': ERROR_CODE_REASON.get(resp.attrib.get('respCode'), 'Unknown error code') if resp is not None and resp.attrib.get('respCode') else None,
+            'signature': signature.text if signature is not None else None
+        }
+    except Exception as e:
+        import traceback
+        print('Exception in parse_heartbeat_response:')
+        traceback.print_exc()
+        return {'error': f'Failed to parse Heart Beat response: {e}'}
+
+
 def parse_sync_time_response(xml_response):
     import xml.etree.ElementTree as ET
     ns = {'etc': 'http://npci.org/etc/schema/'
@@ -815,6 +914,7 @@ if __name__ == '__main__':
     print('1. Tag Details')
     print('2. SyncTime')
     print('3. List Participants')
+    print('4. Heart Beat')
     choice = input('Enter 1, 2, 3, or 4: ').strip()
     if choice == '1':
         print('--- Tag Details API Test ---')
@@ -919,5 +1019,66 @@ if __name__ == '__main__':
             print('Minimal Response:', parsed)
         except Exception as e:
             print('Error sending ListParticipant request:', e)
+    elif choice == '4':
+        print('--- Toll Plaza Heart Beat API Test ---')
+        orgId = input('Enter orgId [default: PGSH]: ').strip() or 'PGSH'
+        plazaId = input('Enter Plaza ID [default: 712764]: ').strip() or '712764'
+        acquirerId = input('Enter Acquirer ID [default: 727274]: ').strip() or '727274'
+        plazaGeoCode = input('Enter Plaza Geo Code [default: 11.0185,76.9778]: ').strip() or '11.0185,76.9778'
+        plazaName = input('Enter Plaza Name [default: Test Plaza]: ').strip() or 'Test Plaza'
+        plazaSubtype = input('Enter Plaza Subtype [default: State]: ').strip() or 'State'
+        plazaType = input('Enter Plaza Type [default: Toll]: ').strip() or 'Toll'
+        address = input('Enter Plaza Address [default: empty]: ').strip() or ''
+        fromDistrict = input('Enter From District [default: empty]: ').strip() or ''
+        toDistrict = input('Enter To District [default: empty]: ').strip() or ''
+        agencyCode = input('Enter Agency Code [default: TCABO]: ').strip() or 'TCABO'
+        try:
+            num_lanes = int(input('Enter number of lanes [default: 2]: ').strip() or '2')
+        except ValueError:
+            num_lanes = 2
+        lanes = []
+        for i in range(num_lanes):
+            print(f'--- Lane {i+1} ---')
+            lane_id = input(f'  Lane ID [default: {plazaId}{i+1:03d}]: ').strip() or f'{plazaId}{i+1:03d}'
+            direction = input('  Direction (E/W/N/S) [default: E]: ').strip() or 'E'
+            readerId = input('  Reader ID [default: empty]: ').strip() or ''
+            status = input('  Status (OPEN/CLOSE) [default: OPEN]: ').strip() or 'OPEN'
+            mode = input('  Mode (Maintenance/Normal) [default: Normal]: ').strip() or 'Normal'
+            laneType = input('  Lane Type (Dedicated/Hybrid/Handheld) [default: Dedicated]: ').strip() or 'Dedicated'
+            lanes.append({
+                'id': lane_id,
+                'direction': direction,
+                'readerId': readerId,
+                'Status': status,
+                'Mode': mode,
+                'laneType': laneType
+            })
+        plaza_info = {
+            'geoCode': plazaGeoCode,
+            'id': plazaId,
+            'name': plazaName,
+            'subtype': plazaSubtype,
+            'type': plazaType,
+            'address': address,
+            'fromDistrict': fromDistrict,
+            'toDistrict': toDistrict,
+            'agencyCode': agencyCode
+        }
+        msgId = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
+        try:
+            response = send_heartbeat(msgId, orgId, acquirerId, plaza_info, lanes)
+            print('Response:')
+            print(response.decode() if isinstance(response, bytes) else response)
+            parsed = parse_heartbeat_response(response)
+            print('\n--- Parsed Heart Beat Response ---')
+            for k, v in parsed.items():
+                if k == 'respCode' and v:
+                    reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
+                    print(f"{k}: {v} ({reason})")
+                else:
+                    print(f"{k}: {v}")
+            print('-------------------------------\n')
+        except Exception as e:
+            print('Error sending Heart Beat request:', e)
     else:
         print('Invalid choice. Exiting.') 
