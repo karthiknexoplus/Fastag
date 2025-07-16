@@ -671,6 +671,8 @@ if __name__ == '__main__':
         try:
             response = requests.post(list_participant_url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
             print('ListParticipant Response:')
+            print('Raw XML Response:')
+            print(response.content.decode())
             parsed = parse_list_participant_response(response.content)
             print('Minimal Response:', parsed)
         except Exception as e:
