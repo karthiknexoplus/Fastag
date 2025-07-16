@@ -1021,42 +1021,23 @@ if __name__ == '__main__':
             print('Error sending ListParticipant request:', e)
     elif choice == '4':
         print('--- Toll Plaza Heart Beat API Test ---')
-        orgId = input('Enter orgId [default: PGSH]: ').strip() or 'PGSH'
-        plazaId = input('Enter Plaza ID [default: 712764]: ').strip() or '712764'
-        acquirerId = input('Enter Acquirer ID [default: 727274]: ').strip() or '727274'
-        plazaGeoCode = input('Enter Plaza Geo Code [default: 11.0185,76.9778]: ').strip() or '11.0185,76.9778'
-        plazaName = input('Enter Plaza Name [default: Test Plaza]: ').strip() or 'Test Plaza'
-        plazaSubtype = input('Enter Plaza Subtype [default: State]: ').strip() or 'State'
-        plazaType = input('Enter Plaza Type [default: Toll]: ').strip() or 'Toll'
-        address = input('Enter Plaza Address [default: empty]: ').strip() or ''
-        fromDistrict = input('Enter From District [default: empty]: ').strip() or ''
-        toDistrict = input('Enter To District [default: empty]: ').strip() or ''
-        agencyCode = input('Enter Agency Code [default: TCABO]: ').strip() or 'TCABO'
-        # Pre-fill lane mapping as per provided table
-        default_lanes = [
+        orgId = 'PGSH'
+        plazaId = '712764'
+        acquirerId = '727274'
+        plazaGeoCode = '11.0185,76.9778'
+        plazaName = 'PGS hospital'
+        plazaSubtype = 'State'
+        plazaType = 'Toll'
+        address = ''
+        fromDistrict = ''
+        toDistrict = ''
+        agencyCode = 'TCABO'
+        lanes = [
             {'id': 'IN01', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
             {'id': 'IN02', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
             {'id': 'OUT01', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
             {'id': 'OUT02', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ]
-        print('Default lane mapping will be used. Press Enter to accept defaults or enter new values.')
-        lanes = []
-        for i, lane in enumerate(default_lanes):
-            print(f'--- Lane {i+1} ---')
-            lane_id = input(f"  Lane ID [default: {lane['id']}]: ").strip() or lane['id']
-            direction = input(f"  Direction (E/W/N/S) [default: {lane['direction']}]: ").strip() or lane['direction']
-            readerId = input('  Reader ID [default: empty]: ').strip() or ''
-            status = input(f"  Status (OPEN/CLOSE) [default: {lane['Status']}]: ").strip() or lane['Status']
-            mode = input(f"  Mode (Maintenance/Normal) [default: {lane['Mode']}]: ").strip() or lane['Mode']
-            laneType = input(f"  Lane Type (Dedicated/Hybrid/Handheld) [default: {lane['laneType']}]: ").strip() or lane['laneType']
-            lanes.append({
-                'id': lane_id,
-                'direction': direction,
-                'readerId': readerId,
-                'Status': status,
-                'Mode': mode,
-                'laneType': laneType
-            })
         plaza_info = {
             'geoCode': plazaGeoCode,
             'id': plazaId,
