@@ -481,4 +481,42 @@ if __name__ == '__main__':
         print(response.decode() if isinstance(response, bytes) else response)
         # Signature verification is already done in send_tag_details
     except Exception as e:
-        print('Error sending Tag Details request:', e) 
+        print('Error sending Tag Details request:', e)
+
+    # --- SyncTime API Test ---
+    print('\n--- SyncTime API Test ---')
+    # Set the UAT endpoint for SyncTime
+    sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
+    ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+    sync_msgId = now.strftime('%Y%m%d%H%M%S')  # Use timestamp as unique msgId
+    # Build unsigned XML
+    sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
+    ET.SubElement(sync_root, 'Head', {
+        'ver': '1.0',
+        'ts': ts,
+        'orgId': orgId,
+        'msgId': sync_msgId
+    })
+    # Sign the XML
+    sync_xml_str = ET.tostring(sync_root, encoding='utf-8', method='xml')
+    print('SyncTime Request XML (unsigned):')
+    print(sync_xml_str.decode())
+    # Use the same signing logic as for Tag Details
+    from lxml import etree
+    sync_xml_doc = etree.fromstring(sync_xml_str)
+    signer = XMLSigner(signature_algorithm="rsa-sha256")
+    with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+        key = key_file.read()
+        cert = cert_file.read()
+    signed_sync_xml = signer.sign(sync_xml_doc, key=key, cert=cert)
+    signed_sync_xml_str = etree.tostring(signed_sync_xml, pretty_print=False, xml_declaration=False)
+    print('SyncTime Request XML (signed):')
+    print(signed_sync_xml_str.decode())
+    # Send the request
+    headers = {'Content-Type': 'application/xml'}
+    try:
+        sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
+        print('SyncTime Response:')
+        print(sync_response.content.decode() if sync_response.content else sync_response.status_code)
+    except Exception as e:
+        print('Error sending SyncTime request:', e) 
