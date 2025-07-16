@@ -1051,10 +1051,25 @@ if __name__ == '__main__':
         }
         msgId = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
         try:
-            response = send_heartbeat(msgId, orgId, acquirerId, plaza_info, lanes)
+            # Build unsigned XML
+            ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
+            txn_id = str(uuid.uuid4())[:22]
+            unsigned_xml = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirerId, plaza_info, lanes)
+            print('Heart Beat Request XML (unsigned):')
+            print(unsigned_xml.decode() if isinstance(unsigned_xml, bytes) else unsigned_xml)
+            # Sign XML
+            print('DEBUG: About to sign Heart Beat XML...')
+            signed_xml = sign_xml(unsigned_xml)
+            print('DEBUG: Signed Heart Beat XML generated.')
+            print('Heart Beat Request XML (signed):')
+            print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+            # Send
+            url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
+            headers = {'Content-Type': 'application/xml'}
+            response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
             print('Response:')
-            print(response.decode() if isinstance(response, bytes) else response)
-            parsed = parse_heartbeat_response(response)
+            print(response.content.decode() if isinstance(response.content, bytes) else response.content)
+            parsed = parse_heartbeat_response(response.content)
             print('\n--- Parsed Heart Beat Response ---')
             for k, v in parsed.items():
                 if k == 'respCode' and v:
