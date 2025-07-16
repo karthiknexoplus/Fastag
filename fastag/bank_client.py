@@ -1025,6 +1025,7 @@ if __name__ == '__main__':
         msgId = txn_id
         try:
             response = send_tag_details(msgId, orgId, vehicle_info)
+            print('HTTP Status Code:', getattr(response, 'status_code', 'N/A'))
             print('Response:')
             print(response.decode() if isinstance(response, bytes) else response)
             # Parse and print a neat summary
@@ -1099,6 +1100,7 @@ if __name__ == '__main__':
         headers = {'Content-Type': 'application/xml'}
         try:
             response = requests.post(list_participant_url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
+            print('HTTP Status Code:', response.status_code)
             print('ListParticipant Response:')
             print('Raw XML Response:')
             print(response.content.decode())
