@@ -511,13 +511,37 @@ def build_list_participant_request(orgId, msgId, txn_id, ts):
     ET.SubElement(plist, 'Participant', {'BankCode': 'ALL'})
     return ET.tostring(root, encoding='utf-8', method='xml')
 
+ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'etolluatsigner_Public.crt.txt')
+
 def parse_list_participant_response(xml_response):
     import xml.etree.ElementTree as ET
     try:
+        # Verify XML signature using signxml and the provided certificate
+        from signxml import XMLVerifier
+        try:
+            with open(ETOLL_SIGNER_CERT_PATH, 'rb') as cert_file:
+                cert = cert_file.read()
+            # signxml expects bytes, so ensure xml_response is bytes
+            if isinstance(xml_response, str):
+                xml_response = xml_response.encode()
+            XMLVerifier().verify(xml_response, x509_cert=cert)
+        except Exception as ve:
+            return {'error': f'Signature verification failed: {ve}'}
+        ns = {'etc': 'http://npci.org/etc/schema/'}
         root = ET.fromstring(xml_response)
-        head = root.find('Head')
-        txn = root.find('Txn')
-        resp = root.find('Resp') if txn is not None else root.find('Resp')
+        # Find Head and Txn with namespace
+        head = root.find('etc:Head', ns)
+        txn = root.find('etc:Txn', ns)
+        # Resp is inside Txn, but may not have namespace
+        resp = None
+        if txn is not None:
+            # Try with and without namespace
+            resp = txn.find('etc:Resp', ns)
+            if resp is None:
+                resp = txn.find('Resp')
+        if resp is None:
+            # Fallback: try to find Resp anywhere
+            resp = root.find('.//Resp')
         result = {
             'msgId': head.attrib.get('msgId') if head is not None else None,
             'orgId': head.attrib.get('orgId') if head is not None else None,
@@ -537,10 +561,14 @@ def parse_list_participant_response(xml_response):
             'reason': ERROR_CODE_REASON.get(resp.attrib.get('respCode'), 'Unknown error code') if resp is not None and resp.attrib.get('respCode') else None,
             'participants': []
         }
-        plist = resp.find('ParticipantList') if resp is not None else None
+        # Try to find ParticipantList inside resp (with or without namespace)
+        plist = None
+        if resp is not None:
+            plist = resp.find('ParticipantList')
+            if plist is None:
+                plist = resp.find('etc:ParticipantList', ns)
         if plist is not None:
             for p in plist.findall('Participant'):
-                # Add all attributes of each Participant
                 result['participants'].append(dict(p.attrib))
         return result
     except Exception as e:
