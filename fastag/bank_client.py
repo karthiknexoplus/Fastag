@@ -997,6 +997,121 @@ def api_sync_time():
 
 TAG_DETAILS_URL = "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails"
 
+def send_query_exception_list_icd(msgId, orgId, exception_list):
+    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
+    txn_id = str(uuid.uuid4())[:22]
+    unsigned_xml = build_query_exception_list_request_icd(msgId, orgId, ts, txn_id, exception_list)
+    print('Query Exception List Request XML (unsigned):')
+    print(unsigned_xml.decode() if isinstance(unsigned_xml, bytes) else unsigned_xml)
+    # Validate XML
+    errors = validate_query_exception_list_xml(unsigned_xml)
+    if errors:
+        print('Validation errors:')
+        for err in errors:
+            print('-', err)
+        print('Request not sent due to validation errors.')
+        sys.exit(1)
+    else:
+        print('XML is ICD-compliant!')
+    print('DEBUG: About to sign Query Exception List XML...')
+    signed_xml = sign_xml(unsigned_xml)
+    print('DEBUG: Signed Query Exception List XML generated.')
+    print('Query Exception List Request XML (signed):')
+    print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqQueryExceptionList'
+    headers = {'Content-Type': 'application/xml'}
+    response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
+    print('HTTP Status Code:', response.status_code)
+    print('Response:')
+    print(response.content.decode() if isinstance(response.content, bytes) else response.content)
+    return response.content
+
+def build_query_exception_list_request_icd(msgId, orgId, ts, txn_id, exception_list):
+    root = ET.Element('etc:ReqQueryExceptionList', {'xmlns:etc': 'http://npci.org/etc/schema/'})
+    head = ET.SubElement(root, 'Head', {
+        'ver': '1.0',
+        'ts': ts,
+        'orgId': orgId,
+        'msgId': msgId
+    })
+    txn = ET.SubElement(root, 'Txn', {
+        'id': txn_id,
+        'note': '',
+        'refId': '',
+        'refUrl': '',
+        'ts': ts,
+        'type': 'Query',
+        'orgTxnId': ''
+    })
+    exc_list = ET.SubElement(txn, 'ExceptionList')
+    for exc in exception_list:
+        ET.SubElement(exc_list, 'Exception', exc)
+    signature = ET.SubElement(root, 'Signature')
+    signature.text = '...' # Placeholder, will be replaced by actual signature
+    return ET.tostring(root, encoding='utf-8', method='xml')
+
+def validate_query_exception_list_xml(xml_bytes):
+    errors = []
+    try:
+        root = ET.fromstring(xml_bytes)
+        ns = {'etc': 'http://npci.org/etc/schema/'}
+        # Root
+        if root.tag != '{http://npci.org/etc/schema/}TollplazaHbeatReq': # This tag is for heartbeat, not exception list
+            errors.append('Root element or namespace is incorrect for exception list.')
+        # Head
+        head = root.find('Head')
+        if head is None:
+            errors.append('Missing Head element for exception list.')
+        else:
+            if head.attrib.get('ver') != '1.0':
+                errors.append('Head.ver must be "1.0" for exception list.')
+            ts = head.attrib.get('ts', '')
+            if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', ts):
+                errors.append('Head.ts format invalid for exception list.')
+            orgId = head.attrib.get('orgId', '')
+            if not re.match(r'^[A-Za-z]{4}$', orgId):
+                errors.append('Head.orgId must be 4 alphabetic chars for exception list.')
+            msgId = head.attrib.get('msgId', '')
+            if not (1 <= len(msgId) <= 35):
+                errors.append('Head.msgId length invalid for exception list.')
+        # Txn
+        txn = root.find('Txn')
+        if txn is None:
+            errors.append('Missing Txn element for exception list.')
+        else:
+            txn_id = txn.attrib.get('id', '')
+            if not (1 <= len(txn_id) <= 22):
+                errors.append('Txn.id length invalid for exception list.')
+            txn_ts = txn.attrib.get('ts', '')
+            if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', txn_ts):
+                errors.append('Txn.ts format invalid for exception list.')
+            if txn.attrib.get('type') != 'Query': # Changed from 'Hbt' to 'Query'
+                errors.append('Txn.type must be "Query" for exception list.')
+            # Meta
+            meta = txn.find('Meta')
+            if meta is None or meta.find('Meta1') is None or meta.find('Meta2') is None:
+                errors.append('Meta1 and Meta2 must be present in Meta for exception list.')
+            # ExceptionList
+            exc_list = txn.find('ExceptionList')
+            if exc_list is None:
+                errors.append('Missing ExceptionList element for exception list.')
+            else:
+                for exc in exc_list.findall('Exception'):
+                    exc_code = exc.attrib.get('excCode', '')
+                    if not re.match(r'^[A-Za-z]{2}$', exc_code):
+                        errors.append(f'Exception.excCode "{exc_code}" is not in correct format (2 alphabetic chars).')
+                    last_fetch_time = exc.attrib.get('lastFetchTime', '')
+                    if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', last_fetch_time):
+                        errors.append(f'Exception.lastFetchTime "{last_fetch_time}" is not in ISO format.')
+        # Signature
+        signature = root.find('Signature')
+        if signature is None:
+            errors.append('Missing Signature element for exception list.')
+    except Exception as e:
+        errors.append(f'XML parsing error for exception list: {e}')
+    return errors
+
+
 if __name__ == '__main__':
     print('Choose which request to send:')
     print('1. Tag Details')
@@ -1199,7 +1314,7 @@ if __name__ == '__main__':
         ]
         try:
             response_content = send_query_exception_list_icd(msgId, orgId, exception_list)
-            parsed = parse_query_exception_list_response_icd(response_content)
+            parsed = parse_query_exception_list_response(response_content)
             print('\n--- Parsed Query Exception List Response ---')
             for k, v in parsed.items():
                 print(f"{k}: {v}")
