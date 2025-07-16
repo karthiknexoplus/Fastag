@@ -1,7 +1,7 @@
 import os
 import requests
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import uuid
 from signxml import XMLSigner, XMLVerifier
 from lxml import etree
@@ -770,7 +770,7 @@ def parse_pay_response(xml_response):
 #     pass
 
 
-def build_query_exception_list_request(msgId, orgId, ts, txnId, exception_list, signature_placeholder='...'):
+def build_query_exception_list_request(msgId, orgId, ts, txn_id, exception_list, signature_placeholder='...'):
     root = ET.Element('etc:ReqQueryExceptionList', {'xmlns:etc': 'http://npci.org/etc/schema/'})
     head = ET.SubElement(root, 'Head', {
         'ver': '1.0',
@@ -779,7 +779,7 @@ def build_query_exception_list_request(msgId, orgId, ts, txnId, exception_list, 
         'msgId': msgId
     })
     txn = ET.SubElement(root, 'Txn', {
-        'id': txnId,
+        'id': txn_id,
         'note': '',
         'refId': '',
         'refUrl': '',
@@ -797,8 +797,8 @@ def build_query_exception_list_request(msgId, orgId, ts, txnId, exception_list, 
 
 def send_query_exception_list(msgId, orgId, exception_list, signature_placeholder='...'):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    txnId = str(uuid.uuid4())[:22]
-    xml_data = build_query_exception_list_request(msgId, orgId, ts, txnId, exception_list, signature_placeholder)
+    txn_id = str(uuid.uuid4())[:22]
+    xml_data = build_query_exception_list_request(msgId, orgId, ts, txn_id, exception_list, signature_placeholder)
     url = os.getenv('BANK_API_EXCEPTIONLIST_URL', 'https://uat-bank-url.example.com/exceptionlist')
     headers = {'Content-Type': 'application/xml'}
     response = requests.post(url, data=xml_data, headers=headers, timeout=10)
@@ -1003,7 +1003,8 @@ if __name__ == '__main__':
     print('2. SyncTime')
     print('3. List Participants')
     print('4. Heart Beat')
-    choice = input('Enter 1, 2, 3, or 4: ').strip()
+    print('5. Request Query Exception List')
+    choice = input('Enter 1, 2, 3, 4, or 5: ').strip()
     if choice == '1':
         print('--- Tag Details API Test ---')
         print("DEBUG: Running latest bank_client.py")
@@ -1186,5 +1187,24 @@ if __name__ == '__main__':
                 print('Raw Response from bank:')
                 print(e.response.content.decode(errors='replace'))
             print('Error sending Heart Beat request:', e)
+    elif choice == '5':
+        print('--- Request Query Exception List API Test ---')
+        orgId = 'PGSH'
+        msgId = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
+        # Use demo exception list (can be edited as needed)
+        last_fetch_time = (datetime.now(timezone.utc) - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S')
+        exception_list = [
+            {'excCode': '01', 'lastFetchTime': last_fetch_time},
+            {'excCode': '02', 'lastFetchTime': last_fetch_time}
+        ]
+        try:
+            response_content = send_query_exception_list_icd(msgId, orgId, exception_list)
+            parsed = parse_query_exception_list_response_icd(response_content)
+            print('\n--- Parsed Query Exception List Response ---')
+            for k, v in parsed.items():
+                print(f"{k}: {v}")
+            print('-------------------------------\n')
+        except Exception as e:
+            print('Error sending Query Exception List request:', e)
     else:
         print('Invalid choice. Exiting.') 
