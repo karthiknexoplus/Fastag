@@ -1064,6 +1064,10 @@ if __name__ == '__main__':
                     print(f"{k}: {v}")
             print('-------------------------------\n')
         except Exception as e:
+            # Try to print the response content if available
+            if hasattr(e, 'response') and e.response is not None:
+                print('Raw Response from bank:')
+                print(e.response.content.decode(errors='replace'))
             print('Error sending Heart Beat request:', e)
     else:
         print('Invalid choice. Exiting.') 
