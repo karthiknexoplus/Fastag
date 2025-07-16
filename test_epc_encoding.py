@@ -10,6 +10,8 @@ Segments:
 Total: 58 bits
 """
 
+import sys
+
 def get_int_input(prompt, minval, maxval, default=None):
     while True:
         val = input(f"{prompt} [{minval}-{maxval}{' default '+str(default) if default is not None else ''}]: ").strip()
@@ -54,15 +56,107 @@ def decode_epc(epc):
         'RFU': rfu
     }
 
+def encode_epc96_icici(header, gs1, tag_supplier_id, serial_no, epc_validation=0):
+    # [Header(8)][GS1(24)][TagSupplierID(5)][SerialNo(32)][EPCValidation(16)] = 85 bits, pad to 96 bits
+    epc = (header & 0xFF) << (24+5+32+16)
+    epc |= (gs1 & 0xFFFFFF) << (5+32+16)
+    epc |= (tag_supplier_id & 0x1F) << (32+16)
+    epc |= (serial_no & 0xFFFFFFFF) << 16
+    epc |= (epc_validation & 0xFFFF)
+    return epc
+
+def decode_epc96_icici(epc):
+    if isinstance(epc, str):
+        epc = epc.strip()
+        if epc.startswith('0x') or epc.startswith('0X'):
+            epc = int(epc, 16)
+        else:
+            epc = int(epc)
+    header = (epc >> 77) & 0xFF
+    gs1 = (epc >> 53) & 0xFFFFFF
+    tag_supplier_id = (epc >> 48) & 0x1F
+    serial_no = (epc >> 16) & 0xFFFFFFFF
+    epc_validation = epc & 0xFFFF
+    return {
+        'Header': header,
+        'GS1': gs1,
+        'Tag_Supplier_ID': tag_supplier_id,
+        'Serial_No': serial_no,
+        'EPC_Validation': epc_validation
+    }
+
+def encode_epc96_ihmcl(header, filter_val, partition, ihmcl_prefix, cch_id, tag_vendor_id, vehicle_id, future_use=0):
+    # [Header(8)][Filter(3)][Partition(3)][IHMCL Prefix(24)][CCH ID(5)][Tag Vendor ID(5)][Vehicle ID(26)][Future Use(6)][Checksum(16)]
+    # Checksum is calculated after all other fields are set
+    epc = (header & 0xFF) << (3+3+24+5+5+26+6+16)
+    epc |= (filter_val & 0x7) << (3+24+5+5+26+6+16)
+    epc |= (partition & 0x7) << (24+5+5+26+6+16)
+    epc |= (ihmcl_prefix & 0xFFFFFF) << (5+5+26+6+16)
+    epc |= (cch_id & 0x1F) << (5+26+6+16)
+    epc |= (tag_vendor_id & 0x1F) << (26+6+16)
+    epc |= (vehicle_id & 0x3FFFFFF) << (6+16)
+    epc |= (future_use & 0x3F) << 16
+    # Checksum will be added later
+    return epc
+
+def add_checksum_epc96_ihmcl(epc):
+    # Calculate checksum (Modulo 10) on the decimal representation of the EPC (excluding the last 16 bits)
+    epc_no_checksum = epc >> 16
+    dec_str = str(epc_no_checksum)
+    # Modulo 10 algorithm: multiply odd/even positions by 3/1 from right
+    total = 0
+    for i, digit in enumerate(reversed(dec_str)):
+        n = int(digit)
+        if (i % 2) == 0:
+            total += n * 3
+        else:
+            total += n
+    check_digit = (10 - (total % 10)) % 10
+    # Place checksum in last 16 bits (for demo, just use check_digit in lowest byte)
+    epc_with_checksum = (epc & (~0xFFFF)) | check_digit
+    return epc_with_checksum, check_digit
+
+def decode_epc96_ihmcl(epc):
+    if isinstance(epc, str):
+        epc = epc.strip()
+        if epc.startswith('0x') or epc.startswith('0X'):
+            epc = int(epc, 16)
+        else:
+            epc = int(epc)
+    header = (epc >> 88) & 0xFF
+    filter_val = (epc >> 85) & 0x7
+    partition = (epc >> 82) & 0x7
+    ihmcl_prefix = (epc >> 58) & 0xFFFFFF
+    cch_id = (epc >> 53) & 0x1F
+    tag_vendor_id = (epc >> 48) & 0x1F
+    vehicle_id = (epc >> 22) & 0x3FFFFFF
+    future_use = (epc >> 16) & 0x3F
+    checksum = epc & 0xFFFF
+    return {
+        'Header': header,
+        'Filter': filter_val,
+        'Partition': partition,
+        'IHMCL_Prefix': ihmcl_prefix,
+        'CCH_ID': cch_id,
+        'Tag_Vendor_ID': tag_vendor_id,
+        'Vehicle_ID': vehicle_id,
+        'Future_Use': future_use,
+        'Checksum': checksum
+    }
+
 def main():
-    print("FASTag EPC Memory Encoder/Decoder (IHMCL/GS1)")
+    print("FASTag EPC Memory Encoder/Decoder (IHMCL/GS1/ICICI)")
     print("Segments: CCH_ID=1 (5b), Issuer_ID (20b), Key_Index (8b), Serial (20b), RFU (5b)")
     while True:
         print("\nChoose an option:")
-        print("1. Encode EPC")
-        print("2. Decode EPC")
-        print("3. Exit")
-        choice = input("Enter 1, 2, or 3: ").strip()
+        print("1. Encode EPC-58 (GS1)")
+        print("2. Decode EPC-58 (GS1)")
+        print("3. Encode EPC-96 (ICICI)")
+        print("4. Decode EPC-96 (ICICI)")
+        print("5. Encode EPC-96 (IHMCL)")
+        print("6. Decode EPC-96 (IHMCL)")
+        print("7. Exit")
+        choice = input("Enter 1-7: ").strip()
         if choice == '1':
             issuer_id = get_int_input("Issuer ID", 0, 1048575)
             issuer_key_index = get_int_input("Issuer Key Index", 0, 255)
@@ -82,6 +176,49 @@ def main():
             except Exception as e:
                 print("Error decoding EPC:", e)
         elif choice == '3':
+            header = get_int_input("Header", 0, 255, default=91)
+            gs1 = get_int_input("GS1 (24b, e.g. 8907048)", 0, 16777215, default=8907048)
+            tag_supplier_id = get_int_input("Tag Supplier ID", 1, 31)
+            serial_no = get_int_input("Unique Tag Serial No", 0, 0xFFFFFFFF)
+            epc_validation = get_int_input("EPC Validation (future use)", 0, 0xFFFF, default=0)
+            epc = encode_epc96_icici(header, gs1, tag_supplier_id, serial_no, epc_validation)
+            print("\nEPC-96 (ICICI) (96 bits):", format(epc, '096b'))
+            print("EPC-96 (ICICI) (hex, 24 digits):", format(epc, '024X'))
+            print("EPC-96 (ICICI) (hex, 0x prefix):", hex(epc))
+        elif choice == '4':
+            epc_val = input("Enter EPC-96 (ICICI) value (hex or int): ").strip()
+            try:
+                fields = decode_epc96_icici(epc_val)
+                print("\nDecoded EPC-96 (ICICI) fields:")
+                for k, v in fields.items():
+                    print(f"{k}: {v}")
+            except Exception as e:
+                print("Error decoding EPC-96 (ICICI):", e)
+        elif choice == '5':
+            header = get_int_input("Header", 0, 255, default=52)
+            filter_val = get_int_input("Filter", 0, 7, default=0)
+            partition = get_int_input("Partition", 0, 7, default=5)
+            ihmcl_prefix = get_int_input("IHMCL Prefix", 0, 16777215, default=8907272)
+            cch_id = get_int_input("CCH ID", 0, 31)
+            tag_vendor_id = get_int_input("Tag Vendor ID", 0, 31)
+            vehicle_id = get_int_input("Vehicle ID", 0, 67108863)
+            future_use = get_int_input("Future Use", 0, 63, default=0)
+            epc = encode_epc96_ihmcl(header, filter_val, partition, ihmcl_prefix, cch_id, tag_vendor_id, vehicle_id, future_use)
+            epc_with_checksum, check_digit = add_checksum_epc96_ihmcl(epc)
+            print(f"\nEPC-96 (IHMCL) (96 bits): {format(epc_with_checksum, '096b')}")
+            print(f"EPC-96 (IHMCL) (hex, 24 digits): {format(epc_with_checksum, '024X')}")
+            print(f"EPC-96 (IHMCL) (hex, 0x prefix): {hex(epc_with_checksum)}")
+            print(f"Checksum (Modulo 10): {check_digit}")
+        elif choice == '6':
+            epc_val = input("Enter EPC-96 (IHMCL) value (hex or int): ").strip()
+            try:
+                fields = decode_epc96_ihmcl(epc_val)
+                print("\nDecoded EPC-96 (IHMCL) fields:")
+                for k, v in fields.items():
+                    print(f"{k}: {v}")
+            except Exception as e:
+                print("Error decoding EPC-96 (IHMCL):", e)
+        elif choice == '7':
             break
         else:
             print("Invalid choice. Try again.")
