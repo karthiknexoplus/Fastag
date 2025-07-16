@@ -7,6 +7,7 @@ from signxml import XMLSigner, XMLVerifier
 from lxml import etree
 import sys
 from flask import Flask, request, jsonify
+import base64
 
 app = Flask(__name__)
 
@@ -575,6 +576,41 @@ def parse_list_participant_response(xml_response):
         return {'error': f'Failed to parse response: {e}'}
 
 
+def extract_and_compare_xml_certificate(xml_response):
+    import xml.etree.ElementTree as ET
+    try:
+        # Parse XML and find the X509Certificate value
+        root = ET.fromstring(xml_response)
+        cert_b64 = None
+        for elem in root.iter():
+            if elem.tag.endswith('X509Certificate'):
+                cert_b64 = elem.text.strip().replace('\n', '').replace('\r', '')
+                break
+        if not cert_b64:
+            print('No <X509Certificate> found in XML.')
+            return False
+        # Convert to PEM
+        pem = '-----BEGIN CERTIFICATE-----\n'
+        for i in range(0, len(cert_b64), 64):
+            pem += cert_b64[i:i+64] + '\n'
+        pem += '-----END CERTIFICATE-----\n'
+        # Read local cert
+        with open(ETOLL_SIGNER_CERT_PATH, 'r') as f:
+            local_pem = f.read().replace('\r', '')
+        # Compare
+        match = pem.strip() == local_pem.strip()
+        print('Certificate in XML matches local etolluatsigner_Public.crt.txt:' if match else 'Certificate in XML does NOT match local etolluatsigner_Public.crt.txt!')
+        if not match:
+            print('\n--- Certificate from XML ---\n')
+            print(pem)
+            print('\n--- Local Certificate ---\n')
+            print(local_pem)
+        return match
+    except Exception as e:
+        print(f'Error extracting or comparing certificate: {e}')
+        return False
+
+
 @app.route('/api/bank/sync_time', methods=['POST'])
 def api_sync_time():
     """API endpoint to trigger a SyncTime request to the bank and return the response."""
@@ -701,6 +737,8 @@ if __name__ == '__main__':
             print('ListParticipant Response:')
             print('Raw XML Response:')
             print(response.content.decode())
+            # Call certificate comparison utility before signature verification
+            extract_and_compare_xml_certificate(response.content)
             parsed = parse_list_participant_response(response.content)
             print('Minimal Response:', parsed)
         except Exception as e:
