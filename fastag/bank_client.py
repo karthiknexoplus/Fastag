@@ -1000,6 +1000,7 @@ if __name__ == '__main__':
         print(f"You can either paste the Heart Beat Response XML below (end with a blank line), or enter a filename to load from {cwd}.")
         user_input = input('Paste XML or enter filename: ').strip()
         xml_response = ''
+        pasted = False
         if user_input and os.path.isfile(os.path.join(cwd, user_input)):
             xml_path = os.path.join(cwd, user_input)
             try:
@@ -1017,6 +1018,12 @@ if __name__ == '__main__':
                 if line.strip() == '':
                     break
                 xml_response += line + '\n'
+            pasted = True
+        if pasted:
+            temp_path = os.path.join(cwd, 'last_heartbeat_response.xml')
+            with open(temp_path, 'w') as f:
+                f.write(xml_response)
+            print(f'[INFO] Pasted XML saved to: {temp_path}')
         print('Raw XML Response:')
         print(xml_response)
         parsed = parse_heartbeat_response(xml_response)
