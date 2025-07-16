@@ -310,11 +310,12 @@ def send_tag_details(msgId, orgId, vehicle_info):
         print("Error details from bank:", response.text)
         raise
     # --- Signature Verification (for response) ---
-    cert_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'etolluatsigner_Public.crt.txt')
-    cert_path = os.path.normpath(cert_path)
+    # Always look for the cert in the project root
+    ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'etolluatsigner_Public.crt.txt')
+    print(f"[DEBUG] Using signer cert path: {ETOLL_SIGNER_CERT_PATH}")
     try:
         from lxml import etree
-        with open(cert_path, 'rb') as f:
+        with open(ETOLL_SIGNER_CERT_PATH, 'rb') as f:
             cert = f.read()
         from signxml import XMLVerifier
         verified_data = XMLVerifier().verify(response.content, x509_cert=cert).signed_xml
@@ -514,7 +515,9 @@ def build_list_participant_request(orgId, msgId, txn_id, ts):
     ET.SubElement(plist, 'Participant', {'BankCode': 'ALL'})
     return ET.tostring(root, encoding='utf-8', method='xml')
 
-ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'etolluatsigner_Public.crt.txt')
+# Always look for the cert in the project root
+ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'etolluatsigner_Public.crt.txt')
+print(f"[DEBUG] Using signer cert path: {ETOLL_SIGNER_CERT_PATH}")
 
 def parse_list_participant_response(xml_response):
     import xml.etree.ElementTree as ET
