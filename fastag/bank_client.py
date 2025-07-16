@@ -517,22 +517,31 @@ def parse_list_participant_response(xml_response):
         root = ET.fromstring(xml_response)
         head = root.find('Head')
         txn = root.find('Txn')
-        resp = txn.find('Resp') if txn is not None else None
+        resp = root.find('Resp') if txn is not None else root.find('Resp')
         result = {
             'msgId': head.attrib.get('msgId') if head is not None else None,
             'orgId': head.attrib.get('orgId') if head is not None else None,
-            'ts': head.attrib.get('ts') if head is not None else None,
+            'head_ts': head.attrib.get('ts') if head is not None else None,
             'ver': head.attrib.get('ver') if head is not None else None,
             'txnId': txn.attrib.get('id') if txn is not None else None,
+            'txn_note': txn.attrib.get('note') if txn is not None else None,
+            'txn_refId': txn.attrib.get('refId') if txn is not None else None,
+            'txn_refUrl': txn.attrib.get('refUrl') if txn is not None else None,
+            'txn_ts': txn.attrib.get('ts') if txn is not None else None,
+            'txn_type': txn.attrib.get('type') if txn is not None else None,
+            'txn_orgTxnId': txn.attrib.get('orgTxnId') if txn is not None else None,
+            'resp_ts': resp.attrib.get('ts') if resp is not None else None,
             'respCode': resp.attrib.get('respCode') if resp is not None else None,
             'result': resp.attrib.get('result') if resp is not None else None,
+            'NoOfParticipant': resp.attrib.get('NoOfParticipant') if resp is not None else None,
             'reason': ERROR_CODE_REASON.get(resp.attrib.get('respCode'), 'Unknown error code') if resp is not None and resp.attrib.get('respCode') else None,
             'participants': []
         }
-        plist = txn.find('ParticipantList') if txn is not None else None
+        plist = resp.find('ParticipantList') if resp is not None else None
         if plist is not None:
             for p in plist.findall('Participant'):
-                result['participants'].append(p.attrib)
+                # Add all attributes of each Participant
+                result['participants'].append(dict(p.attrib))
         return result
     except Exception as e:
         return {'error': f'Failed to parse response: {e}'}
