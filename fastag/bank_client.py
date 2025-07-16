@@ -183,8 +183,8 @@ ERROR_CODE_REASON = {
     '302': 'Status Element is not available',
     '303': 'Incorrect format for Transaction Date',
     '304': 'Transaction Date is of future date',
-    '305': "The given combination for a particular transaction doesn't exist", 
-    '306': "Transaction ID doesn't exist in Transaction Master table", 
+    '305': "The given combination for a particular transaction doesn't exist",
+    '306': "Transaction ID doesn't exist in Transaction Master table",
     '307': 'TxnId in Status element is empty or not in correct format',
     '308': 'Acquirer ID is empty or not in correct format',
     '309': 'Transaction Status Request List element is missing',
@@ -356,22 +356,36 @@ def send_heartbeat(msgId, orgId, lanes, plaza_info, signature_placeholder='...')
 
 
 def parse_heartbeat_response(xml_response):
-    tree = ET.fromstring(xml_response)
-    head = tree.find('Head')
-    txn = tree.find('Txn')
-    resp = txn.find('Resp') if txn is not None else None
-    signature = tree.find('Signature')
-    return {
-        'msgId': head.attrib.get('msgId') if head is not None else None,
-        'orgId': head.attrib.get('orgId') if head is not None else None,
-        'ts': head.attrib.get('ts') if head is not None else None,
-        'ver': head.attrib.get('ver') if head is not None else None,
-        'txnId': txn.attrib.get('id') if txn is not None else None,
-        'result': resp.attrib.get('result') if resp is not None else None,
-        'errCode': resp.attrib.get('errCode') if resp is not None else None,
-        'resp_ts': resp.attrib.get('ts') if resp is not None else None,
-        'signature': signature.text if signature is not None else None
-    }
+    import xml.etree.ElementTree as ET
+    ns = {'etc': 'http://npci.org/etc/schema/'}
+    try:
+        root = ET.fromstring(xml_response)
+        head = root.find('etc:Head', ns)
+        txn = root.find('etc:Txn', ns)
+        resp = txn.find('etc:Resp', ns) if txn is not None else None
+        result = {
+            'msgId': head.attrib.get('msgId') if head is not None else None,
+            'orgId': head.attrib.get('orgId') if head is not None else None,
+            'head_ts': head.attrib.get('ts') if head is not None else None,
+            'ver': head.attrib.get('ver') if head is not None else None,
+            'txnId': txn.attrib.get('id') if txn is not None else None,
+            'txn_note': txn.attrib.get('note') if txn is not None else None,
+            'txn_refId': txn.attrib.get('refId') if txn is not None else None,
+            'txn_refUrl': txn.attrib.get('refUrl') if txn is not None else None,
+            'txn_ts': txn.attrib.get('ts') if txn is not None else None,
+            'txn_type': txn.attrib.get('type') if txn is not None else None,
+            'txn_orgTxnId': txn.attrib.get('orgTxnId') if txn is not None else None,
+            'resp_ts': resp.attrib.get('ts') if resp is not None else None,
+            'errCode': resp.attrib.get('errCode') if resp is not None else None,
+            'result': resp.attrib.get('result') if resp is not None else None,
+            'reason': ERROR_CODE_REASON.get(resp.attrib.get('errCode'), 'Unknown error code') if resp is not None and resp.attrib.get('errCode') else None
+        }
+        return result
+    except Exception as e:
+        import traceback
+        print('Exception in parse_heartbeat_response:')
+        traceback.print_exc()
+        return {'error': f'Failed to parse response: {e}'}
 
 
 def build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_placeholder='...'):
@@ -873,7 +887,8 @@ if __name__ == '__main__':
     print('1. Tag Details')
     print('2. SyncTime')
     print('3. List Participants')
-    choice = input('Enter 1 or 2: ').strip()
+    print('4. Toll Plaza Heart Beat (parse only)')
+    choice = input('Enter 1, 2, 3, or 4: ').strip()
     if choice == '1':
         print('--- Tag Details API Test ---')
         print("DEBUG: Running latest bank_client.py")
@@ -977,5 +992,24 @@ if __name__ == '__main__':
             print('Minimal Response:', parsed)
         except Exception as e:
             print('Error sending ListParticipant request:', e)
+    elif choice == '4':
+        print('--- Toll Plaza Heart Beat Response Parse Test ---')
+        xml_path = input('Enter path to Heart Beat Response XML file: ').strip()
+        try:
+            with open(xml_path, 'r') as f:
+                xml_response = f.read()
+            print('Raw XML Response:')
+            print(xml_response)
+            parsed = parse_heartbeat_response(xml_response)
+            print('\n--- Parsed Heart Beat Response ---')
+            for k, v in parsed.items():
+                if k == 'errCode' and v:
+                    reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
+                    print(f"{k}: {v} ({reason})")
+                else:
+                    print(f"{k}: {v}")
+            print('-------------------------------\n')
+        except Exception as e:
+            print('Error parsing Heart Beat response:', e)
     else:
         print('Invalid choice. Exiting.') 
