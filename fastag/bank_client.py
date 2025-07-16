@@ -885,7 +885,7 @@ if __name__ == '__main__':
         vehicle_info = {
             'TID': '',
             'vehicleRegNo': '',
-            'tagId': '34161FA82032D69802008A60'
+            'tagId': '34161FA82033E8E4037B2920'
         }
         from datetime import datetime
         now = datetime.now()
