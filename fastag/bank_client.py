@@ -1152,7 +1152,7 @@ if __name__ == '__main__':
                 for err in errors:
                     print('-', err)
                 print('Request not sent due to validation errors.')
-                return
+                sys.exit(1)
             else:
                 print('XML is ICD-compliant!')
             # Sign XML
