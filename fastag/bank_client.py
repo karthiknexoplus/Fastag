@@ -460,8 +460,8 @@ def parse_query_exception_list_response(xml_response):
 def api_sync_time():
     """API endpoint to trigger a SyncTime request to the bank and return the response."""
     orgId = request.json.get('orgId', 'PGSH')
-    # Use simple numeric msgId as in ICD sample
-    msgId = request.json.get('msgId', '0001')
+    # Generate a unique msgId for every request
+    msgId = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
     ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
     sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
     sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
@@ -521,10 +521,9 @@ if __name__ == '__main__':
     elif choice == '2':
         print('--- SyncTime API Test ---')
         sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
-        from datetime import datetime
         now = datetime.now()
         ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-        sync_msgId = '0001'
+        sync_msgId = now.strftime('%Y%m%d%H%M%S%f')  # Unique msgId for every request
         orgId = 'PGSH'
         sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
         ET.SubElement(sync_root, 'Head', {
