@@ -288,20 +288,22 @@ ERROR_CODE_REASON = {
 }
 
 # --- Toll Plaza Heart Beat API ---
+# ICD reference: See sample schema in user prompt, matches V2.5
+
 def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta=None, signature_placeholder='...'):
     """
-    Build the Toll Plaza Heart Beat XML request.
-    plaza_info: dict with keys: geoCode, id, name, subtype, type, address, fromDistrict, toDistrict, agencyCode
-    lanes: list of dicts, each with keys: id, direction, readerId, Status, Mode, laneType
-    meta: list of dicts, e.g. [{"name": "", "value": ""}]
+    Build the Toll Plaza Heart Beat XML request as per ICD V2.5 sample schema.
+    All required attributes and order are enforced.
     """
     root = ET.Element('etc:TollplazaHbeatReq', {'xmlns:etc': 'http://npci.org/etc/schema/'})
+    # Head
     ET.SubElement(root, 'Head', {
         'msgId': msgId,
         'orgId': orgId,
         'ts': ts,
         'ver': '1.0'
     })
+    # Txn
     txn = ET.SubElement(root, 'Txn', {
         'id': txn_id,
         'note': '',
@@ -311,18 +313,34 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'type': 'Hbt',
         'orgTxnId': ''
     })
+    # Meta (always present, with Meta1 and Meta2)
     meta_elem = ET.SubElement(txn, 'Meta')
-    if meta:
-        for i, m in enumerate(meta, 1):
-            ET.SubElement(meta_elem, f'Meta{i}', m)
-    else:
-        # Add empty Meta1 and Meta2 for ICD compliance
-        ET.SubElement(meta_elem, 'Meta1', {'name': '', 'value': ''})
-        ET.SubElement(meta_elem, 'Meta2', {'name': '', 'value': ''})
+    ET.SubElement(meta_elem, 'Meta1', {'name': '', 'value': ''})
+    ET.SubElement(meta_elem, 'Meta2', {'name': '', 'value': ''})
+    # HbtMsg
     ET.SubElement(txn, 'HbtMsg', {'type': 'ALIVE', 'acquirerId': acquirer_id})
-    plaza = ET.SubElement(txn, 'Plaza', plaza_info)
+    # Plaza
+    plaza = ET.SubElement(txn, 'Plaza', {
+        'geoCode': plaza_info.get('geoCode', ''),
+        'id': plaza_info.get('id', ''),
+        'name': plaza_info.get('name', ''),
+        'subtype': plaza_info.get('subtype', ''),
+        'type': plaza_info.get('type', ''),
+        'address': plaza_info.get('address', ''),
+        'fromDistrict': plaza_info.get('fromDistrict', ''),
+        'toDistrict': plaza_info.get('toDistrict', ''),
+        'agencyCode': plaza_info.get('agencyCode', '')
+    })
     for lane in lanes:
-        ET.SubElement(plaza, 'Lane', lane)
+        ET.SubElement(plaza, 'Lane', {
+            'id': lane.get('id', ''),
+            'direction': lane.get('direction', ''),
+            'readerId': lane.get('readerId', ''),
+            'Status': lane.get('Status', ''),
+            'Mode': lane.get('Mode', ''),
+            'laneType': lane.get('laneType', '')
+        })
+    # Signature placeholder
     signature = ET.SubElement(root, 'Signature')
     signature.text = signature_placeholder
     return ET.tostring(root, encoding='utf-8', method='xml')
