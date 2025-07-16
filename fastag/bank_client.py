@@ -994,22 +994,28 @@ if __name__ == '__main__':
             print('Error sending ListParticipant request:', e)
     elif choice == '4':
         print('--- Toll Plaza Heart Beat Response Parse Test ---')
-        xml_path = input('Enter path to Heart Beat Response XML file: ').strip()
-        try:
-            with open(xml_path, 'r') as f:
-                xml_response = f.read()
-            print('Raw XML Response:')
-            print(xml_response)
-            parsed = parse_heartbeat_response(xml_response)
-            print('\n--- Parsed Heart Beat Response ---')
-            for k, v in parsed.items():
-                if k == 'errCode' and v:
-                    reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
-                    print(f"{k}: {v} ({reason})")
-                else:
-                    print(f"{k}: {v}")
-            print('-------------------------------\n')
-        except Exception as e:
-            print('Error parsing Heart Beat response:', e)
+        while True:
+            xml_path = input('Enter path to Heart Beat Response XML file: ').strip()
+            if not os.path.isfile(xml_path):
+                print(f"Error: '{xml_path}' is not a valid file. Please enter a valid XML file path.")
+                continue
+            try:
+                with open(xml_path, 'r') as f:
+                    xml_response = f.read()
+                print('Raw XML Response:')
+                print(xml_response)
+                parsed = parse_heartbeat_response(xml_response)
+                print('\n--- Parsed Heart Beat Response ---')
+                for k, v in parsed.items():
+                    if k == 'errCode' and v:
+                        reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
+                        print(f"{k}: {v} ({reason})")
+                    else:
+                        print(f"{k}: {v}")
+                print('-------------------------------\n')
+                break
+            except Exception as e:
+                print('Error parsing Heart Beat response:', e)
+                break
     else:
         print('Invalid choice. Exiting.') 
