@@ -289,7 +289,8 @@ ERROR_CODE_REASON = {
 
 def parse_sync_time_response(xml_response):
     import xml.etree.ElementTree as ET
-    ns = {'etc': 'http://npci.org/etc/schema/'}
+    ns = {'etc': 'http://npci.org/etc/schema/'
+}
     try:
         root = ET.fromstring(xml_response)
         head = root.find('Head')
@@ -994,8 +995,14 @@ if __name__ == '__main__':
             print('Error sending ListParticipant request:', e)
     elif choice == '4':
         print('--- Toll Plaza Heart Beat Response Parse Test ---')
+        import os
+        cwd = os.getcwd()
+        print(f"Place your Heart Beat Response XML file in this directory: {cwd}")
         while True:
-            xml_path = input('Enter path to Heart Beat Response XML file: ').strip()
+            xml_path = input(f'Enter XML filename (or full path) [default: {cwd}/<filename>]: ').strip()
+            # If only a filename is given, prepend cwd
+            if not os.path.isabs(xml_path):
+                xml_path = os.path.join(cwd, xml_path)
             if not os.path.isfile(xml_path):
                 print(f"Error: '{xml_path}' is not a valid file. Please enter a valid XML file path.")
                 continue
