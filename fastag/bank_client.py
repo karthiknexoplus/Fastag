@@ -237,11 +237,23 @@ def sign_xml(xml_data):
         signed_root.append(new_sig)
     return etree.tostring(signed_root)
 
+def generate_txn_id(plaza_id, lane_id, dt=None):
+    """
+    Generate transaction ID as Plaza ID (6 digits) + Lane ID (last 3 digits) + Transaction Date & Time (DDMMYYHHMMSS)
+    """
+    if dt is None:
+        dt = datetime.now()
+    date_str = dt.strftime("%d%m%y%H%M%S")
+    return f"{plaza_id}{lane_id[-3:]}{date_str}"
+
 def send_tag_details(msgId, orgId, vehicle_info):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    txnId = msgId  # Use the same numeric string for txnId as in ICD sample
+    # Use transaction ID logic: Plaza ID (6 digits) + Lane ID (last 3 digits) + DateTime (DDMMYYHHMMSS)
+    plaza_id = '712764'  # Example Plaza ID
+    lane_id = '001'      # Example Lane ID (last 3 digits)
+    txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
-    print('Request XML (unsigned):')
+    print(f'Request XML (unsigned), TxnId: {txnId}')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("DEBUG: Skipping digital signature (not required by bank).")
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
