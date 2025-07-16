@@ -465,8 +465,8 @@ if __name__ == '__main__':
     # Use realistic test data for vehicle_info
     vehicle_info = {
         'TID': '',
-        'vehicleRegNo': 'KA04MJ6369',
-        'tagId': ''
+        'vehicleRegNo': '',
+        'tagId': '34161FA82032D69802008A60'
     }
     # Generate a unique transaction ID (TxnId) as per ICD format
     from datetime import datetime
