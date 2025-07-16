@@ -1,5 +1,7 @@
 from flask import Blueprint, request, Response
 import logging
+import xml.etree.ElementTree as ET
+from signxml import XMLVerifier
 
 bank_api = Blueprint('bank_api', __name__)
 
@@ -15,7 +17,28 @@ def sync_time():
 def tag_details():
     xml_data = request.data.decode('utf-8')
     logging.info(f"Received Tag Details request: {xml_data}")
-    # TODO: Parse XML, validate, and process Tag Details
+
+    # Parse XML and extract details
+    try:
+        root = ET.fromstring(xml_data)
+        ns = {'etc': 'http://npci.org/etc/schema/'}
+        # Find all VehicleDetails
+        vehicle_details = root.findall('.//etc:VehicleDetails', ns)
+        for v in vehicle_details:
+            details = {d.attrib['name']: d.attrib['value'] for d in v.findall('etc:Detail', ns)}
+            logging.info(f"Extracted Vehicle Details: {details}")
+    except Exception as e:
+        logging.error(f"XML parsing failed: {e}")
+
+    # Verify signature (optional but recommended)
+    try:
+        with open('etolluatsigner_Public.crt.txt', 'rb') as f:
+            cert = f.read()
+        XMLVerifier().verify(xml_data, x509_cert=cert)
+        logging.info("Signature verified successfully.")
+    except Exception as e:
+        logging.error(f"Signature verification failed: {e}")
+
     ack_xml = '<Ack>OK</Ack>'
     return Response(ack_xml, mimetype='application/xml')
 
