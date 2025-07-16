@@ -46,7 +46,7 @@ def build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder='...'):
 
 
 def send_sync_time(ver, orgId, msgId, signature_placeholder='...'):
-    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     xml_data = build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder)
     url = get_bank_url()
     headers = {'Content-Type': 'application/xml'}
@@ -328,7 +328,7 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
     return ET.tostring(root, encoding='utf-8', method='xml')
 
 def send_heartbeat(msgId, orgId, acquirer_id, plaza_info, lanes, meta=None, signature_placeholder='...'):
-    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txn_id = str(uuid.uuid4())[:22]
     xml_data = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta, signature_placeholder)
     url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
@@ -441,7 +441,7 @@ def build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_plac
 
 
 def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
-    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     xml_data = build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_placeholder)
     url = os.getenv('BANK_API_CHECKTXN_URL', 'https://uat-bank-url.example.com/checktxn')
@@ -648,7 +648,7 @@ def build_pay_request(msgId, orgId, ts, txnId, entryTxnId, pay_data, signature_p
 
 
 def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
-    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     entryTxnId = str(uuid.uuid4())[:22]
     xml_data = build_pay_request(msgId, orgId, ts, txnId, entryTxnId, pay_data, signature_placeholder)
@@ -708,7 +708,7 @@ def build_query_exception_list_request(msgId, orgId, ts, txnId, exception_list, 
 
 
 def send_query_exception_list(msgId, orgId, exception_list, signature_placeholder='...'):
-    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     xml_data = build_query_exception_list_request(msgId, orgId, ts, txnId, exception_list, signature_placeholder)
     url = os.getenv('BANK_API_EXCEPTIONLIST_URL', 'https://uat-bank-url.example.com/exceptionlist')
@@ -880,8 +880,8 @@ def api_sync_time():
     """API endpoint to trigger a SyncTime request to the bank and return the response."""
     orgId = request.json.get('orgId', 'PGSH')
     # Generate a unique msgId for every request
-    msgId = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
-    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+    msgId = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
+    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
     sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
     ET.SubElement(sync_root, 'Head', {
@@ -1032,19 +1032,23 @@ if __name__ == '__main__':
         fromDistrict = input('Enter From District [default: empty]: ').strip() or ''
         toDistrict = input('Enter To District [default: empty]: ').strip() or ''
         agencyCode = input('Enter Agency Code [default: TCABO]: ').strip() or 'TCABO'
-        try:
-            num_lanes = int(input('Enter number of lanes [default: 2]: ').strip() or '2')
-        except ValueError:
-            num_lanes = 2
+        # Pre-fill lane mapping as per provided table
+        default_lanes = [
+            {'id': 'IN01', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+        ]
+        print('Default lane mapping will be used. Press Enter to accept defaults or enter new values.')
         lanes = []
-        for i in range(num_lanes):
+        for i, lane in enumerate(default_lanes):
             print(f'--- Lane {i+1} ---')
-            lane_id = input(f'  Lane ID [default: {plazaId}{i+1:03d}]: ').strip() or f'{plazaId}{i+1:03d}'
-            direction = input('  Direction (E/W/N/S) [default: E]: ').strip() or 'E'
+            lane_id = input(f"  Lane ID [default: {lane['id']}]: ").strip() or lane['id']
+            direction = input(f"  Direction (E/W/N/S) [default: {lane['direction']}]: ").strip() or lane['direction']
             readerId = input('  Reader ID [default: empty]: ').strip() or ''
-            status = input('  Status (OPEN/CLOSE) [default: OPEN]: ').strip() or 'OPEN'
-            mode = input('  Mode (Maintenance/Normal) [default: Normal]: ').strip() or 'Normal'
-            laneType = input('  Lane Type (Dedicated/Hybrid/Handheld) [default: Dedicated]: ').strip() or 'Dedicated'
+            status = input(f"  Status (OPEN/CLOSE) [default: {lane['Status']}]: ").strip() or lane['Status']
+            mode = input(f"  Mode (Maintenance/Normal) [default: {lane['Mode']}]: ").strip() or lane['Mode']
+            laneType = input(f"  Lane Type (Dedicated/Hybrid/Handheld) [default: {lane['laneType']}]: ").strip() or lane['laneType']
             lanes.append({
                 'id': lane_id,
                 'direction': direction,
@@ -1064,7 +1068,7 @@ if __name__ == '__main__':
             'toDistrict': toDistrict,
             'agencyCode': agencyCode
         }
-        msgId = datetime.utcnow().strftime('%Y%m%d%H%M%S%f')
+        msgId = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
         try:
             response = send_heartbeat(msgId, orgId, acquirerId, plaza_info, lanes)
             print('Response:')
