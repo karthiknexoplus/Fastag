@@ -1054,11 +1054,9 @@ def validate_query_exception_list_xml(xml_bytes):
     errors = []
     try:
         root = ET.fromstring(xml_bytes)
-        ns = {'etc': 'http://npci.org/etc/schema/'}
-        # Root
-        if root.tag != '{http://npci.org/etc/schema/}TollplazaHbeatReq': # This tag is for heartbeat, not exception list
+        # Correct root tag for Query Exception List
+        if root.tag != '{http://npci.org/etc/schema/}ReqQueryExceptionList':
             errors.append('Root element or namespace is incorrect for exception list.')
-        # Head
         head = root.find('Head')
         if head is None:
             errors.append('Missing Head element for exception list.')
@@ -1074,7 +1072,6 @@ def validate_query_exception_list_xml(xml_bytes):
             msgId = head.attrib.get('msgId', '')
             if not (1 <= len(msgId) <= 35):
                 errors.append('Head.msgId length invalid for exception list.')
-        # Txn
         txn = root.find('Txn')
         if txn is None:
             errors.append('Missing Txn element for exception list.')
@@ -1085,12 +1082,8 @@ def validate_query_exception_list_xml(xml_bytes):
             txn_ts = txn.attrib.get('ts', '')
             if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', txn_ts):
                 errors.append('Txn.ts format invalid for exception list.')
-            if txn.attrib.get('type') != 'Query': # Changed from 'Hbt' to 'Query'
+            if txn.attrib.get('type') != 'Query':
                 errors.append('Txn.type must be "Query" for exception list.')
-            # Meta
-            meta = txn.find('Meta')
-            if meta is None or meta.find('Meta1') is None or meta.find('Meta2') is None:
-                errors.append('Meta1 and Meta2 must be present in Meta for exception list.')
             # ExceptionList
             exc_list = txn.find('ExceptionList')
             if exc_list is None:
@@ -1098,8 +1091,8 @@ def validate_query_exception_list_xml(xml_bytes):
             else:
                 for exc in exc_list.findall('Exception'):
                     exc_code = exc.attrib.get('excCode', '')
-                    if not re.match(r'^[A-Za-z]{2}$', exc_code):
-                        errors.append(f'Exception.excCode "{exc_code}" is not in correct format (2 alphabetic chars).')
+                    if not re.match(r'^[0-9]{2}$', exc_code):
+                        errors.append(f'Exception.excCode "{exc_code}" is not in correct format (2 digits).')
                     last_fetch_time = exc.attrib.get('lastFetchTime', '')
                     if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', last_fetch_time):
                         errors.append(f'Exception.lastFetchTime "{last_fetch_time}" is not in ISO format.')
