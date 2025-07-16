@@ -39,7 +39,10 @@ def encode_epc(issuer_id, issuer_key_index, serial_number, rfu=0):
 def decode_epc(epc):
     if isinstance(epc, str):
         epc = epc.strip()
+        # Try hex if it looks like hex (contains A-F or a-f or is all digits)
         if epc.startswith('0x') or epc.startswith('0X'):
+            epc = int(epc, 16)
+        elif all(c in '0123456789abcdefABCDEF' for c in epc):
             epc = int(epc, 16)
         else:
             epc = int(epc)
@@ -69,6 +72,8 @@ def decode_epc96_icici(epc):
     if isinstance(epc, str):
         epc = epc.strip()
         if epc.startswith('0x') or epc.startswith('0X'):
+            epc = int(epc, 16)
+        elif all(c in '0123456789abcdefABCDEF' for c in epc):
             epc = int(epc, 16)
         else:
             epc = int(epc)
@@ -120,6 +125,8 @@ def decode_epc96_ihmcl(epc):
     if isinstance(epc, str):
         epc = epc.strip()
         if epc.startswith('0x') or epc.startswith('0X'):
+            epc = int(epc, 16)
+        elif all(c in '0123456789abcdefABCDEF' for c in epc):
             epc = int(epc, 16)
         else:
             epc = int(epc)
