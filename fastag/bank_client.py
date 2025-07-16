@@ -659,7 +659,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
         print(etree.tostring(verified_data, pretty_print=True).decode())
     except Exception as e:
         print("[Signature Verification] Signature verification failed:", e)
-    return response.content
+    return response
 
 
 def parse_tag_details_response(xml_response):
@@ -1134,11 +1134,11 @@ if __name__ == '__main__':
         msgId = txn_id
         try:
             response = send_tag_details(msgId, orgId, vehicle_info)
-            print('HTTP Status Code:', getattr(response, 'status_code', 'N/A'))
+            print('HTTP Status Code:', response.status_code)
             print('Response:')
-            print(response.decode() if isinstance(response, bytes) else response)
+            print(response.content.decode() if isinstance(response.content, bytes) else response.content)
             # Parse and print a neat summary
-            parsed = parse_tag_details_response(response)
+            parsed = parse_tag_details_response(response.content)
             print('\n--- Parsed Tag Details Response ---')
             for k, v in parsed.items():
                 if k == 'respCode' and v:
