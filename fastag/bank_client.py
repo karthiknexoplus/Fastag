@@ -8,6 +8,7 @@ from lxml import etree
 import sys
 from flask import Flask, request, jsonify
 import base64
+import re
 
 app = Flask(__name__)
 
@@ -289,6 +290,75 @@ ERROR_CODE_REASON = {
 
 # --- Toll Plaza Heart Beat API ---
 # ICD reference: See sample schema in user prompt, matches V2.5
+
+def validate_heartbeat_xml(xml_bytes):
+    errors = []
+    try:
+        root = ET.fromstring(xml_bytes)
+        ns = {'etc': 'http://npci.org/etc/schema/'}
+        # Root
+        if root.tag != '{http://npci.org/etc/schema/}TollplazaHbeatReq':
+            errors.append('Root element or namespace is incorrect.')
+        # Head
+        head = root.find('Head')
+        if head is None:
+            errors.append('Missing Head element.')
+        else:
+            if head.attrib.get('ver') != '1.0':
+                errors.append('Head.ver must be "1.0".')
+            ts = head.attrib.get('ts', '')
+            if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', ts):
+                errors.append('Head.ts format invalid.')
+            orgId = head.attrib.get('orgId', '')
+            if not re.match(r'^[A-Za-z]{4}$', orgId):
+                errors.append('Head.orgId must be 4 alphabetic chars.')
+            msgId = head.attrib.get('msgId', '')
+            if not (1 <= len(msgId) <= 35):
+                errors.append('Head.msgId length invalid.')
+        # Txn
+        txn = root.find('Txn')
+        if txn is None:
+            errors.append('Missing Txn element.')
+        else:
+            txn_id = txn.attrib.get('id', '')
+            if not (1 <= len(txn_id) <= 22):
+                errors.append('Txn.id length invalid.')
+            txn_ts = txn.attrib.get('ts', '')
+            if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', txn_ts):
+                errors.append('Txn.ts format invalid.')
+            if txn.attrib.get('type') != 'Hbt':
+                errors.append('Txn.type must be "Hbt".')
+            # Meta
+            meta = txn.find('Meta')
+            if meta is None or meta.find('Meta1') is None or meta.find('Meta2') is None:
+                errors.append('Meta1 and Meta2 must be present in Meta.')
+            # HbtMsg
+            hbtmsg = txn.find('HbtMsg')
+            if hbtmsg is None or hbtmsg.attrib.get('type') != 'ALIVE' or not hbtmsg.attrib.get('acquirerId'):
+                errors.append('HbtMsg must have type="ALIVE" and acquirerId.')
+            # Plaza
+            plaza = txn.find('Plaza')
+            if plaza is None:
+                errors.append('Missing Plaza element.')
+            else:
+                for attr in ['geoCode', 'id', 'name', 'subtype', 'type', 'address', 'fromDistrict', 'toDistrict', 'agencyCode']:
+                    if attr not in plaza.attrib:
+                        errors.append(f'Plaza missing attribute: {attr}')
+                # Lane(s)
+                lanes = plaza.findall('Lane')
+                if not lanes:
+                    errors.append('At least one Lane must be present in Plaza.')
+                for lane in lanes:
+                    for attr in ['id', 'direction', 'readerId', 'Status', 'Mode', 'laneType']:
+                        if attr not in lane.attrib:
+                            errors.append(f'Lane missing attribute: {attr}')
+        # Signature
+        signature = root.find('Signature')
+        if signature is None:
+            errors.append('Missing Signature element.')
+    except Exception as e:
+        errors.append(f'XML parsing error: {e}')
+    return errors
 
 def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta=None, signature_placeholder='...'):
     """
@@ -1075,6 +1145,16 @@ if __name__ == '__main__':
             unsigned_xml = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirerId, plaza_info, lanes)
             print('Heart Beat Request XML (unsigned):')
             print(unsigned_xml.decode() if isinstance(unsigned_xml, bytes) else unsigned_xml)
+            # Validate XML
+            errors = validate_heartbeat_xml(unsigned_xml)
+            if errors:
+                print('Validation errors:')
+                for err in errors:
+                    print('-', err)
+                print('Request not sent due to validation errors.')
+                return
+            else:
+                print('XML is ICD-compliant!')
             # Sign XML
             print('DEBUG: About to sign Heart Beat XML...')
             signed_xml = sign_xml(unsigned_xml)
