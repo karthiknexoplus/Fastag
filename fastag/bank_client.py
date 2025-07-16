@@ -18,8 +18,9 @@ PROD_URL = os.getenv('BANK_API_PROD_URL', 'https://prod-bank-url.example.com/syn
 # Choose environment: 'UAT' or 'PROD'
 BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 
-PRIVATE_KEY_PATH = "private.txt"
-CERT_PATH = "SSL certificate.txt"
+PRIVATE_KEY_PATH = "private.txt"  # Your private key for signing
+CERT_PATH = "fastag_only_cert.pem"  # Use Let's Encrypt cert for signing (for testing only)
+print(f"[DEBUG] Using cert for signing: {CERT_PATH}")
 
 VERIFY_SIGNATURE = False  # Set to True to enable signature verification (recommended for production)
 SIGN_REQUEST = True  # Set to False to skip XML signing (for UAT or debugging)
