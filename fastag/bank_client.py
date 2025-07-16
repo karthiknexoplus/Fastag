@@ -490,6 +490,54 @@ def parse_query_exception_list_response(xml_response):
     }
 
 
+def build_list_participant_request(orgId, msgId, txn_id, ts):
+    root = ET.Element('etc:ReqListParticipant', {'xmlns:etc': 'http://npci.org/etc/schema/'})
+    ET.SubElement(root, 'Head', {
+        'ver': '1.0',
+        'ts': ts,
+        'orgId': orgId,
+        'msgId': msgId
+    })
+    txn = ET.SubElement(root, 'Txn', {
+        'id': txn_id,
+        'note': '',
+        'refId': '',
+        'refUrl': '',
+        'ts': ts,
+        'type': 'ListParticipant',
+        'orgTxnId': ''
+    })
+    plist = ET.SubElement(txn, 'ParticipantList')
+    ET.SubElement(plist, 'Participant', {'BankCode': 'ALL'})
+    return ET.tostring(root, encoding='utf-8', method='xml')
+
+def parse_list_participant_response(xml_response):
+    import xml.etree.ElementTree as ET
+    try:
+        root = ET.fromstring(xml_response)
+        head = root.find('Head')
+        txn = root.find('Txn')
+        resp = txn.find('Resp') if txn is not None else None
+        result = {
+            'msgId': head.attrib.get('msgId') if head is not None else None,
+            'orgId': head.attrib.get('orgId') if head is not None else None,
+            'ts': head.attrib.get('ts') if head is not None else None,
+            'ver': head.attrib.get('ver') if head is not None else None,
+            'txnId': txn.attrib.get('id') if txn is not None else None,
+            'respCode': resp.attrib.get('respCode') if resp is not None else None,
+            'result': resp.attrib.get('result') if resp is not None else None,
+            'reason': ERROR_CODE_REASON.get(resp.attrib.get('respCode'), 'Unknown error code') if resp is not None and resp.attrib.get('respCode') else None,
+            'participants': []
+        }
+        plist = txn.find('ParticipantList') if txn is not None else None
+        if plist is not None:
+            for p in plist.findall('Participant'):
+                result['participants'].append(p.attrib)
+        return result
+    except Exception as e:
+        return {'error': f'Failed to parse response: {e}'}
+
+
 @app.route('/api/bank/sync_time', methods=['POST'])
 def api_sync_time():
     """API endpoint to trigger a SyncTime request to the bank and return the response."""
@@ -527,6 +575,7 @@ if __name__ == '__main__':
     print('Choose which request to send:')
     print('1. Tag Details')
     print('2. SyncTime')
+    print('3. List Participants')
     choice = input('Enter 1 or 2: ').strip()
     if choice == '1':
         print('--- Tag Details API Test ---')
@@ -588,5 +637,34 @@ if __name__ == '__main__':
             print('Minimal Response:', parsed)
         except Exception as e:
             print('Error sending SyncTime request:', e)
+    elif choice == '3':
+        print('--- List Participants API Test ---')
+        list_participant_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/listParticipant'
+        now = datetime.now()
+        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+        msgId = now.strftime('%Y%m%d%H%M%S%f')
+        orgId = 'PGSH'
+        txn_id = msgId
+        req_xml = build_list_participant_request(orgId, msgId, txn_id, ts)
+        print('ListParticipant Request XML (unsigned):')
+        print(req_xml.decode())
+        from lxml import etree
+        req_xml_doc = etree.fromstring(req_xml)
+        signer = XMLSigner(signature_algorithm="rsa-sha256")
+        with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+            key = key_file.read()
+            cert = cert_file.read()
+        signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
+        signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=False)
+        print('ListParticipant Request XML (signed):')
+        print(signed_xml_str.decode())
+        headers = {'Content-Type': 'application/xml'}
+        try:
+            response = requests.post(list_participant_url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
+            print('ListParticipant Response:')
+            parsed = parse_list_participant_response(response.content)
+            print('Minimal Response:', parsed)
+        except Exception as e:
+            print('Error sending ListParticipant request:', e)
     else:
         print('Invalid choice. Exiting.') 
