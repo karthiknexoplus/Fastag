@@ -5,6 +5,10 @@ from datetime import datetime, timezone
 import uuid
 from signxml import XMLSigner, XMLVerifier
 from lxml import etree
+import sys
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 # Configurable URLs (set via environment variable or config file)
 UAT_URL = os.getenv('BANK_API_UAT_URL', 'https://uat-bank-url.example.com/sync_time')
@@ -452,56 +456,22 @@ def parse_query_exception_list_response(xml_response):
     }
 
 
-if __name__ == '__main__':
-    print('--- Tag Details API Test ---')
-    print("DEBUG: Running latest bank_client.py")
-    # Set the UAT endpoint for IDFC
-    os.environ['BANK_API_TAGDETAILS_URL'] = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
-    orgId = 'PGSH'
-    plazaId = '712764'
-    agencyId = 'TCABO'
-    acquirerId = '727274'
-    plazaGeoCode = '11.0185,76.9778'
-    # Use realistic test data for vehicle_info
-    vehicle_info = {
-        'TID': '',
-        'vehicleRegNo': '',
-        'tagId': '34161FA82032D69802008A60'
-    }
-    # Generate a unique transaction ID (TxnId) as per ICD format
-    from datetime import datetime
-    now = datetime.now()
-    # Example: PlazaID (6) + LaneID (3, use 001 for now) + DateTime (DDMMYYHHMMSS)
-    lane_id = '001'
-    txn_id = f"{plazaId}{lane_id}{now.strftime('%d%m%y%H%M%S')}"
-    msgId = txn_id  # Use the same value for msgId
-    try:
-        response = send_tag_details(msgId, orgId, vehicle_info)
-        print('Response:')
-        print(response.decode() if isinstance(response, bytes) else response)
-        # Signature verification is already done in send_tag_details
-    except Exception as e:
-        print('Error sending Tag Details request:', e)
-
-    # --- SyncTime API Test ---
-    print('\n--- SyncTime API Test ---')
-    # Set the UAT endpoint for SyncTime
+@app.route('/api/bank/sync_time', methods=['POST'])
+def api_sync_time():
+    """API endpoint to trigger a SyncTime request to the bank and return the response."""
+    orgId = request.json.get('orgId', 'PGSH')
+    # Use simple numeric msgId as in ICD sample
+    msgId = request.json.get('msgId', '0001')
+    ts = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
     sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
-    ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-    sync_msgId = '0001'  # Use simple numeric msgId as in ICD sample
-    # Build unsigned XML
     sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
     ET.SubElement(sync_root, 'Head', {
         'ver': '1.0',
         'ts': ts,
         'orgId': orgId,
-        'msgId': sync_msgId
+        'msgId': msgId
     })
-    # Sign the XML
     sync_xml_str = ET.tostring(sync_root, encoding='utf-8', method='xml')
-    print('SyncTime Request XML (unsigned):')
-    print(sync_xml_str.decode())
-    # Use the same signing logic as for Tag Details
     from lxml import etree
     sync_xml_doc = etree.fromstring(sync_xml_str)
     signer = XMLSigner(signature_algorithm="rsa-sha256")
@@ -510,13 +480,78 @@ if __name__ == '__main__':
         cert = cert_file.read()
     signed_sync_xml = signer.sign(sync_xml_doc, key=key, cert=cert)
     signed_sync_xml_str = etree.tostring(signed_sync_xml, pretty_print=False, xml_declaration=False)
-    print('SyncTime Request XML (signed):')
-    print(signed_sync_xml_str.decode())
-    # Send the request
     headers = {'Content-Type': 'application/xml'}
     try:
         sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
-        print('SyncTime Response:')
-        print(sync_response.content.decode() if sync_response.content else sync_response.status_code)
+        return (sync_response.content, sync_response.status_code, {'Content-Type': 'application/xml'})
     except Exception as e:
-        print('Error sending SyncTime request:', e) 
+        return jsonify({'error': str(e)}), 500
+
+
+if __name__ == '__main__':
+    print('Choose which request to send:')
+    print('1. Tag Details')
+    print('2. SyncTime')
+    choice = input('Enter 1 or 2: ').strip()
+    if choice == '1':
+        print('--- Tag Details API Test ---')
+        print("DEBUG: Running latest bank_client.py")
+        os.environ['BANK_API_TAGDETAILS_URL'] = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+        orgId = 'PGSH'
+        plazaId = '712764'
+        agencyId = 'TCABO'
+        acquirerId = '727274'
+        plazaGeoCode = '11.0185,76.9778'
+        vehicle_info = {
+            'TID': '',
+            'vehicleRegNo': '',
+            'tagId': '34161FA82032D69802008A60'
+        }
+        from datetime import datetime
+        now = datetime.now()
+        lane_id = '001'
+        txn_id = f"{plazaId}{lane_id}{now.strftime('%d%m%y%H%M%S')}"
+        msgId = txn_id
+        try:
+            response = send_tag_details(msgId, orgId, vehicle_info)
+            print('Response:')
+            print(response.decode() if isinstance(response, bytes) else response)
+        except Exception as e:
+            print('Error sending Tag Details request:', e)
+    elif choice == '2':
+        print('--- SyncTime API Test ---')
+        sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
+        from datetime import datetime
+        now = datetime.now()
+        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+        sync_msgId = '0001'
+        orgId = 'PGSH'
+        sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
+        ET.SubElement(sync_root, 'Head', {
+            'ver': '1.0',
+            'ts': ts,
+            'orgId': orgId,
+            'msgId': sync_msgId
+        })
+        sync_xml_str = ET.tostring(sync_root, encoding='utf-8', method='xml')
+        print('SyncTime Request XML (unsigned):')
+        print(sync_xml_str.decode())
+        from lxml import etree
+        sync_xml_doc = etree.fromstring(sync_xml_str)
+        signer = XMLSigner(signature_algorithm="rsa-sha256")
+        with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+            key = key_file.read()
+            cert = cert_file.read()
+        signed_sync_xml = signer.sign(sync_xml_doc, key=key, cert=cert)
+        signed_sync_xml_str = etree.tostring(signed_sync_xml, pretty_print=False, xml_declaration=False)
+        print('SyncTime Request XML (signed):')
+        print(signed_sync_xml_str.decode())
+        headers = {'Content-Type': 'application/xml'}
+        try:
+            sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
+            print('SyncTime Response:')
+            print(sync_response.content.decode() if sync_response.content else sync_response.status_code)
+        except Exception as e:
+            print('Error sending SyncTime request:', e)
+    else:
+        print('Invalid choice. Exiting.') 
