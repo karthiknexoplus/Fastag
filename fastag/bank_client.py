@@ -656,6 +656,7 @@ def api_sync_time():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+TAG_DETAILS_URL = "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails"
 
 if __name__ == '__main__':
     print('Choose which request to send:')
@@ -666,7 +667,7 @@ if __name__ == '__main__':
     if choice == '1':
         print('--- Tag Details API Test ---')
         print("DEBUG: Running latest bank_client.py")
-        os.environ['BANK_API_TAGDETAILS_URL'] = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+        os.environ['BANK_API_TAGDETAILS_URL'] = TAG_DETAILS_URL
         orgId = 'PGSH'
         plazaId = '712764'
         agencyId = 'TCABO'
