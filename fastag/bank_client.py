@@ -690,6 +690,17 @@ if __name__ == '__main__':
             response = send_tag_details(msgId, orgId, vehicle_info)
             print('Response:')
             print(response.decode() if isinstance(response, bytes) else response)
+            # Parse and print a neat summary
+            parsed = parse_tag_details_response(response)
+            print('\n--- Parsed Tag Details Response ---')
+            for k, v in parsed.items():
+                if k == 'respCode' and v:
+                    from fastag.bank_client import ERROR_CODE_REASON
+                    reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
+                    print(f"{k}: {v} ({reason})")
+                else:
+                    print(f"{k}: {v}")
+            print('-------------------------------\n')
         except Exception as e:
             print('Error sending Tag Details request:', e)
     elif choice == '2':
