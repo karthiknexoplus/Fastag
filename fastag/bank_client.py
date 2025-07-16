@@ -997,32 +997,36 @@ if __name__ == '__main__':
         print('--- Toll Plaza Heart Beat Response Parse Test ---')
         import os
         cwd = os.getcwd()
-        print(f"Place your Heart Beat Response XML file in this directory: {cwd}")
-        while True:
-            xml_path = input(f'Enter XML filename (or full path) [default: {cwd}/<filename>]: ').strip()
-            # If only a filename is given, prepend cwd
-            if not os.path.isabs(xml_path):
-                xml_path = os.path.join(cwd, xml_path)
-            if not os.path.isfile(xml_path):
-                print(f"Error: '{xml_path}' is not a valid file. Please enter a valid XML file path.")
-                continue
+        print(f"You can either paste the Heart Beat Response XML below (end with a blank line), or enter a filename to load from {cwd}.")
+        user_input = input('Paste XML or enter filename: ').strip()
+        xml_response = ''
+        if user_input and os.path.isfile(os.path.join(cwd, user_input)):
+            xml_path = os.path.join(cwd, user_input)
             try:
                 with open(xml_path, 'r') as f:
                     xml_response = f.read()
-                print('Raw XML Response:')
-                print(xml_response)
-                parsed = parse_heartbeat_response(xml_response)
-                print('\n--- Parsed Heart Beat Response ---')
-                for k, v in parsed.items():
-                    if k == 'errCode' and v:
-                        reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
-                        print(f"{k}: {v} ({reason})")
-                    else:
-                        print(f"{k}: {v}")
-                print('-------------------------------\n')
-                break
             except Exception as e:
-                print('Error parsing Heart Beat response:', e)
-                break
+                print(f"Error reading file: {e}")
+                exit(1)
+        else:
+            if user_input:
+                xml_response = user_input + '\n'
+            print('(Paste the rest of the XML, end with a blank line)')
+            while True:
+                line = input()
+                if line.strip() == '':
+                    break
+                xml_response += line + '\n'
+        print('Raw XML Response:')
+        print(xml_response)
+        parsed = parse_heartbeat_response(xml_response)
+        print('\n--- Parsed Heart Beat Response ---')
+        for k, v in parsed.items():
+            if k == 'errCode' and v:
+                reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
+                print(f"{k}: {v} ({reason})")
+            else:
+                print(f"{k}: {v}")
+        print('-------------------------------\n')
     else:
         print('Invalid choice. Exiting.') 
