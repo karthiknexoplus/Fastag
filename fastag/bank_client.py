@@ -695,7 +695,6 @@ if __name__ == '__main__':
             print('\n--- Parsed Tag Details Response ---')
             for k, v in parsed.items():
                 if k == 'respCode' and v:
-                    from fastag.bank_client import ERROR_CODE_REASON
                     reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
                     print(f"{k}: {v} ({reason})")
                 else:
