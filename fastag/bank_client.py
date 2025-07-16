@@ -51,23 +51,27 @@ def send_sync_time(ver, orgId, msgId, signature_placeholder='...'):
 
 
 def parse_sync_time_response(xml_response):
-    tree = ET.fromstring(xml_response)
+    import xml.etree.ElementTree as ET
     ns = {'etc': 'http://npci.org/etc/schema/'}
-    head = tree.find('Head')
-    resp = tree.find('Resp')
-    time_elem = resp.find('Time') if resp is not None else None
-    signature = tree.find('Signature')
-    return {
-        'msgId': head.attrib.get('msgId') if head is not None else None,
-        'orgId': head.attrib.get('orgId') if head is not None else None,
-        'ts': head.attrib.get('ts') if head is not None else None,
-        'ver': head.attrib.get('ver') if head is not None else None,
-        'respCode': resp.attrib.get('respCode') if resp is not None else None,
-        'result': resp.attrib.get('result') if resp is not None else None,
-        'resp_ts': resp.attrib.get('ts') if resp is not None else None,
-        'serverTime': time_elem.attrib.get('serverTime') if time_elem is not None else None,
-        'signature': signature.text if signature is not None else None
-    }
+    try:
+        root = ET.fromstring(xml_response)
+        head = root.find('Head')
+        resp = root.find('Resp')
+        result = {
+            'msgId': head.attrib.get('msgId') if head is not None else None,
+            'orgId': head.attrib.get('orgId') if head is not None else None,
+            'ts': head.attrib.get('ts') if head is not None else None,
+            'ver': head.attrib.get('ver') if head is not None else None,
+            'respCode': resp.attrib.get('respCode') if resp is not None else None,
+            'result': resp.attrib.get('result') if resp is not None else None,
+            'serverTime': None
+        }
+        time_elem = resp.find('Time') if resp is not None else None
+        if time_elem is not None:
+            result['serverTime'] = time_elem.attrib.get('serverTime')
+        return result
+    except Exception as e:
+        return {'error': f'Failed to parse response: {e}'}
 
 
 def build_heartbeat_request(msgId, orgId, ts, txnId, lanes, plaza_info, signature_placeholder='...'):
@@ -483,7 +487,8 @@ def api_sync_time():
     headers = {'Content-Type': 'application/xml'}
     try:
         sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
-        return (sync_response.content, sync_response.status_code, {'Content-Type': 'application/xml'})
+        parsed = parse_sync_time_response(sync_response.content)
+        return jsonify(parsed), sync_response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -549,7 +554,8 @@ if __name__ == '__main__':
         try:
             sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
             print('SyncTime Response:')
-            print(sync_response.content.decode() if sync_response.content else sync_response.status_code)
+            parsed = parse_sync_time_response(sync_response.content)
+            print('Minimal Response:', parsed)
         except Exception as e:
             print('Error sending SyncTime request:', e)
     else:
