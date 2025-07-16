@@ -13,8 +13,8 @@ PROD_URL = os.getenv('BANK_API_PROD_URL', 'https://prod-bank-url.example.com/syn
 # Choose environment: 'UAT' or 'PROD'
 BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 
-PRIVATE_KEY_PATH = "certs/rsa-privkey.pem"
-CERT_PATH = "certs/rsa-cert.pem"
+PRIVATE_KEY_PATH = "private.txt"
+CERT_PATH = "SSL certificate.txt"
 
 
 def get_bank_url():
@@ -255,10 +255,14 @@ def send_tag_details(msgId, orgId, vehicle_info):
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
     print(f'Request XML (unsigned), TxnId: {txnId}')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
-    print("DEBUG: Skipping digital signature (not required by bank).")
+    print("DEBUG: About to sign XML...")
+    signed_xml = sign_xml(xml_data)
+    print("DEBUG: Signed XML generated.")
+    print('Request XML (signed):')
+    print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
+    response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
