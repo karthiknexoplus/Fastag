@@ -1194,6 +1194,16 @@ def validate_query_exception_list_xml(xml_bytes):
                     last_fetch_time = exc.attrib.get('lastFetchTime', '')
                     if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$', last_fetch_time):
                         errors.append(f'Exception.lastFetchTime "{last_fetch_time}" is not in ISO format.')
+                    else:
+                        # Check if lastFetchTime is not more than 24 hours ago
+                        try:
+                            from datetime import datetime, timezone, timedelta
+                            lft_dt = datetime.strptime(last_fetch_time, '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc)
+                            now_dt = datetime.now(timezone.utc)
+                            if (now_dt - lft_dt) > timedelta(hours=24):
+                                errors.append(f'Exception.lastFetchTime "{last_fetch_time}" is more than 24 hours ago.')
+                        except Exception as e:
+                            errors.append(f'Exception.lastFetchTime "{last_fetch_time}" could not be parsed: {e}')
         # Signature
         signature = root.find('Signature')
         if signature is None:
