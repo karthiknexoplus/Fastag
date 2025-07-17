@@ -149,6 +149,15 @@
     max-width: 400px;
   }
 }
+.addon-card, .tech-card {
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+  cursor: pointer;
+}
+.addon-card:hover, .tech-card:hover {
+  box-shadow: 0 6px 24px rgba(127,83,172,0.13), 0 1.5px 8px rgba(90,103,216,0.10);
+  background: linear-gradient(90deg, #f3e5f5 0%, #e3f2fd 100%);
+  transform: translateY(-2px) scale(1.03);
+}
 </style>
 {% endblock %}
 {% block content %}
@@ -261,37 +270,127 @@
       </div>
     </div>
   </div>
-  <div class="row mb-5">
+  <div class="row mb-5 g-4">
     <div class="col-md-6">
       <div class="addons-section">
         <h4 class="fw-bold mb-3">✨ Add-Ons</h4>
-        <ul class="mb-0">
-          <li>Extra WhatsApp/SMS credits</li>
-          <li>Advanced analytics dashboard</li>
-          <li>Custom report designer</li>
-          <li>On-premise DB backup</li>
-          <li>White-labeled mobile app</li>
-          <li>Emergency assist service (24/7)</li>
-          <li>Custom hardware support</li>
-          <li>Annual on-site maintenance</li>
-          <li>Extra user logins pack</li>
-          <li>API integration with ERP/visitor apps</li>
-          <li>Prepaid wallet for tenants</li>
-        </ul>
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-chat-dots fs-3 text-primary"></i>
+              <span>Extra WhatsApp/SMS credits</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-bar-chart-line fs-3 text-success"></i>
+              <span>Advanced analytics dashboard</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-file-earmark-bar-graph fs-3 text-info"></i>
+              <span>Custom report designer</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-hdd-network fs-3 text-warning"></i>
+              <span>On-premise DB backup</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-phone fs-3 text-secondary"></i>
+              <span>White-labeled mobile app</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-shield-check fs-3 text-danger"></i>
+              <span>Emergency assist service (24/7)</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-cpu fs-3 text-primary"></i>
+              <span>Custom hardware support</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-calendar-check fs-3 text-success"></i>
+              <span>Annual on-site maintenance</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-people fs-3 text-info"></i>
+              <span>Extra user logins pack</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-plug fs-3 text-warning"></i>
+              <span>API integration with ERP/visitor apps</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-wallet2 fs-3 text-secondary"></i>
+              <span>Prepaid wallet for tenants</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="col-md-6">
       <div class="tech-section">
         <h4 class="fw-bold mb-3">💡 Technical Highlights</h4>
-        <ul class="mb-0">
-          <li>100% cloud-based with secure auto backup</li>
-          <li>Web dashboard + mobile app (iOS & Android)</li>
-          <li>Secure HTTPS & encrypted API</li>
-          <li>Works globally — manage anywhere</li>
-          <li>Supports future EV charging integration</li>
-          <li>IoT ready — real-time data sync</li>
-          <li>Simple onboarding: scan, assign, go live</li>
-        </ul>
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-cloud-arrow-up fs-3 text-primary"></i>
+              <span>100% cloud-based with secure auto backup</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-laptop fs-3 text-success"></i>
+              <span>Web dashboard + mobile app (iOS & Android)</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-shield-lock fs-3 text-info"></i>
+              <span>Secure HTTPS & encrypted API</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-globe2 fs-3 text-warning"></i>
+              <span>Works globally — manage anywhere</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-ev-station fs-3 text-secondary"></i>
+              <span>Supports future EV charging integration</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-broadcast-pin fs-3 text-danger"></i>
+              <span>IoT ready — real-time data sync</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-qr-code-scan fs-3 text-primary"></i>
+              <span>Simple onboarding: scan, assign, go live</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
