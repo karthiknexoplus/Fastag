@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Plans & Pricing - FASTag Access Control{% endblock %}
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+.hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 4rem 0 2rem 0;
+  text-align: center;
+}
+.pricing-card {
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+  border: none;
+  transition: transform 0.3s, box-shadow 0.3s;
+  background: #fff;
+}
+.pricing-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.18);
+}
+.pricing-card .plan-badge {
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 1rem;
+  padding: 0.3rem 1rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+.plan-starter { background: #e3f2fd; color: #1976d2; }
+.plan-pro { background: #fff3e0; color: #ff9800; }
+.plan-master { background: #f3e5f5; color: #8e24aa; }
+.pricing-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0 0;
+}
+.pricing-card ul li {
+  margin-bottom: 0.7rem;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+}
+.pricing-card ul li i {
+  color: #28a745;
+  margin-right: 0.7rem;
+}
+.comparison-table th, .comparison-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+.comparison-table th {
+  background: #f8f9fa;
+}
+.addons-section, .tech-section {
+  background: #f8f9fa;
+  border-radius: 1.5rem;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.cta-section {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  color: #fff;
+  border-radius: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+.cta-section .btn {
+  font-size: 1.2rem;
+  padding: 0.8rem 2.5rem;
+  border-radius: 2rem;
+  font-weight: 600;
+}
+@media (max-width: 991px) {
+  .pricing-card { margin-bottom: 2rem; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1 class="display-4 fw-bold mb-3">FASTag Access Control Plans</h1>
+  <p class="lead mb-4">Choose the perfect plan for your apartment, office, or commercial parking. <br>Modern, secure, and scalable access control for every need.</p>
+</div>
+<div class="container py-5">
+  <div class="row justify-content-center mb-5">
+    <div class="col-lg-4">
+      <div class="card pricing-card h-100 border-0 shadow-sm">
+        <div class="card-body text-center">
+          <span class="plan-badge plan-starter">🟢 Entry Gate</span>
+          <h3 class="fw-bold mb-3">Starter</h3>
+          <ul class="text-start">
+            <li><i class="fas fa-check-circle"></i> FASTag-enabled automatic entry & exit</li>
+            <li><i class="fas fa-check-circle"></i> UHF Reader + Boom Barrier control</li>
+            <li><i class="fas fa-check-circle"></i> Manual whitelist by vehicle/FASTag</li>
+            <li><i class="fas fa-check-circle"></i> Basic remote barrier open/close</li>
+            <li><i class="fas fa-check-circle"></i> Entry/exit history with date & time</li>
+            <li><i class="fas fa-check-circle"></i> Owner details: vehicle, model, fuel</li>
+            <li><i class="fas fa-check-circle"></i> Non-FASTag vehicle record manually</li>
+            <li><i class="fas fa-check-circle"></i> Basic visitor management</li>
+            <li><i class="fas fa-check-circle"></i> Real-time barrier status</li>
+            <li><i class="fas fa-check-circle"></i> Wiegand reader support</li>
+            <li><i class="fas fa-check-circle"></i> Up to 2 barriers & 2 readers</li>
+            <li><i class="fas fa-check-circle"></i> Mobile app & web dashboard</li>
+            <li><i class="fas fa-check-circle"></i> Basic user access control</li>
+            <li><i class="fas fa-check-circle"></i> Cloud database storage</li>
+            <li><i class="fas fa-check-circle"></i> Standard email support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card pricing-card h-100 border-0 shadow-sm">
+        <div class="card-body text-center">
+          <span class="plan-badge plan-pro">🟡 Barrier Pro</span>
+          <h3 class="fw-bold mb-3">Standard</h3>
+          <ul class="text-start">
+            <li><i class="fas fa-check-circle"></i> Everything in Starter, PLUS:</li>
+            <li><i class="fas fa-check-circle"></i> Auto FASTag vehicle fetch & whitelist</li>
+            <li><i class="fas fa-check-circle"></i> FASTag onboarding via QR scan</li>
+            <li><i class="fas fa-check-circle"></i> FASTag balance & challans</li>
+            <li><i class="fas fa-check-circle"></i> Know FASTag’s bank association</li>
+            <li><i class="fas fa-check-circle"></i> Multi-site config (up to 3 sites)</li>
+            <li><i class="fas fa-check-circle"></i> Unlimited manual vehicle addition</li>
+            <li><i class="fas fa-check-circle"></i> Auto visitor waitlist & auto-open</li>
+            <li><i class="fas fa-check-circle"></i> Owner can lock vehicle remotely</li>
+            <li><i class="fas fa-check-circle"></i> WhatsApp/SMS on entry & exit</li>
+            <li><i class="fas fa-check-circle"></i> Reader settings: remote config</li>
+            <li><i class="fas fa-check-circle"></i> Real-time monitoring</li>
+            <li><i class="fas fa-check-circle"></i> Scheduled DB backup/restore</li>
+            <li><i class="fas fa-check-circle"></i> Role-based user management</li>
+            <li><i class="fas fa-check-circle"></i> SSH access to controllers</li>
+            <li><i class="fas fa-check-circle"></i> Up to 5 barriers & 5 readers</li>
+            <li><i class="fas fa-check-circle"></i> WhatsApp/SMS pack (limited)</li>
+            <li><i class="fas fa-check-circle"></i> Priority email support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card pricing-card h-100 border-0 shadow-sm">
+        <div class="card-body text-center">
+          <span class="plan-badge plan-master">🟠 Access Master</span>
+          <h3 class="fw-bold mb-3">Premium</h3>
+          <ul class="text-start">
+            <li><i class="fas fa-check-circle"></i> Everything in Standard, PLUS:</li>
+            <li><i class="fas fa-check-circle"></i> Unlimited sites & onboarding</li>
+            <li><i class="fas fa-check-circle"></i> Real-time vehicle search/history</li>
+            <li><i class="fas fa-check-circle"></i> Find FASTag’s bank & owner instantly</li>
+            <li><i class="fas fa-check-circle"></i> Advanced visitor mgmt: QR pass</li>
+            <li><i class="fas fa-check-circle"></i> Blacklist/whitelist on the fly</li>
+            <li><i class="fas fa-check-circle"></i> Owner lock with timed unlock</li>
+            <li><i class="fas fa-check-circle"></i> Advanced analytics & reports</li>
+            <li><i class="fas fa-check-circle"></i> Scheduled reports by email/WA</li>
+            <li><i class="fas fa-check-circle"></i> Remote firmware update</li>
+            <li><i class="fas fa-check-circle"></i> Remote health status</li>
+            <li><i class="fas fa-check-circle"></i> Emergency barrier lock/unlock</li>
+            <li><i class="fas fa-check-circle"></i> Automatic challan alerts</li>
+            <li><i class="fas fa-check-circle"></i> Payment gateway integration</li>
+            <li><i class="fas fa-check-circle"></i> White-labeling & API access</li>
+            <li><i class="fas fa-check-circle"></i> WhatsApp support (high quota)</li>
+            <li><i class="fas fa-check-circle"></i> Dedicated account manager</li>
+            <li><i class="fas fa-check-circle"></i> Priority phone & WA support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-bordered comparison-table align-middle">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Entry Gate<br><span class="badge bg-success">Starter</span></th>
+              <th>Barrier Pro<br><span class="badge bg-warning text-dark">Standard</span></th>
+              <th>Access Master<br><span class="badge bg-danger">Premium</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>FASTag auto-fetch</td><td>❌</td><td>✅</td><td>✅</td></tr>
+            <tr><td>QR onboarding</td><td>❌</td><td>✅</td><td>✅</td></tr>
+            <tr><td>Visitor waitlist</td><td>Basic</td><td>✅</td><td>Advanced QR</td></tr>
+            <tr><td>WhatsApp alerts</td><td>❌</td><td>Limited</td><td>High quota</td></tr>
+            <tr><td>Remote firmware</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>Multi-site</td><td>❌</td><td>3 sites</td><td>Unlimited</td></tr>
+            <tr><td>Max barriers</td><td>2</td><td>5</td><td>10+</td></tr>
+            <tr><td>API & ERP</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>White-label</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>Support</td><td>Email</td><td>Priority Email</td><td>Priority Phone & WhatsApp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-5">
+    <div class="col-md-6">
+      <div class="addons-section">
+        <h4 class="fw-bold mb-3">✨ Extra Add-Ons</h4>
+        <ul class="mb-0">
+          <li>Extra WhatsApp/SMS credits</li>
+          <li>Advanced analytics dashboard</li>
+          <li>Custom report designer</li>
+          <li>On-premise DB backup</li>
+          <li>White-labeled mobile app</li>
+          <li>Emergency assist service (24/7)</li>
+          <li>Custom hardware support</li>
+          <li>Annual on-site maintenance</li>
+          <li>Extra user logins pack</li>
+          <li>API integration with ERP/visitor apps</li>
+          <li>Prepaid wallet for tenants</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="tech-section">
+        <h4 class="fw-bold mb-3">💡 Technical Highlights</h4>
+        <ul class="mb-0">
+          <li>100% cloud-based with secure auto backup</li>
+          <li>Web dashboard + mobile app (iOS & Android)</li>
+          <li>Secure HTTPS & encrypted API</li>
+          <li>Works globally — manage anywhere</li>
+          <li>Supports future EV charging integration</li>
+          <li>IoT ready — real-time data sync</li>
+          <li>Simple onboarding: scan, assign, go live</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="cta-section">
+    <h2 class="fw-bold mb-3">Ready to upgrade your access control?</h2>
+    <p class="lead mb-4">Contact us for a personalized demo, pricing, or to get started with FASTag Access Control today.</p>
+    <a href="mailto:sales@onebee.in" class="btn btn-light btn-lg shadow">Contact Sales</a>
+  </div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+{% endblock %} 
