@@ -86,17 +86,24 @@
                 <span class="fw-bold text-dark" style="font-size:1.2rem; letter-spacing:1px;">FASTag Parking</span>
             </a>
             <div class="d-flex align-items-center ms-auto">
+                {% if not session.get('user') %}
+                <a href="{{ url_for('analytics.pricing') }}" class="nav-icon-link {% if request.endpoint == 'analytics.pricing' %}active{% endif %}" title="Pricing">
+                    <i class="fas fa-tags"></i>
+                    <span class="nav-label d-none d-md-inline">Pricing</span>
+                </a>
+                <a href="{{ url_for('google_auth.login') }}" class="nav-icon-link" title="Login">
+                    <i class="fab fa-google"></i>
+                    <span class="nav-label d-none d-md-inline">Login</span>
+                </a>
+                {% else %}
                 <a href="{{ url_for('auth.home') }}" class="nav-icon-link {% if request.endpoint == 'auth.home' %}active{% endif %}" title="Dashboard">
                     <i class="fas fa-home"></i>
                     <span class="nav-label d-none d-md-inline">Dashboard</span>
                 </a>
-                {% if session.get('user') %}
                 <a href="{{ url_for('all_data.all_data') }}" class="nav-icon-link {% if request.endpoint == 'all_data.all_data' %}active{% endif %}" title="All Data">
                     <i class="fas fa-database"></i>
                     <span class="nav-label d-none d-md-inline">All Data</span>
                 </a>
-                {% endif %}
-                {% if not session.get('user') %}
                 <a href="{{ url_for('locations.locations') }}" class="nav-icon-link {% if request.endpoint == 'locations.locations' %}active{% endif %}" title="Locations">
                     <i class="fas fa-map-marker-alt"></i>
                     <span class="nav-label d-none d-md-inline">Locations</span>
@@ -122,7 +129,6 @@
                         </a></li>
                     </ul>
                 </div>
-                {% endif %}
                 <a href="{{ url_for('live_status.live_status') }}" class="nav-icon-link {% if request.endpoint == 'live_status.live_status' %}active{% endif %}" title="Live Status">
                     <i class="fas fa-wifi"></i>
                     <span class="nav-label d-none d-md-inline">Live Status</span>
@@ -154,7 +160,6 @@
                         </a></li>
                     </ul>
                 </div>
-                {% if session.get('user') %}
                 <div class="dropdown d-inline-block">
                     <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Account">
                         <i class="fas fa-user-circle"></i>
@@ -173,11 +178,6 @@
                         </a></li>
                     </ul>
                 </div>
-                {% else %}
-                <a href="{{ url_for('google_auth.login') }}" class="nav-icon-link" title="Login">
-                    <i class="fab fa-google"></i>
-                    <span class="nav-label d-none d-md-inline">Login</span>
-                </a>
                 {% endif %}
             </div>
         </div>
