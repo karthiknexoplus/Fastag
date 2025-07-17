@@ -738,3 +738,7 @@ def export_barrier_events():
         mimetype='text/csv',
         headers={"Content-Disposition": f"attachment;filename={filename}"}
     ) 
+    
+@analytics_bp.route('/pricing')
+def pricing():
+    return render_template('pricing.html')

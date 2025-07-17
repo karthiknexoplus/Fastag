@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+{% block title %}Plans & Pricing - FASTag Access Control{% endblock %}
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+.hero {
+  background: linear-gradient(135deg, #5a67d8 0%, #7f53ac 100%);
+  color: #fff;
+  padding: 3.5rem 0 2rem 0;
+  text-align: center;
+}
+.pricing-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+.pricing-plan {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 24px rgba(90,103,216,0.10);
+  flex: 1 1 320px;
+  min-width: 320px;
+  max-width: 370px;
+  padding: 2.2rem 2rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1.5px solid #f3f3f3;
+}
+.pricing-plan:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 36px rgba(127,83,172,0.13);
+}
+.plan-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+  color: #7f53ac;
+}
+.plan-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+.plan-price {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #5a67d8;
+  margin-bottom: 0.7rem;
+}
+.plan-desc {
+  color: #6c757d;
+  font-size: 1.05rem;
+  margin-bottom: 1.2rem;
+  min-height: 48px;
+}
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  width: 100%;
+}
+.plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.01rem;
+  margin-bottom: 0.5rem;
+}
+.plan-features .bi-check-circle {
+  color: #28a745;
+}
+.plan-features .bi-x-circle {
+  color: #e53e3e;
+}
+.plan-cta {
+  margin-top: auto;
+  width: 100%;
+}
+.plan-cta .btn {
+  width: 100%;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 1.08rem;
+  padding: 0.7rem 0;
+}
+.comparison-table th, .comparison-table td {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 1.01rem;
+  padding: 0.7rem 0.5rem;
+}
+.comparison-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+.addons-section, .faq-section, .tech-section {
+  background: #f8f9fa;
+  border-radius: 1.5rem;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.cta-section {
+  background: linear-gradient(135deg, #7f53ac 0%, #5a67d8 100%);
+  color: #fff;
+  border-radius: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+.cta-section .btn {
+  font-size: 1.1rem;
+  padding: 0.7rem 2.2rem;
+  border-radius: 2rem;
+  font-weight: 600;
+}
+@media (max-width: 991px) {
+  .pricing-row { flex-direction: column; gap: 1.5rem; }
+  .pricing-plan { max-width: 100%; }
+}
+.sticky-cta {
+  display: none;
+}
+@media (max-width: 600px) {
+  .sticky-cta {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: linear-gradient(90deg, #7f53ac 0%, #5a67d8 100%);
+    color: #fff;
+    z-index: 1000;
+    text-align: center;
+    padding: 1rem 0.5rem 1.2rem 0.5rem;
+    box-shadow: 0 -2px 16px rgba(90,103,216,0.10);
+  }
+  .sticky-cta .btn {
+    font-size: 1.1rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    padding: 0.7rem 2.2rem;
+    width: 90vw;
+    max-width: 400px;
+  }
+}
+.addon-card, .tech-card {
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+  cursor: pointer;
+}
+.addon-card:hover, .tech-card:hover {
+  box-shadow: 0 6px 24px rgba(127,83,172,0.13), 0 1.5px 8px rgba(90,103,216,0.10);
+  background: linear-gradient(90deg, #f3e5f5 0%, #e3f2fd 100%);
+  transform: translateY(-2px) scale(1.03);
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1 class="display-4 fw-bold mb-3">FASTag Access Control Pricing</h1>
+  <p class="lead mb-4">Flexible plans for every community, office, or parking lot. Modern, secure, and scalable access control for all.</p>
+</div>
+<div class="container py-5">
+  <div class="pricing-row mb-5">
+    <div class="pricing-plan">
+      <div class="plan-header">Basic Access</div>
+      <div class="plan-title">Entry Gate</div>
+      <div class="plan-price">₹3,650<span style='font-size:1rem;font-weight:400;'>/month</span></div>
+      <div class="plan-desc">Perfect for small apartments, offices, or villas needing simple, local access control.</div>
+      <ul class="plan-features">
+        <li><i class="bi bi-barrier"></i>1 Barrier & 1 UHF Reader</li>
+        <li><i class="bi bi-laptop"></i>Local web dashboard</li>
+        <li><i class="bi bi-phone bi-x-circle"></i>No mobile app</li>
+        <li><i class="bi bi-cloud-slash"></i>No cloud database</li>
+        <li><i class="bi bi-person bi-x-circle"></i>No owner details</li>
+        <li><i class="bi bi-people bi-x-circle"></i>No visitor management</li>
+        <li><i class="bi bi-diagram-3 bi-x-circle"></i>No Wiegand/IP reader</li>
+        <li><i class="bi bi-list-check"></i>Manual whitelist</li>
+        <li><i class="bi bi-clock-history"></i>Entry/exit history (local)</li>
+        <li><i class="bi bi-door-open"></i>Basic remote barrier open/close</li>
+        <li><i class="bi bi-envelope"></i>Email support</li>
+      </ul>
+      <div class="plan-cta"><a href="mailto:sales@onebee.in" class="btn btn-outline-primary">Contact Sales</a></div>
+    </div>
+    <div class="pricing-plan" style="border:2px solid #f9a825;">
+      <div class="plan-header">Smart Community</div>
+      <div class="plan-title">Barrier Pro</div>
+      <div class="plan-price">₹4,850<span style='font-size:1rem;font-weight:400;'>/month</span></div>
+      <div class="plan-desc">Ideal for mid-size apartments, gated communities, or corporate parks with cloud and mobile access.</div>
+      <ul class="plan-features">
+        <li><i class="bi bi-barrier"></i>Up to 5 Barriers & 5 UHF/IP Readers</li>
+        <li><i class="bi bi-cloud"></i>Cloud database & backup</li>
+        <li><i class="bi bi-laptop"></i>Web dashboard</li>
+        <li><i class="bi bi-phone"></i>Mobile app access</li>
+        <li><i class="bi bi-person"></i>Owner details & vehicle info</li>
+        <li><i class="bi bi-people"></i>Visitor management (auto waitlist)</li>
+        <li><i class="bi bi-diagram-3"></i>Wiegand & IP reader support</li>
+        <li><i class="bi bi-qr-code"></i>FASTag onboarding via QR</li>
+        <li><i class="bi bi-list-check"></i>Manual & auto whitelist</li>
+        <li><i class="bi bi-clock-history"></i>Entry/exit history (cloud)</li>
+        <li><i class="bi bi-bell"></i>WhatsApp/SMS alerts (limited)</li>
+        <li><i class="bi bi-person-lock"></i>Owner lock vehicle remotely</li>
+        <li><i class="bi bi-gear"></i>Remote reader settings</li>
+        <li><i class="bi bi-shield-lock"></i>Role-based user management</li>
+        <li><i class="bi bi-envelope"></i>Priority email support</li>
+      </ul>
+      <div class="plan-cta"><a href="mailto:sales@onebee.in" class="btn btn-warning">Contact Sales</a></div>
+    </div>
+    <div class="pricing-plan" style="border:2px solid #8e24aa;">
+      <div class="plan-header">Enterprise Plus</div>
+      <div class="plan-title">Access Master</div>
+      <div class="plan-price">₹1,35,000<span style='font-size:1rem;font-weight:400;'>/lifetime</span></div>
+      <div class="plan-desc">For large communities, RWAs, or commercial lots needing advanced analytics, unlimited scaling, and integrations.</div>
+      <ul class="plan-features">
+        <li><i class="bi bi-barrier"></i>Unlimited barriers & readers</li>
+        <li><i class="bi bi-cloud"></i>Cloud DB, backup & multi-site</li>
+        <li><i class="bi bi-laptop"></i>Web dashboard</li>
+        <li><i class="bi bi-phone"></i>Mobile app (iOS & Android)</li>
+        <li><i class="bi bi-person"></i>Owner details & vehicle info</li>
+        <li><i class="bi bi-people"></i>Advanced visitor mgmt (QR, pre-reg)</li>
+        <li><i class="bi bi-diagram-3"></i>Wiegand & IP reader support</li>
+        <li><i class="bi bi-qr-code"></i>FASTag onboarding via QR</li>
+        <li><i class="bi bi-list-check"></i>Manual & auto whitelist</li>
+        <li><i class="bi bi-clock-history"></i>Entry/exit history (cloud)</li>
+        <li><i class="bi bi-bell"></i>WhatsApp/SMS alerts (high quota)</li>
+        <li><i class="bi bi-person-lock"></i>Owner lock with timed unlock</li>
+        <li><i class="bi bi-graph-up"></i>Advanced analytics & reports</li>
+        <li><i class="bi bi-gear"></i>Remote reader settings & firmware</li>
+        <li><i class="bi bi-shield-lock"></i>Role-based user management</li>
+        <li><i class="bi bi-palette"></i>White-labeling & API access</li>
+        <li><i class="bi bi-headset"></i>Priority phone & WhatsApp support</li>
+      </ul>
+      <div class="plan-cta"><a href="mailto:sales@onebee.in" class="btn btn-primary">Contact Sales</a></div>
+    </div>
+  </div>
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-bordered comparison-table align-middle">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Basic Access</th>
+              <th>Smart Community</th>
+              <th>Enterprise Plus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Mobile app</td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-check-circle"></i></td><td><i class="bi bi-check-circle"></i></td></tr>
+            <tr><td>Cloud database</td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-check-circle"></i></td><td><i class="bi bi-check-circle"></i></td></tr>
+            <tr><td>Web dashboard</td><td>Local only</td><td>Cloud</td><td>Cloud</td></tr>
+            <tr><td>Owner details</td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-check-circle"></i></td><td><i class="bi bi-check-circle"></i></td></tr>
+            <tr><td>Visitor management</td><td><i class="bi bi-x-circle"></i></td><td>Basic</td><td>Advanced QR</td></tr>
+            <tr><td>Wiegand/IP reader support</td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-check-circle"></i></td><td><i class="bi bi-check-circle"></i></td></tr>
+            <tr><td>FASTag onboarding via QR</td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-check-circle"></i></td><td><i class="bi bi-check-circle"></i></td></tr>
+            <tr><td>Manual/auto whitelist</td><td>Manual</td><td>Manual & Auto</td><td>Manual & Auto</td></tr>
+            <tr><td>Entry/exit history</td><td>Local</td><td>Cloud</td><td>Cloud</td></tr>
+            <tr><td>WhatsApp/SMS alerts</td><td><i class="bi bi-x-circle"></i></td><td>Limited</td><td>High quota</td></tr>
+            <tr><td>Owner lock vehicle</td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-check-circle"></i></td><td>Timed unlock</td></tr>
+            <tr><td>Barriers & readers</td><td>1/1</td><td>5/5</td><td>Unlimited</td></tr>
+            <tr><td>White-label/API</td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-x-circle"></i></td><td><i class="bi bi-check-circle"></i></td></tr>
+            <tr><td>Support</td><td>Email</td><td>Priority Email</td><td>Priority Phone & WhatsApp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-5 g-4">
+    <div class="col-md-6">
+      <div class="addons-section">
+        <h4 class="fw-bold mb-3">✨ Add-Ons</h4>
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-chat-dots fs-3 text-primary"></i>
+              <span>Extra WhatsApp/SMS credits</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-bar-chart-line fs-3 text-success"></i>
+              <span>Advanced analytics dashboard</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-file-earmark-bar-graph fs-3 text-info"></i>
+              <span>Custom report designer</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-hdd-network fs-3 text-warning"></i>
+              <span>On-premise DB backup</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-phone fs-3 text-secondary"></i>
+              <span>White-labeled mobile app</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-shield-check fs-3 text-danger"></i>
+              <span>Emergency assist service (24/7)</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-cpu fs-3 text-primary"></i>
+              <span>Custom hardware support</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-calendar-check fs-3 text-success"></i>
+              <span>Annual on-site maintenance</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-people fs-3 text-info"></i>
+              <span>Extra user logins pack</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-plug fs-3 text-warning"></i>
+              <span>API integration with ERP/visitor apps</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="addon-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-wallet2 fs-3 text-secondary"></i>
+              <span>Prepaid wallet for tenants</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="tech-section">
+        <h4 class="fw-bold mb-3">💡 Technical Highlights</h4>
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-cloud-arrow-up fs-3 text-primary"></i>
+              <span>100% cloud-based with secure auto backup</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-laptop fs-3 text-success"></i>
+              <span>Web dashboard + mobile app (iOS & Android)</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-shield-lock fs-3 text-info"></i>
+              <span>Secure HTTPS & encrypted API</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-globe2 fs-3 text-warning"></i>
+              <span>Works globally — manage anywhere</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-ev-station fs-3 text-secondary"></i>
+              <span>Supports future EV charging integration</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-broadcast-pin fs-3 text-danger"></i>
+              <span>IoT ready — real-time data sync</span>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="tech-card p-3 h-100 rounded-3 shadow-sm d-flex align-items-center gap-3 bg-white hover-glow">
+              <i class="bi bi-qr-code-scan fs-3 text-primary"></i>
+              <span>Simple onboarding: scan, assign, go live</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="faq-section mb-5">
+    <h4 class="fw-bold mb-3">Frequently Asked Questions</h4>
+    <div class="accordion" id="faqAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="faq1"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse1">Is there a free trial?</button></h2>
+        <div id="faqCollapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Yes! Contact us for a demo or trial access for your site.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="faq2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse2">Can I upgrade or downgrade plans?</button></h2>
+        <div id="faqCollapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Absolutely! You can upgrade or downgrade at any time. Contact our team for a seamless transition.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="faq3"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse3">Do you offer on-premise or hybrid solutions?</button></h2>
+        <div id="faqCollapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Yes, we support on-premise, cloud, and hybrid deployments. Let us know your requirements.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="faq4"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse4">What support options are available?</button></h2>
+        <div id="faqCollapse4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Support options depend on your plan. All plans include email support, while higher plans offer priority email, phone, and WhatsApp support.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="faq5"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse5">Can I get a custom quote or white-label solution?</button></h2>
+        <div id="faqCollapse5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Yes! Contact us for custom pricing, white-labeling, or integration with your existing systems.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cta-section">
+    <h2 class="fw-bold mb-3">Ready to upgrade your access control?</h2>
+    <p class="lead mb-4">Contact us for a personalized demo, pricing, or to get started with FASTag Access Control today.</p>
+    <a href="mailto:sales@onebee.in" class="btn btn-light btn-lg shadow">Contact Sales</a>
+  </div>
+</div>
+<div class="sticky-cta d-lg-none">
+  <a href="mailto:sales@onebee.in" class="btn btn-light btn-lg shadow">Contact Sales</a>
+</div>
+{% endblock %} 
