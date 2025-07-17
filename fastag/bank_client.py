@@ -414,7 +414,7 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'geoCode': plaza_info.get('geoCode', ''),
         'id': plaza_info.get('id', ''),
         'name': plaza_info.get('name', ''),
-        'subtype': plaza_info.get('subtype', ''),
+        'subtype': 'Covered',  # Force subtype to 'Covered'
         'type': plaza_info.get('type', ''),
         'address': plaza_info.get('address', ''),
         'fromDistrict': plaza_info.get('fromDistrict', ''),
