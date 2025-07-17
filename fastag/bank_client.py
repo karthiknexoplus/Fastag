@@ -51,10 +51,30 @@ def send_sync_time(ver, orgId, msgId, signature_placeholder='...'):
     xml_data = build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder)
     url = get_bank_url()
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=xml_data, headers=headers, timeout=10)
-    response.raise_for_status()
-    return parse_sync_time_response(response.content)
-
+    print("\n[SYNC_TIME] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    print("[SYNC_TIME] URL:", url)
+    print("[SYNC_TIME] Headers:", headers)
+    if SIGN_REQUEST:
+        print("[SYNC_TIME] About to sign XML...")
+        signed_xml = sign_xml(xml_data)
+        print("[SYNC_TIME] Signed XML generated:")
+        print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+        payload = signed_xml
+    else:
+        print('[SYNC_TIME] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
+        payload = xml_data
+    try:
+        response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+        print("[SYNC_TIME] HTTP Status Code:", response.status_code)
+        print("[SYNC_TIME] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+        parsed = parse_sync_time_response(response.content)
+        print("[SYNC_TIME] Parsed Response:")
+        for k, v in parsed.items():
+            print(f"  {k}: {v}")
+        return parsed
+    except Exception as e:
+        print('[SYNC_TIME] Error sending SyncTime request:', e)
+        return {'error': str(e)}
 
 # Error code to reason mapping (partial, add more as needed)
 ERROR_CODE_REASON = {
@@ -421,21 +441,30 @@ def send_heartbeat(msgId, orgId, acquirer_id, plaza_info, lanes, meta=None, sign
     xml_data = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta, signature_placeholder)
     url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
     headers = {'Content-Type': 'application/xml'}
+    print("\n[HEARTBEAT] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    print("[HEARTBEAT] URL:", url)
+    print("[HEARTBEAT] Headers:", headers)
     if SIGN_REQUEST:
-        print("DEBUG: About to sign Heart Beat XML...")
+        print("[HEARTBEAT] About to sign Heart Beat XML...")
         signed_xml = sign_xml(xml_data)
-        print("DEBUG: Signed Heart Beat XML generated.")
+        print("[HEARTBEAT] Signed Heart Beat XML generated:")
+        print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
         payload = signed_xml
     else:
-        print('WARNING: Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
+        print('[HEARTBEAT] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
         payload = xml_data
-    response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
     try:
-        response.raise_for_status()
-    except requests.HTTPError as e:
-        print("Error details from bank:", response.text)
-        raise
-    return response.content
+        response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+        print("[HEARTBEAT] HTTP Status Code:", response.status_code)
+        print("[HEARTBEAT] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+        parsed = parse_heartbeat_response(response.content)
+        print("[HEARTBEAT] Parsed Response:")
+        for k, v in parsed.items():
+            print(f"  {k}: {v}")
+        return response.content
+    except Exception as e:
+        print('[HEARTBEAT] Error sending Heart Beat request:', e)
+        return None
 
 def parse_heartbeat_response(xml_response):
     try:
@@ -534,9 +563,30 @@ def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
     xml_data = build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_placeholder)
     url = os.getenv('BANK_API_CHECKTXN_URL', 'https://uat-bank-url.example.com/checktxn')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=xml_data, headers=headers, timeout=10)
-    response.raise_for_status()
-    return parse_check_txn_response(response.content)
+    print("\n[CHECK_TXN] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    print("[CHECK_TXN] URL:", url)
+    print("[CHECK_TXN] Headers:", headers)
+    if SIGN_REQUEST:
+        print("[CHECK_TXN] About to sign XML...")
+        signed_xml = sign_xml(xml_data)
+        print("[CHECK_TXN] Signed XML generated:")
+        print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+        payload = signed_xml
+    else:
+        print('[CHECK_TXN] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
+        payload = xml_data
+    try:
+        response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+        print("[CHECK_TXN] HTTP Status Code:", response.status_code)
+        print("[CHECK_TXN] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+        parsed = parse_check_txn_response(response.content)
+        print("[CHECK_TXN] Parsed Response:")
+        for k, v in parsed.items():
+            print(f"  {k}: {v}")
+        return parsed
+    except Exception as e:
+        print('[CHECK_TXN] Error sending CheckTxn request:', e)
+        return {'error': str(e)}
 
 
 def parse_check_txn_response(xml_response):
@@ -626,40 +676,46 @@ def send_tag_details(msgId, orgId, vehicle_info):
     lane_id = '001'      # Example Lane ID (last 3 digits)
     txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
-    print(f'Request XML (unsigned), TxnId: {txnId}')
+    print(f'\n[TAG_DETAILS] Request XML (unsigned), TxnId: {txnId}')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     if SIGN_REQUEST:
-        print("DEBUG: About to sign XML...")
+        print("[TAG_DETAILS] About to sign XML...")
         signed_xml = sign_xml(xml_data)
-        print("DEBUG: Signed XML generated.")
-        print('Request XML (signed):')
+        print("[TAG_DETAILS] Signed XML generated:")
         print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
         payload = signed_xml
     else:
-        print('WARNING: Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
+        print('[TAG_DETAILS] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
         payload = xml_data
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+    print("[TAG_DETAILS] URL:", url)
+    print("[TAG_DETAILS] Headers:", headers)
     try:
-        response.raise_for_status()
-    except requests.HTTPError as e:
-        print("Error details from bank:", response.text)
-        raise
-    # --- Signature Verification (for response) ---
-    ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'etolluatsigner_Public.crt.txt')
-    print(f"[DEBUG] Using signer cert path: {ETOLL_SIGNER_CERT_PATH}")
-    try:
-        from lxml import etree
-        with open(ETOLL_SIGNER_CERT_PATH, 'rb') as f:
-            cert = f.read()
-        from signxml import XMLVerifier
-        verified_data = XMLVerifier().verify(response.content, x509_cert=cert).signed_xml
-        print("[Signature Verification] Signature is valid!")
-        print(etree.tostring(verified_data, pretty_print=True).decode())
+        response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+        print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
+        print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+        # --- Signature Verification (for response) ---
+        ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'etolluatsigner_Public.crt.txt')
+        print(f"[TAG_DETAILS] Using signer cert path: {ETOLL_SIGNER_CERT_PATH}")
+        try:
+            from lxml import etree
+            with open(ETOLL_SIGNER_CERT_PATH, 'rb') as f:
+                cert = f.read()
+            from signxml import XMLVerifier
+            verified_data = XMLVerifier().verify(response.content, x509_cert=cert).signed_xml
+            print("[TAG_DETAILS] Signature is valid!")
+            print(etree.tostring(verified_data, pretty_print=True).decode())
+        except Exception as e:
+            print("[TAG_DETAILS] Signature verification failed:", e)
+        parsed = parse_tag_details_response(response.content)
+        print("[TAG_DETAILS] Parsed Response:")
+        for k, v in parsed.items():
+            print(f"  {k}: {v}")
+        return response
     except Exception as e:
-        print("[Signature Verification] Signature verification failed:", e)
-    return response
+        print('[TAG_DETAILS] Error sending Tag Details request:', e)
+        return None
 
 
 def parse_tag_details_response(xml_response):
@@ -742,9 +798,30 @@ def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
     xml_data = build_pay_request(msgId, orgId, ts, txnId, entryTxnId, pay_data, signature_placeholder)
     url = os.getenv('BANK_API_PAY_URL', 'https://uat-bank-url.example.com/pay')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=xml_data, headers=headers, timeout=10)
-    response.raise_for_status()
-    return parse_pay_response(response.content)
+    print("\n[PAY] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    print("[PAY] URL:", url)
+    print("[PAY] Headers:", headers)
+    if SIGN_REQUEST:
+        print("[PAY] About to sign XML...")
+        signed_xml = sign_xml(xml_data)
+        print("[PAY] Signed XML generated:")
+        print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+        payload = signed_xml
+    else:
+        print('[PAY] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
+        payload = xml_data
+    try:
+        response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+        print("[PAY] HTTP Status Code:", response.status_code)
+        print("[PAY] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+        parsed = parse_pay_response(response.content)
+        print("[PAY] Parsed Response:")
+        for k, v in parsed.items():
+            print(f"  {k}: {v}")
+        return parsed
+    except Exception as e:
+        print('[PAY] Error sending Pay request:', e)
+        return {'error': str(e)}
 
 
 def parse_pay_response(xml_response):
@@ -801,9 +878,30 @@ def send_query_exception_list(msgId, orgId, exception_list, signature_placeholde
     xml_data = build_query_exception_list_request(msgId, orgId, ts, txn_id, exception_list, signature_placeholder)
     url = os.getenv('BANK_API_EXCEPTIONLIST_URL', 'https://uat-bank-url.example.com/exceptionlist')
     headers = {'Content-Type': 'application/xml'}
-    response = requests.post(url, data=xml_data, headers=headers, timeout=10)
-    response.raise_for_status()
-    return parse_query_exception_list_response(response.content)
+    print("\n[QUERY_EXCEPTION_LIST] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    print("[QUERY_EXCEPTION_LIST] URL:", url)
+    print("[QUERY_EXCEPTION_LIST] Headers:", headers)
+    if SIGN_REQUEST:
+        print("[QUERY_EXCEPTION_LIST] About to sign XML...")
+        signed_xml = sign_xml(xml_data)
+        print("[QUERY_EXCEPTION_LIST] Signed XML generated:")
+        print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+        payload = signed_xml
+    else:
+        print('[QUERY_EXCEPTION_LIST] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
+        payload = xml_data
+    try:
+        response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+        print("[QUERY_EXCEPTION_LIST] HTTP Status Code:", response.status_code)
+        print("[QUERY_EXCEPTION_LIST] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+        parsed = parse_query_exception_list_response(response.content)
+        print("[QUERY_EXCEPTION_LIST] Parsed Response:")
+        for k, v in parsed.items():
+            print(f"  {k}: {v}")
+        return parsed
+    except Exception as e:
+        print('[QUERY_EXCEPTION_LIST] Error sending Query Exception List request:', e)
+        return {'error': str(e)}
 
 
 def parse_query_exception_list_response(xml_response):
