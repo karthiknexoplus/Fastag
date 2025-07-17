@@ -1407,11 +1407,13 @@ if __name__ == '__main__':
         print('--- Request Query Exception List API Test ---')
         orgId = 'PGSH'
         msgId = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
-        # Use old date for first-time fetch
-        old_fetch_time = '1970-01-01T00:00:00'
+        # Use current UTC time for lastFetchTime to ensure it's within 24 hours
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+        recent_fetch_time = now.strftime('%Y-%m-%dT%H:%M:%S')
         exception_list = [
-            {'excCode': '01', 'lastFetchTime': old_fetch_time},
-            {'excCode': '02', 'lastFetchTime': old_fetch_time}
+            {'excCode': '01', 'lastFetchTime': recent_fetch_time},
+            {'excCode': '02', 'lastFetchTime': recent_fetch_time}
         ]
         try:
             response_content = send_query_exception_list_icd(msgId, orgId, exception_list)
