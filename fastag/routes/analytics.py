@@ -1919,3 +1919,7 @@ def denied_fastag_activity_feed():
         return jsonify({'results': unique_entries, 'count': len(unique_entries)})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@analytics_bp.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
