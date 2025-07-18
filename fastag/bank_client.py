@@ -673,7 +673,13 @@ def sign_xml(xml_data):
         parent = ds_signature.getparent()
         if parent is not None:
             parent.remove(ds_signature)
-    return etree.tostring(signed_root)
+    # Convert to string and forcefully remove any ds: prefixes (as a last resort)
+    xml_str = etree.tostring(signed_root, encoding='utf-8').decode()
+    # Remove all <ds: and </ds: prefixes
+    xml_str = xml_str.replace('<ds:', '<').replace('</ds:', '</')
+    # Set namespace only on the first <Signature> tag
+    xml_str = xml_str.replace('<Signature>', '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">', 1)
+    return xml_str.encode('utf-8')
 
 def generate_txn_id(plaza_id, lane_id, dt=None):
     """
