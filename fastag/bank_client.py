@@ -415,7 +415,7 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'id': plaza_info.get('id', ''),
         'name': plaza_info.get('name', ''),
         'subtype': 'Covered',  # Force subtype to 'Covered'
-        'type': plaza_info.get('type', ''),
+        'type': 'Parking',
         'address': plaza_info.get('address', ''),
         'fromDistrict': plaza_info.get('fromDistrict', ''),
         'toDistrict': plaza_info.get('toDistrict', ''),
@@ -1335,7 +1335,7 @@ if __name__ == '__main__':
         plazaGeoCode = '11.0185,76.9778'
         plazaName = 'PGS hospital'
         plazaSubtype = 'State'
-        plazaType = 'Toll'
+        plazaType = 'Parking'
         address = ''
         fromDistrict = ''
         toDistrict = ''
