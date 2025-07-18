@@ -22,7 +22,7 @@ BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 # --- XML Signing and Verification Configuration ---
 # Set these to your actual key/cert paths
 PRIVATE_KEY_PATH = "privkey.pem"  # Use the local project directory copy
-CERT_PATH = "/etc/letsencrypt/live/fastag.onebee.in/fullchain.pem"        # Your public cert for embedding in XML
+CERT_PATH = "fullchain.pem"        # Use the local project directory copy
 BANK_CERT_PATH = "../etolluatsigner_Public.crt.txt"                      # Bank's public cert for verifying responses
 
 VERIFY_SIGNATURE = False  # Set to True to enable signature verification (recommended for production)
