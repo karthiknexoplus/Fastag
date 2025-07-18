@@ -37,7 +37,6 @@ FASTAG_BILLERS = [
 
 fastag_balance_bp = Blueprint('fastag_balance', __name__)
 
-@auth_bp.route('/')
 @fastag_balance_bp.route('/fastag_balance', methods=['GET', 'POST'])
 def fastag_balance():
     if request.method == 'POST':
