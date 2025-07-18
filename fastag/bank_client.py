@@ -19,9 +19,11 @@ PROD_URL = os.getenv('BANK_API_PROD_URL', 'https://prod-bank-url.example.com/syn
 # Choose environment: 'UAT' or 'PROD'
 BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 
-PRIVATE_KEY_PATH = "private.txt"  # Your private key for signing
-CERT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'fastag_only_cert.pem')
-print(f"[DEBUG] Using cert for signing: {CERT_PATH}")
+# --- XML Signing and Verification Configuration ---
+# Set these to your actual key/cert paths
+PRIVATE_KEY_PATH = "/etc/letsencrypt/live/fastag.onebee.in/privkey.pem"  # Your private key for signing XML
+CERT_PATH = "/etc/letsencrypt/live/fastag.onebee.in/fullchain.pem"        # Your public cert for embedding in XML
+BANK_CERT_PATH = "../etolluatsigner_Public.crt.txt"                      # Bank's public cert for verifying responses
 
 VERIFY_SIGNATURE = False  # Set to True to enable signature verification (recommended for production)
 SIGN_REQUEST = True  # Set to False to skip XML signing (for UAT or debugging)
