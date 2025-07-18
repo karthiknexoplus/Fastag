@@ -59,9 +59,9 @@ def send_sync_time(ver, orgId, msgId, signature_placeholder='...'):
     if SIGN_REQUEST:
         print("[SYNC_TIME] About to sign XML...")
         signed_xml = sign_xml(xml_data)
-        print("[SYNC_TIME] Signed XML generated:")
+        print("[SYNC_TIME] Signed XML generated (actual payload to be sent):")
         print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
-        payload = signed_xml
+        payload = signed_xml  # Ensure this is the post-processed XML
     else:
         print('[SYNC_TIME] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
         payload = xml_data
