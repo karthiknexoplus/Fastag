@@ -11,6 +11,7 @@ import base64
 import re
 import random
 import xml.dom.minidom
+from uuid import uuid4
 
 app = Flask(__name__)
 
@@ -630,19 +631,18 @@ def parse_check_txn_response(xml_response):
 
 
 def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
-    # Build XML matching the provided sample
+    # Strictly ICD-compliant Tag Details request
     NS = 'http://npci.org/etc/schema/'
-    nsmap = {'ns0': NS}
+    nsmap = {'etc': NS}
     # Auto-generate refId if not provided
     if not vehicle_info.get('refId'):
         from datetime import datetime
-        import random
         refId = f"{orgId}L{datetime.now().strftime('%d%m%y%H%M%S')}"
     else:
         refId = vehicle_info.get('refId')
-    root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
+    root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.2',
+        'ver': '1.0',
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
@@ -656,12 +656,14 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
         'type': 'FETCH',
         'orgTxnId': ''
     })
-    vehicle = etree.SubElement(txn, 'Vehicle', {
-        'TID': vehicle_info.get('TID', ''),
+    vehicle_attrs = {
         'tagId': vehicle_info.get('tagId', ''),
-        'avc': vehicle_info.get('avc', '5'),
-        'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
-    })
+    }
+    if vehicle_info.get('vehicleRegNo'):
+        vehicle_attrs['vehicleRegNo'] = vehicle_info['vehicleRegNo']
+    if vehicle_info.get('TID'):
+        vehicle_attrs['TID'] = vehicle_info['TID']
+    etree.SubElement(txn, 'Vehicle', vehicle_attrs)
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
@@ -1242,14 +1244,13 @@ if __name__ == '__main__':
         vehicle_info = {
             'TID': '',
             'vehicleRegNo': '',
-            'tagId': tagid,
-            'avc': '5'
+            'tagId': tagid
         }
         from datetime import datetime
         now = datetime.now()
         ts = now.strftime('%Y-%m-%dT%H:%M:%S')
         msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'
-        txnId = msgId + '1'  # Ensure unique txnId
+        txnId = str(uuid4())[:22]  # UUID, 1-22 chars
         xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
         print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
         print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
