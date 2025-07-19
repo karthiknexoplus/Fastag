@@ -438,11 +438,35 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
     signature.text = signature_placeholder
     return ET.tostring(root, encoding='utf-8', method='xml')
 
-def send_heartbeat(msgId, orgId, acquirer_id, plaza_info, lanes, meta=None, signature_placeholder='...'):
+def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=None, meta=None, signature_placeholder='...'):
+    # Set defaults as per user-provided details
+    if orgId is None:
+        orgId = 'PGSH'
+    if acquirer_id is None:
+        acquirer_id = '727274'
+    if plaza_info is None:
+        plaza_info = {
+            'geoCode': '11.0185,76.9778',
+            'id': '712764',
+            'name': 'PGS hospital',
+            'subtype': 'Covered',
+            'type': 'Parking',
+            'address': '',
+            'fromDistrict': '',
+            'toDistrict': '',
+            'agencyCode': 'TCABO'
+        }
+    if lanes is None:
+        lanes = [
+            {'id': 'IN01', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+        ]
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txn_id = str(uuid.uuid4())[:22]
     xml_data = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta, signature_placeholder)
-    url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
+    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq'
     headers = {'Content-Type': 'application/xml'}
     print("\n[HEARTBEAT] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("[HEARTBEAT] URL:", url)
