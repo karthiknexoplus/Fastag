@@ -612,12 +612,11 @@ def parse_check_txn_response(xml_response):
 
 
 def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
-    # Build XML matching the working sample exactly
+    # Build XML matching the bank's expected format: <etc:ReqTagDetails xmlns:etc="http://npci.org/etc/schema/">
     NS = 'http://npci.org/etc/schema/'
-    nsmap = {'ns0': NS}
-    # Use lxml for namespace prefix control
+    nsmap = {'etc': NS}
     from lxml import etree
-    root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
+    root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
         'ver': '1.2',
         'ts': ts,
@@ -627,19 +626,18 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     txn = etree.SubElement(root, 'Txn', {
         'id': txnId,
         'note': '',
-        'refId': vehicle_info.get('refId', ''),
+        'refId': vehicle_info.get('refId', 'TESTREFID123'),
         'refUrl': '',
         'ts': vehicle_info.get('txn_ts', ts),
         'type': 'FETCH',
         'orgTxnId': ''
     })
     vehicle = etree.SubElement(txn, 'Vehicle', {
-        'TID': vehicle_info.get('TID', ''),
-        'tagId': vehicle_info.get('tagId', ''),
-        'avc': vehicle_info.get('avc', ''),
-        'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
+        'TID': vehicle_info.get('TID', 'TESTTID123'),
+        'tagId': vehicle_info.get('tagId', 'TESTTAGID123456'),
+        'avc': vehicle_info.get('avc', '5'),
+        'vehicleRegNo': vehicle_info.get('vehicleRegNo', 'TESTREG1234')
     })
-    # Return pretty-printed XML string
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
