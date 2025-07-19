@@ -353,8 +353,9 @@ def validate_heartbeat_xml(xml_bytes):
                 errors.append('Txn.type must be "Hbt".')
             # Meta
             meta = txn.find('Meta')
-            if meta is None or meta.find('Meta1') is None or meta.find('Meta2') is None:
-                errors.append('Meta1 and Meta2 must be present in Meta.')
+            if meta is None:
+                errors.append('Meta element must be present.')
+            # No need to check for Meta1/Meta2 children
             # HbtMsg
             hbtmsg = txn.find('HbtMsg')
             if hbtmsg is None or hbtmsg.attrib.get('type') != 'ALIVE' or not hbtmsg.attrib.get('acquirerId'):
