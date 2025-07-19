@@ -1196,20 +1196,19 @@ if __name__ == '__main__':
     if choice == '1':
         print('--- Tag Details API Test ---')
         print("DEBUG: Running latest bank_client.py")
-        os.environ['BANK_API_TAGDETAILS_URL'] = TAG_DETAILS_URL
+        # Prompt user for tagId
+        tagid_input = input('Enter tagId (or press Enter for default): ').strip()
+        tagid = tagid_input if tagid_input else '34161FA82033E8E4037B2920'
         orgId = 'PGSH'
-        plazaId = '712764'
-        agencyId = 'TCABO'
-        acquirerId = '727274'
-        plazaGeoCode = '11.0185,76.9778'
         vehicle_info = {
             'TID': '',
             'vehicleRegNo': '',
-            'tagId': '34161FA82033E8E4037B2920'
+            'tagId': tagid
         }
         from datetime import datetime
         now = datetime.now()
         lane_id = '001'
+        plazaId = '712764'
         txn_id = f"{plazaId}{lane_id}{now.strftime('%d%m%y%H%M%S')}"
         msgId = txn_id
         try:
