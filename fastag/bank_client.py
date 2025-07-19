@@ -1049,7 +1049,7 @@ def api_sync_time():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-TAG_DETAILS_URL = "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails"
+TAG_DETAILS_URL = "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2"
 
 def send_query_exception_list_icd(msgId, orgId, exception_list):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
