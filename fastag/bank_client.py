@@ -1170,6 +1170,14 @@ def validate_query_exception_list_xml(xml_bytes):
         errors.append(f'XML parsing error for exception list: {e}')
     return errors
 
+def generate_txn_id(plaza_id, lane_id, dt=None):
+    """
+    Generate transaction ID as Plaza ID (6 digits) + Lane ID (last 3 digits) + Transaction Date & Time (DDMMYYHHMMSS)
+    """
+    if dt is None:
+        dt = datetime.now()
+    date_str = dt.strftime("%d%m%y%H%M%S")
+    return f"{plaza_id}{lane_id[-3:]}{date_str}"
 
 if __name__ == '__main__':
     print('Choose which request to send:')
