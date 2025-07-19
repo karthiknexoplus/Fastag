@@ -402,10 +402,8 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'ts': ts,
         'type': 'Hbt'
     })
-    # ICD-compliant Meta block
-    meta_elem = ET.SubElement(txn, 'Meta')
-    ET.SubElement(meta_elem, 'Meta1', {'name': '', 'value': ''})
-    ET.SubElement(meta_elem, 'Meta2', {'name': '', 'value': ''})
+    # Customer-compliant Meta block (empty)
+    ET.SubElement(txn, 'Meta')
     ET.SubElement(txn, 'HbtMsg', {'acquirerId': acquirer_id, 'type': 'ALIVE'})
     plaza = ET.SubElement(txn, 'Plaza', {
         'address': plaza_info.get('name', ''),
@@ -418,14 +416,15 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'toDistrict': plaza_info.get('toDistrict', ''),
         'type': plaza_info.get('type', '')
     })
-    # Use 1-3 char lane ids and Status="OPEN"
-    icd_lane_ids = ['IN1', 'IN2', 'OUT1', 'OUT2']
+    # Use customer-style lane ids and Status="Open"
+    customer_lane_ids = ['LANE01', 'LANE02', 'OUT01', 'OUT02']
+    customer_directions = ['N', 'S', 'N', 'S']
     for idx, lane in enumerate(lanes):
         ET.SubElement(plaza, 'Lane', {
             'Mode': lane.get('Mode', 'Normal'),
-            'Status': 'OPEN',
-            'direction': lane.get('direction', 'N'),
-            'id': icd_lane_ids[idx] if idx < len(icd_lane_ids) else lane.get('id', 'IN1'),
+            'Status': 'Open',
+            'direction': customer_directions[idx] if idx < len(customer_directions) else lane.get('direction', 'N'),
+            'id': customer_lane_ids[idx] if idx < len(customer_lane_ids) else lane.get('id', 'LANE01'),
             'laneType': lane.get('laneType', 'Hybrid'),
             'readerId': lane.get('readerId', '1')
         })
@@ -1385,12 +1384,12 @@ if __name__ == '__main__':
         fromDistrict = 'Coimbatore'
         toDistrict = 'Coimbatore'
         agencyCode = 'TCABO'
-        # Lane ids will be set in build_heartbeat_request for ICD compliance
+        # Lane ids will be set in build_heartbeat_request for customer compliance
         lanes = [
-            {'direction': 'N', 'readerId': '1', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'direction': 'N', 'readerId': '2', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'direction': 'S', 'readerId': '3', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'direction': 'S', 'readerId': '4', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'S', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'N', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ]
         plaza_info = {
             'geoCode': plazaGeoCode,
