@@ -1421,6 +1421,7 @@ if __name__ == '__main__':
             print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
             url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
             headers = {'Content-Type': 'application/xml'}
+            print(f'Heart Beat Endpoint URL: {url}')
             response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
             print('HTTP Status Code:', response.status_code)
             print('Response:')
