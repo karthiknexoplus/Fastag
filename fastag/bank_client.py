@@ -1209,6 +1209,51 @@ def generate_txn_id(plaza_id, lane_id, dt=None):
     date_str = dt.strftime("%d%m%y%H%M%S")
     return f"{plaza_id}{lane_id[-3:]}{date_str}"
 
+def sign_xml(xml_data):
+    # Parse XML with lxml
+    root = etree.fromstring(xml_data)
+    # Load private key and cert
+    with open(PRIVATE_KEY_PATH, "rb") as key_file:
+        private_key = key_file.read()
+    with open(CERT_PATH, "rb") as cert_file:
+        cert = cert_file.read()
+    # Sign the XML with required canonicalization algorithm
+    signer = XMLSigner(
+        signature_algorithm="rsa-sha256",
+        c14n_algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"
+    )
+    signed_root = signer.sign(root, key=private_key, cert=cert, reference_uri=None)
+    # Remove the empty <Signature> placeholder from the original XML
+    placeholder = signed_root.find(".//Signature")
+    if placeholder is not None:
+        parent = placeholder.getparent()
+        parent.remove(placeholder)
+    # Find the generated <ds:Signature> element
+    ds_signature = signed_root.find(".//{http://www.w3.org/2000/09/xmldsig#}Signature")
+    if ds_signature is not None:
+        # Remove ds: prefix from all signature-related tags
+        for elem in ds_signature.iter():
+            if elem.tag.startswith("{http://www.w3.org/2000/09/xmldsig#}"):
+                elem.tag = elem.tag.replace("{http://www.w3.org/2000/09/xmldsig#}", "")
+        # Create a new <Signature> element (no prefix, with namespace)
+        new_sig = etree.Element("Signature", nsmap=None)
+        new_sig.attrib["xmlns"] = "http://www.w3.org/2000/09/xmldsig#"
+        for child in ds_signature:
+            new_sig.append(child)
+        # Insert the new <Signature> element as the last child of the root
+        signed_root.append(new_sig)
+        # Remove the old ds:Signature
+        parent = ds_signature.getparent()
+        if parent is not None:
+            parent.remove(ds_signature)
+    # Convert to string and forcefully remove any ds: prefixes (as a last resort)
+    xml_str = etree.tostring(signed_root, encoding='utf-8').decode()
+    # Remove all <ds: and </ds: prefixes
+    xml_str = xml_str.replace('<ds:', '<').replace('</ds:', '</')
+    # Set namespace only on the first <Signature> tag
+    xml_str = xml_str.replace('<Signature>', '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">', 1)
+    return xml_str.encode('utf-8')
+
 if __name__ == '__main__':
     print('Choose which request to send:')
     print('1. Tag Details')
