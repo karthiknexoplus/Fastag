@@ -1250,7 +1250,8 @@ if __name__ == '__main__':
         now = datetime.now()
         ts = now.strftime('%Y-%m-%dT%H:%M:%S')
         msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'
-        txnId = str(uuid4())[:22]  # UUID, 1-22 chars
+        # Use numeric, timestamp-based Txn id as in working sample
+        txnId = now.strftime('%H%M%d%m%y%H%M%S') + str(now.microsecond)[-4:]  # e.g., 10012507171300006769
         xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
         print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
         print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
