@@ -10,6 +10,7 @@ from flask import Flask, request, jsonify
 import base64
 import re
 import random
+import xml.dom.minidom
 
 app = Flask(__name__)
 
@@ -1247,6 +1248,13 @@ def sign_xml(xml_data):
     xml_str = xml_str.replace('<Signature>', '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">', 1)
     return xml_str.encode('utf-8')
 
+def pretty_print_xml(xml_bytes):
+    try:
+        parsed = xml.dom.minidom.parseString(xml_bytes.decode('utf-8'))
+        return parsed.toprettyxml(indent="  ")
+    except Exception as e:
+        return xml_bytes.decode('utf-8')
+
 if __name__ == '__main__':
     print('Choose which request to send:')
     print('1. Tag Details')
@@ -1396,8 +1404,8 @@ if __name__ == '__main__':
         try:
             ts = now.strftime('%Y-%m-%dT%H:%M:%S')
             unsigned_xml = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirerId, plaza_info, lanes)
-            print('Heart Beat Request XML (unsigned):')
-            print(unsigned_xml.decode() if isinstance(unsigned_xml, bytes) else unsigned_xml)
+            print('Heart Beat Request XML (unsigned, pretty-printed):')
+            print(pretty_print_xml(unsigned_xml))
             errors = validate_heartbeat_xml(unsigned_xml)
             if errors:
                 print('Validation errors:')
@@ -1410,7 +1418,6 @@ if __name__ == '__main__':
             print('DEBUG: About to sign Heart Beat XML...')
             signed_xml = sign_xml(unsigned_xml)
             print('DEBUG: Signed Heart Beat XML generated.')
-            print('Heart Beat Request XML (signed):')
             print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
             url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
             headers = {'Content-Type': 'application/xml'}
