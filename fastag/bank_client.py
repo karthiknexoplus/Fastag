@@ -630,20 +630,19 @@ def parse_check_txn_response(xml_response):
 
 
 def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
-    # Build XML matching the official document, but with ver='1.2'
+    # Build XML matching the provided sample
     NS = 'http://npci.org/etc/schema/'
-    nsmap = {'etc': NS}
-    from lxml import etree
+    nsmap = {'ns0': NS}
     # Auto-generate refId if not provided
     if not vehicle_info.get('refId'):
         from datetime import datetime
         import random
-        refId = datetime.now().strftime('%Y%m%d%H%M%S') + str(random.randint(100000, 999999))
+        refId = f"{orgId}L{datetime.now().strftime('%d%m%y%H%M%S')}"
     else:
         refId = vehicle_info.get('refId')
-    root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
+    root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.2',  # Try version 1.2
+        'ver': '1.2',
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
@@ -653,18 +652,16 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
         'note': '',
         'refId': refId,
         'refUrl': '',
-        'ts': vehicle_info.get('txn_ts', ts),
+        'ts': ts,
         'type': 'FETCH',
         'orgTxnId': ''
     })
     vehicle = etree.SubElement(txn, 'Vehicle', {
         'TID': vehicle_info.get('TID', ''),
-        'vehicleRegNo': vehicle_info.get('vehicleRegNo', ''),
-        'tagId': vehicle_info.get('tagId', '34161FA8203287AA0D38ABE0')
+        'tagId': vehicle_info.get('tagId', ''),
+        'avc': vehicle_info.get('avc', '5'),
+        'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
     })
-    # Add empty Signature element as per doc
-    signature = etree.SubElement(root, 'Signature')
-    signature.text = ''
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
@@ -1245,31 +1242,33 @@ if __name__ == '__main__':
         vehicle_info = {
             'TID': '',
             'vehicleRegNo': '',
-            'tagId': tagid
+            'tagId': tagid,
+            'avc': '5'
         }
         from datetime import datetime
         now = datetime.now()
-        lane_id = '001'
-        plazaId = '712764'
-        txn_id = f"{plazaId}{lane_id}{now.strftime('%d%m%y%H%M%S')}"
-        msgId = txn_id
+        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+        msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'
+        txnId = msgId + '1'  # Ensure unique txnId
+        xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
+        print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
+        print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+        payload = xml_data
+        url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+        print("[DEBUG] Hardcoded URL for request:", url)
+        headers = {'Content-Type': 'application/xml'}
+        print("[TAG_DETAILS] URL:", url)
+        print("[TAG_DETAILS] Headers:", headers)
         try:
-            response = send_tag_details(msgId, orgId, vehicle_info)
-            print('HTTP Status Code:', response.status_code)
-            print('Response:')
-            print(response.content.decode() if isinstance(response.content, bytes) else response.content)
-            # Parse and print a neat summary
+            response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+            print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
+            print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
             parsed = parse_tag_details_response(response.content)
-            print('\n--- Parsed Tag Details Response ---')
+            print("[TAG_DETAILS] Parsed Response:")
             for k, v in parsed.items():
-                if k == 'respCode' and v:
-                    reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
-                    print(f"{k}: {v} ({reason})")
-                else:
-                    print(f"{k}: {v}")
-            print('-------------------------------\n')
+                print(f"  {k}: {v}")
         except Exception as e:
-            print('Error sending Tag Details request:', e)
+            print('[TAG_DETAILS] Error sending Tag Details request:', e)
     elif choice == '2':
         print('--- SyncTime API Test ---')
         sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
