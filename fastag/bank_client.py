@@ -402,7 +402,6 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'ts': ts,
         'type': 'Hbt'
     })
-    # Customer-compliant Meta block (empty)
     ET.SubElement(txn, 'Meta')
     ET.SubElement(txn, 'HbtMsg', {'acquirerId': acquirer_id, 'type': 'ALIVE'})
     plaza = ET.SubElement(txn, 'Plaza', {
@@ -416,15 +415,12 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'toDistrict': plaza_info.get('toDistrict', ''),
         'type': plaza_info.get('type', '')
     })
-    # Use customer-style lane ids and Status="Open"
-    customer_lane_ids = ['LANE01', 'LANE02', 'OUT01', 'OUT02']
-    customer_directions = ['N', 'S', 'N', 'S']
-    for idx, lane in enumerate(lanes):
+    for lane in lanes:
         ET.SubElement(plaza, 'Lane', {
             'Mode': lane.get('Mode', 'Normal'),
-            'Status': 'Open',
-            'direction': customer_directions[idx] if idx < len(customer_directions) else lane.get('direction', 'N'),
-            'id': customer_lane_ids[idx] if idx < len(customer_lane_ids) else lane.get('id', 'LANE01'),
+            'Status': lane.get('Status', 'Open'),
+            'direction': lane.get('direction', 'N'),
+            'id': lane.get('id', 'IN01'),
             'laneType': lane.get('laneType', 'Hybrid'),
             'readerId': lane.get('readerId', '1')
         })
@@ -455,10 +451,10 @@ def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=N
         }
     if lanes is None:
         lanes = [
-            {'id': 'IN01', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'IN02', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT01', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT02', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ]
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txn_id = str(uuid.uuid4())[:22]
@@ -1356,12 +1352,12 @@ if __name__ == '__main__':
         fromDistrict = 'Coimbatore'
         toDistrict = 'Coimbatore'
         agencyCode = 'TCABO'
-        # Lane ids will be set in build_heartbeat_request for customer compliance
+        # Use official mapping for lane IDs and directions
         lanes = [
-            {'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'direction': 'S', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'direction': 'N', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ]
         plaza_info = {
             'geoCode': plazaGeoCode,
