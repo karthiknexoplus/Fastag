@@ -1078,7 +1078,8 @@ TAG_DETAILS_URL = "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/
 
 def send_query_exception_list_icd(msgId, orgId, exception_list):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    txn_id = str(uuid.uuid4())[:22]
+    # Use timestamp-based txn_id matching msgId for compliance
+    txn_id = msgId  # Use the same as msgId, as in Heart Beat/SyncTime
     unsigned_xml = build_query_exception_list_request_icd(msgId, orgId, ts, txn_id, exception_list)
     print('Query Exception List Request XML (unsigned):')
     print(unsigned_xml.decode() if isinstance(unsigned_xml, bytes) else unsigned_xml)
@@ -1420,11 +1421,13 @@ if __name__ == '__main__':
     elif choice == '5':
         print('--- Request Query Exception List API Test ---')
         orgId = 'PGSH'
-        msgId = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
+        # Use timestamp-based msgId/txn_id for compliance
+        now = datetime.now()
+        msgId = now.strftime('%Y%m%d%H%M%S') + 'EXC'
         # Use current UTC time for lastFetchTime to ensure it's within 24 hours
         from datetime import datetime, timezone
-        now = datetime.now(timezone.utc)
-        recent_fetch_time = now.strftime('%Y-%m-%dT%H:%M:%S')
+        now_utc = datetime.now(timezone.utc)
+        recent_fetch_time = now_utc.strftime('%Y-%m-%dT%H:%M:%S')
         exception_list = [
             {'excCode': '01', 'lastFetchTime': recent_fetch_time},
             {'excCode': '02', 'lastFetchTime': recent_fetch_time}
