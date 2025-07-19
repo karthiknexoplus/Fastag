@@ -662,14 +662,9 @@ def send_tag_details(msgId, orgId, vehicle_info):
     print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     payload = xml_data
-    # Debug print for environment variable
-    env_url = os.getenv('BANK_API_TAGDETAILS_URL')
-    if env_url:
-        print(f"[DEBUG] BANK_API_TAGDETAILS_URL is set: {env_url}")
-    else:
-        print("[DEBUG] BANK_API_TAGDETAILS_URL is NOT set, using default /v2 endpoint.")
-    url = env_url if env_url else 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
-    print("[DEBUG] Final URL being used for request:", url)
+    # Hardcode the /v2 endpoint
+    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+    print("[DEBUG] Hardcoded URL for request:", url)
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
     print("[TAG_DETAILS] Headers:", headers)
