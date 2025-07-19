@@ -384,19 +384,13 @@ def validate_heartbeat_xml(xml_bytes):
     return errors
 
 def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta=None, signature_placeholder='...'):
-    """
-    Build the Toll Plaza Heart Beat XML request as per ICD V2.5 sample schema.
-    All required attributes and order are enforced.
-    """
     root = ET.Element('etc:TollplazaHbeatReq', {'xmlns:etc': 'http://npci.org/etc/schema/'})
-    # Head
     ET.SubElement(root, 'Head', {
         'msgId': msgId,
         'orgId': orgId,
         'ts': ts,
         'ver': '1.0'
     })
-    # Txn
     txn = ET.SubElement(root, 'Txn', {
         'id': txn_id,
         'note': '',
@@ -406,32 +400,41 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'type': 'Hbt',
         'orgTxnId': ''
     })
-    # Meta (just <Meta/>)
     ET.SubElement(txn, 'Meta')
-    # HbtMsg
     ET.SubElement(txn, 'HbtMsg', {'type': 'ALIVE', 'acquirerId': acquirer_id})
-    # Plaza (all attributes must be filled with real values)
-    plaza = ET.SubElement(txn, 'Plaza', {
-        'geoCode': plaza_info.get('geoCode', '11.0185,76.9778'),
-        'id': plaza_info.get('id', '712764'),
-        'name': plaza_info.get('name', 'PGS hospital'),
-        'subtype': 'State',  # Force subtype to 'State'
-        'type': 'Parking',
-        'address': plaza_info.get('address', 'PGS hospital address'),
-        'fromDistrict': plaza_info.get('fromDistrict', 'Coimbatore'),
-        'toDistrict': plaza_info.get('toDistrict', 'Coimbatore'),
-        'agencyCode': plaza_info.get('agencyCode', 'TCABO')
-    })
+    # Add all provided plaza_info fields
+    plaza_attrs = {
+        'geoCode': plaza_info.get('geoCode', ''),
+        'id': plaza_info.get('id', ''),
+        'name': plaza_info.get('name', ''),
+        'subtype': plaza_info.get('subtype', ''),
+        'type': plaza_info.get('type', ''),
+        'address': plaza_info.get('address', ''),
+        'fromDistrict': plaza_info.get('fromDistrict', ''),
+        'toDistrict': plaza_info.get('toDistrict', ''),
+        'agencyCode': plaza_info.get('agencyCode', ''),
+        'city': plaza_info.get('city', ''),
+        'state': plaza_info.get('state', ''),
+        'govtBody': plaza_info.get('govtBody', ''),
+        'concessionaireType': plaza_info.get('concessionaireType', ''),
+        'concessionaireName': plaza_info.get('concessionaireName', ''),
+        'siName': plaza_info.get('siName', ''),
+        'category': plaza_info.get('category', ''),
+        'returnJourneyApplicable': plaza_info.get('returnJourneyApplicable', ''),
+        'returnJourneyLogic': plaza_info.get('returnJourneyLogic', '')
+    }
+    # Remove empty attributes
+    plaza_attrs = {k: v for k, v in plaza_attrs.items() if v}
+    plaza = ET.SubElement(txn, 'Plaza', plaza_attrs)
     for lane in lanes:
         ET.SubElement(plaza, 'Lane', {
             'id': lane.get('id', 'IN01'),
             'direction': lane.get('direction', 'N'),
             'readerId': lane.get('readerId', '1'),
-            'Status': 'Open',  # Capital O
+            'Status': 'Open',
             'Mode': lane.get('Mode', 'Normal'),
             'laneType': lane.get('laneType', 'Hybrid')
         })
-    # Signature placeholder
     signature = ET.SubElement(root, 'Signature')
     signature.text = signature_placeholder
     return ET.tostring(root, encoding='utf-8', method='xml')
@@ -1370,14 +1373,23 @@ if __name__ == '__main__':
         orgId = 'PGSH'
         plazaId = '712764'
         acquirerId = '727274'
-        plazaGeoCode = '11.0185,76.9778'
+        plazaGeoCode = '11.0185946,76.9778221'
         plazaName = 'PGS hospital'
-        plazaSubtype = 'State'
+        plazaSubtype = 'Covered'  # Provided as 'Covered'
         plazaType = 'Parking'
-        address = 'PGS hospital address'
+        address = 'PGS hospital, Coimbatore, Tamilnadu'
         fromDistrict = 'Coimbatore'
         toDistrict = 'Coimbatore'
         agencyCode = 'TCABO'
+        city = 'Coimbatore'
+        state = 'Tamilnadu'
+        govtBody = 'IDFC Parking'
+        concessionaireType = 'Conc'
+        concessionaireName = 'Onebee Technology Pvt Ltd'
+        siName = 'Nexoplus Innovations Pvt Ltd'
+        category = 'Not Applicable'
+        returnJourneyApplicable = 'Not Applicable'
+        returnJourneyLogic = 'Not Applicable'
         lanes = [
             {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
             {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
@@ -1393,7 +1405,16 @@ if __name__ == '__main__':
             'address': address,
             'fromDistrict': fromDistrict,
             'toDistrict': toDistrict,
-            'agencyCode': agencyCode
+            'agencyCode': agencyCode,
+            'city': city,
+            'state': state,
+            'govtBody': govtBody,
+            'concessionaireType': concessionaireType,
+            'concessionaireName': concessionaireName,
+            'siName': siName,
+            'category': category,
+            'returnJourneyApplicable': returnJourneyApplicable,
+            'returnJourneyLogic': returnJourneyLogic
         }
         # Generate msgId and txn_id in the same format and make them identical
         now = datetime.now()
