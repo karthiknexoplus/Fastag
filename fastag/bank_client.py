@@ -395,46 +395,34 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
     txn = ET.SubElement(root, 'Txn', {
         'id': txn_id,
         'note': '',
+        'orgTxnId': '',
         'refId': '',
         'refUrl': '',
         'ts': ts,
-        'type': 'Hbt',
-        'orgTxnId': ''
+        'type': 'Hbt'
     })
     ET.SubElement(txn, 'Meta')
-    ET.SubElement(txn, 'HbtMsg', {'type': 'ALIVE', 'acquirerId': acquirer_id})
-    # Add all provided plaza_info fields
-    plaza_attrs = {
+    ET.SubElement(txn, 'HbtMsg', {'acquirerId': acquirer_id, 'type': 'ALIVE'})
+    # Only include Plaza and Lane attributes present in the sample
+    plaza = ET.SubElement(txn, 'Plaza', {
+        'address': plaza_info.get('address', ''),
+        'agencyCode': plaza_info.get('agencyCode', ''),
+        'fromDistrict': plaza_info.get('fromDistrict', ''),
         'geoCode': plaza_info.get('geoCode', ''),
         'id': plaza_info.get('id', ''),
         'name': plaza_info.get('name', ''),
         'subtype': plaza_info.get('subtype', ''),
-        'type': plaza_info.get('type', ''),
-        'address': plaza_info.get('address', ''),
-        'fromDistrict': plaza_info.get('fromDistrict', ''),
         'toDistrict': plaza_info.get('toDistrict', ''),
-        'agencyCode': plaza_info.get('agencyCode', ''),
-        'city': plaza_info.get('city', ''),
-        'state': plaza_info.get('state', ''),
-        'govtBody': plaza_info.get('govtBody', ''),
-        'concessionaireType': plaza_info.get('concessionaireType', ''),
-        'concessionaireName': plaza_info.get('concessionaireName', ''),
-        'siName': plaza_info.get('siName', ''),
-        'category': plaza_info.get('category', ''),
-        'returnJourneyApplicable': plaza_info.get('returnJourneyApplicable', ''),
-        'returnJourneyLogic': plaza_info.get('returnJourneyLogic', '')
-    }
-    # Remove empty attributes
-    plaza_attrs = {k: v for k, v in plaza_attrs.items() if v}
-    plaza = ET.SubElement(txn, 'Plaza', plaza_attrs)
+        'type': plaza_info.get('type', '')
+    })
     for lane in lanes:
         ET.SubElement(plaza, 'Lane', {
-            'id': lane.get('id', 'IN01'),
-            'direction': lane.get('direction', 'N'),
-            'readerId': lane.get('readerId', '1'),
-            'Status': 'Open',
             'Mode': lane.get('Mode', 'Normal'),
-            'laneType': lane.get('laneType', 'Hybrid')
+            'Status': lane.get('Status', 'Open'),
+            'direction': lane.get('direction', 'N'),
+            'id': lane.get('id', 'IN01'),
+            'laneType': lane.get('laneType', 'Hybrid'),
+            'readerId': lane.get('readerId', '1')
         })
     signature = ET.SubElement(root, 'Signature')
     signature.text = signature_placeholder
@@ -1376,21 +1364,12 @@ if __name__ == '__main__':
         acquirerId = '727274'
         plazaGeoCode = '11.0185946,76.9778221'
         plazaName = 'PGS hospital'
-        plazaSubtype = 'Covered'  # Provided as 'Covered'
+        plazaSubtype = 'Covered'  # or 'State' as needed
         plazaType = 'Parking'
         address = 'PGS hospital, Coimbatore, Tamilnadu'
         fromDistrict = 'Coimbatore'
         toDistrict = 'Coimbatore'
         agencyCode = 'TCABO'
-        city = 'Coimbatore'
-        state = 'Tamilnadu'
-        govtBody = 'IDFC Parking'
-        concessionaireType = 'Conc'
-        concessionaireName = 'Onebee Technology Pvt Ltd'
-        siName = 'Nexoplus Innovations Pvt Ltd'
-        category = 'Not Applicable'
-        returnJourneyApplicable = 'Not Applicable'
-        returnJourneyLogic = 'Not Applicable'
         lanes = [
             {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
             {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
@@ -1406,18 +1385,8 @@ if __name__ == '__main__':
             'address': address,
             'fromDistrict': fromDistrict,
             'toDistrict': toDistrict,
-            'agencyCode': agencyCode,
-            'city': city,
-            'state': state,
-            'govtBody': govtBody,
-            'concessionaireType': concessionaireType,
-            'concessionaireName': concessionaireName,
-            'siName': siName,
-            'category': category,
-            'returnJourneyApplicable': returnJourneyApplicable,
-            'returnJourneyLogic': returnJourneyLogic
+            'agencyCode': agencyCode
         }
-        # Generate msgId and txn_id in the same format and make them identical
         now = datetime.now()
         msgId = now.strftime('%Y%m%d%H%M%S') + 'HBRQ'
         txn_id = msgId
