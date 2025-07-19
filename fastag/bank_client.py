@@ -611,104 +611,53 @@ def parse_check_txn_response(xml_response):
     }
 
 
-def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info, signature_placeholder='...'):
-    root = ET.Element('etc:ReqTagDetails', {'xmlns:etc': 'http://npci.org/etc/schema/'})
-    head = ET.SubElement(root, 'Head', {
-        'ver': '1.0',
+def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
+    # Build XML matching the working sample exactly
+    NS = 'http://npci.org/etc/schema/'
+    nsmap = {'ns0': NS}
+    # Use lxml for namespace prefix control
+    from lxml import etree
+    root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
+    head = etree.SubElement(root, 'Head', {
+        'ver': '1.2',
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
     })
-    txn = ET.SubElement(root, 'Txn', {
+    txn = etree.SubElement(root, 'Txn', {
         'id': txnId,
         'note': '',
-        'refId': '',
+        'refId': vehicle_info.get('refId', ''),
         'refUrl': '',
-        'ts': ts,
+        'ts': vehicle_info.get('txn_ts', ts),
         'type': 'FETCH',
         'orgTxnId': ''
     })
-    vehicle = ET.SubElement(txn, 'Vehicle')
-    # Use non-empty test values for all required fields
-    vehicle.set('TID', vehicle_info.get('TID', 'TESTTID123'))
-    vehicle.set('vehicleRegNo', vehicle_info.get('vehicleRegNo', 'TESTREG1234'))
-    vehicle.set('tagId', vehicle_info.get('tagId', 'TESTTAGID123456'))
-    # Add Signature placeholder (to match SyncTime logic)
-    signature = ET.SubElement(root, 'Signature')
-    signature.text = signature_placeholder
-    return ET.tostring(root, encoding='utf-8', method='xml')
+    vehicle = etree.SubElement(txn, 'Vehicle', {
+        'TID': vehicle_info.get('TID', ''),
+        'tagId': vehicle_info.get('tagId', ''),
+        'avc': vehicle_info.get('avc', ''),
+        'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
+    })
+    # Return pretty-printed XML string
+    return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
-def sign_xml(xml_data):
-    # Parse XML with lxml
-    root = etree.fromstring(xml_data)
-    # Load private key and cert
-    with open(PRIVATE_KEY_PATH, "rb") as key_file:
-        private_key = key_file.read()
-    with open(CERT_PATH, "rb") as cert_file:
-        cert = cert_file.read()
-    # Sign the XML with required canonicalization algorithm
-    signer = XMLSigner(
-        signature_algorithm="rsa-sha256",
-        c14n_algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"
-    )
-    signed_root = signer.sign(root, key=private_key, cert=cert, reference_uri=None)
-    # Remove the empty <Signature> placeholder from the original XML
-    placeholder = signed_root.find(".//Signature")
-    if placeholder is not None:
-        parent = placeholder.getparent()
-        parent.remove(placeholder)
-    # Find the generated <ds:Signature> element
-    ds_signature = signed_root.find(".//{http://www.w3.org/2000/09/xmldsig#}Signature")
-    if ds_signature is not None:
-        # Remove ds: prefix from all signature-related tags
-        for elem in ds_signature.iter():
-            if elem.tag.startswith("{http://www.w3.org/2000/09/xmldsig#}"):
-                elem.tag = elem.tag.replace("{http://www.w3.org/2000/09/xmldsig#}", "")
-        # Create a new <Signature> element (no prefix, with namespace)
-        new_sig = etree.Element("Signature", nsmap=None)
-        new_sig.attrib["xmlns"] = "http://www.w3.org/2000/09/xmldsig#"
-        for child in ds_signature:
-            new_sig.append(child)
-        # Insert the new <Signature> element as the last child of the root
-        signed_root.append(new_sig)
-        # Remove the old ds:Signature
-        parent = ds_signature.getparent()
-        if parent is not None:
-            parent.remove(ds_signature)
-    # Convert to string and forcefully remove any ds: prefixes (as a last resort)
-    xml_str = etree.tostring(signed_root, encoding='utf-8').decode()
-    # Remove all <ds: and </ds: prefixes
-    xml_str = xml_str.replace('<ds:', '<').replace('</ds:', '</')
-    # Set namespace only on the first <Signature> tag
-    xml_str = xml_str.replace('<Signature>', '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">', 1)
-    return xml_str.encode('utf-8')
-
-def generate_txn_id(plaza_id, lane_id, dt=None):
-    """
-    Generate transaction ID as Plaza ID (6 digits) + Lane ID (last 3 digits) + Transaction Date & Time (DDMMYYHHMMSS)
-    """
-    if dt is None:
-        dt = datetime.now()
-    date_str = dt.strftime("%d%m%y%H%M%S")
-    return f"{plaza_id}{lane_id[-3:]}{date_str}"
 
 def send_tag_details(msgId, orgId, vehicle_info):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     plaza_id = '712764'  # Example Plaza ID
     lane_id = '001'      # Example Lane ID (last 3 digits)
     txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
+    # For refId and txn_ts, allow override from vehicle_info
+    vehicle_info = vehicle_info.copy()
+    vehicle_info.setdefault('refId', '')
+    vehicle_info.setdefault('txn_ts', ts)
+    vehicle_info.setdefault('avc', '5')  # Default avc as in working sample
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
-    print(f'\n[TAG_DETAILS] Request XML (unsigned), TxnId: {txnId}')
+    print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
-    if SIGN_REQUEST:
-        print("[TAG_DETAILS] About to sign XML...")
-        signed_xml = sign_xml(xml_data)
-        print("[TAG_DETAILS] Signed XML generated:")
-        print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
-        payload = signed_xml
-    else:
-        print('[TAG_DETAILS] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
-        payload = xml_data
+    # Do NOT sign or add signature for this request
+    payload = xml_data
     url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails')
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
@@ -717,18 +666,6 @@ def send_tag_details(msgId, orgId, vehicle_info):
         response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
         print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
         print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
-        ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'etolluatsigner_Public.crt.txt')
-        print(f"[TAG_DETAILS] Using signer cert path: {ETOLL_SIGNER_CERT_PATH}")
-        try:
-            from lxml import etree
-            with open(ETOLL_SIGNER_CERT_PATH, 'rb') as f:
-                cert = f.read()
-            from signxml import XMLVerifier
-            verified_data = XMLVerifier().verify(response.content, x509_cert=cert).signed_xml
-            print("[TAG_DETAILS] Signature is valid!")
-            print(etree.tostring(verified_data, pretty_print=True).decode())
-        except Exception as e:
-            print("[TAG_DETAILS] Signature verification failed:", e)
         parsed = parse_tag_details_response(response.content)
         print("[TAG_DETAILS] Parsed Response:")
         for k, v in parsed.items():
@@ -1114,7 +1051,7 @@ def api_sync_time():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-TAG_DETAILS_URL = "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2"
+TAG_DETAILS_URL = "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails"
 
 def send_query_exception_list_icd(msgId, orgId, exception_list):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
