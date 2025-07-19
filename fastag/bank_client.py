@@ -403,9 +403,9 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
     })
     ET.SubElement(txn, 'Meta')
     ET.SubElement(txn, 'HbtMsg', {'acquirerId': acquirer_id, 'type': 'ALIVE'})
-    # Only include Plaza and Lane attributes present in the customer sample
+    # Set address to just the plaza name
     plaza = ET.SubElement(txn, 'Plaza', {
-        'address': plaza_info.get('address', ''),
+        'address': plaza_info.get('name', ''),
         'agencyCode': plaza_info.get('agencyCode', ''),
         'fromDistrict': plaza_info.get('fromDistrict', ''),
         'geoCode': plaza_info.get('geoCode', ''),
@@ -426,7 +426,10 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         })
     signature = ET.SubElement(root, 'Signature')
     signature.text = signature_placeholder
-    return ET.tostring(root, encoding='utf-8', method='xml')
+    # Add XML declaration and force encoding to UTF-8 (uppercase)
+    xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+    xml_str = xml_bytes.decode('utf-8').replace("<?xml version='1.0' encoding='utf-8'?>", '<?xml version="1.0" encoding="UTF-8"?>')
+    return xml_str.encode('utf-8')
 
 def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=None, meta=None, signature_placeholder='...'):
     # Set defaults as per user-provided details
