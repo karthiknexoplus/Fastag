@@ -9,6 +9,7 @@ import sys
 from flask import Flask, request, jsonify
 import base64
 import re
+import random
 
 app = Flask(__name__)
 
@@ -616,6 +617,13 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     NS = 'http://npci.org/etc/schema/'
     nsmap = {'ns0': NS}
     from lxml import etree
+    # Auto-generate refId if not provided
+    if not vehicle_info.get('refId'):
+        # Example: YYYYMMDDHHMMSS + 6 random digits
+        from datetime import datetime
+        refId = datetime.now().strftime('%Y%m%d%H%M%S') + str(random.randint(100000, 999999))
+    else:
+        refId = vehicle_info.get('refId')
     root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
         'ver': '1.2',
@@ -626,7 +634,7 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     txn = etree.SubElement(root, 'Txn', {
         'id': txnId,
         'note': '',
-        'refId': vehicle_info.get('refId', '536046L03170725125746'),
+        'refId': refId,
         'refUrl': '',
         'ts': vehicle_info.get('txn_ts', ts),
         'type': 'FETCH',
