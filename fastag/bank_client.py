@@ -618,7 +618,7 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     from lxml import etree
     root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.0',  # Changed from 1.2 to 1.0
+        'ver': '1.0',
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
@@ -634,8 +634,8 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     })
     vehicle = etree.SubElement(txn, 'Vehicle', {
         'TID': vehicle_info.get('TID', 'TESTTID123'),
-        'tagId': vehicle_info.get('tagId', 'TESTTAGID123456'),
-        'avc': vehicle_info.get('avc', '5'),
+        'tagId': vehicle_info.get('tagId', '34161FA820328EE80795F540'),
+        'avc': vehicle_info.get('avc', '4'),
         'vehicleRegNo': vehicle_info.get('vehicleRegNo', 'TESTREG1234')
     })
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
