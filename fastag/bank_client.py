@@ -677,7 +677,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     payload = xml_data
     # Hardcode the /v2 endpoint
-    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
     print("[DEBUG] Hardcoded URL for request:", url)
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
