@@ -1430,6 +1430,11 @@ if __name__ == '__main__':
             print('HTTP Status Code:', response.status_code)
             print('Response:')
             print(response.content.decode() if isinstance(response.content, bytes) else response.content)
+            print('--- FULL RAW RESPONSE ---')
+            print('Headers:', response.headers)
+            print('Text:', response.text)
+            print('Raw bytes:', response.content)
+            print('------------------------')
             parsed = parse_heartbeat_response(response.content)
             print('\n--- Parsed Heart Beat Response ---')
             for k, v in parsed.items():
