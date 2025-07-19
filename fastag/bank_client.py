@@ -403,7 +403,7 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
     })
     ET.SubElement(txn, 'Meta')
     ET.SubElement(txn, 'HbtMsg', {'acquirerId': acquirer_id, 'type': 'ALIVE'})
-    # Only include Plaza and Lane attributes present in the sample
+    # Only include Plaza and Lane attributes present in the customer sample
     plaza = ET.SubElement(txn, 'Plaza', {
         'address': plaza_info.get('address', ''),
         'agencyCode': plaza_info.get('agencyCode', ''),
