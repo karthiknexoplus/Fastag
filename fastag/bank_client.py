@@ -618,7 +618,7 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     from lxml import etree
     root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.2',
+        'ver': '1.0',  # Changed from 1.2 to 1.0
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
