@@ -402,9 +402,11 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'ts': ts,
         'type': 'Hbt'
     })
-    ET.SubElement(txn, 'Meta')
+    # ICD-compliant Meta block
+    meta_elem = ET.SubElement(txn, 'Meta')
+    ET.SubElement(meta_elem, 'Meta1', {'name': '', 'value': ''})
+    ET.SubElement(meta_elem, 'Meta2', {'name': '', 'value': ''})
     ET.SubElement(txn, 'HbtMsg', {'acquirerId': acquirer_id, 'type': 'ALIVE'})
-    # Set address to just the plaza name
     plaza = ET.SubElement(txn, 'Plaza', {
         'address': plaza_info.get('name', ''),
         'agencyCode': plaza_info.get('agencyCode', ''),
@@ -416,12 +418,14 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'toDistrict': plaza_info.get('toDistrict', ''),
         'type': plaza_info.get('type', '')
     })
-    for lane in lanes:
+    # Use 1-3 char lane ids and Status="OPEN"
+    icd_lane_ids = ['IN1', 'IN2', 'OUT1', 'OUT2']
+    for idx, lane in enumerate(lanes):
         ET.SubElement(plaza, 'Lane', {
             'Mode': lane.get('Mode', 'Normal'),
-            'Status': lane.get('Status', 'Open'),
+            'Status': 'OPEN',
             'direction': lane.get('direction', 'N'),
-            'id': lane.get('id', 'IN01'),
+            'id': icd_lane_ids[idx] if idx < len(icd_lane_ids) else lane.get('id', 'IN1'),
             'laneType': lane.get('laneType', 'Hybrid'),
             'readerId': lane.get('readerId', '1')
         })
@@ -1375,24 +1379,25 @@ if __name__ == '__main__':
         acquirerId = '727274'
         plazaGeoCode = '11.0185946,76.9778221'
         plazaName = 'PGS hospital'
-        plazaSubtype = 'State'  # Set to 'State' to match working customer
-        plazaType = 'Toll'      # Set to 'Toll' to match working customer
+        plazaSubtype = 'State'
+        plazaType = 'Toll'
         address = 'PGS hospital, Coimbatore, Tamilnadu'
         fromDistrict = 'Coimbatore'
         toDistrict = 'Coimbatore'
         agencyCode = 'TCABO'
+        # Lane ids will be set in build_heartbeat_request for ICD compliance
         lanes = [
-            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'N', 'readerId': '1', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'N', 'readerId': '2', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'S', 'readerId': '3', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'direction': 'S', 'readerId': '4', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ]
         plaza_info = {
             'geoCode': plazaGeoCode,
             'id': plazaId,
             'name': plazaName,
-            'subtype': plazaSubtype,  # Now 'State'
-            'type': plazaType,        # Now 'Toll'
+            'subtype': plazaSubtype,
+            'type': plazaType,
             'address': address,
             'fromDistrict': fromDistrict,
             'toDistrict': toDistrict,
