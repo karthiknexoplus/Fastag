@@ -613,7 +613,7 @@ def parse_check_txn_response(xml_response):
 
 
 def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
-    # Build XML matching the official document
+    # Build XML matching the official document, but with ver='1.2'
     NS = 'http://npci.org/etc/schema/'
     nsmap = {'etc': NS}
     from lxml import etree
@@ -626,7 +626,7 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
         refId = vehicle_info.get('refId')
     root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.0',
+        'ver': '1.2',  # Try version 1.2
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
@@ -656,17 +656,14 @@ def send_tag_details(msgId, orgId, vehicle_info):
     plaza_id = '712764'  # Example Plaza ID
     lane_id = '001'      # Example Lane ID (last 3 digits)
     txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
-    # For refId and txn_ts, allow override from vehicle_info
     vehicle_info = vehicle_info.copy()
-    vehicle_info.setdefault('refId', '')
     vehicle_info.setdefault('txn_ts', ts)
-    vehicle_info.setdefault('avc', '5')  # Default avc as in working sample
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
     print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
-    # Do NOT sign or add signature for this request
     payload = xml_data
-    url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails')
+    # Use /v2 endpoint
+    url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
     print("[TAG_DETAILS] Headers:", headers)
