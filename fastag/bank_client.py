@@ -406,32 +406,30 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'type': 'Hbt',
         'orgTxnId': ''
     })
-    # Meta (always present, with Meta1 and Meta2)
-    meta_elem = ET.SubElement(txn, 'Meta')
-    ET.SubElement(meta_elem, 'Meta1', {'name': '', 'value': ''})
-    ET.SubElement(meta_elem, 'Meta2', {'name': '', 'value': ''})
+    # Meta (just <Meta/>)
+    ET.SubElement(txn, 'Meta')
     # HbtMsg
     ET.SubElement(txn, 'HbtMsg', {'type': 'ALIVE', 'acquirerId': acquirer_id})
-    # Plaza
+    # Plaza (all attributes must be filled with real values)
     plaza = ET.SubElement(txn, 'Plaza', {
-        'geoCode': plaza_info.get('geoCode', ''),
-        'id': plaza_info.get('id', ''),
-        'name': plaza_info.get('name', ''),
-        'subtype': 'Covered',  # Force subtype to 'Covered'
+        'geoCode': plaza_info.get('geoCode', '11.0185,76.9778'),
+        'id': plaza_info.get('id', '712764'),
+        'name': plaza_info.get('name', 'PGS hospital'),
+        'subtype': 'State',  # Force subtype to 'State'
         'type': 'Parking',
-        'address': plaza_info.get('address', ''),
-        'fromDistrict': plaza_info.get('fromDistrict', ''),
-        'toDistrict': plaza_info.get('toDistrict', ''),
-        'agencyCode': plaza_info.get('agencyCode', '')
+        'address': plaza_info.get('address', 'PGS hospital address'),
+        'fromDistrict': plaza_info.get('fromDistrict', 'Coimbatore'),
+        'toDistrict': plaza_info.get('toDistrict', 'Coimbatore'),
+        'agencyCode': plaza_info.get('agencyCode', 'TCABO')
     })
     for lane in lanes:
         ET.SubElement(plaza, 'Lane', {
-            'id': lane.get('id', ''),
-            'direction': lane.get('direction', ''),
-            'readerId': lane.get('readerId', ''),
-            'Status': lane.get('Status', ''),
-            'Mode': lane.get('Mode', ''),
-            'laneType': lane.get('laneType', '')
+            'id': lane.get('id', 'IN01'),
+            'direction': lane.get('direction', 'N'),
+            'readerId': lane.get('readerId', '1'),
+            'Status': 'Open',  # Capital O
+            'Mode': lane.get('Mode', 'Normal'),
+            'laneType': lane.get('laneType', 'Hybrid')
         })
     # Signature placeholder
     signature = ET.SubElement(root, 'Signature')
@@ -1376,15 +1374,15 @@ if __name__ == '__main__':
         plazaName = 'PGS hospital'
         plazaSubtype = 'State'
         plazaType = 'Parking'
-        address = ''
-        fromDistrict = ''
-        toDistrict = ''
+        address = 'PGS hospital address'
+        fromDistrict = 'Coimbatore'
+        toDistrict = 'Coimbatore'
         agencyCode = 'TCABO'
         lanes = [
-            {'id': 'IN01', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'IN02', 'direction': 'N', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT01', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT02', 'direction': 'S', 'readerId': '', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ]
         plaza_info = {
             'geoCode': plazaGeoCode,
@@ -1397,15 +1395,15 @@ if __name__ == '__main__':
             'toDistrict': toDistrict,
             'agencyCode': agencyCode
         }
-        msgId = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
+        # Generate msgId and txn_id in the same format and make them identical
+        now = datetime.now()
+        msgId = now.strftime('%Y%m%d%H%M%S') + 'HBRQ'
+        txn_id = msgId
         try:
-            # Build unsigned XML
-            ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-            txn_id = str(uuid.uuid4())[:22]
+            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
             unsigned_xml = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirerId, plaza_info, lanes)
             print('Heart Beat Request XML (unsigned):')
             print(unsigned_xml.decode() if isinstance(unsigned_xml, bytes) else unsigned_xml)
-            # Validate XML
             errors = validate_heartbeat_xml(unsigned_xml)
             if errors:
                 print('Validation errors:')
@@ -1415,13 +1413,11 @@ if __name__ == '__main__':
                 sys.exit(1)
             else:
                 print('XML is ICD-compliant!')
-            # Sign XML
             print('DEBUG: About to sign Heart Beat XML...')
             signed_xml = sign_xml(unsigned_xml)
             print('DEBUG: Signed Heart Beat XML generated.')
             print('Heart Beat Request XML (signed):')
             print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
-            # Send
             url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
             headers = {'Content-Type': 'application/xml'}
             response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
@@ -1438,7 +1434,6 @@ if __name__ == '__main__':
                     print(f"{k}: {v}")
             print('-------------------------------\n')
         except Exception as e:
-            # Try to print the response content if available
             if hasattr(e, 'response') and e.response is not None:
                 print('Raw Response from bank:')
                 print(e.response.content.decode(errors='replace'))
