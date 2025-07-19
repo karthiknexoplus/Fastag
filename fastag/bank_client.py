@@ -613,20 +613,20 @@ def parse_check_txn_response(xml_response):
 
 
 def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
-    # Build XML matching the working customer example exactly
+    # Build XML matching the official document
     NS = 'http://npci.org/etc/schema/'
-    nsmap = {'ns0': NS}
+    nsmap = {'etc': NS}
     from lxml import etree
     # Auto-generate refId if not provided
     if not vehicle_info.get('refId'):
-        # Example: YYYYMMDDHHMMSS + 6 random digits
         from datetime import datetime
+        import random
         refId = datetime.now().strftime('%Y%m%d%H%M%S') + str(random.randint(100000, 999999))
     else:
         refId = vehicle_info.get('refId')
-    root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
+    root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.2',
+        'ver': '1.0',
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
@@ -642,10 +642,12 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     })
     vehicle = etree.SubElement(txn, 'Vehicle', {
         'TID': vehicle_info.get('TID', ''),
-        'tagId': vehicle_info.get('tagId', '34161FA8203287AA0D38ABE0'),
-        'avc': vehicle_info.get('avc', '5'),
-        'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
+        'vehicleRegNo': vehicle_info.get('vehicleRegNo', ''),
+        'tagId': vehicle_info.get('tagId', '34161FA8203287AA0D38ABE0')
     })
+    # Add empty Signature element as per doc
+    signature = etree.SubElement(root, 'Signature')
+    signature.text = ''
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
