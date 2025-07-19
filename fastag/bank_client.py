@@ -1364,8 +1364,8 @@ if __name__ == '__main__':
         acquirerId = '727274'
         plazaGeoCode = '11.0185946,76.9778221'
         plazaName = 'PGS hospital'
-        plazaSubtype = 'Covered'  # or 'State' as needed
-        plazaType = 'Parking'
+        plazaSubtype = 'State'  # Set to 'State' to match working customer
+        plazaType = 'Toll'      # Set to 'Toll' to match working customer
         address = 'PGS hospital, Coimbatore, Tamilnadu'
         fromDistrict = 'Coimbatore'
         toDistrict = 'Coimbatore'
@@ -1380,8 +1380,8 @@ if __name__ == '__main__':
             'geoCode': plazaGeoCode,
             'id': plazaId,
             'name': plazaName,
-            'subtype': plazaSubtype,
-            'type': plazaType,
+            'subtype': plazaSubtype,  # Now 'State'
+            'type': plazaType,        # Now 'Toll'
             'address': address,
             'fromDistrict': fromDistrict,
             'toDistrict': toDistrict,
