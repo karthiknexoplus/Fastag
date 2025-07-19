@@ -611,7 +611,7 @@ def parse_check_txn_response(xml_response):
     }
 
 
-def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
+def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info, signature_placeholder='...'):
     root = ET.Element('etc:ReqTagDetails', {'xmlns:etc': 'http://npci.org/etc/schema/'})
     head = ET.SubElement(root, 'Head', {
         'ver': '1.0',
@@ -629,11 +629,13 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
         'orgTxnId': ''
     })
     vehicle = ET.SubElement(txn, 'Vehicle')
-    # Always include all three attributes as per ICD: TID, vehicleRegNo, tagId (lowercase)
-    vehicle.set('TID', vehicle_info.get('TID', ''))
-    vehicle.set('vehicleRegNo', vehicle_info.get('vehicleRegNo', ''))
-    vehicle.set('tagId', vehicle_info.get('tagId', ''))
-    # Remove Meta, MessageSignature, and licensekey for strict ICD compliance
+    # Use non-empty test values for all required fields
+    vehicle.set('TID', vehicle_info.get('TID', 'TESTTID123'))
+    vehicle.set('vehicleRegNo', vehicle_info.get('vehicleRegNo', 'TESTREG1234'))
+    vehicle.set('tagId', vehicle_info.get('tagId', 'TESTTAGID123456'))
+    # Add Signature placeholder (to match SyncTime logic)
+    signature = ET.SubElement(root, 'Signature')
+    signature.text = signature_placeholder
     return ET.tostring(root, encoding='utf-8', method='xml')
 
 def sign_xml(xml_data):
@@ -692,7 +694,6 @@ def generate_txn_id(plaza_id, lane_id, dt=None):
 
 def send_tag_details(msgId, orgId, vehicle_info):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    # Use transaction ID logic: Plaza ID (6 digits) + Lane ID (last 3 digits) + DateTime (DDMMYYHHMMSS)
     plaza_id = '712764'  # Example Plaza ID
     lane_id = '001'      # Example Lane ID (last 3 digits)
     txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
@@ -708,7 +709,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
     else:
         print('[TAG_DETAILS] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
         payload = xml_data
-    url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2')
+    url = os.getenv('BANK_API_TAGDETAILS_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails')
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
     print("[TAG_DETAILS] Headers:", headers)
@@ -716,7 +717,6 @@ def send_tag_details(msgId, orgId, vehicle_info):
         response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
         print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
         print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
-        # --- Signature Verification (for response) ---
         ETOLL_SIGNER_CERT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'etolluatsigner_Public.crt.txt')
         print(f"[TAG_DETAILS] Using signer cert path: {ETOLL_SIGNER_CERT_PATH}")
         try:
