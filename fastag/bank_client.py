@@ -1226,6 +1226,14 @@ def pretty_print_xml(xml_bytes):
     except Exception as e:
         return xml_bytes.decode('utf-8')
 
+def print_participants_table(participants):
+    print("\nList of Participants:")
+    print(f"{'S.No':<5} {'Issuer IIN':<10} {'Name'}")
+    print("-" * 40)
+    for idx, p in enumerate(participants, 1):
+        print(f"{idx:<5} {p.get('issuerIin', ''):<10} {p.get('name', '')}")
+    print("-" * 40)
+
 if __name__ == '__main__':
     print('Choose which request to send:')
     print('1. Tag Details')
@@ -1339,6 +1347,9 @@ if __name__ == '__main__':
             extract_and_compare_xml_certificate(response.content)
             parsed = parse_list_participant_response(response.content)
             print('Minimal Response:', parsed)
+            # Print tabular view in terminal
+            if 'participants' in parsed and isinstance(parsed['participants'], list):
+                print_participants_table(parsed['participants'])
         except Exception as e:
             print('Error sending ListParticipant request:', e)
     elif choice == '4':
