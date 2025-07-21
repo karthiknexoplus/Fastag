@@ -1509,74 +1509,352 @@ AVC_MAP = {
 }
 
 if __name__ == '__main__':
-    print('Choose which request to send:')
-    print('1. Tag Details')
-    print('2. SyncTime')
-    print('3. List Participants')
-    print('4. Heart Beat')
-    print('5. Request Query Exception List')
-    print('6. Request Pay')
-    choice = input('Enter 1, 2, 3, 4, 5, or 6: ').strip()
-    if choice == '1':
-        print('--- Tag Details API Test ---')
-        print('Select a UAT Tag to test:')
-        for idx, tag in enumerate(UAT_TAGS, 1):
-            print(f"{idx}. Chassis: {tag['chassis']}, Tag ID: {tag['tagId']}, TID: {tag['TID']}, Status: {tag['excStatus']}, Bank: {tag['bankName']}")
-        print(f"{len(UAT_TAGS)+1}. Enter manually")
-        sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
-        if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
-            tag = UAT_TAGS[int(sel)-1]
-            avc_num = ''
-            m = re.match(r'VC(\d+)', tag['vehicleClass'])
-            if m:
-                avc_num = m.group(1)
-            vehicle_info = {
-                'tagId': tag['tagId'],
-                'avc': avc_num,
-                'vehicleRegNo': tag['vehicleRegNo'],
-                # Generate refId similar to working sample: 6 digits + 'L' + 14 digits
-                'refId': f"{random.randint(100000,999999)}L{datetime.now().strftime('%d%m%y%H%M%S')}"
-            }
-        else:
-            tagid = input('Enter tagId: ').strip()
-            avc = input('Enter avc (number, e.g. 7): ').strip()
-            vehicleRegNo = input('Enter vehicleRegNo (optional): ').strip()
-            vehicle_info = {
-                'tagId': tagid,
-                'avc': avc,
-                'vehicleRegNo': vehicleRegNo,
-                'refId': f"{random.randint(100000,999999)}L{datetime.now().strftime('%d%m%y%H%M%S')}"
-            }
-        # Check mandatory field
-        if not vehicle_info['tagId']:
-            print('Error: tagId is mandatory!')
-        else:
+    while True:
+        print('Choose which request to send:')
+        print('1. Tag Details')
+        print('2. SyncTime')
+        print('3. List Participants')
+        print('4. Heart Beat')
+        print('5. Request Query Exception List')
+        print('6. Request Pay')
+        print('0. Exit')
+        choice = input('Enter 1, 2, 3, 4, 5, 6, or 0: ').strip()
+        if choice == '0':
+            print('Exiting. Goodbye!')
+            break
+        elif choice == '1':
+            print('--- Tag Details API Test ---')
+            print('Select a UAT Tag to test:')
+            for idx, tag in enumerate(UAT_TAGS, 1):
+                print(f"{idx}. Chassis: {tag['chassis']}, Tag ID: {tag['tagId']}, TID: {tag['TID']}, Status: {tag['excStatus']}, Bank: {tag['bankName']}")
+            print(f"{len(UAT_TAGS)+1}. Enter manually")
+            sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
+            if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
+                tag = UAT_TAGS[int(sel)-1]
+                avc_num = ''
+                m = re.match(r'VC(\d+)', tag['vehicleClass'])
+                if m:
+                    avc_num = m.group(1)
+                vehicle_info = {
+                    'tagId': tag['tagId'],
+                    'avc': avc_num,
+                    'vehicleRegNo': tag['vehicleRegNo'],
+                    # Generate refId similar to working sample: 6 digits + 'L' + 14 digits
+                    'refId': f"{random.randint(100000,999999)}L{datetime.now().strftime('%d%m%y%H%M%S')}"
+                }
+            else:
+                tagid = input('Enter tagId: ').strip()
+                avc = input('Enter avc (number, e.g. 7): ').strip()
+                vehicleRegNo = input('Enter vehicleRegNo (optional): ').strip()
+                vehicle_info = {
+                    'tagId': tagid,
+                    'avc': avc,
+                    'vehicleRegNo': vehicleRegNo,
+                    'refId': f"{random.randint(100000,999999)}L{datetime.now().strftime('%d%m%y%H%M%S')}"
+                }
+            # Check mandatory field
+            if not vehicle_info['tagId']:
+                print('Error: tagId is mandatory!')
+            else:
+                now = datetime.now()
+                txn_ts = (now - timedelta(minutes=2)).strftime('%Y-%m-%dT%H:%M:%S')
+                head_ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+                # Generate numeric-only msgId and txnId, 20 digits each
+                msgId = now.strftime('%y%m%d%H%M%S%f')[:20]
+                txnId = str(int(msgId) + 1)  # Just increment by 1 for txnId
+                xml_data = build_tag_details_request(msgId, 'PGSH', head_ts, txnId, txn_ts, vehicle_info)
+                xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
+                if xml_str.startswith('<?xml'):
+                    xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
+                    xml_str = xml_str.replace('encoding="utf-8"', 'encoding="UTF-8"', 1)
+                print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
+                print(xml_str)
+                # Prompt for endpoint
+                print("Select Tag Details endpoint:")
+                print("1. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails")
+                print("2. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2")
+                url_choice = input("Enter 1 or 2: ").strip()
+                if url_choice == '2':
+                    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+                else:
+                    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
+                print("[DEBUG] Selected URL for request:", url)
+                headers = {'Content-Type': 'application/xml'}
+                print("[TAG_DETAILS] URL:", url)
+                print("[TAG_DETAILS] Headers:", headers)
+                try:
+                    req_xml_doc = etree.fromstring(xml_str.encode())
+                    signer = XMLSigner(signature_algorithm="rsa-sha256")
+                    with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+                        key = key_file.read()
+                        cert = cert_file.read()
+                    signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
+                    signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=True, encoding="UTF-8")
+                    print('\n[TAG_DETAILS] Request XML (signed):')
+                    print(signed_xml_str.decode())
+                except Exception as e:
+                    print('[TAG_DETAILS] Error signing Tag Details XML:', e)
+                    signed_xml_str = xml_str.encode()
+
+                # Use signed XML as payload
+                try:
+                    response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
+                    print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
+                    print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+                    parsed = parse_tag_details_response(response.content)
+                    print("[TAG_DETAILS] Parsed Response:")
+                    for k, v in parsed.items():
+                        print(f"  {k}: {v}")
+                except Exception as e:
+                    print('[TAG_DETAILS] Error sending Tag Details request:', e)
+                    
+        elif choice == '2':
+            print('--- SyncTime API Test ---')
+            sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
             now = datetime.now()
-            txn_ts = (now - timedelta(minutes=2)).strftime('%Y-%m-%dT%H:%M:%S')
-            head_ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-            # Generate numeric-only msgId and txnId, 20 digits each
-            msgId = now.strftime('%y%m%d%H%M%S%f')[:20]
-            txnId = str(int(msgId) + 1)  # Just increment by 1 for txnId
-            xml_data = build_tag_details_request(msgId, 'PGSH', head_ts, txnId, txn_ts, vehicle_info)
+            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+            sync_msgId = now.strftime('%Y%m%d%H%M%S%f')  # Unique msgId for every request
+            orgId = 'PGSH'
+            sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
+            ET.SubElement(sync_root, 'Head', {
+                'ver': '1.0',
+                'ts': ts,
+                'orgId': orgId,
+                'msgId': sync_msgId
+            })
+            sync_xml_str = ET.tostring(sync_root, encoding='utf-8', method='xml')
+            print('SyncTime Request XML (unsigned):')
+            print(sync_xml_str.decode())
+            from lxml import etree
+            sync_xml_doc = etree.fromstring(sync_xml_str)
+            signer = XMLSigner(signature_algorithm="rsa-sha256")
+            with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+                key = key_file.read()
+                cert = cert_file.read()
+            signed_sync_xml = signer.sign(sync_xml_doc, key=key, cert=cert)
+            signed_sync_xml_str = etree.tostring(signed_sync_xml, pretty_print=False, xml_declaration=False)
+            print('SyncTime Request XML (signed):')
+            print(signed_sync_xml_str.decode())
+            headers = {'Content-Type': 'application/xml'}
+            try:
+                sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
+                print('HTTP Status Code:', sync_response.status_code)
+                print('SyncTime Response:')
+                parsed = parse_sync_time_response(sync_response.content)
+                print('Minimal Response:', parsed)
+            except Exception as e:
+                print('Error sending SyncTime request:', e)
+        elif choice == '3':
+            print('--- List Participants API Test ---')
+            list_participant_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/listParticipant'
+            now = datetime.now()
+            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+            msgId = now.strftime('%Y%m%d%H%M%S%f')
+            orgId = 'PGSH'
+            txn_id = msgId
+            req_xml = build_list_participant_request(orgId, msgId, txn_id, ts)
+            print('ListParticipant Request XML (unsigned):')
+            print(req_xml.decode())
+            from lxml import etree
+            req_xml_doc = etree.fromstring(req_xml)
+            signer = XMLSigner(signature_algorithm="rsa-sha256")
+            with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+                key = key_file.read()
+                cert = cert_file.read()
+            signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
+            signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=False)
+            print('ListParticipant Request XML (signed):')
+            print(signed_xml_str.decode())
+            headers = {'Content-Type': 'application/xml'}
+            try:
+                response = requests.post(list_participant_url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
+                print('HTTP Status Code:', response.status_code)
+                print('ListParticipant Response:')
+                print('Raw XML Response:')
+                print(response.content.decode())
+                # Call certificate comparison utility before signature verification
+                extract_and_compare_xml_certificate(response.content)
+                parsed = parse_list_participant_response(response.content)
+                print('Minimal Response:', parsed)
+                # Print tabular view in terminal
+                if 'participants' in parsed and isinstance(parsed['participants'], list):
+                    print_participants_table(parsed['participants'])
+            except Exception as e:
+                print('Error sending ListParticipant request:', e)
+        elif choice == '4':
+            print('--- Toll Plaza Heart Beat API Test ---')
+            orgId = 'PGSH'
+            plazaId = '712764'
+            acquirerId = '727274'
+            plazaGeoCode = '11.0185946,76.9778221'
+            plazaName = 'PGS hospital'
+            plazaSubtype = 'State'
+            plazaType = 'Toll'
+            address = 'PGS hospital, Coimbatore, Tamilnadu'
+            fromDistrict = 'Coimbatore'
+            toDistrict = 'Coimbatore'
+            agencyCode = 'TCABO'
+            # Use official mapping for lane IDs and directions
+            lanes = [
+                {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+                {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+                {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+                {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            ]
+            plaza_info = {
+                'geoCode': plazaGeoCode,
+                'id': plazaId,
+                'name': plazaName,
+                'subtype': plazaSubtype,
+                'type': plazaType,
+                'address': address,
+                'fromDistrict': fromDistrict,
+                'toDistrict': toDistrict,
+                'agencyCode': agencyCode
+            }
+            now = datetime.now()
+            msgId = now.strftime('%Y%m%d%H%M%S') + 'HBRQ'
+            txn_id = msgId
+            try:
+                ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+                unsigned_xml = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirerId, plaza_info, lanes)
+                print('Heart Beat Request XML (unsigned, pretty-printed):')
+                print(pretty_print_xml(unsigned_xml))
+                errors = validate_heartbeat_xml(unsigned_xml)
+                if errors:
+                    print('Validation errors:')
+                    for err in errors:
+                        print('-', err)
+                    print('Request not sent due to validation errors.')
+                    sys.exit(1)
+                else:
+                    print('XML is ICD-compliant!')
+                print('DEBUG: About to sign Heart Beat XML...')
+                signed_xml = sign_xml(unsigned_xml)
+                print('DEBUG: Signed Heart Beat XML generated.')
+                print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
+                url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
+                headers = {'Content-Type': 'application/xml'}
+                print(f'Heart Beat Endpoint URL: {url}')
+                response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
+                print('HTTP Status Code:', response.status_code)
+                print('Response:')
+                print(response.content.decode() if isinstance(response.content, bytes) else response.content)
+                print('--- FULL RAW RESPONSE ---')
+                print('Headers:', response.headers)
+                print('Text:', response.text)
+                print('Raw bytes:', response.content)
+                print('------------------------')
+                parsed = parse_heartbeat_response(response.content)
+                print('\n--- Parsed Heart Beat Response ---')
+                for k, v in parsed.items():
+                    if k == 'respCode' and v:
+                        reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
+                        print(f"{k}: {v} ({reason})")
+                    else:
+                        print(f"{k}: {v}")
+                print('-------------------------------\n')
+            except Exception as e:
+                if hasattr(e, 'response') and e.response is not None:
+                    print('Raw Response from bank:')
+                    print(e.response.content.decode(errors='replace'))
+                print('Error sending Heart Beat request:', e)
+        elif choice == '5':
+            print('--- Request Query Exception List API Test ---')
+            orgId = 'PGSH'
+            # Use timestamp-based msgId/txn_id for compliance
+            now = datetime.now()
+            msgId = now.strftime('%Y%m%d%H%M%S') + 'EXC'
+            # Use current UTC time for lastFetchTime to ensure it's within 24 hours
+            from datetime import datetime, timezone
+            now_utc = datetime.now(timezone.utc)
+            recent_fetch_time = now_utc.strftime('%Y-%m-%dT%H:%M:%S')
+            exception_list = [
+                {'excCode': '01', 'lastFetchTime': recent_fetch_time},
+                {'excCode': '02', 'lastFetchTime': recent_fetch_time}
+            ]
+            try:
+                response_content = send_query_exception_list_icd(msgId, orgId, exception_list)
+                try:
+                    parsed = parse_query_exception_list_response(response_content)
+                    print('\n--- Parsed Query Exception List Response ---')
+                    for k, v in parsed.items():
+                        print(f"{k}: {v}")
+                    print('-------------------------------\n')
+                except Exception as e:
+                    print('Could not parse response as XML:', e)
+            except Exception as e:
+                print('Error sending Query Exception List request:', e)
+        elif choice == '6':
+            print('--- Request Pay API Test ---')
+            # Prompt for UAT tag (reuse Tag Details logic)
+            print('Select a UAT Tag to use:')
+            for idx, tag in enumerate(UAT_TAGS, 1):
+                print(f"{idx}. Chassis: {tag['chassis']}, Tag ID: {tag['tagId']}, TID: {tag['TID']}, Status: {tag['excStatus']}, Bank: {tag['bankName']}")
+            print(f"{len(UAT_TAGS)+1}. Enter manually")
+            sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
+            if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
+                tag = UAT_TAGS[int(sel)-1]
+                tagId = tag['tagId']
+                TID = tag['TID']
+                vehicleRegNo = tag.get('vehicleRegNo', '') or tag['chassis']
+                avc = tag['vehicleClass'][2:] if tag['vehicleClass'].startswith('VC') else tag['vehicleClass']
+            else:
+                tagId = input('Enter tagId: ').strip()
+                TID = input('Enter TID: ').strip()
+                vehicleRegNo = input('Enter vehicleRegNo: ').strip()
+                avc = input('Enter avc (number, e.g. 7): ').strip()
+            # Prompt for lane/reader/direction (reuse Heart Beat logic)
+            print('Select Lane:')
+            lane_options = [
+                {'id': 'IN01', 'direction': 'N', 'readerId': '1'},
+                {'id': 'IN02', 'direction': 'N', 'readerId': '2'},
+                {'id': 'OUT01', 'direction': 'S', 'readerId': '3'},
+                {'id': 'OUT02', 'direction': 'S', 'readerId': '4'},
+            ]
+            for idx, lane in enumerate(lane_options, 1):
+                print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
+            lane_sel = input(f"Enter 1-{len(lane_options)}: ").strip()
+            if lane_sel.isdigit() and 1 <= int(lane_sel) <= len(lane_options):
+                lane = lane_options[int(lane_sel)-1]
+            else:
+                lane = lane_options[0]
+            # Use similar data as Heart Beat for plaza
+            orgId = 'PGSH'
+            plaza_info = {
+                'geoCode': '11,76',
+                'id': '712764',
+                'name': 'PGS hospital',
+                'subtype': 'Covered',
+                'type': 'Parking',
+                'address': '',
+                'fromDistrict': '',
+                'toDistrict': '',
+                'agencyCode': 'TCABO'
+            }
+            now = datetime.now()
+            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+            msgId = now.strftime('%Y%m%d%H%M%S%f')[:26]
+            txnId = now.strftime('%Y%m%d%H%M%S%f')[:21]
+            entry_txn_id = txnId
+            # Prompt for amount to be debited
+            amount_value = input('Enter amount to be debited (e.g. 455.00): ').strip()
+            if not amount_value:
+                amount_value = '455.00'
+            try:
+                amount_value = '{:.2f}'.format(float(amount_value))
+            except Exception:
+                amount_value = '455.00'
+            # Automatically set transaction time to 10 minutes in the past
+            ts = (datetime.now() - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%S')
+            xml_data = build_pay_request(amount_value, ts)
             xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
             if xml_str.startswith('<?xml'):
                 xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
                 xml_str = xml_str.replace('encoding="utf-8"', 'encoding="UTF-8"', 1)
-            print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
+            print(f'\n[PAY] Request XML (unsigned, no signature), TxnId: {txnId}')
             print(xml_str)
-            # Prompt for endpoint
-            print("Select Tag Details endpoint:")
-            print("1. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails")
-            print("2. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2")
-            url_choice = input("Enter 1 or 2: ").strip()
-            if url_choice == '2':
-                url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
-            else:
-                url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
-            print("[DEBUG] Selected URL for request:", url)
-            headers = {'Content-Type': 'application/xml'}
-            print("[TAG_DETAILS] URL:", url)
-            print("[TAG_DETAILS] Headers:", headers)
+            # Sign the XML
             try:
                 req_xml_doc = etree.fromstring(xml_str.encode())
                 signer = XMLSigner(signature_algorithm="rsa-sha256")
@@ -1585,295 +1863,22 @@ if __name__ == '__main__':
                     cert = cert_file.read()
                 signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
                 signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=True, encoding="UTF-8")
-                print('\n[TAG_DETAILS] Request XML (signed):')
+                print('\n[PAY] Request XML (signed):')
                 print(signed_xml_str.decode())
             except Exception as e:
-                print('[TAG_DETAILS] Error signing Tag Details XML:', e)
+                print('[PAY] Error signing Pay XML:', e)
                 signed_xml_str = xml_str.encode()
-
-            # Use signed XML as payload
+            # Send the request
+            url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqPay'
+            headers = {'Content-Type': 'application/xml'}
+            print("[PAY] URL:", url)
+            print("[PAY] Headers:", headers)
             try:
                 response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
-                print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
-                print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
-                parsed = parse_tag_details_response(response.content)
-                print("[TAG_DETAILS] Parsed Response:")
-                for k, v in parsed.items():
-                    print(f"  {k}: {v}")
+                print("[PAY] HTTP Status Code:", response.status_code)
+                print("[PAY] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+                # Optionally parse response here
             except Exception as e:
-                print('[TAG_DETAILS] Error sending Tag Details request:', e)
-                
-    elif choice == '2':
-        print('--- SyncTime API Test ---')
-        sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
-        now = datetime.now()
-        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-        sync_msgId = now.strftime('%Y%m%d%H%M%S%f')  # Unique msgId for every request
-        orgId = 'PGSH'
-        sync_root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
-        ET.SubElement(sync_root, 'Head', {
-            'ver': '1.0',
-            'ts': ts,
-            'orgId': orgId,
-            'msgId': sync_msgId
-        })
-        sync_xml_str = ET.tostring(sync_root, encoding='utf-8', method='xml')
-        print('SyncTime Request XML (unsigned):')
-        print(sync_xml_str.decode())
-        from lxml import etree
-        sync_xml_doc = etree.fromstring(sync_xml_str)
-        signer = XMLSigner(signature_algorithm="rsa-sha256")
-        with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
-            key = key_file.read()
-            cert = cert_file.read()
-        signed_sync_xml = signer.sign(sync_xml_doc, key=key, cert=cert)
-        signed_sync_xml_str = etree.tostring(signed_sync_xml, pretty_print=False, xml_declaration=False)
-        print('SyncTime Request XML (signed):')
-        print(signed_sync_xml_str.decode())
-        headers = {'Content-Type': 'application/xml'}
-        try:
-            sync_response = requests.post(sync_time_url, data=signed_sync_xml_str, headers=headers, timeout=10, verify=False)
-            print('HTTP Status Code:', sync_response.status_code)
-            print('SyncTime Response:')
-            parsed = parse_sync_time_response(sync_response.content)
-            print('Minimal Response:', parsed)
-        except Exception as e:
-            print('Error sending SyncTime request:', e)
-    elif choice == '3':
-        print('--- List Participants API Test ---')
-        list_participant_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/listParticipant'
-        now = datetime.now()
-        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-        msgId = now.strftime('%Y%m%d%H%M%S%f')
-        orgId = 'PGSH'
-        txn_id = msgId
-        req_xml = build_list_participant_request(orgId, msgId, txn_id, ts)
-        print('ListParticipant Request XML (unsigned):')
-        print(req_xml.decode())
-        from lxml import etree
-        req_xml_doc = etree.fromstring(req_xml)
-        signer = XMLSigner(signature_algorithm="rsa-sha256")
-        with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
-            key = key_file.read()
-            cert = cert_file.read()
-        signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
-        signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=False)
-        print('ListParticipant Request XML (signed):')
-        print(signed_xml_str.decode())
-        headers = {'Content-Type': 'application/xml'}
-        try:
-            response = requests.post(list_participant_url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
-            print('HTTP Status Code:', response.status_code)
-            print('ListParticipant Response:')
-            print('Raw XML Response:')
-            print(response.content.decode())
-            # Call certificate comparison utility before signature verification
-            extract_and_compare_xml_certificate(response.content)
-            parsed = parse_list_participant_response(response.content)
-            print('Minimal Response:', parsed)
-            # Print tabular view in terminal
-            if 'participants' in parsed and isinstance(parsed['participants'], list):
-                print_participants_table(parsed['participants'])
-        except Exception as e:
-            print('Error sending ListParticipant request:', e)
-    elif choice == '4':
-        print('--- Toll Plaza Heart Beat API Test ---')
-        orgId = 'PGSH'
-        plazaId = '712764'
-        acquirerId = '727274'
-        plazaGeoCode = '11.0185946,76.9778221'
-        plazaName = 'PGS hospital'
-        plazaSubtype = 'State'
-        plazaType = 'Toll'
-        address = 'PGS hospital, Coimbatore, Tamilnadu'
-        fromDistrict = 'Coimbatore'
-        toDistrict = 'Coimbatore'
-        agencyCode = 'TCABO'
-        # Use official mapping for lane IDs and directions
-        lanes = [
-            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-        ]
-        plaza_info = {
-            'geoCode': plazaGeoCode,
-            'id': plazaId,
-            'name': plazaName,
-            'subtype': plazaSubtype,
-            'type': plazaType,
-            'address': address,
-            'fromDistrict': fromDistrict,
-            'toDistrict': toDistrict,
-            'agencyCode': agencyCode
-        }
-        now = datetime.now()
-        msgId = now.strftime('%Y%m%d%H%M%S') + 'HBRQ'
-        txn_id = msgId
-        try:
-            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-            unsigned_xml = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirerId, plaza_info, lanes)
-            print('Heart Beat Request XML (unsigned, pretty-printed):')
-            print(pretty_print_xml(unsigned_xml))
-            errors = validate_heartbeat_xml(unsigned_xml)
-            if errors:
-                print('Validation errors:')
-                for err in errors:
-                    print('-', err)
-                print('Request not sent due to validation errors.')
-                sys.exit(1)
-            else:
-                print('XML is ICD-compliant!')
-            print('DEBUG: About to sign Heart Beat XML...')
-            signed_xml = sign_xml(unsigned_xml)
-            print('DEBUG: Signed Heart Beat XML generated.')
-            print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
-            url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
-            headers = {'Content-Type': 'application/xml'}
-            print(f'Heart Beat Endpoint URL: {url}')
-            response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
-            print('HTTP Status Code:', response.status_code)
-            print('Response:')
-            print(response.content.decode() if isinstance(response.content, bytes) else response.content)
-            print('--- FULL RAW RESPONSE ---')
-            print('Headers:', response.headers)
-            print('Text:', response.text)
-            print('Raw bytes:', response.content)
-            print('------------------------')
-            parsed = parse_heartbeat_response(response.content)
-            print('\n--- Parsed Heart Beat Response ---')
-            for k, v in parsed.items():
-                if k == 'respCode' and v:
-                    reason = ERROR_CODE_REASON.get(v, 'Unknown error code')
-                    print(f"{k}: {v} ({reason})")
-                else:
-                    print(f"{k}: {v}")
-            print('-------------------------------\n')
-        except Exception as e:
-            if hasattr(e, 'response') and e.response is not None:
-                print('Raw Response from bank:')
-                print(e.response.content.decode(errors='replace'))
-            print('Error sending Heart Beat request:', e)
-    elif choice == '5':
-        print('--- Request Query Exception List API Test ---')
-        orgId = 'PGSH'
-        # Use timestamp-based msgId/txn_id for compliance
-        now = datetime.now()
-        msgId = now.strftime('%Y%m%d%H%M%S') + 'EXC'
-        # Use current UTC time for lastFetchTime to ensure it's within 24 hours
-        from datetime import datetime, timezone
-        now_utc = datetime.now(timezone.utc)
-        recent_fetch_time = now_utc.strftime('%Y-%m-%dT%H:%M:%S')
-        exception_list = [
-            {'excCode': '01', 'lastFetchTime': recent_fetch_time},
-            {'excCode': '02', 'lastFetchTime': recent_fetch_time}
-        ]
-        try:
-            response_content = send_query_exception_list_icd(msgId, orgId, exception_list)
-            try:
-                parsed = parse_query_exception_list_response(response_content)
-                print('\n--- Parsed Query Exception List Response ---')
-                for k, v in parsed.items():
-                    print(f"{k}: {v}")
-                print('-------------------------------\n')
-            except Exception as e:
-                print('Could not parse response as XML:', e)
-        except Exception as e:
-            print('Error sending Query Exception List request:', e)
-    elif choice == '6':
-        print('--- Request Pay API Test ---')
-        # Prompt for UAT tag (reuse Tag Details logic)
-        print('Select a UAT Tag to use:')
-        for idx, tag in enumerate(UAT_TAGS, 1):
-            print(f"{idx}. Chassis: {tag['chassis']}, Tag ID: {tag['tagId']}, TID: {tag['TID']}, Status: {tag['excStatus']}, Bank: {tag['bankName']}")
-        print(f"{len(UAT_TAGS)+1}. Enter manually")
-        sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
-        if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
-            tag = UAT_TAGS[int(sel)-1]
-            tagId = tag['tagId']
-            TID = tag['TID']
-            vehicleRegNo = tag.get('vehicleRegNo', '') or tag['chassis']
-            avc = tag['vehicleClass'][2:] if tag['vehicleClass'].startswith('VC') else tag['vehicleClass']
+                print('[PAY] Error sending Pay request:', e)
         else:
-            tagId = input('Enter tagId: ').strip()
-            TID = input('Enter TID: ').strip()
-            vehicleRegNo = input('Enter vehicleRegNo: ').strip()
-            avc = input('Enter avc (number, e.g. 7): ').strip()
-        # Prompt for lane/reader/direction (reuse Heart Beat logic)
-        print('Select Lane:')
-        lane_options = [
-            {'id': 'IN01', 'direction': 'N', 'readerId': '1'},
-            {'id': 'IN02', 'direction': 'N', 'readerId': '2'},
-            {'id': 'OUT01', 'direction': 'S', 'readerId': '3'},
-            {'id': 'OUT02', 'direction': 'S', 'readerId': '4'},
-        ]
-        for idx, lane in enumerate(lane_options, 1):
-            print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
-        lane_sel = input(f"Enter 1-{len(lane_options)}: ").strip()
-        if lane_sel.isdigit() and 1 <= int(lane_sel) <= len(lane_options):
-            lane = lane_options[int(lane_sel)-1]
-        else:
-            lane = lane_options[0]
-        # Use similar data as Heart Beat for plaza
-        orgId = 'PGSH'
-        plaza_info = {
-            'geoCode': '11,76',
-            'id': '712764',
-            'name': 'PGS hospital',
-            'subtype': 'Covered',
-            'type': 'Parking',
-            'address': '',
-            'fromDistrict': '',
-            'toDistrict': '',
-            'agencyCode': 'TCABO'
-        }
-        now = datetime.now()
-        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-        msgId = now.strftime('%Y%m%d%H%M%S%f')[:26]
-        txnId = now.strftime('%Y%m%d%H%M%S%f')[:21]
-        entry_txn_id = txnId
-        # Prompt for amount to be debited
-        amount_value = input('Enter amount to be debited (e.g. 455.00): ').strip()
-        if not amount_value:
-            amount_value = '455.00'
-        try:
-            amount_value = '{:.2f}'.format(float(amount_value))
-        except Exception:
-            amount_value = '455.00'
-        # Automatically set transaction time to 10 minutes in the past
-        ts = (datetime.now() - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%S')
-        xml_data = build_pay_request(amount_value, ts)
-        xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
-        if xml_str.startswith('<?xml'):
-            xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
-            xml_str = xml_str.replace('encoding="utf-8"', 'encoding="UTF-8"', 1)
-        print(f'\n[PAY] Request XML (unsigned, no signature), TxnId: {txnId}')
-        print(xml_str)
-        # Sign the XML
-        try:
-            req_xml_doc = etree.fromstring(xml_str.encode())
-            signer = XMLSigner(signature_algorithm="rsa-sha256")
-            with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
-                key = key_file.read()
-                cert = cert_file.read()
-            signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
-            signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=True, encoding="UTF-8")
-            print('\n[PAY] Request XML (signed):')
-            print(signed_xml_str.decode())
-        except Exception as e:
-            print('[PAY] Error signing Pay XML:', e)
-            signed_xml_str = xml_str.encode()
-        # Send the request
-        url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqPay'
-        headers = {'Content-Type': 'application/xml'}
-        print("[PAY] URL:", url)
-        print("[PAY] Headers:", headers)
-        try:
-            response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
-            print("[PAY] HTTP Status Code:", response.status_code)
-            print("[PAY] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
-            # Optionally parse response here
-        except Exception as e:
-            print('[PAY] Error sending Pay request:', e)
-    else:
-        print('Invalid choice. Exiting.') 
+            print('Invalid choice. Please try again.')
