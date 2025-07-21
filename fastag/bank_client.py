@@ -518,26 +518,58 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'type': plaza_info.get('type', '')
     })
     for lane in lanes:
-        ET.SubElement(plaza, 'Lane', {
-            'direction': lane['direction'],
-            'id': lane['id'],
-            'readerId': lane['readerId'],
-            'Status': 'OPEN',
-            'Mode': 'Normal',
-            'laneType': 'Hybrid',
-            'ExitGate': '1',
-            'Floor': '1'
-        })
-        ET.SubElement(plaza, 'EntryLane', {
-            'direction': lane['direction'],
-            'id': lane['id'],
-            'readerId': lane['readerId'],
-            'Status': 'OPEN',
-            'Mode': 'Normal',
-            'laneType': 'Hybrid',
-            'EntryGate': '1',
-            'Floor': '1'
-        })
+        # Map EntryGate/ExitGate based on lane id
+        entry_gate_map = {'IN01': '1', 'IN02': '2'}
+        exit_gate_map = {'OUT01': '1', 'OUT02': '2'}
+        # Lane (Exit): OUT01/OUT02
+        if lane['id'].startswith('OUT'):
+            exit_gate = exit_gate_map.get(lane['id'], '1')
+            etree.SubElement(plaza, 'Lane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'ExitGate': exit_gate,
+                'Floor': '1'
+            })
+        # Lane (Entry): IN01/IN02
+        else:
+            etree.SubElement(plaza, 'Lane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'ExitGate': '',
+                'Floor': '1'
+            })
+        # EntryLane: always set EntryGate for IN01/IN02
+        if lane['id'].startswith('IN'):
+            entry_gate = entry_gate_map.get(lane['id'], '1')
+            etree.SubElement(plaza, 'EntryLane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'EntryGate': entry_gate,
+                'Floor': '1'
+            })
+        else:
+            etree.SubElement(plaza, 'EntryLane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'EntryGate': '',
+                'Floor': '1'
+            })
     signature = ET.SubElement(root, 'Signature')
     signature.text = signature_placeholder
     # Add XML declaration and force encoding to UTF-8 (uppercase)
