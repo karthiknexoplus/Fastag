@@ -1021,7 +1021,7 @@ def build_pay_request(amount_value, ts):
 
 
 def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
-    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
+    ts = (datetime.now(timezone.utc) - timedelta(minutes=10, seconds=1)).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     entryTxnId = str(uuid.uuid4())[:22]
     xml_data = build_pay_request(msgId, orgId, ts, txnId, entryTxnId, pay_data, signature_placeholder)
