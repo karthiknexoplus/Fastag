@@ -767,8 +767,12 @@ def send_tag_details(msgId, orgId, vehicle_info):
     vehicle_info = vehicle_info.copy()
     vehicle_info.setdefault('txn_ts', ts)
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, txn_ts, vehicle_info)
+    xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
+    if xml_str.startswith('<?xml'):
+        xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
+        xml_str = xml_str.replace('encoding="utf-8"', 'encoding="UTF-8"', 1)
     print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
-    print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+    print(xml_str)
     payload = xml_data
     # Hardcode the /v2 endpoint
     url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
@@ -1384,8 +1388,12 @@ if __name__ == '__main__':
             msgId = now.strftime('%y%m%d%H%M%S%f')[:20]
             txnId = str(int(msgId) + 1)  # Just increment by 1 for txnId
             xml_data = build_tag_details_request(msgId, 'PGSH', head_ts, txnId, txn_ts, vehicle_info)
+            xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
+            if xml_str.startswith('<?xml'):
+                xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
+                xml_str = xml_str.replace('encoding="utf-8"', 'encoding="UTF-8"', 1)
             print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
-            print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+            print(xml_str)
             # Prompt for endpoint
             print("Select Tag Details endpoint:")
             print("1. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails")
@@ -1400,7 +1408,7 @@ if __name__ == '__main__':
             print("[TAG_DETAILS] URL:", url)
             print("[TAG_DETAILS] Headers:", headers)
             try:
-                response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
+                response = requests.post(url, data=xml_str.encode(), headers=headers, timeout=10, verify=False)
                 print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
                 print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
                 parsed = parse_tag_details_response(response.content)
