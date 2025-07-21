@@ -929,8 +929,8 @@ def build_pay_request(amount_value, ts):
     # Lane/EntryLane logic as before...
     entry_gate_map = {'IN01': '1', 'IN02': '2'}
     exit_gate_map = {'OUT01': '1', 'OUT02': '2'}
-    if lane['id'].startswith('OUT'):
-        exit_gate = exit_gate_map.get(lane['id'], '1')
+    if plaza_info['type'] == 'Parking':
+        # For Parking, always set EntryGate, ExitGate, and Floor to '1'
         etree.SubElement(plaza, 'Lane', {
             'direction': lane['direction'],
             'id': lane['id'],
@@ -938,22 +938,9 @@ def build_pay_request(amount_value, ts):
             'Status': 'OPEN',
             'Mode': 'Normal',
             'laneType': 'Hybrid',
-            'ExitGate': exit_gate,
+            'ExitGate': '1',
             'Floor': '1'
         })
-    else:
-        etree.SubElement(plaza, 'Lane', {
-            'direction': lane['direction'],
-            'id': lane['id'],
-            'readerId': lane['readerId'],
-            'Status': 'OPEN',
-            'Mode': 'Normal',
-            'laneType': 'Hybrid',
-            'ExitGate': '',
-            'Floor': '1'
-        })
-    if lane['id'].startswith('IN'):
-        entry_gate = entry_gate_map.get(lane['id'], '1')
         etree.SubElement(plaza, 'EntryLane', {
             'direction': lane['direction'],
             'id': lane['id'],
@@ -961,20 +948,56 @@ def build_pay_request(amount_value, ts):
             'Status': 'OPEN',
             'Mode': 'Normal',
             'laneType': 'Hybrid',
-            'EntryGate': entry_gate,
+            'EntryGate': '1',
             'Floor': '1'
         })
     else:
-        etree.SubElement(plaza, 'EntryLane', {
-            'direction': lane['direction'],
-            'id': lane['id'],
-            'readerId': lane['readerId'],
-            'Status': 'OPEN',
-            'Mode': 'Normal',
-            'laneType': 'Hybrid',
-            'EntryGate': '',
-            'Floor': '1'
-        })
+        if lane['id'].startswith('OUT'):
+            exit_gate = exit_gate_map.get(lane['id'], '1')
+            etree.SubElement(plaza, 'Lane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'ExitGate': exit_gate,
+                'Floor': '1'
+            })
+        else:
+            etree.SubElement(plaza, 'Lane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'ExitGate': '',
+                'Floor': '1'
+            })
+        if lane['id'].startswith('IN'):
+            entry_gate = entry_gate_map.get(lane['id'], '1')
+            etree.SubElement(plaza, 'EntryLane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'EntryGate': entry_gate,
+                'Floor': '1'
+            })
+        else:
+            etree.SubElement(plaza, 'EntryLane', {
+                'direction': lane['direction'],
+                'id': lane['id'],
+                'readerId': lane['readerId'],
+                'Status': 'OPEN',
+                'Mode': 'Normal',
+                'laneType': 'Hybrid',
+                'EntryGate': '',
+                'Floor': '1'
+            })
     rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
         'publicKeyCVV': '', 'procRestrictionResult': 'ok', 'signAuth': 'VALID', 'tagVerified': 'NETC TAG', 'ts': ts, 'txnCounter': '1', 'txnStatus': 'SUCCESS', 'vehicleAuth': 'YES'
     })
