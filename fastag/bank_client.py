@@ -1351,16 +1351,20 @@ if __name__ == '__main__':
         sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
         if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
             tag = UAT_TAGS[int(sel)-1]
-            avc_num = AVC_MAP.get(tag['vehicleClass'], '')
+            # Extract avc as the number after 'VC' in vehicleClass
+            avc_num = ''
+            m = re.match(r'VC(\d+)', tag['vehicleClass'])
+            if m:
+                avc_num = m.group(1)
             vehicle_info = {
                 'tagId': tag['tagId'],
-                'avc': avc_num,  # Use mapped avc number
+                'avc': avc_num,
                 'vehicleRegNo': tag['vehicleRegNo'],
                 'refId': ''
             }
         else:
             tagid = input('Enter tagId: ').strip()
-            avc = input('Enter avc (number, e.g. 5): ').strip()
+            avc = input('Enter avc (number, e.g. 7): ').strip()
             vehicleRegNo = input('Enter vehicleRegNo (optional): ').strip()
             vehicle_info = {
                 'tagId': tagid,
