@@ -1772,7 +1772,13 @@ if __name__ == '__main__':
             amount_value = '{:.2f}'.format(float(amount_value))
         except Exception:
             amount_value = '455.00'
-        xml_data = build_pay_request(amount_value)
+        # Prompt for transaction time (ts) for testing
+        ts_input = input('Enter transaction time (YYYY-MM-DDTHH:MM:SS) or leave blank for now: ').strip()
+        if ts_input:
+            ts = ts_input
+        else:
+            ts = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        xml_data = build_pay_request(amount_value, ts)
         xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
         if xml_str.startswith('<?xml'):
             xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
