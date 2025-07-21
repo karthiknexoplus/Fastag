@@ -731,13 +731,13 @@ def parse_check_txn_response(xml_response):
     }
 
 
-def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
+def build_tag_details_request(msgId, orgId, head_ts, txnId, txn_ts, vehicle_info):
     NS = 'http://npci.org/etc/schema/'
     nsmap = {'ns0': NS}
     root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
         'ver': '1.2',
-        'ts': ts,
+        'ts': head_ts,
         'orgId': orgId,
         'msgId': msgId
     })
@@ -746,11 +746,12 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
         'note': '',
         'refId': vehicle_info.get('refId', ''),
         'refUrl': '',
-        'ts': ts,
+        'ts': txn_ts,
         'type': 'FETCH',
         'orgTxnId': ''
     })
     etree.SubElement(txn, 'Vehicle', {
+        'TID': '',  # Always include TID as empty string
         'tagId': vehicle_info.get('tagId', ''),
         'avc': vehicle_info.get('avc', ''),
         'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
@@ -765,7 +766,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
     txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
     vehicle_info = vehicle_info.copy()
     vehicle_info.setdefault('txn_ts', ts)
-    xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
+    xml_data = build_tag_details_request(msgId, orgId, ts, txnId, txn_ts, vehicle_info)
     print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
     print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     payload = xml_data
@@ -1359,7 +1360,8 @@ if __name__ == '__main__':
                 'tagId': tag['tagId'],
                 'avc': avc_num,
                 'vehicleRegNo': tag['vehicleRegNo'],
-                'refId': ''
+                # Generate refId similar to working sample: 6 digits + 'L' + 14 digits
+                'refId': f"{random.randint(100000,999999)}L{datetime.now().strftime('%d%m%y%H%M%S')}"
             }
         else:
             tagid = input('Enter tagId: ').strip()
@@ -1369,18 +1371,19 @@ if __name__ == '__main__':
                 'tagId': tagid,
                 'avc': avc,
                 'vehicleRegNo': vehicleRegNo,
-                'refId': ''
+                'refId': f"{random.randint(100000,999999)}L{datetime.now().strftime('%d%m%y%H%M%S')}"
             }
         # Check mandatory field
         if not vehicle_info['tagId']:
             print('Error: tagId is mandatory!')
         else:
-            from datetime import datetime
             now = datetime.now()
-            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-            msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'  # Unique msgId
-            txnId = now.strftime('%H%M%d%m%y%H%M%S') + str(now.microsecond)[-4:]  # Unique txnId
-            xml_data = build_tag_details_request(msgId, 'PGSH', ts, txnId, vehicle_info)  # Set orgId to PGSH
+            txn_ts = (now - timedelta(minutes=2)).strftime('%Y-%m-%dT%H:%M:%S')
+            head_ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+            # Generate numeric-only msgId and txnId, 20 digits each
+            msgId = now.strftime('%y%m%d%H%M%S%f')[:20]
+            txnId = str(int(msgId) + 1)  # Just increment by 1 for txnId
+            xml_data = build_tag_details_request(msgId, 'PGSH', head_ts, txnId, txn_ts, vehicle_info)
             print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
             print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
             # Prompt for endpoint
