@@ -1754,7 +1754,7 @@ if __name__ == '__main__':
             etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc.zfill(2)})
             etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': vehicleRegNo})
             payment = etree.SubElement(root, 'Payment')
-            amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': '455.00', 'PriceMode': 'POINT', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
+            amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': '455.00', 'PriceMode': 'CUSTOM', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
             etree.SubElement(amount, 'OverwightAmount', {'curr': 'INR', 'value': '0', 'PaymentMode': 'Tag'})
             return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
         xml_data = build_pay_request()
