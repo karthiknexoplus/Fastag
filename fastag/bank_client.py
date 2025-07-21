@@ -31,6 +31,107 @@ BANK_CERT_PATH = "../etolluatsigner_Public.crt.txt"                      # Bank'
 VERIFY_SIGNATURE = False  # Set to True to enable signature verification (recommended for production)
 SIGN_REQUEST = True  # Set to False to skip XML signing (for UAT or debugging)
 
+# Add this at the top of the file (after imports)
+UAT_TAGS = [
+    {
+        'chassis': 'TREE322EW2',
+        'tagId': '34161FA820327FA4C8354960',
+        'TID': '34161FA820327FA4C8354960',
+        'vehicleRegNo': '',
+        'vehicleClass': 'VC7',
+        'vehicleClassDesc': 'Bus 2-axle',
+        'commercialVehicle': 'T',
+        'tagStatusProcessing': 'I',
+        'issueDate': '24/03/2017',
+        'excStatus': 'Hotlist',
+        'bankId': '606162',
+        'bankName': 'IDFC DIMTS'
+    },
+    {
+        'chassis': 'TY78KL1243',
+        'tagId': '34161FA820327FA4C82B57E0',
+        'TID': 'E20034120189C2FFEE56CBCD',
+        'vehicleRegNo': '',
+        'vehicleClass': 'VC7',
+        'vehicleClassDesc': 'Bus 2-axle',
+        'commercialVehicle': 'F',
+        'tagStatusProcessing': 'A',
+        'issueDate': '30/11/2016',
+        'excStatus': 'Hotlist',
+        'bankId': '606162',
+        'bankName': 'IDFC DIMTS'
+    },
+    {
+        'chassis': 'MH09BU1360',
+        'tagId': '34161FA820327FA40206C6C0',
+        'TID': '34161FA820327FA40206C6E0',
+        'vehicleRegNo': '',
+        'vehicleClass': 'VC20',
+        'vehicleClassDesc': 'Tata Ace and Similar mini Light Commercial Vehicle',
+        'commercialVehicle': 'T',
+        'tagStatusProcessing': 'A',
+        'issueDate': '06/07/2017',
+        'excStatus': 'Active',
+        'bankId': '606162',
+        'bankName': 'IDFC DIMTS'
+    },
+    {
+        'chassis': 'DK10OT1111',
+        'tagId': '34161FA820327FA4C82BDA40',
+        'TID': '34161FA820327FA4C82BDA40',
+        'vehicleRegNo': '',
+        'vehicleClass': 'VC15',
+        'vehicleClassDesc': 'Truck Multi axle ( 7 and above)',
+        'commercialVehicle': 'T',
+        'tagStatusProcessing': 'A',
+        'issueDate': '13/09/2017',
+        'excStatus': 'Hotlist',
+        'bankId': '606162',
+        'bankName': 'IDFC DIMTS'
+    },
+    {
+        'chassis': 'JK89KL1310',
+        'tagId': '34161FA820327FA4C834BF40',
+        'TID': '34161FA820327FA4C834BF40',
+        'vehicleRegNo': '',
+        'vehicleClass': 'VC15',
+        'vehicleClassDesc': 'Truck Multi axle ( 7 and above)',
+        'commercialVehicle': 'T',
+        'tagStatusProcessing': 'A',
+        'issueDate': '04/04/2017',
+        'excStatus': 'Hotlist',
+        'bankId': '606162',
+        'bankName': 'IDFC DIMTS'
+    },
+    {
+        'chassis': 'MH89AB1021',
+        'tagId': '34161FA82032D698022BF9E0',
+        'TID': '34161FA82032D698022BF9E0',
+        'vehicleRegNo': '',
+        'vehicleClass': 'VC4',
+        'vehicleClassDesc': 'Car / Jeep / Van',
+        'commercialVehicle': 'F',
+        'tagStatusProcessing': 'A',
+        'issueDate': '17/01/2019',
+        'excStatus': 'Active',
+        'bankId': '617292',
+        'bankName': 'DCBX Bank'
+    },
+    {
+        'chassis': 'TR123TR12',
+        'tagId': '34161FA820327FA4C8353220',
+        'TID': '34161FA820327FA4C8353220',
+        'vehicleRegNo': '',
+        'vehicleClass': 'VC7',
+        'vehicleClassDesc': 'Bus 2-axle',
+        'commercialVehicle': 'T',
+        'tagStatusProcessing': 'A',
+        'issueDate': '17/02/2017',
+        'excStatus': 'Hotlist',
+        'bankId': '606162',
+        'bankName': 'IDFC DIMTS'
+    }
+]
 
 def get_bank_url():
     if BANK_ENV.upper() == 'PROD':
@@ -631,18 +732,12 @@ def parse_check_txn_response(xml_response):
 
 
 def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
-    # Strictly ICD-compliant Tag Details request
+    # Build XML as per provided sample, do not deviate
     NS = 'http://npci.org/etc/schema/'
-    nsmap = {'etc': NS}
-    # Auto-generate refId if not provided
-    if not vehicle_info.get('refId'):
-        from datetime import datetime
-        refId = f"{orgId}L{datetime.now().strftime('%d%m%y%H%M%S')}"
-    else:
-        refId = vehicle_info.get('refId')
-    root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
+    nsmap = {'ns0': NS}
+    root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.0',
+        'ver': '1.2',
         'ts': ts,
         'orgId': orgId,
         'msgId': msgId
@@ -650,20 +745,18 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
     txn = etree.SubElement(root, 'Txn', {
         'id': txnId,
         'note': '',
-        'refId': refId,
+        'refId': vehicle_info.get('refId', ''),
         'refUrl': '',
         'ts': ts,
         'type': 'FETCH',
         'orgTxnId': ''
     })
-    vehicle_attrs = {
+    etree.SubElement(txn, 'Vehicle', {
+        'TID': vehicle_info.get('TID', ''),
         'tagId': vehicle_info.get('tagId', ''),
-    }
-    if vehicle_info.get('vehicleRegNo'):
-        vehicle_attrs['vehicleRegNo'] = vehicle_info['vehicleRegNo']
-    if vehicle_info.get('TID'):
-        vehicle_attrs['TID'] = vehicle_info['TID']
-    etree.SubElement(txn, 'Vehicle', vehicle_attrs)
+        'avc': vehicle_info.get('avc', ''),
+        'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
+    })
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
@@ -1244,41 +1337,60 @@ if __name__ == '__main__':
     choice = input('Enter 1, 2, 3, 4, or 5: ').strip()
     if choice == '1':
         print('--- Tag Details API Test ---')
-        print("DEBUG: Running latest bank_client.py")
-        # Prompt user for tagId
-        tagid_input = input('Enter tagId (or press Enter for default): ').strip()
-        tagid = tagid_input if tagid_input else '34161FA82033E8E4037B2920'
-        orgId = 'PGSH'
-        vehicle_info = {
-            'TID': '',
-            'vehicleRegNo': '',
-            'tagId': tagid
-        }
-        from datetime import datetime
-        now = datetime.now()
-        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-        msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'
-        # Use numeric, timestamp-based Txn id as in working sample
-        txnId = now.strftime('%H%M%d%m%y%H%M%S') + str(now.microsecond)[-4:]  # e.g., 10012507171300006769
-        xml_data = build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info)
-        print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
-        print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
-        payload = xml_data
-        url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
-        print("[DEBUG] Hardcoded URL for request:", url)
-        headers = {'Content-Type': 'application/xml'}
-        print("[TAG_DETAILS] URL:", url)
-        print("[TAG_DETAILS] Headers:", headers)
-        try:
-            response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
-            print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
-            print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
-            parsed = parse_tag_details_response(response.content)
-            print("[TAG_DETAILS] Parsed Response:")
-            for k, v in parsed.items():
-                print(f"  {k}: {v}")
-        except Exception as e:
-            print('[TAG_DETAILS] Error sending Tag Details request:', e)
+        print('Select a UAT Tag to test:')
+        for idx, tag in enumerate(UAT_TAGS, 1):
+            print(f"{idx}. Chassis: {tag['chassis']}, Tag ID: {tag['tagId']}, TID: {tag['TID']}, Status: {tag['excStatus']}, Bank: {tag['bankName']}")
+        print(f"{len(UAT_TAGS)+1}. Enter manually")
+        sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
+        if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
+            tag = UAT_TAGS[int(sel)-1]
+            vehicle_info = {
+                'TID': tag['TID'],
+                'tagId': tag['tagId'],
+                'avc': '',  # You can prompt for avc if needed
+                'vehicleRegNo': tag['vehicleRegNo'],
+                'refId': ''  # You can prompt for refId if needed
+            }
+        else:
+            tagid = input('Enter tagId: ').strip()
+            tid = input('Enter TID (optional): ').strip()
+            avc = input('Enter avc (optional): ').strip()
+            vehicleRegNo = input('Enter vehicleRegNo (optional): ').strip()
+            vehicle_info = {
+                'TID': tid,
+                'tagId': tagid,
+                'avc': avc,
+                'vehicleRegNo': vehicleRegNo,
+                'refId': ''
+            }
+        # Check mandatory field
+        if not vehicle_info['tagId']:
+            print('Error: tagId is mandatory!')
+        else:
+            from datetime import datetime
+            now = datetime.now()
+            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+            msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'
+            txnId = now.strftime('%H%M%d%m%y%H%M%S') + str(now.microsecond)[-4:]
+            xml_data = build_tag_details_request(msgId, 'IDFC', ts, txnId, vehicle_info)
+            print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
+            print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
+            payload = xml_data
+            url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
+            print("[DEBUG] Hardcoded URL for request:", url)
+            headers = {'Content-Type': 'application/xml'}
+            print("[TAG_DETAILS] URL:", url)
+            print("[TAG_DETAILS] Headers:", headers)
+            try:
+                response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+                print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
+                print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+                parsed = parse_tag_details_response(response.content)
+                print("[TAG_DETAILS] Parsed Response:")
+                for k, v in parsed.items():
+                    print(f"  {k}: {v}")
+            except Exception as e:
+                print('[TAG_DETAILS] Error sending Tag Details request:', e)
     elif choice == '2':
         print('--- SyncTime API Test ---')
         sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
