@@ -1402,7 +1402,7 @@ if __name__ == '__main__':
             if url_choice == '2':
                 url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
             else:
-                url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
+                url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v1'
             print("[DEBUG] Selected URL for request:", url)
             headers = {'Content-Type': 'application/xml'}
             print("[TAG_DETAILS] URL:", url)
