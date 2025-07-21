@@ -864,7 +864,6 @@ def build_pay_request():
         'ver': '1.0'
     })
     meta = etree.SubElement(root, 'Meta')
-    # Use a unique value for BBPSTXNID (e.g., msgId)
     etree.SubElement(meta, 'Tag', {'name': 'BBPSTXNID', 'value': msgId})
     txn = etree.SubElement(root, 'Txn', {
         'id': txnId,
@@ -875,35 +874,65 @@ def build_pay_request():
         'ts': ts,
         'type': 'DEBIT'
     })
-    entry_txn = etree.SubElement(txn, 'EntryTxn', {
+    etree.SubElement(txn, 'EntryTxn', {
         'id': entry_txn_id,
         'tsRead': ts,
-        'type': pay_data.get('entry_txn_type', 'DEBIT')
+        'ts': ts,
+        'type': 'DEBIT'
     })
-    plaza = etree.SubElement(root, 'Plaza', pay_data.get('plaza', {}))
-    if 'entry_plaza' in pay_data:
-        etree.SubElement(plaza, 'EntryPlaza', pay_data['entry_plaza'])
-    if 'lane' in pay_data:
-        etree.SubElement(plaza, 'Lane', pay_data['lane'])
-    if 'entry_lane' in pay_data:
-        etree.SubElement(plaza, 'EntryLane', pay_data['entry_lane'])
-    if 'reader_verification' in pay_data:
-        rv = etree.SubElement(plaza, 'ReaderVerificationResult', pay_data['reader_verification'])
-        if 'tag_user_memory' in pay_data:
-            tum = etree.SubElement(rv, 'TagUserMemory')
-            for detail in pay_data['tag_user_memory']:
-                etree.SubElement(tum, 'Detail', detail)
-    vehicle = etree.SubElement(root, 'Vehicle', pay_data.get('vehicle', {}))
-    if 'vehicle_details' in pay_data:
-        vd = etree.SubElement(vehicle, 'VehicleDetails')
-        for detail in pay_data['vehicle_details']:
-            etree.SubElement(vd, 'Detail', detail)
+    plaza = etree.SubElement(root, 'Plaza', {
+        'geoCode': plaza_info['geoCode'],
+        'id': plaza_info['id'],
+        'name': plaza_info['name'],
+        'subtype': plaza_info['subtype'],
+        'type': plaza_info['type']
+    })
+    etree.SubElement(plaza, 'EntryPlaza', {
+        'geoCode': plaza_info['geoCode'],
+        'id': plaza_info['id'],
+        'name': plaza_info['name'],
+        'subtype': plaza_info['subtype'],
+        'type': plaza_info['type']
+    })
+    etree.SubElement(plaza, 'Lane', {
+        'direction': lane['direction'],
+        'id': lane['id'],
+        'readerId': lane['readerId'],
+        'Status': 'OPEN',
+        'Mode': 'Normal',
+        'laneType': 'Hybrid',
+        'ExitGate': '1',
+        'Floor': '1'
+    })
+    etree.SubElement(plaza, 'EntryLane', {
+        'direction': lane['direction'],
+        'id': lane['id'],
+        'readerId': lane['readerId'],
+        'Status': 'OPEN',
+        'Mode': 'Normal',
+        'laneType': 'Hybrid',
+        'EntryGate': '1',
+        'Floor': '1'
+    })
+    rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
+        'publicKeyCVV': '', 'procRestrictionResult': 'ok', 'signAuth': 'VALID', 'tagVerified': 'NETC TAG', 'ts': ts, 'txnCounter': '1', 'txnStatus': 'SUCCESS', 'vehicleAuth': 'YES'
+    })
+    tum = etree.SubElement(rvr, 'TagUserMemory')
+    etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': TID})
+    etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': vehicleRegNo})
+    etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': avc})
+    vehicle = etree.SubElement(root, 'Vehicle', {
+        'TID': TID,
+        'tagId': tagId,
+        'wim': '',
+        'staticweight': '0'
+    })
+    vdetails = etree.SubElement(vehicle, 'VehicleDetails')
+    etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc.zfill(2)})
+    etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': vehicleRegNo})
     payment = etree.SubElement(root, 'Payment')
-    amount = etree.SubElement(payment, 'Amount', pay_data.get('amount', {}))
-    if 'overweight_amount' in pay_data:
-        etree.SubElement(amount, 'OverwightAmount', pay_data['overweight_amount'])
-    signature = etree.SubElement(root, 'Signature')
-    signature.text = signature_placeholder
+    amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': '455.00', 'PriceMode': 'CUSTOM', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
+    etree.SubElement(amount, 'OverwightAmount', {'curr': 'INR', 'value': '0', 'PaymentMode': 'Tag'})
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
