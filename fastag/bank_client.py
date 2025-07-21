@@ -1640,7 +1640,39 @@ if __name__ == '__main__':
             print('Error sending Query Exception List request:', e)
     elif choice == '6':
         print('--- Request Pay API Test ---')
-        # Use similar data as Heart Beat
+        # Prompt for UAT tag (reuse Tag Details logic)
+        print('Select a UAT Tag to use:')
+        for idx, tag in enumerate(UAT_TAGS, 1):
+            print(f"{idx}. Chassis: {tag['chassis']}, Tag ID: {tag['tagId']}, TID: {tag['TID']}, Status: {tag['excStatus']}, Bank: {tag['bankName']}")
+        print(f"{len(UAT_TAGS)+1}. Enter manually")
+        sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
+        if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
+            tag = UAT_TAGS[int(sel)-1]
+            tagId = tag['tagId']
+            TID = tag['TID']
+            vehicleRegNo = tag['chassis']
+            avc = tag['vehicleClass'][2:] if tag['vehicleClass'].startswith('VC') else tag['vehicleClass']
+        else:
+            tagId = input('Enter tagId: ').strip()
+            TID = input('Enter TID: ').strip()
+            vehicleRegNo = input('Enter vehicleRegNo: ').strip()
+            avc = input('Enter avc (number, e.g. 7): ').strip()
+        # Prompt for lane/reader/direction (reuse Heart Beat logic)
+        print('Select Lane:')
+        lane_options = [
+            {'id': 'IN01', 'direction': 'N', 'readerId': '1'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '2'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '3'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '4'},
+        ]
+        for idx, lane in enumerate(lane_options, 1):
+            print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
+        lane_sel = input(f"Enter 1-{len(lane_options)}: ").strip()
+        if lane_sel.isdigit() and 1 <= int(lane_sel) <= len(lane_options):
+            lane = lane_options[int(lane_sel)-1]
+        else:
+            lane = lane_options[0]
+        # Use similar data as Heart Beat for plaza
         orgId = 'PGSH'
         plaza_info = {
             'geoCode': '11.0185,76.9778',
@@ -1653,18 +1685,11 @@ if __name__ == '__main__':
             'toDistrict': '',
             'agencyCode': 'TCABO'
         }
-        lanes = [
-            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-        ]
         now = datetime.now()
         ts = now.strftime('%Y-%m-%dT%H:%M:%S')
         msgId = now.strftime('%Y%m%d%H%M%S%f')[:26]
         txnId = now.strftime('%Y%m%d%H%M%S%f')[:21]
         entry_txn_id = txnId
-        # Build the Pay request XML to match the working sample
         def build_pay_request():
             NS = 'http://npci.org/etc/schema/'
             nsmap = {'etc': NS}
@@ -1707,27 +1732,27 @@ if __name__ == '__main__':
                 'type': plaza_info['type']
             })
             etree.SubElement(plaza, 'Lane', {
-                'direction': 'N', 'id': 'Lane06', 'readerId': '6', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'ExitGate': '', 'Floor': ''
+                'direction': lane['direction'], 'id': lane['id'], 'readerId': lane['readerId'], 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'ExitGate': '', 'Floor': ''
             })
             etree.SubElement(plaza, 'EntryLane', {
-                'direction': 'N', 'id': 'Lane06', 'readerId': '6', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'EntryGate': '', 'Floor': ''
+                'direction': lane['direction'], 'id': lane['id'], 'readerId': lane['readerId'], 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'EntryGate': '', 'Floor': ''
             })
             rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
                 'publicKeyCVV': '', 'procRestrictionResult': 'ok', 'signAuth': 'VALID', 'tagVerified': 'NETC TAG', 'ts': ts, 'txnCounter': '1', 'txnStatus': 'SUCCESS', 'vehicleAuth': 'YES'
             })
             tum = etree.SubElement(rvr, 'TagUserMemory')
-            etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': '34161FA820328EE823DD43C0'})
-            etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': 'XXXXXXXXXXXX'})
-            etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': '12'})
+            etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': tagId})
+            etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': vehicleRegNo})
+            etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': avc})
             vehicle = etree.SubElement(root, 'Vehicle', {
-                'TID': 'E200341201281C00023222F1',
-                'tagId': '34161FA820328EE823DD43C0',
+                'TID': TID,
+                'tagId': tagId,
                 'wim': '',
                 'staticweight': '0'
             })
             vdetails = etree.SubElement(vehicle, 'VehicleDetails')
-            etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': '07'})
-            etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': 'XXXXXXXXXXXX'})
+            etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc.zfill(2)})
+            etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': vehicleRegNo})
             payment = etree.SubElement(root, 'Payment')
             amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': '455.00', 'PriceMode': 'POINT', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
             etree.SubElement(amount, 'OverwightAmount', {'curr': 'INR', 'value': '0', 'PaymentMode': 'Tag'})
