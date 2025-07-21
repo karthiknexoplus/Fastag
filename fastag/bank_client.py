@@ -1373,7 +1373,8 @@ if __name__ == '__main__':
     print('3. List Participants')
     print('4. Heart Beat')
     print('5. Request Query Exception List')
-    choice = input('Enter 1, 2, 3, 4, or 5: ').strip()
+    print('6. Request Pay')
+    choice = input('Enter 1, 2, 3, 4, 5, or 6: ').strip()
     if choice == '1':
         print('--- Tag Details API Test ---')
         print('Select a UAT Tag to test:')
@@ -1637,5 +1638,132 @@ if __name__ == '__main__':
                 print('Could not parse response as XML:', e)
         except Exception as e:
             print('Error sending Query Exception List request:', e)
+    elif choice == '6':
+        print('--- Request Pay API Test ---')
+        # Use similar data as Heart Beat
+        orgId = 'PGSH'
+        plaza_info = {
+            'geoCode': '11.0185,76.9778',
+            'id': '712764',
+            'name': 'PGS hospital',
+            'subtype': 'Covered',
+            'type': 'Parking',
+            'address': '',
+            'fromDistrict': '',
+            'toDistrict': '',
+            'agencyCode': 'TCABO'
+        }
+        lanes = [
+            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+        ]
+        now = datetime.now()
+        ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+        msgId = now.strftime('%Y%m%d%H%M%S%f')[:26]
+        txnId = now.strftime('%Y%m%d%H%M%S%f')[:21]
+        entry_txn_id = txnId
+        # Build the Pay request XML to match the working sample
+        def build_pay_request():
+            NS = 'http://npci.org/etc/schema/'
+            nsmap = {'etc': NS}
+            root = etree.Element('{%s}ReqPay' % NS, nsmap=nsmap)
+            head = etree.SubElement(root, 'Head', {
+                'msgId': msgId,
+                'orgId': orgId,
+                'ts': ts,
+                'ver': '1.0'
+            })
+            meta = etree.SubElement(root, 'Meta')
+            etree.SubElement(meta, 'Tag', {'name': 'BBPSTXNID', 'value': ''})
+            txn = etree.SubElement(root, 'Txn', {
+                'id': txnId,
+                'note': '',
+                'orgTxnId': '',
+                'refId': '',
+                'refUrl': '',
+                'ts': ts,
+                'type': 'DEBIT'
+            })
+            etree.SubElement(txn, 'EntryTxn', {
+                'id': entry_txn_id,
+                'tsRead': ts,
+                'ts': ts,
+                'type': 'DEBIT'
+            })
+            plaza = etree.SubElement(root, 'Plaza', {
+                'geoCode': plaza_info['geoCode'],
+                'id': plaza_info['id'],
+                'name': plaza_info['name'],
+                'subtype': plaza_info['subtype'],
+                'type': plaza_info['type']
+            })
+            etree.SubElement(plaza, 'EntryPlaza', {
+                'geoCode': '0,0',
+                'id': plaza_info['id'],
+                'name': plaza_info['name'],
+                'subtype': plaza_info['subtype'],
+                'type': plaza_info['type']
+            })
+            etree.SubElement(plaza, 'Lane', {
+                'direction': 'N', 'id': 'Lane06', 'readerId': '6', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'ExitGate': '', 'Floor': ''
+            })
+            etree.SubElement(plaza, 'EntryLane', {
+                'direction': 'N', 'id': 'Lane06', 'readerId': '6', 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'EntryGate': '', 'Floor': ''
+            })
+            rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
+                'publicKeyCVV': '', 'procRestrictionResult': 'ok', 'signAuth': 'VALID', 'tagVerified': 'NETC TAG', 'ts': ts, 'txnCounter': '1', 'txnStatus': 'SUCCESS', 'vehicleAuth': 'YES'
+            })
+            tum = etree.SubElement(rvr, 'TagUserMemory')
+            etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': '34161FA820328EE823DD43C0'})
+            etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': 'XXXXXXXXXXXX'})
+            etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': '12'})
+            vehicle = etree.SubElement(root, 'Vehicle', {
+                'TID': 'E200341201281C00023222F1',
+                'tagId': '34161FA820328EE823DD43C0',
+                'wim': '',
+                'staticweight': '0'
+            })
+            vdetails = etree.SubElement(vehicle, 'VehicleDetails')
+            etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': '07'})
+            etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': 'XXXXXXXXXXXX'})
+            payment = etree.SubElement(root, 'Payment')
+            amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': '455.00', 'PriceMode': 'POINT', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
+            etree.SubElement(amount, 'OverwightAmount', {'curr': 'INR', 'value': '0', 'PaymentMode': 'Tag'})
+            return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
+        xml_data = build_pay_request()
+        xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
+        if xml_str.startswith('<?xml'):
+            xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
+            xml_str = xml_str.replace('encoding="utf-8"', 'encoding="UTF-8"', 1)
+        print(f'\n[PAY] Request XML (unsigned, no signature), TxnId: {txnId}')
+        print(xml_str)
+        # Sign the XML
+        try:
+            req_xml_doc = etree.fromstring(xml_str.encode())
+            signer = XMLSigner(signature_algorithm="rsa-sha256")
+            with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+                key = key_file.read()
+                cert = cert_file.read()
+            signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
+            signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=True, encoding="UTF-8")
+            print('\n[PAY] Request XML (signed):')
+            print(signed_xml_str.decode())
+        except Exception as e:
+            print('[PAY] Error signing Pay XML:', e)
+            signed_xml_str = xml_str.encode()
+        # Send the request
+        url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqPay'
+        headers = {'Content-Type': 'application/xml'}
+        print("[PAY] URL:", url)
+        print("[PAY] Headers:", headers)
+        try:
+            response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
+            print("[PAY] HTTP Status Code:", response.status_code)
+            print("[PAY] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+            # Optionally parse response here
+        except Exception as e:
+            print('[PAY] Error sending Pay request:', e)
     else:
         print('Invalid choice. Exiting.') 
