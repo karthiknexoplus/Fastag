@@ -1650,7 +1650,7 @@ if __name__ == '__main__':
             tag = UAT_TAGS[int(sel)-1]
             tagId = tag['tagId']
             TID = tag['TID']
-            vehicleRegNo = tag['chassis']
+            vehicleRegNo = tag.get('vehicleRegNo', '') or tag['chassis']
             avc = tag['vehicleClass'][2:] if tag['vehicleClass'].startswith('VC') else tag['vehicleClass']
         else:
             tagId = input('Enter tagId: ').strip()
@@ -1741,7 +1741,7 @@ if __name__ == '__main__':
                 'publicKeyCVV': '', 'procRestrictionResult': 'ok', 'signAuth': 'VALID', 'tagVerified': 'NETC TAG', 'ts': ts, 'txnCounter': '1', 'txnStatus': 'SUCCESS', 'vehicleAuth': 'YES'
             })
             tum = etree.SubElement(rvr, 'TagUserMemory')
-            etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': tagId})
+            etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': TID})
             etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': vehicleRegNo})
             etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': avc})
             vehicle = etree.SubElement(root, 'Vehicle', {
