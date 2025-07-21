@@ -586,7 +586,7 @@ def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=N
         return response.content
     except Exception as e:
         print('[HEARTBEAT] Error sending Heart Beat request:', e)
-        return None
+       
 
 def parse_heartbeat_response(xml_response):
     try:
