@@ -105,15 +105,20 @@ def pay_response():
     # Parse for error code and print description if present
     try:
         err_code = None
-        # Try to find <Resp> element and get respCode or errCode
+        resp_code = None
+        # Try to find <Resp> element and get respCode and errCode
         resp = None
         if root is not None:
             resp = root.find('.//Resp')
         if resp is not None:
-            err_code = resp.attrib.get('errCode') or resp.attrib.get('respCode')
+            err_code = resp.attrib.get('errCode')
+            resp_code = resp.attrib.get('respCode')
         if err_code:
             err_msg = PAY_ERROR_CODES.get(err_code, 'Unknown error code')
-            print(f"[PAY RESPONSE ERROR] Code: {err_code} - {err_msg}")
+            print(f"[PAY RESPONSE ERROR] errCode: {err_code} - {err_msg}")
+        if resp_code:
+            resp_msg = PAY_ERROR_CODES.get(resp_code, 'Unknown error code')
+            print(f"[PAY RESPONSE ERROR] respCode: {resp_code} - {resp_msg}")
     except Exception as e:
         print(f"[PAY RESPONSE ERROR] Could not parse error code: {e}")
     ack_xml = '<Ack>OK</Ack>'

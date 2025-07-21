@@ -1768,6 +1768,10 @@ if __name__ == '__main__':
         amount_value = input('Enter amount to be debited (e.g. 455.00): ').strip()
         if not amount_value:
             amount_value = '455.00'
+        try:
+            amount_value = '{:.2f}'.format(float(amount_value))
+        except Exception:
+            amount_value = '455.00'
         xml_data = build_pay_request(amount_value)
         xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
         if xml_str.startswith('<?xml'):
