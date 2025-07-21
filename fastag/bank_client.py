@@ -519,12 +519,24 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
     })
     for lane in lanes:
         ET.SubElement(plaza, 'Lane', {
-            'Mode': lane.get('Mode', 'Normal'),
-            'Status': lane.get('Status', 'Open'),
-            'direction': lane.get('direction', 'N'),
-            'id': lane.get('id', 'IN01'),
-            'laneType': lane.get('laneType', 'Hybrid'),
-            'readerId': lane.get('readerId', '1')
+            'direction': lane['direction'],
+            'id': lane['id'],
+            'readerId': lane['readerId'],
+            'Status': 'OPEN',
+            'Mode': 'Normal',
+            'laneType': 'Hybrid',
+            'ExitGate': '1',
+            'Floor': '1'
+        })
+        ET.SubElement(plaza, 'EntryLane', {
+            'direction': lane['direction'],
+            'id': lane['id'],
+            'readerId': lane['readerId'],
+            'Status': 'OPEN',
+            'Mode': 'Normal',
+            'laneType': 'Hybrid',
+            'EntryGate': '1',
+            'Floor': '1'
         })
     signature = ET.SubElement(root, 'Signature')
     signature.text = signature_placeholder
@@ -841,57 +853,58 @@ def parse_tag_details_response(xml_response):
     }
 
 
-def build_pay_request(msgId, orgId, ts, txnId, entryTxnId, pay_data, signature_placeholder='...'):
-    root = ET.Element('etc:ReqPay', {'xmlns:etc': 'http://npci.org/etc/schema/'})
-    head = ET.SubElement(root, 'Head', {
+def build_pay_request():
+    NS = 'http://npci.org/etc/schema/'
+    nsmap = {'etc': NS}
+    root = etree.Element('{%s}ReqPay' % NS, nsmap=nsmap)
+    head = etree.SubElement(root, 'Head', {
         'msgId': msgId,
         'orgId': orgId,
         'ts': ts,
         'ver': '1.0'
     })
-    meta = ET.SubElement(root, 'Meta')
-    # Optionally add <Tag> elements to meta if present in pay_data['meta']
-    for tag in pay_data.get('meta', []):
-        ET.SubElement(meta, 'Tag', tag)
-    txn = ET.SubElement(root, 'Txn', {
+    meta = etree.SubElement(root, 'Meta')
+    # Use a unique value for BBPSTXNID (e.g., msgId)
+    etree.SubElement(meta, 'Tag', {'name': 'BBPSTXNID', 'value': msgId})
+    txn = etree.SubElement(root, 'Txn', {
         'id': txnId,
         'note': '',
         'orgTxnId': '',
         'refId': '',
         'refUrl': '',
         'ts': ts,
-        'type': pay_data.get('txn_type', 'DEBIT')
+        'type': 'DEBIT'
     })
-    entry_txn = ET.SubElement(txn, 'EntryTxn', {
-        'id': entryTxnId,
+    entry_txn = etree.SubElement(txn, 'EntryTxn', {
+        'id': entry_txn_id,
         'tsRead': ts,
         'type': pay_data.get('entry_txn_type', 'DEBIT')
     })
-    plaza = ET.SubElement(root, 'Plaza', pay_data.get('plaza', {}))
+    plaza = etree.SubElement(root, 'Plaza', pay_data.get('plaza', {}))
     if 'entry_plaza' in pay_data:
-        ET.SubElement(plaza, 'EntryPlaza', pay_data['entry_plaza'])
+        etree.SubElement(plaza, 'EntryPlaza', pay_data['entry_plaza'])
     if 'lane' in pay_data:
-        ET.SubElement(plaza, 'Lane', pay_data['lane'])
+        etree.SubElement(plaza, 'Lane', pay_data['lane'])
     if 'entry_lane' in pay_data:
-        ET.SubElement(plaza, 'EntryLane', pay_data['entry_lane'])
+        etree.SubElement(plaza, 'EntryLane', pay_data['entry_lane'])
     if 'reader_verification' in pay_data:
-        rv = ET.SubElement(plaza, 'ReaderVerificationResult', pay_data['reader_verification'])
+        rv = etree.SubElement(plaza, 'ReaderVerificationResult', pay_data['reader_verification'])
         if 'tag_user_memory' in pay_data:
-            tum = ET.SubElement(rv, 'TagUserMemory')
+            tum = etree.SubElement(rv, 'TagUserMemory')
             for detail in pay_data['tag_user_memory']:
-                ET.SubElement(tum, 'Detail', detail)
-    vehicle = ET.SubElement(root, 'Vehicle', pay_data.get('vehicle', {}))
+                etree.SubElement(tum, 'Detail', detail)
+    vehicle = etree.SubElement(root, 'Vehicle', pay_data.get('vehicle', {}))
     if 'vehicle_details' in pay_data:
-        vd = ET.SubElement(vehicle, 'VehicleDetails')
+        vd = etree.SubElement(vehicle, 'VehicleDetails')
         for detail in pay_data['vehicle_details']:
-            ET.SubElement(vd, 'Detail', detail)
-    payment = ET.SubElement(root, 'Payment')
-    amount = ET.SubElement(payment, 'Amount', pay_data.get('amount', {}))
+            etree.SubElement(vd, 'Detail', detail)
+    payment = etree.SubElement(root, 'Payment')
+    amount = etree.SubElement(payment, 'Amount', pay_data.get('amount', {}))
     if 'overweight_amount' in pay_data:
-        ET.SubElement(amount, 'OverwightAmount', pay_data['overweight_amount'])
-    signature = ET.SubElement(root, 'Signature')
+        etree.SubElement(amount, 'OverwightAmount', pay_data['overweight_amount'])
+    signature = etree.SubElement(root, 'Signature')
     signature.text = signature_placeholder
-    return ET.tostring(root, encoding='utf-8', method='xml')
+    return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
 def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
@@ -1675,7 +1688,7 @@ if __name__ == '__main__':
         # Use similar data as Heart Beat for plaza
         orgId = 'PGSH'
         plaza_info = {
-            'geoCode': '11.0185,76.9778',
+            'geoCode': '11,76',
             'id': '712764',
             'name': 'PGS hospital',
             'subtype': 'Covered',
@@ -1690,73 +1703,6 @@ if __name__ == '__main__':
         msgId = now.strftime('%Y%m%d%H%M%S%f')[:26]
         txnId = now.strftime('%Y%m%d%H%M%S%f')[:21]
         entry_txn_id = txnId
-        def build_pay_request():
-            NS = 'http://npci.org/etc/schema/'
-            nsmap = {'etc': NS}
-            root = etree.Element('{%s}ReqPay' % NS, nsmap=nsmap)
-            head = etree.SubElement(root, 'Head', {
-                'msgId': msgId,
-                'orgId': orgId,
-                'ts': ts,
-                'ver': '1.0'
-            })
-            meta = etree.SubElement(root, 'Meta')
-            etree.SubElement(meta, 'Tag', {'name': 'BBPSTXNID', 'value': ''})
-            txn = etree.SubElement(root, 'Txn', {
-                'id': txnId,
-                'note': '',
-                'orgTxnId': '',
-                'refId': '',
-                'refUrl': '',
-                'ts': ts,
-                'type': 'DEBIT'
-            })
-            etree.SubElement(txn, 'EntryTxn', {
-                'id': entry_txn_id,
-                'tsRead': ts,
-                'ts': ts,
-                'type': 'DEBIT'
-            })
-            plaza = etree.SubElement(root, 'Plaza', {
-                'geoCode': plaza_info['geoCode'],
-                'id': plaza_info['id'],
-                'name': plaza_info['name'],
-                'subtype': plaza_info['subtype'],
-                'type': plaza_info['type']
-            })
-            etree.SubElement(plaza, 'EntryPlaza', {
-                'geoCode': '0,0',
-                'id': plaza_info['id'],
-                'name': plaza_info['name'],
-                'subtype': plaza_info['subtype'],
-                'type': plaza_info['type']
-            })
-            etree.SubElement(plaza, 'Lane', {
-                'direction': lane['direction'], 'id': lane['id'], 'readerId': lane['readerId'], 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'ExitGate': '', 'Floor': ''
-            })
-            etree.SubElement(plaza, 'EntryLane', {
-                'direction': lane['direction'], 'id': lane['id'], 'readerId': lane['readerId'], 'Status': 'OPEN', 'Mode': 'Normal', 'laneType': 'Hybrid', 'EntryGate': '', 'Floor': ''
-            })
-            rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
-                'publicKeyCVV': '', 'procRestrictionResult': 'ok', 'signAuth': 'VALID', 'tagVerified': 'NETC TAG', 'ts': ts, 'txnCounter': '1', 'txnStatus': 'SUCCESS', 'vehicleAuth': 'YES'
-            })
-            tum = etree.SubElement(rvr, 'TagUserMemory')
-            etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': TID})
-            etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': vehicleRegNo})
-            etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': avc})
-            vehicle = etree.SubElement(root, 'Vehicle', {
-                'TID': TID,
-                'tagId': tagId,
-                'wim': '',
-                'staticweight': '0'
-            })
-            vdetails = etree.SubElement(vehicle, 'VehicleDetails')
-            etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc.zfill(2)})
-            etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': vehicleRegNo})
-            payment = etree.SubElement(root, 'Payment')
-            amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': '455.00', 'PriceMode': 'CUSTOM', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
-            etree.SubElement(amount, 'OverwightAmount', {'curr': 'INR', 'value': '0', 'PaymentMode': 'Tag'})
-            return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
         xml_data = build_pay_request()
         xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
         if xml_str.startswith('<?xml'):
