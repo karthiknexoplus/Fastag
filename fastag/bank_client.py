@@ -1396,7 +1396,7 @@ if __name__ == '__main__':
             print(xml_str)
             # Prompt for endpoint
             print("Select Tag Details endpoint:")
-            print("1. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails")
+            print("1. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v1")
             print("2. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2")
             url_choice = input("Enter 1 or 2: ").strip()
             if url_choice == '2':
