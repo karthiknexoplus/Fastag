@@ -1351,7 +1351,6 @@ if __name__ == '__main__':
         sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
         if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
             tag = UAT_TAGS[int(sel)-1]
-            # Extract avc as the number after 'VC' in vehicleClass
             avc_num = ''
             m = re.match(r'VC(\d+)', tag['vehicleClass'])
             if m:
@@ -1384,14 +1383,21 @@ if __name__ == '__main__':
             xml_data = build_tag_details_request(msgId, 'PGSH', ts, txnId, vehicle_info)  # Set orgId to PGSH
             print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
             print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
-            payload = xml_data
-            url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
-            print("[DEBUG] Hardcoded URL for request:", url)
+            # Prompt for endpoint
+            print("Select Tag Details endpoint:")
+            print("1. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails")
+            print("2. https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2")
+            url_choice = input("Enter 1 or 2: ").strip()
+            if url_choice == '2':
+                url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2'
+            else:
+                url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
+            print("[DEBUG] Selected URL for request:", url)
             headers = {'Content-Type': 'application/xml'}
             print("[TAG_DETAILS] URL:", url)
             print("[TAG_DETAILS] Headers:", headers)
             try:
-                response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+                response = requests.post(url, data=xml_data, headers=headers, timeout=10, verify=False)
                 print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
                 print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
                 parsed = parse_tag_details_response(response.content)
