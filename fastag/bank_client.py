@@ -814,6 +814,18 @@ def parse_tag_details_response(xml_response):
     txn = tree.find('Txn')
     resp = txn.find('Resp') if txn is not None else None
     signature = tree.find('Signature')
+    # Extract all <Detail> name/value pairs from <VehicleDetails>
+    details_dict = {}
+    try:
+        ns = {'etc': 'http://npci.org/etc/schema/'}
+        vehicle_details = tree.find('.//VehicleDetails')
+        if vehicle_details is not None:
+            for detail in vehicle_details.findall('Detail'):
+                name = detail.attrib.get('name')
+                value = detail.attrib.get('value')
+                details_dict[name] = value
+    except Exception as e:
+        details_dict['error'] = f'Failed to parse VehicleDetails: {e}'
     return {
         'msgId': head.attrib.get('msgId') if head is not None else None,
         'orgId': head.attrib.get('orgId') if head is not None else None,
@@ -824,7 +836,8 @@ def parse_tag_details_response(xml_response):
         'respCode': resp.attrib.get('respCode') if resp is not None else None,
         'successReqCnt': resp.attrib.get('successReqCnt') if resp is not None else None,
         'totReqCnt': resp.attrib.get('totReqCnt') if resp is not None else None,
-        'signature': signature.text if signature is not None else None
+        'signature': signature.text if signature is not None else None,
+        'vehicle_details': details_dict
     }
 
 
