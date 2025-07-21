@@ -733,10 +733,10 @@ def parse_check_txn_response(xml_response):
 
 def build_tag_details_request(msgId, orgId, head_ts, txnId, txn_ts, vehicle_info):
     NS = 'http://npci.org/etc/schema/'
-    nsmap = {'etc': NS}  # Use 'etc' as the prefix, not 'ns0'
+    nsmap = {'etc': NS}
     root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.2',
+        'ver': '1.0',  # Use version 1.0 as required by the bank
         'ts': head_ts,
         'orgId': orgId,
         'msgId': msgId
