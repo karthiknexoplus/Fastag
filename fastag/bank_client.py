@@ -736,7 +736,7 @@ def build_tag_details_request(msgId, orgId, head_ts, txnId, txn_ts, vehicle_info
     nsmap = {'etc': NS}
     root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.2',  # Use version 1.2 as required
+        'ver': '1.0',  # Use version 1.2 as required
         'ts': head_ts,
         'orgId': orgId,
         'msgId': msgId
