@@ -1764,6 +1764,10 @@ if __name__ == '__main__':
         msgId = now.strftime('%Y%m%d%H%M%S%f')[:26]
         txnId = now.strftime('%Y%m%d%H%M%S%f')[:21]
         entry_txn_id = txnId
+        # Prompt for amount to be debited
+        amount_value = input('Enter amount to be debited (e.g. 455.00): ').strip()
+        if not amount_value:
+            amount_value = '455.00'
         xml_data = build_pay_request()
         xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
         if xml_str.startswith('<?xml'):
