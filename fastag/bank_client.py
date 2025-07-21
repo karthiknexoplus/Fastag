@@ -734,9 +734,9 @@ def parse_check_txn_response(xml_response):
 def build_tag_details_request(msgId, orgId, head_ts, txnId, txn_ts, vehicle_info):
     NS = 'http://npci.org/etc/schema/'
     nsmap = {'etc': NS}
-    root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
+    root = etree.Element('{%s}ReqTagDetails' % NS, nsmap=nsmap)  # Use ReqTagDetails
     head = etree.SubElement(root, 'Head', {
-        'ver': '1.0',  # Use version 1.0 as required by the bank
+        'ver': '1.0',
         'ts': head_ts,
         'orgId': orgId,
         'msgId': msgId
@@ -750,11 +750,11 @@ def build_tag_details_request(msgId, orgId, head_ts, txnId, txn_ts, vehicle_info
         'type': 'FETCH',
         'orgTxnId': ''
     })
+    # Vehicle: only TID, vehicleRegNo, tagId (in that order)
     etree.SubElement(txn, 'Vehicle', {
-        'TID': '',  # Always include TID as empty string
-        'tagId': vehicle_info.get('tagId', ''),
-        'avc': vehicle_info.get('avc', ''),
-        'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
+        'TID': '',
+        'vehicleRegNo': vehicle_info.get('vehicleRegNo', ''),
+        'tagId': vehicle_info.get('tagId', '')
     })
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
