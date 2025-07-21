@@ -732,7 +732,6 @@ def parse_check_txn_response(xml_response):
 
 
 def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
-    # Build XML as per provided sample, do not deviate
     NS = 'http://npci.org/etc/schema/'
     nsmap = {'ns0': NS}
     root = etree.Element('{%s}ReqDetails' % NS, nsmap=nsmap)
@@ -752,7 +751,6 @@ def build_tag_details_request(msgId, orgId, ts, txnId, vehicle_info):
         'orgTxnId': ''
     })
     etree.SubElement(txn, 'Vehicle', {
-        'TID': vehicle_info.get('TID', ''),
         'tagId': vehicle_info.get('tagId', ''),
         'avc': vehicle_info.get('avc', ''),
         'vehicleRegNo': vehicle_info.get('vehicleRegNo', '')
@@ -1327,6 +1325,15 @@ def print_participants_table(participants):
         print(f"{idx:<5} {p.get('issuerIin', ''):<10} {p.get('name', '')}")
     print("-" * 40)
 
+# In the Tag Details menu logic, when a UAT tag is selected, map vehicleClass to avc number and do not include TID in vehicle_info
+AVC_MAP = {
+    'VC7': '5',
+    'VC20': '20',
+    'VC15': '15',
+    'VC4': '4',
+    # Add more mappings as needed
+}
+
 if __name__ == '__main__':
     print('Choose which request to send:')
     print('1. Tag Details')
@@ -1344,20 +1351,18 @@ if __name__ == '__main__':
         sel = input(f"Enter 1-{len(UAT_TAGS)+1}: ").strip()
         if sel.isdigit() and 1 <= int(sel) <= len(UAT_TAGS):
             tag = UAT_TAGS[int(sel)-1]
+            avc_num = AVC_MAP.get(tag['vehicleClass'], '')
             vehicle_info = {
-                'TID': tag['TID'],
                 'tagId': tag['tagId'],
-                'avc': '',  # You can prompt for avc if needed
+                'avc': avc_num,  # Use mapped avc number
                 'vehicleRegNo': tag['vehicleRegNo'],
-                'refId': ''  # You can prompt for refId if needed
+                'refId': ''
             }
         else:
             tagid = input('Enter tagId: ').strip()
-            tid = input('Enter TID (optional): ').strip()
-            avc = input('Enter avc (optional): ').strip()
+            avc = input('Enter avc (number, e.g. 5): ').strip()
             vehicleRegNo = input('Enter vehicleRegNo (optional): ').strip()
             vehicle_info = {
-                'TID': tid,
                 'tagId': tagid,
                 'avc': avc,
                 'vehicleRegNo': vehicleRegNo,
@@ -1370,9 +1375,9 @@ if __name__ == '__main__':
             from datetime import datetime
             now = datetime.now()
             ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-            msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'
-            txnId = now.strftime('%H%M%d%m%y%H%M%S') + str(now.microsecond)[-4:]
-            xml_data = build_tag_details_request(msgId, 'IDFC', ts, txnId, vehicle_info)
+            msgId = now.strftime('%Y%m%d%H%M%S') + 'TAG'  # Unique msgId
+            txnId = now.strftime('%H%M%d%m%y%H%M%S') + str(now.microsecond)[-4:]  # Unique txnId
+            xml_data = build_tag_details_request(msgId, 'PGSH', ts, txnId, vehicle_info)  # Set orgId to PGSH
             print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
             print(xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
             payload = xml_data
