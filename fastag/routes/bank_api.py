@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from signxml import XMLVerifier
 from fastag.bank_client import send_sync_time
 import json
+from fastag.pay_error_codes import PAY_ERROR_CODES
 
 bank_api = Blueprint('bank_api', __name__)
 
@@ -101,7 +102,20 @@ def heartbeat():
 @bank_api.route('/api/bank/pay_response', methods=['POST'])
 def pay_response():
     xml_data, root = parse_and_log_xml('Pay Response')
-    # TODO: Parse XML, validate, and process Pay Response
+    # Parse for error code and print description if present
+    try:
+        err_code = None
+        # Try to find <Resp> element and get respCode or errCode
+        resp = None
+        if root is not None:
+            resp = root.find('.//Resp')
+        if resp is not None:
+            err_code = resp.attrib.get('errCode') or resp.attrib.get('respCode')
+        if err_code:
+            err_msg = PAY_ERROR_CODES.get(err_code, 'Unknown error code')
+            print(f"[PAY RESPONSE ERROR] Code: {err_code} - {err_msg}")
+    except Exception as e:
+        print(f"[PAY RESPONSE ERROR] Could not parse error code: {e}")
     ack_xml = '<Ack>OK</Ack>'
     return Response(ack_xml, mimetype='application/xml')
 
