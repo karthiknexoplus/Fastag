@@ -885,7 +885,7 @@ def parse_tag_details_response(xml_response):
     }
 
 
-def build_pay_request():
+def build_pay_request(amount_value):
     NS = 'http://npci.org/etc/schema/'
     nsmap = {'etc': NS}
     root = etree.Element('{%s}ReqPay' % NS, nsmap=nsmap)
@@ -963,7 +963,7 @@ def build_pay_request():
     etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc.zfill(2)})
     etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': vehicleRegNo})
     payment = etree.SubElement(root, 'Payment')
-    amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': '455.00', 'PriceMode': 'CUSTOM', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
+    amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': amount_value, 'PriceMode': 'CUSTOM', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
     etree.SubElement(amount, 'OverwightAmount', {'curr': 'INR', 'value': '0', 'PaymentMode': 'Tag'})
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
@@ -1768,7 +1768,7 @@ if __name__ == '__main__':
         amount_value = input('Enter amount to be debited (e.g. 455.00): ').strip()
         if not amount_value:
             amount_value = '455.00'
-        xml_data = build_pay_request()
+        xml_data = build_pay_request(amount_value)
         xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
         if xml_str.startswith('<?xml'):
             xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
