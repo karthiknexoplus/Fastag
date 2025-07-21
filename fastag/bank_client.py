@@ -1031,11 +1031,11 @@ def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
     if last_ts:
         # Add 10 minutes and 1 second to last used ts
         next_ts = last_ts + timedelta(minutes=10, seconds=1)
-        if next_ts > now:
-            # If next_ts is in the future, use now - 10min1s
-            next_ts = now - timedelta(minutes=10, seconds=1)
+        if next_ts > now + timedelta(days=2):  # Prevent runaway into far future
+            next_ts = now + timedelta(days=1) - timedelta(minutes=10, seconds=1)
     else:
-        next_ts = now - timedelta(minutes=10, seconds=1)
+        # Start with 1 day in the future minus 10min1s
+        next_ts = now + timedelta(days=1) - timedelta(minutes=10, seconds=1)
     last_ts_per_tag[tagId] = next_ts
     ts = next_ts.strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
