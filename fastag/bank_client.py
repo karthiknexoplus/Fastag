@@ -781,14 +781,28 @@ def send_tag_details(msgId, orgId, vehicle_info):
     print("[TAG_DETAILS] URL:", url)
     print("[TAG_DETAILS] Headers:", headers)
     try:
-        response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
+        req_xml_doc = etree.fromstring(xml_str.encode())
+        signer = XMLSigner(signature_algorithm="rsa-sha256")
+        with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+            key = key_file.read()
+            cert = cert_file.read()
+        signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
+        signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=True, encoding="UTF-8")
+        print('\n[TAG_DETAILS] Request XML (signed):')
+        print(signed_xml_str.decode())
+    except Exception as e:
+        print('[TAG_DETAILS] Error signing Tag Details XML:', e)
+        signed_xml_str = xml_str.encode()
+
+    # Use signed XML as payload
+    try:
+        response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
         print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
         print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
         parsed = parse_tag_details_response(response.content)
         print("[TAG_DETAILS] Parsed Response:")
         for k, v in parsed.items():
             print(f"  {k}: {v}")
-        return response
     except Exception as e:
         print('[TAG_DETAILS] Error sending Tag Details request:', e)
         return None
@@ -1408,7 +1422,22 @@ if __name__ == '__main__':
             print("[TAG_DETAILS] URL:", url)
             print("[TAG_DETAILS] Headers:", headers)
             try:
-                response = requests.post(url, data=xml_str.encode(), headers=headers, timeout=10, verify=False)
+                req_xml_doc = etree.fromstring(xml_str.encode())
+                signer = XMLSigner(signature_algorithm="rsa-sha256")
+                with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+                    key = key_file.read()
+                    cert = cert_file.read()
+                signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
+                signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=True, encoding="UTF-8")
+                print('\n[TAG_DETAILS] Request XML (signed):')
+                print(signed_xml_str.decode())
+            except Exception as e:
+                print('[TAG_DETAILS] Error signing Tag Details XML:', e)
+                signed_xml_str = xml_str.encode()
+
+            # Use signed XML as payload
+            try:
+                response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
                 print("[TAG_DETAILS] HTTP Status Code:", response.status_code)
                 print("[TAG_DETAILS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
                 parsed = parse_tag_details_response(response.content)
@@ -1417,6 +1446,7 @@ if __name__ == '__main__':
                     print(f"  {k}: {v}")
             except Exception as e:
                 print('[TAG_DETAILS] Error sending Tag Details request:', e)
+                return None
     elif choice == '2':
         print('--- SyncTime API Test ---')
         sync_time_url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime'
