@@ -75,7 +75,26 @@ def check_txn_status():
 @bank_api.route('/api/bank/heartbeat', methods=['POST'])
 def heartbeat():
     xml_data, root = parse_and_log_xml('Heart Beat')
-    # TODO: Parse XML, validate, and process Heart Beat
+
+    # Parse XML and extract details (same as tag_details)
+    try:
+        ns = {'etc': 'http://npci.org/etc/schema/'}
+        vehicle_details = root.findall('.//etc:VehicleDetails', ns)
+        for v in vehicle_details:
+            details = {d.attrib['name']: d.attrib['value'] for d in v.findall('etc:Detail', ns)}
+            logging.info(f"Extracted Vehicle Details: {details}")
+    except Exception as e:
+        logging.error(f"XML parsing failed: {e}")
+
+    # Verify signature (optional but recommended, same as tag_details)
+    try:
+        with open('etolluatsigner_Public.crt.txt', 'rb') as f:
+            cert = f.read()
+        XMLVerifier().verify(xml_data, x509_cert=cert)
+        logging.info("Signature verified successfully.")
+    except Exception as e:
+        logging.error(f"Signature verification failed: {e}")
+
     ack_xml = '<Ack>OK</Ack>'
     return Response(ack_xml, mimetype='application/xml')
 
