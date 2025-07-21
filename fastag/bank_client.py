@@ -12,6 +12,7 @@ import re
 import random
 import xml.dom.minidom
 from uuid import uuid4
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -132,6 +133,9 @@ UAT_TAGS = [
         'bankName': 'IDFC DIMTS'
     }
 ]
+
+# Global dictionary to track last used ts per tagId
+last_ts_per_tag = defaultdict(lambda: None)
 
 def get_bank_url():
     if BANK_ENV.upper() == 'PROD':
@@ -1021,7 +1025,19 @@ def build_pay_request(amount_value, ts):
 
 
 def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
-    ts = (datetime.now(timezone.utc) - timedelta(minutes=10, seconds=1)).strftime('%Y-%m-%dT%H:%M:%S')
+    tagId = pay_data.get('tagId') if isinstance(pay_data, dict) else None
+    now = datetime.now(timezone.utc)
+    last_ts = last_ts_per_tag.get(tagId)
+    if last_ts:
+        # Add 10 minutes and 1 second to last used ts
+        next_ts = last_ts + timedelta(minutes=10, seconds=1)
+        if next_ts > now:
+            # If next_ts is in the future, use now - 10min1s
+            next_ts = now - timedelta(minutes=10, seconds=1)
+    else:
+        next_ts = now - timedelta(minutes=10, seconds=1)
+    last_ts_per_tag[tagId] = next_ts
+    ts = next_ts.strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     entryTxnId = str(uuid.uuid4())[:22]
     xml_data = build_pay_request(msgId, orgId, ts, txnId, entryTxnId, pay_data, signature_placeholder)
