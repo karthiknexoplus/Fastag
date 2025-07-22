@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch vehicle number when FASTag ID button is clicked
     fetchVehicleBtn.addEventListener('click', function() {
         if (!fastagFeaturesEnabled) {
-            alert('Please contact Onebee for pricing!');
+            alert('Please contact ' + (window.COMPANY_NAME || 'your provider') + ' for pricing!');
             return;
         }
         const fastagId = fastagIdInput.value.trim();
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch FASTag ID when vehicle number button is clicked
     fetchFastagBtn.addEventListener('click', function() {
         if (!fastagFeaturesEnabled) {
-            alert('Please contact Onebee for pricing!');
+            alert('Please contact ' + (window.COMPANY_NAME || 'your provider') + ' for pricing!');
             return;
         }
         const vehicleNumber = vehicleNumberInput.value.trim();

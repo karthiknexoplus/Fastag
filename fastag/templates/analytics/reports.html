@@ -113,6 +113,7 @@
     <span style="font-size:0.95em; color:#555;">Website: <a href="https://{{ COMPANY_WEBSITE }}" target="_blank">{{ COMPANY_WEBSITE }}</a></span>
 </div>
 <script>
+window.COMPANY_NAME = "{{ COMPANY_NAME }}";
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof window.fastagFeaturesEnabled !== 'undefined' && !window.fastagFeaturesEnabled) {
         document.getElementById('fastag-disabled-message').style.display = 'block';
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.export-btn').forEach(btn => {
             btn.disabled = true;
             btn.classList.add('disabled');
-            btn.title = 'Contact Onebee for pricing';
+            btn.title = 'Contact ' + window.COMPANY_NAME + ' for pricing';
         });
     }
 });
@@ -522,7 +523,7 @@ function setDateRange(range) {
 
 function exportReport(reportType) {
     if (typeof window.fastagFeaturesEnabled !== 'undefined' && !window.fastagFeaturesEnabled) {
-        showAlert('FASTag analytics and reports are disabled. Please contact Onebee for pricing!', 'warning');
+        showAlert('FASTag analytics and reports are disabled. Please contact ' + window.COMPANY_NAME + ' for pricing!', 'warning');
         return;
     }
     const startDate = document.getElementById('start-date').value;
@@ -562,7 +563,7 @@ function exportReport(reportType) {
 
 function exportVehicleReport() {
     if (typeof window.fastagFeaturesEnabled !== 'undefined' && !window.fastagFeaturesEnabled) {
-        showAlert('FASTag analytics and reports are disabled. Please contact Onebee for pricing!', 'warning');
+        showAlert('FASTag analytics and reports are disabled. Please contact ' + window.COMPANY_NAME + ' for pricing!', 'warning');
         return;
     }
     const startDate = document.getElementById('start-date').value;
