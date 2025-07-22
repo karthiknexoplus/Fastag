@@ -108,6 +108,10 @@ existing_env['COMPANY_MOBILE'] = prompt_update('COMPANY_MOBILE', company_mobile,
 existing_env['COMPANY_EMAIL'] = prompt_update('COMPANY_EMAIL', company_email, 'Enter your company email (e.g. info@onebee.in): ')
 existing_env['COMPANY_WEBSITE'] = prompt_update('COMPANY_WEBSITE', company_website, 'Enter your company website (e.g. www.onebee.in): ')
 
+# --- Add logo filename variable ---
+logo_filename = existing_env.get('LOGO_FILENAME', '')
+existing_env['LOGO_FILENAME'] = prompt_update('LOGO_FILENAME', logo_filename, 'Enter your logo filename (e.g. logo.png): ')
+
 # Save all environment variables
 save_env_file(existing_env)
 
