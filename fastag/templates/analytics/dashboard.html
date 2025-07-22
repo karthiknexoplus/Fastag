@@ -981,26 +981,30 @@ function updateTables(data) {
     const readerHealthTable = document.getElementById('reader-health-table');
     if (data.reader_health) {
         readerHealthTable.innerHTML = data.reader_health.map(reader => {
+            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             const isHealthy = reader[4] > 0;
             // Convert UTC timestamp to IST for display
             let lastActivity = reader[5];
             if (lastActivity && lastActivity !== 'Never') {
                 try {
-                    // Try to parse as ISO or fallback to Date
                     let d = new Date(lastActivity);
-                    // If the string is not ISO, parse as 'YYYY-MM-DD HH:mm:ss'
                     if (isNaN(d.getTime()) && lastActivity.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
                         const [date, time] = lastActivity.split(' ');
                         const [year, month, day] = date.split('-');
                         const [hour, min, sec] = time.split(':');
                         d = new Date(Date.UTC(year, month - 1, day, hour, min, sec));
                     }
-                    // Convert to IST (UTC+5:30)
                     d.setMinutes(d.getMinutes() + 330);
                     lastActivity = d.toLocaleString('en-IN', { hour12: false });
                 } catch (e) {
                     // fallback to original string
                 }
+            }
+            let eventsCell = reader[4];
+            let lastActivityCell = lastActivity;
+            if (!fastagFeaturesEnabled) {
+                eventsCell = "<span style='color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing</span>";
+                lastActivityCell = "<span style='color:#764ba2;'><i class='fas fa-lock'></i> Contact Onebee for pricing</span>";
             }
             return `
                 <tr>
@@ -1008,8 +1012,8 @@ function updateTables(data) {
                     <td>${reader[1]}</td>
                     <td>${reader[2]}</td>
                     <td>${reader[3]}</td>
-                    <td>${reader[4]}</td>
-                    <td>${lastActivity}</td>
+                    <td>${eventsCell}</td>
+                    <td>${lastActivityCell}</td>
                     <td>
                         <span class="status-badge ${isHealthy ? 'status-granted' : 'status-denied'}">
                             ${isHealthy ? 'Healthy' : 'Inactive'}
