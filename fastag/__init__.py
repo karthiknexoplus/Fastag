@@ -192,5 +192,6 @@ def create_app():
             'COMPANY_EMAIL': os.environ.get('COMPANY_EMAIL', 'info@onebee.in'),
             'COMPANY_WEBSITE': os.environ.get('COMPANY_WEBSITE', 'www.onebee.in'),
             'LOGO_FILENAME': os.environ.get('LOGO_FILENAME', 'logo.png'),
+            'FAVICON_FILENAME': os.environ.get('FAVICON_FILENAME', 'favicon.ico'),
         }
     return app 

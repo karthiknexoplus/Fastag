@@ -112,6 +112,10 @@ existing_env['COMPANY_WEBSITE'] = prompt_update('COMPANY_WEBSITE', company_websi
 logo_filename = existing_env.get('LOGO_FILENAME', '')
 existing_env['LOGO_FILENAME'] = prompt_update('LOGO_FILENAME', logo_filename, 'Enter your logo filename (e.g. logo.png): ')
 
+# --- Add favicon filename variable ---
+favicon_filename = existing_env.get('FAVICON_FILENAME', '')
+existing_env['FAVICON_FILENAME'] = prompt_update('FAVICON_FILENAME', favicon_filename, 'Enter your favicon filename (e.g. favicon.ico): ')
+
 # Save all environment variables
 save_env_file(existing_env)
 
