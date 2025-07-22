@@ -72,11 +72,11 @@
                         <td><span class="badge fs-6" style="background: #764ba2; color: white; font-size:0.95em;">{{ r['mac_address'] }}</span></td>
                         <td>{{ r['reader_ip'] }}</td>
                         <td class="text-center">
-                            <a href="{{ url_for('readers.edit_reader', id=r['id']) }}" class="me-2" title="Edit" style="color: #764ba2;">
+                            <a href="{{ url_for('readers.edit_reader', id=r['id']) }}" class="me-2 edit-reader-btn" title="Edit" style="color: #764ba2;">
                                 <i class="fas fa-pen-to-square" style="font-size:1.05rem;"></i>
                             </a>
                             <form method="POST" action="{{ url_for('readers.delete_reader', id=r['id']) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline" title="Delete" onclick="return confirm('Delete this reader?');" style="color: #dc3545;">
+                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline delete-reader-btn" title="Delete" onclick="return confirm('Delete this reader?');" style="color: #dc3545;">
                                     <i class="fas fa-trash-alt" style="font-size:1.05rem;"></i>
                                 </button>
                             </form>
