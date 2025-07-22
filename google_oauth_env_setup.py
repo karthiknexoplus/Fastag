@@ -119,7 +119,36 @@ existing_env['FAVICON_FILENAME'] = prompt_update('FAVICON_FILENAME', favicon_fil
 # --- Add app title variable ---
 app_title = existing_env.get('APP_TITLE', '')
 print("\n=== App Title Setup ===\n")
-existing_env['APP_TITLE'] = prompt_update('APP_TITLE', app_title, 'Enter your app title (e.g. FASTag Parking): ')
+if app_title:
+    print(f"Existing APP_TITLE: {app_title}")
+    update = input("Do you want to update APP_TITLE? (y/n): ").lower().strip()
+    if update in ['y', 'yes']:
+        def confirm_value(val):
+            while True:
+                confirm = input(f"You entered: {val}\nIs this correct? (y/n): ").lower().strip()
+                if confirm in ['y', 'yes']:
+                    return val
+                elif confirm in ['n', 'no']:
+                    val = input('Enter your app title (e.g. FASTag Parking): ')
+                else:
+                    print("Please enter 'y' or 'n'.")
+        val = input('Enter your app title (e.g. FASTag Parking): ')
+        existing_env['APP_TITLE'] = confirm_value(val)
+    else:
+        print("✓ Keeping existing APP_TITLE")
+        existing_env['APP_TITLE'] = app_title
+else:
+    def confirm_value(val):
+        while True:
+            confirm = input(f"You entered: {val}\nIs this correct? (y/n): ").lower().strip()
+            if confirm in ['y', 'yes']:
+                return val
+            elif confirm in ['n', 'no']:
+                val = input('Enter your app title (e.g. FASTag Parking): ')
+            else:
+                print("Please enter 'y' or 'n'.")
+    val = input('Enter your app title (e.g. FASTag Parking): ')
+    existing_env['APP_TITLE'] = confirm_value(val)
 
 # Save all environment variables
 save_env_file(existing_env)
