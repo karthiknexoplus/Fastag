@@ -116,6 +116,10 @@ existing_env['LOGO_FILENAME'] = prompt_update('LOGO_FILENAME', logo_filename, 'E
 favicon_filename = existing_env.get('FAVICON_FILENAME', '')
 existing_env['FAVICON_FILENAME'] = prompt_update('FAVICON_FILENAME', favicon_filename, 'Enter your favicon filename (e.g. favicon.ico): ')
 
+# --- Add app title variable ---
+app_title = existing_env.get('APP_TITLE', '')
+existing_env['APP_TITLE'] = prompt_update('APP_TITLE', app_title, 'Enter your app title (e.g. FASTag Parking): ')
+
 # Save all environment variables
 save_env_file(existing_env)
 

@@ -193,5 +193,6 @@ def create_app():
             'COMPANY_WEBSITE': os.environ.get('COMPANY_WEBSITE', 'www.onebee.in'),
             'LOGO_FILENAME': os.environ.get('LOGO_FILENAME', 'logo.png'),
             'FAVICON_FILENAME': os.environ.get('FAVICON_FILENAME', 'favicon.ico'),
+            'APP_TITLE': os.environ.get('APP_TITLE', 'FASTag Parking'),
         }
     return app 
