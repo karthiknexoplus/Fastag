@@ -185,6 +185,7 @@
 </style>
 
 <script>
+window.COMPANY_NAME = "{{ COMPANY_NAME }}";
 document.addEventListener('DOMContentLoaded', function() {
     // Get the feature flag from the global variable in base.html
     var fastagFeaturesEnabled = typeof window.fastagFeaturesEnabled !== 'undefined' ? window.fastagFeaturesEnabled : true;
