@@ -124,6 +124,12 @@ def add_missing_columns():
 # Call this during initialization
 add_missing_columns()
 
+def fastag_mask(value):
+    """Mask a FASTag ID, e.g., 34161FA82032861412298640 -> 3*******************40"""
+    if not value or len(value) < 5:
+        return '*' * len(value)
+    return value[0] + '*' * (len(value) - 3) + value[-2:]
+
 def create_app():
     from fastag.rfid.relay_controller import RelayController  # updated import after moving class
     app = Flask(__name__, instance_relative_config=True)
@@ -166,6 +172,8 @@ def create_app():
     app.register_blueprint(challan_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
+    # Register Jinja filter for FASTag masking
+    app.jinja_env.filters['fastag_mask'] = fastag_mask
     @app.context_processor
     def inject_system_info():
         return {

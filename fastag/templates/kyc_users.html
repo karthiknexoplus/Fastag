@@ -93,10 +93,10 @@
     <div class="card p-3 shadow-sm border-0">
         <h5 class="mb-3">
             <i class="fas fa-list fastag-menu-icon"></i><span class="fastag-menu-label">KYC Users List (Total: {{ total_users }})</span>
-            <a href="{{ url_for('kyc_users.export_kyc_users_csv') }}" class="btn btn-outline-success btn-sm ms-2" title="Export as CSV">
+            <a href="{{ url_for('kyc_users.export_kyc_users_csv') }}" class="btn btn-outline-success btn-sm ms-2 export-btn" id="export-csv-btn" title="Export as CSV">
                 <i class="fas fa-file-csv"></i>
             </a>
-            <a href="{{ url_for('kyc_users.export_kyc_users_xlsx') }}" class="btn btn-outline-primary btn-sm ms-1" title="Export as Excel">
+            <a href="{{ url_for('kyc_users.export_kyc_users_xlsx') }}" class="btn btn-outline-primary btn-sm ms-1 export-btn" id="export-xlsx-btn" title="Export as Excel">
                 <i class="fas fa-file-excel"></i>
             </a>
         </h5>
@@ -116,7 +116,13 @@
                     {% for user in users %}
                     <tr>
                         <td>{{ user['name'] }}</td>
-                        <td>{{ user['fastag_id'] }}</td>
+                        <td>
+                            {% if not config.FASTAG_FEATURES_ENABLED %}
+                                {{ user['fastag_id']|fastag_mask }}
+                            {% else %}
+                                {{ user['fastag_id'] }}
+                            {% endif %}
+                        </td>
                         <td>{{ user['vehicle_number'] }}</td>
                         <td>{{ user['contact_number'] }}</td>
                         <td>{{ user['address'] }}</td>
@@ -266,6 +272,18 @@ document.addEventListener('DOMContentLoaded', function() {
     vehicleNumberInput.addEventListener('input', function() {
         vehicleFeedback.innerHTML = '';
     });
+
+    var fastagFeaturesEnabled = typeof window.fastagFeaturesEnabled !== 'undefined' ? window.fastagFeaturesEnabled : true;
+    if (!fastagFeaturesEnabled) {
+        document.getElementById('export-csv-btn').classList.add('disabled');
+        document.getElementById('export-csv-btn').setAttribute('tabindex', '-1');
+        document.getElementById('export-csv-btn').setAttribute('aria-disabled', 'true');
+        document.getElementById('export-csv-btn').setAttribute('title', 'Contact Onebee for pricing');
+        document.getElementById('export-xlsx-btn').classList.add('disabled');
+        document.getElementById('export-xlsx-btn').setAttribute('tabindex', '-1');
+        document.getElementById('export-xlsx-btn').setAttribute('aria-disabled', 'true');
+        document.getElementById('export-xlsx-btn').setAttribute('title', 'Contact Onebee for pricing');
+    }
 });
 </script>
 {% endblock %} 
