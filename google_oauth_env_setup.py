@@ -118,6 +118,7 @@ existing_env['FAVICON_FILENAME'] = prompt_update('FAVICON_FILENAME', favicon_fil
 
 # --- Add app title variable ---
 app_title = existing_env.get('APP_TITLE', '')
+print("\n=== App Title Setup ===\n")
 existing_env['APP_TITLE'] = prompt_update('APP_TITLE', app_title, 'Enter your app title (e.g. FASTag Parking): ')
 
 # Save all environment variables
