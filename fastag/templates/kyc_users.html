@@ -123,7 +123,13 @@
                                 {{ user['fastag_id'] }}
                             {% endif %}
                         </td>
-                        <td>{{ user['vehicle_number'] }}</td>
+                        <td>
+                            {% if not config.FASTAG_FEATURES_ENABLED %}
+                                {{ user['vehicle_number']|vehicle_mask }}
+                            {% else %}
+                                {{ user['vehicle_number'] }}
+                            {% endif %}
+                        </td>
                         <td>{{ user['contact_number'] }}</td>
                         <td>{{ user['address'] }}</td>
                         <td class="text-center">

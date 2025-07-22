@@ -130,6 +130,12 @@ def fastag_mask(value):
         return '*' * len(value)
     return value[0] + '*' * (len(value) - 3) + value[-2:]
 
+def vehicle_mask(value):
+    """Mask a vehicle number, e.g., TN66AT2938 -> T*******38"""
+    if not value or len(value) < 5:
+        return '*' * len(value)
+    return value[0] + '*' * (len(value) - 3) + value[-2:]
+
 def create_app():
     from fastag.rfid.relay_controller import RelayController  # updated import after moving class
     app = Flask(__name__, instance_relative_config=True)
@@ -172,8 +178,9 @@ def create_app():
     app.register_blueprint(challan_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
-    # Register Jinja filter for FASTag masking
+    # Register Jinja filters for FASTag and vehicle masking
     app.jinja_env.filters['fastag_mask'] = fastag_mask
+    app.jinja_env.filters['vehicle_mask'] = vehicle_mask
     @app.context_processor
     def inject_system_info():
         return {
