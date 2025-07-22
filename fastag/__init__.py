@@ -183,8 +183,13 @@ def create_app():
     app.jinja_env.filters['vehicle_mask'] = vehicle_mask
     @app.context_processor
     def inject_system_info():
+        import os
         return {
             'system_info': Markup(get_rpi_system_info()),
-            'config': app.config
+            'config': app.config,
+            'COMPANY_NAME': os.environ.get('COMPANY_NAME', 'Onebee Technology Pvt Ltd'),
+            'COMPANY_MOBILE': os.environ.get('COMPANY_MOBILE', '9500850000'),
+            'COMPANY_EMAIL': os.environ.get('COMPANY_EMAIL', 'info@onebee.in'),
+            'COMPANY_WEBSITE': os.environ.get('COMPANY_WEBSITE', 'www.onebee.in'),
         }
     return app 

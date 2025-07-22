@@ -199,7 +199,7 @@
         {% block content %}{% endblock %}
     </div>
     <footer class="footer mt-auto py-3 text-center" style="color: #888;">
-        Powered by Onebee Technology Pvt Ltd
+        Powered by {{ COMPANY_NAME }}
         {% if system_info %}
         <div style="font-size:0.95em; margin-top:6px; text-align:center; letter-spacing:0.5px;">
             {{ system_info|safe }}
@@ -234,15 +234,16 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header" style="background: #764ba2; color: white;">
-            <h5 class="modal-title" id="contactModalLabel"><i class="fas fa-info-circle me-2"></i>Contact Onebee Technology Pvt Ltd</h5>
+            <h5 class="modal-title" id="contactModalLabel"><i class="fas fa-info-circle me-2"></i>Contact {{ COMPANY_NAME }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
             <p style="font-size: 1.15rem; color: #764ba2;">
               <i class="fas fa-phone-alt fa-2x mb-3"></i><br/>
-              Please contact <b>Onebee</b> for pricing and feature access!<br/>
-              <span style="font-size:0.95em; color:#555;">Mobile: <a href="tel:9500850000">9500850000</a></span><br/>
-              <span style="font-size:0.95em; color:#555;">Website: <a href="https://www.onebee.in" target="_blank">www.onebee.in</a></span>
+              Please contact <b>{{ COMPANY_NAME }}</b> for pricing and feature access!<br/>
+              <span style="font-size:0.95em; color:#555;">Mobile: <a href="tel:{{ COMPANY_MOBILE }}">{{ COMPANY_MOBILE }}</a></span><br/>
+              <span style="font-size:0.95em; color:#555;">Email: <a href="mailto:{{ COMPANY_EMAIL }}">{{ COMPANY_EMAIL }}</a></span><br/>
+              <span style="font-size:0.95em; color:#555;">Website: <a href="https://{{ COMPANY_WEBSITE }}" target="_blank">{{ COMPANY_WEBSITE }}</a></span>
             </p>
           </div>
           <div class="modal-footer">

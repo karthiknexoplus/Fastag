@@ -72,6 +72,31 @@ else:
     existing_env['FASTAG_FEATURES_ENABLED'] = fastag_enabled
     print("✓ FASTag feature flag added!")
 
+# --- Add company info variables ---
+company_name = existing_env.get('COMPANY_NAME', '')
+company_mobile = existing_env.get('COMPANY_MOBILE', '')
+company_email = existing_env.get('COMPANY_EMAIL', '')
+company_website = existing_env.get('COMPANY_WEBSITE', '')
+
+print("\n=== Company Info Setup ===\n")
+
+def prompt_update(var_name, current_value, prompt_text):
+    if current_value:
+        print(f"Existing {var_name}: {current_value}")
+        update = input(f"Do you want to update {var_name}? (y/n): ").lower().strip()
+        if update in ['y', 'yes']:
+            return input(prompt_text)
+        else:
+            print(f"✓ Keeping existing {var_name}")
+            return current_value
+    else:
+        return input(prompt_text)
+
+existing_env['COMPANY_NAME'] = prompt_update('COMPANY_NAME', company_name, 'Enter your company name (e.g. Onebee Technology Pvt Ltd): ')
+existing_env['COMPANY_MOBILE'] = prompt_update('COMPANY_MOBILE', company_mobile, 'Enter your company mobile number (e.g. 9500850000): ')
+existing_env['COMPANY_EMAIL'] = prompt_update('COMPANY_EMAIL', company_email, 'Enter your company email (e.g. info@onebee.in): ')
+existing_env['COMPANY_WEBSITE'] = prompt_update('COMPANY_WEBSITE', company_website, 'Enter your company website (e.g. www.onebee.in): ')
+
 # Save all environment variables
 save_env_file(existing_env)
 

@@ -108,9 +108,9 @@
 {% block content %}
 <div id="fastag-disabled-message" style="display:none;" class="alert alert-warning text-center fw-bold my-4">
     <i class="fas fa-lock fa-lg me-2"></i>
-    FASTag analytics and reports are disabled. Please contact <b>Onebee</b> for pricing and feature access!<br>
-    <span style="font-size:0.95em; color:#555;">Mobile: <a href="tel:9500850000">9500850000</a></span> |
-    <span style="font-size:0.95em; color:#555;">Website: <a href="https://www.onebee.in" target="_blank">www.onebee.in</a></span>
+    FASTag analytics and reports are disabled. Please contact <b>{{ COMPANY_NAME }}</b> for pricing and feature access!<br>
+    <span style="font-size:0.95em; color:#555;">Mobile: <a href="tel:{{ COMPANY_MOBILE }}">{{ COMPANY_MOBILE }}</a></span> |
+    <span style="font-size:0.95em; color:#555;">Website: <a href="https://{{ COMPANY_WEBSITE }}" target="_blank">{{ COMPANY_WEBSITE }}</a></span>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
