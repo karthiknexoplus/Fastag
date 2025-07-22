@@ -81,16 +81,27 @@ company_website = existing_env.get('COMPANY_WEBSITE', '')
 print("\n=== Company Info Setup ===\n")
 
 def prompt_update(var_name, current_value, prompt_text):
+    def confirm_value(val):
+        while True:
+            confirm = input(f"You entered: {val}\nIs this correct? (y/n): ").lower().strip()
+            if confirm in ['y', 'yes']:
+                return val
+            elif confirm in ['n', 'no']:
+                val = input(prompt_text)
+            else:
+                print("Please enter 'y' or 'n'.")
     if current_value:
         print(f"Existing {var_name}: {current_value}")
         update = input(f"Do you want to update {var_name}? (y/n): ").lower().strip()
         if update in ['y', 'yes']:
-            return input(prompt_text)
+            val = input(prompt_text)
+            return confirm_value(val)
         else:
             print(f"✓ Keeping existing {var_name}")
             return current_value
     else:
-        return input(prompt_text)
+        val = input(prompt_text)
+        return confirm_value(val)
 
 existing_env['COMPANY_NAME'] = prompt_update('COMPANY_NAME', company_name, 'Enter your company name (e.g. Onebee Technology Pvt Ltd): ')
 existing_env['COMPANY_MOBILE'] = prompt_update('COMPANY_MOBILE', company_mobile, 'Enter your company mobile number (e.g. 9500850000): ')
