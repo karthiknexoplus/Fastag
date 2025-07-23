@@ -424,3 +424,31 @@ def get_all_data():
     except Exception as e:
         logger.error(f"Error in /api/all_data: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500 
+
+@api.route('/relay-status', methods=['GET'])
+def relay_status():
+    """
+    Returns the real-time status of the 3 relays (GPIO 26, 20, 21) as ON/OFF.
+    """
+    try:
+        relay_controller = current_app.relay_controller
+        pins = relay_controller.pins  # [26, 20, 21]
+        try:
+            import RPi.GPIO as GPIO
+            GPIO_AVAILABLE = True
+        except ImportError:
+            GPIO_AVAILABLE = False
+        status = {}
+        if GPIO_AVAILABLE:
+            for idx, pin in enumerate(pins):
+                # Active-low: LOW (0) = ON, HIGH (1) = OFF
+                value = GPIO.input(pin)
+                status[f"relay{idx+1}"] = "ON" if value == 0 else "OFF"
+        else:
+            # If not on Pi, simulate status
+            for idx in range(3):
+                status[f"relay{idx+1}"] = "UNKNOWN"
+        return jsonify({"success": True, "status": status}), 200
+    except Exception as e:
+        logger.error(f"Error in /api/relay-status: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500 

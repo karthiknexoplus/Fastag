@@ -291,6 +291,32 @@
                 </div>
             </div>
         </div>
+        <!-- Barrier Status Card -->
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body text-center">
+                    <div class="stats-label mb-2">Barrier Status</div>
+                    <div class="d-flex justify-content-center align-items-center mb-2" id="barrier-status-icons">
+                        <div class="mx-2 text-center">
+                            <i id="relay1-icon" class="fas fa-toggle-on fa-2x" style="color: #aaa;"></i><br>
+                            <small>Relay 1</small>
+                            <button class="btn btn-sm btn-outline-secondary mt-1" onclick="refreshRelayStatus(1)"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div class="mx-2 text-center">
+                            <i id="relay2-icon" class="fas fa-toggle-on fa-2x" style="color: #aaa;"></i><br>
+                            <small>Relay 2</small>
+                            <button class="btn btn-sm btn-outline-secondary mt-1" onclick="refreshRelayStatus(2)"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div class="mx-2 text-center">
+                            <i id="relay3-icon" class="fas fa-toggle-on fa-2x" style="color: #aaa;"></i><br>
+                            <small>Relay 3</small>
+                            <button class="btn btn-sm btn-outline-secondary mt-1" onclick="refreshRelayStatus(3)"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm mt-2" onclick="refreshRelayStatus()"><i class="fas fa-sync-alt"></i> Refresh All</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- FASTag vs Non-FASTag Pie Chart, Overstayed Vehicles, Unique Vehicles, Entry/Exit Trend -->
@@ -463,6 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     loadAnalyticsData();
     loadDeniedFastagActivityFeed();
+    refreshRelayStatus(); // Initial load for barrier status
     // Removed all setInterval auto-refreshes for analytics and feeds
 });
 
@@ -1266,6 +1293,47 @@ function showTotalEventsTodayDetails() {
             document.getElementById('totalEventsTodayModalBody').innerHTML = 
                 '<p class="text-center text-danger">Error loading data. Please try again.</p>';
             modal.show();
+        });
+}
+
+function setRelayIcon(relayNum, status) {
+    var icon = document.getElementById('relay' + relayNum + '-icon');
+    if (!icon) return;
+    if (status === 'ON') {
+        icon.className = 'fas fa-toggle-on fa-2x';
+        icon.style.color = '#28a745';
+    } else if (status === 'OFF') {
+        icon.className = 'fas fa-toggle-off fa-2x';
+        icon.style.color = '#dc3545';
+    } else {
+        icon.className = 'fas fa-question fa-2x';
+        icon.style.color = '#aaa';
+    }
+}
+function refreshRelayStatus(relayNum) {
+    fetch('/api/relay-status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.status) {
+                for (let i = 1; i <= 3; i++) {
+                    if (!relayNum || relayNum === i) {
+                        setRelayIcon(i, data.status['relay' + i]);
+                    }
+                }
+            } else {
+                for (let i = 1; i <= 3; i++) {
+                    if (!relayNum || relayNum === i) {
+                        setRelayIcon(i, 'UNKNOWN');
+                    }
+                }
+            }
+        })
+        .catch(() => {
+            for (let i = 1; i <= 3; i++) {
+                if (!relayNum || relayNum === i) {
+                    setRelayIcon(i, 'UNKNOWN');
+                }
+            }
         });
 }
 </script>
