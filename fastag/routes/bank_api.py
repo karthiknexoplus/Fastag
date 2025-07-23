@@ -2,10 +2,11 @@ from flask import Blueprint, request, Response
 import logging
 import xml.etree.ElementTree as ET
 from signxml import XMLVerifier
-from fastag.bank_client import send_sync_time
+from fastag.bank_client import send_sync_time, parse_sync_time_response
 import json
 from fastag.pay_error_codes import PAY_ERROR_CODES
 from flask import Blueprint, render_template, request
+from datetime import datetime
 
 bank_api = Blueprint('bank_api', __name__)
 banking = Blueprint('banking', __name__)
@@ -135,7 +136,29 @@ def exception_response():
 
 @banking.route('/banking/sync_time', methods=['GET', 'POST'])
 def sync_time():
-    return render_template('banking/sync_time.html')
+    response = None
+    orgId = 'PGSH'
+    msgId = 'AUTO'
+    ts = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    if request.method == 'POST':
+        orgId = request.form.get('orgId', 'PGSH')
+        msgId = request.form.get('msgId', 'AUTO')
+        ts = request.form.get('ts', ts)
+        # If msgId or ts is AUTO, generate them
+        if msgId == 'AUTO':
+            msgId = datetime.now().strftime('%Y%m%d%H%M%S')
+        if ts == 'AUTO':
+            ts = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        # Call bank_client to send SyncTime
+        result = send_sync_time('1.0', orgId, msgId)
+        # Show parsed response in a user-friendly way
+        if isinstance(result, dict):
+            response = "<b>Sync Time Response:</b><br>"
+            for k, v in result.items():
+                response += f"<b>{k}:</b> {v}<br>"
+        else:
+            response = result
+    return render_template('banking/sync_time.html', orgId=orgId, msgId=msgId, ts=ts, response=response)
 
 @banking.route('/banking/tag_details', methods=['GET', 'POST'])
 def tag_details():

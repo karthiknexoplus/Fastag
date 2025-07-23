@@ -951,18 +951,18 @@ def build_pay_request(
             return 'T' + lane_id[3:]
         return lane_id
     # Lane
-    etree.SubElement(plaza, 'Lane', {
-        'direction': lane['direction'],
-        'id': lane['id'],
+        etree.SubElement(plaza, 'Lane', {
+            'direction': lane['direction'],
+            'id': lane['id'],
         'readerId': get_short_reader_id(lane['id']),
         'Status': lane.get('Status', 'OPEN'),
         'Mode': lane.get('Mode', 'NORMAL'),
         'laneType': lane.get('laneType', 'Hybrid'),
         'ExitGate': get_short_reader_id(lane['id']),
         'Floor': lane.get('Floor', '1')
-    })
+        })
     # EntryLane
-    etree.SubElement(plaza, 'EntryLane', {
+        etree.SubElement(plaza, 'EntryLane', {
         'direction': entry_lane['direction'],
         'id': entry_lane['id'],
         'readerId': get_short_reader_id(entry_lane['id']),
@@ -971,7 +971,7 @@ def build_pay_request(
         'laneType': entry_lane.get('laneType', 'Hybrid'),
         'EntryGate': get_short_reader_id(entry_lane['id']),
         'Floor': entry_lane.get('Floor', '1')
-    })
+            })
     # ReaderVerificationResult
     rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
         'publicKeyCVV': '',
