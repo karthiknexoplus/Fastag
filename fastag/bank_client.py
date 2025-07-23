@@ -1804,8 +1804,8 @@ if __name__ == '__main__':
             # Prompt for entry and exit lanes ONLY (remove old 'Select Lane' block)
             print('Select Entry Lane:')
             entry_lane_options = [
-                {'id': 'IN01', 'direction': 'N', 'readerId': 'N01'},
-                {'id': 'IN02', 'direction': 'N', 'readerId': 'N02'},
+                {'id': 'IN01', 'direction': 'N', 'readerId': '1'},
+                {'id': 'IN02', 'direction': 'N', 'readerId': '2'},
             ]
             for idx, lane in enumerate(entry_lane_options, 1):
                 print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
@@ -1817,8 +1817,8 @@ if __name__ == '__main__':
 
             print('Select Exit Lane:')
             exit_lane_options = [
-                {'id': 'OUT01', 'direction': 'S', 'readerId': 'T03'},
-                {'id': 'OUT02', 'direction': 'S', 'readerId': 'T04'},
+                {'id': 'OUT01', 'direction': 'S', 'readerId': '3'},
+                {'id': 'OUT02', 'direction': 'S', 'readerId': '4'},
             ]
             for idx, lane in enumerate(exit_lane_options, 1):
                 print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
