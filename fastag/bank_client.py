@@ -1819,8 +1819,6 @@ if __name__ == '__main__':
             exit_lane_options = [
                 {'id': 'OUT01', 'direction': 'S', 'readerId': 'T03'},
                 {'id': 'OUT02', 'direction': 'S', 'readerId': 'T04'},
-                {'id': 'OUT03', 'direction': 'S', 'readerId': 'T03'},
-                {'id': 'OUT04', 'direction': 'S', 'readerId': 'T04'},
             ]
             for idx, lane in enumerate(exit_lane_options, 1):
                 print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
