@@ -2,7 +2,7 @@ from flask import Blueprint, request, Response
 import logging
 import xml.etree.ElementTree as ET
 from signxml import XMLVerifier
-from fastag.bank_client import send_sync_time, parse_sync_time_response, send_tag_details, parse_tag_details_response, API_URLS
+from fastag.bank_client import send_sync_time, parse_sync_time_response, send_tag_details, parse_tag_details_response, API_URLS, send_heartbeat
 import json
 from fastag.pay_error_codes import PAY_ERROR_CODES
 from flask import Blueprint, render_template, request
@@ -185,7 +185,49 @@ def tag_details():
 
 @banking.route('/banking/heartbeat', methods=['GET', 'POST'])
 def heartbeat():
-    return render_template('banking/heartbeat.html')
+    response = None
+    static = API_URLS.get('STATIC', {}) if hasattr(API_URLS, 'get') else {}
+    orgId = static.get('org_id', 'PGSH')
+    plazaId = static.get('plaza_id', '712764')
+    acquirerId = static.get('acquirer_id', '727274')
+    agencyId = static.get('agency_id', 'TCABO')
+    plazaGeoCode = static.get('plaza_geo_code', '11.0185,76.9778')
+    if request.method == 'POST':
+        orgId = request.form.get('orgId', orgId)
+        plazaId = request.form.get('plazaId', plazaId)
+        acquirerId = request.form.get('acquirerId', acquirerId)
+        agencyId = request.form.get('agencyId', agencyId)
+        plazaGeoCode = request.form.get('plazaGeoCode', plazaGeoCode)
+        # Build plaza_info and lanes from config/static
+        plaza_info = {
+            'geoCode': plazaGeoCode,
+            'id': plazaId,
+            'name': static.get('plaza_name', ''),
+            'subtype': 'Covered',
+            'type': 'Parking',
+            'address': '',
+            'fromDistrict': '',
+            'toDistrict': '',
+            'agencyCode': agencyId
+        }
+        lanes = static.get('lanes', [
+            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
+        ])
+        # Call bank_client to send Heartbeat
+        try:
+            result = send_heartbeat(msgId=datetime.now().strftime('%Y%m%d%H%M%S'), orgId=orgId, acquirer_id=acquirerId, plaza_info=plaza_info, lanes=lanes)
+            if isinstance(result, dict):
+                response = "<b>Heartbeat Response:</b><br>"
+                for k, v in result.items():
+                    response += f"<b>{k}:</b> {v}<br>"
+            else:
+                response = result
+        except Exception as e:
+            response = f"<b>Error:</b> {e}"
+    return render_template('banking/heartbeat.html', orgId=orgId, plazaId=plazaId, acquirerId=acquirerId, agencyId=agencyId, plazaGeoCode=plazaGeoCode, response=response)
 
 @banking.route('/banking/query_exception', methods=['GET', 'POST'])
 def query_exception():
