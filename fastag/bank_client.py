@@ -583,7 +583,7 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
     xml_str = xml_bytes.decode('utf-8').replace("<?xml version='1.0' encoding='utf-8'?>", '<?xml version="1.0" encoding="UTF-8"?>')
     return xml_str.encode('utf-8')
 
-def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=None, meta=None, signature_placeholder='...'):
+def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=None, meta=None, signature_placeholder='...', txn_id=None):
     # Set defaults as per user-provided details
     if orgId is None:
         orgId = 'PGSH'
@@ -609,7 +609,8 @@ def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=N
             {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ]
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    txn_id = str(uuid.uuid4())[:22]
+    if txn_id is None:
+        txn_id = str(uuid.uuid4())[:22]
     xml_data = build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, lanes, meta, signature_placeholder)
     url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq'
     headers = {'Content-Type': 'application/xml'}
@@ -633,10 +634,10 @@ def send_heartbeat(msgId, orgId=None, acquirer_id=None, plaza_info=None, lanes=N
         print("[HEARTBEAT] Parsed Response:")
         for k, v in parsed.items():
             print(f"  {k}: {v}")
-        return response.content
+        return parsed
     except Exception as e:
         print('[HEARTBEAT] Error sending Heart Beat request:', e)
-        return None
+        return {'error': str(e)}
 
 def parse_heartbeat_response(xml_response):
     try:
