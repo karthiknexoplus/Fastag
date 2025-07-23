@@ -522,13 +522,11 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
         'type': plaza_info.get('type', '')
     })
     for lane in lanes:
-        # Map EntryGate/ExitGate based on lane id
         entry_gate_map = {'IN01': '1', 'IN02': '2'}
         exit_gate_map = {'OUT01': '1', 'OUT02': '2'}
-        # Lane (Exit): OUT01/OUT02
         if lane['id'].startswith('OUT'):
             exit_gate = exit_gate_map.get(lane['id'], '1')
-            etree.SubElement(plaza, 'Lane', {
+            ET.SubElement(plaza, 'Lane', {
                 'direction': lane['direction'],
                 'id': lane['id'],
                 'readerId': lane['readerId'],
@@ -538,9 +536,8 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
                 'ExitGate': exit_gate,
                 'Floor': '1'
             })
-        # Lane (Entry): IN01/IN02
         else:
-            etree.SubElement(plaza, 'Lane', {
+            ET.SubElement(plaza, 'Lane', {
                 'direction': lane['direction'],
                 'id': lane['id'],
                 'readerId': lane['readerId'],
@@ -550,10 +547,9 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
                 'ExitGate': '',
                 'Floor': '1'
             })
-        # EntryLane: always set EntryGate for IN01/IN02
         if lane['id'].startswith('IN'):
             entry_gate = entry_gate_map.get(lane['id'], '1')
-            etree.SubElement(plaza, 'EntryLane', {
+            ET.SubElement(plaza, 'EntryLane', {
                 'direction': lane['direction'],
                 'id': lane['id'],
                 'readerId': lane['readerId'],
@@ -564,7 +560,7 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
                 'Floor': '1'
             })
         else:
-            etree.SubElement(plaza, 'EntryLane', {
+            ET.SubElement(plaza, 'EntryLane', {
                 'direction': lane['direction'],
                 'id': lane['id'],
                 'readerId': lane['readerId'],
@@ -576,7 +572,6 @@ def build_heartbeat_request(msgId, orgId, ts, txn_id, acquirer_id, plaza_info, l
             })
     signature = ET.SubElement(root, 'Signature')
     signature.text = signature_placeholder
-    # Add XML declaration and force encoding to UTF-8 (uppercase)
     xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
     xml_str = xml_bytes.decode('utf-8').replace("<?xml version='1.0' encoding='utf-8'?>", '<?xml version="1.0" encoding="UTF-8"?>')
     return xml_str.encode('utf-8')
