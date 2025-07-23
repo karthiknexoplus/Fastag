@@ -2,6 +2,7 @@ from flask import Blueprint, request, Response
 import logging
 from fastag.bank_client import parse_pay_response
 from lxml import etree
+from fastag.bank_client import parse_heartbeat_response
 
 bank_callbacks = Blueprint('bank_callbacks', __name__)
 
@@ -57,5 +58,24 @@ def exception_response():
     xml_data = request.data.decode('utf-8')
     logging.info(f"Received Exception List callback: {xml_data}")
     # TODO: Parse XML, validate, and process the exception list as needed
+    ack_xml = '<Ack>OK</Ack>'
+    return Response(ack_xml, mimetype='application/xml')
+
+@bank_callbacks.route('/api/bank/heartbeat_response', methods=['POST'])
+def heartbeat_response():
+    xml_data = request.data.decode('utf-8')
+    logging.info(f"Received Heartbeat Response callback: {xml_data}")
+    try:
+        parsed = parse_heartbeat_response(xml_data)
+        neat_output = [
+            f"Heartbeat Response Parsed:",
+        ]
+        for k, v in parsed.items():
+            neat_output.append(f"  {k}: {v}")
+        logging.info('\n'.join(neat_output))
+        print('\n'.join(neat_output))
+    except Exception as e:
+        logging.error(f"Error parsing Heartbeat Response XML: {e}")
+        print(f"Error parsing Heartbeat Response XML: {e}")
     ack_xml = '<Ack>OK</Ack>'
     return Response(ack_xml, mimetype='application/xml') 
