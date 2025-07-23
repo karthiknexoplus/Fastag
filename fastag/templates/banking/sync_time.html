@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Sync Time - Banking{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Sync Time</h2>
+  <form method="post">
+    <div class="mb-3">
+      <label for="orgId" class="form-label">Org ID</label>
+      <input type="text" class="form-control" id="orgId" name="orgId" value="PGSH">
+    </div>
+    <div class="mb-3">
+      <label for="msgId" class="form-label">Message ID</label>
+      <input type="text" class="form-control" id="msgId" name="msgId" value="AUTO">
+    </div>
+    <div class="mb-3">
+      <label for="ts" class="form-label">Timestamp</label>
+      <input type="text" class="form-control" id="ts" name="ts" value="AUTO">
+    </div>
+    <button type="submit" class="btn btn-primary">Send Sync Time</button>
+  </form>
+  <hr>
+  <h5>Response</h5>
+  <div id="response">
+    {% if response %}
+      <pre>{{ response|safe }}</pre>
+    {% endif %}
+  </div>
+</div>
+{% endblock %} 

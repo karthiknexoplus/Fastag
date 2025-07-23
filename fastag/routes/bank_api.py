@@ -5,8 +5,10 @@ from signxml import XMLVerifier
 from fastag.bank_client import send_sync_time
 import json
 from fastag.pay_error_codes import PAY_ERROR_CODES
+from flask import Blueprint, render_template, request
 
 bank_api = Blueprint('bank_api', __name__)
+banking = Blueprint('banking', __name__)
 
 def parse_and_log_xml(endpoint_name):
     xml_data = request.data.decode('utf-8')
@@ -129,4 +131,32 @@ def exception_response():
     xml_data, root = parse_and_log_xml('Exception List')
     # TODO: Parse XML, validate, and process Exception List
     ack_xml = '<Ack>OK</Ack>'
-    return Response(ack_xml, mimetype='application/xml') 
+    return Response(ack_xml, mimetype='application/xml')
+
+@banking.route('/banking/sync_time', methods=['GET', 'POST'])
+def sync_time():
+    return render_template('banking/sync_time.html')
+
+@banking.route('/banking/tag_details', methods=['GET', 'POST'])
+def tag_details():
+    return render_template('banking/tag_details.html')
+
+@banking.route('/banking/heartbeat', methods=['GET', 'POST'])
+def heartbeat():
+    return render_template('banking/heartbeat.html')
+
+@banking.route('/banking/query_exception', methods=['GET', 'POST'])
+def query_exception():
+    return render_template('banking/query_exception.html')
+
+@banking.route('/banking/request_pay', methods=['GET', 'POST'])
+def request_pay():
+    return render_template('banking/request_pay.html')
+
+@banking.route('/banking/response_pay', methods=['GET', 'POST'])
+def response_pay():
+    return render_template('banking/response_pay.html')
+
+@banking.route('/banking/transaction_status', methods=['GET', 'POST'])
+def transaction_status():
+    return render_template('banking/transaction_status.html') 

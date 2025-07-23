@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Response Pay - Banking{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Response Pay</h2>
+  <hr>
+  <h5>Response</h5>
+  <div id="response">
+    {% if response %}
+      <pre>{{ response|safe }}</pre>
+    {% endif %}
+  </div>
+</div>
+{% endblock %} 
