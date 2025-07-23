@@ -1806,22 +1806,7 @@ if __name__ == '__main__':
                 TID = input('Enter TID: ').strip()
                 vehicleRegNo = input('Enter vehicleRegNo: ').strip()
                 avc = input('Enter avc (number, e.g. 7): ').strip()
-            # Prompt for lane/reader/direction (reuse Heart Beat logic)
-            print('Select Lane:')
-            lane_options = [
-                {'id': 'IN01', 'direction': 'N', 'readerId': '1'},
-                {'id': 'IN02', 'direction': 'N', 'readerId': '2'},
-                {'id': 'OUT01', 'direction': 'S', 'readerId': '3'},
-                {'id': 'OUT02', 'direction': 'S', 'readerId': '4'},
-            ]
-            for idx, lane in enumerate(lane_options, 1):
-                print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
-            lane_sel = input(f"Enter 1-{len(lane_options)}: ").strip()
-            if lane_sel.isdigit() and 1 <= int(lane_sel) <= len(lane_options):
-                lane = lane_options[int(lane_sel)-1]
-            else:
-                lane = lane_options[0]
-            # Prompt for entry and exit lanes
+            # Prompt for entry and exit lanes ONLY (remove old 'Select Lane' block)
             print('Select Entry Lane:')
             entry_lane_options = [
                 {'id': 'IN01', 'direction': 'N', 'readerId': 'N01'},
