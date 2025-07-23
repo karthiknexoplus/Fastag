@@ -13,6 +13,7 @@ import random
 import xml.dom.minidom
 from uuid import uuid4
 from collections import defaultdict
+import json
 
 app = Flask(__name__)
 
@@ -137,11 +138,17 @@ UAT_TAGS = [
 # Global dictionary to track last used ts per tagId
 last_ts_per_tag = defaultdict(lambda: None)
 
-def get_bank_url():
-    if BANK_ENV.upper() == 'PROD':
-        return PROD_URL
-    return UAT_URL
+# Load API URLs from certs/bank_api_urls.json
+with open('certs/bank_api_urls.json', 'r') as f:
+    BANK_API_URLS = json.load(f)
+API_ENV = os.getenv('BANK_API_ENV', 'UAT').upper()
+API_URLS = BANK_API_URLS.get(API_ENV, BANK_API_URLS['UAT'])
 
+# Example usage:
+# API_URLS['sync_time_url'], API_URLS['pay_url'], etc.
+
+def get_bank_url():
+    return API_URLS['sync_time_url']
 
 def build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder='...'):
     root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
