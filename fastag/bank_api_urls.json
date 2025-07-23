@@ -1,0 +1,40 @@
+{
+  "UAT": {
+    "sync_time_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqSyncTime",
+    "tag_details_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails",
+    "check_txn_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqChkTxn",
+    "heartbeat_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq",
+    "pay_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqPay",
+    "query_exception_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqQueryExceptionList",
+    "violation_audit_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ViolationAuditDetails",
+    "cash_detail_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqCashDetail",
+    "iin_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/listParticipant",
+    "tag_details_v2_url": "https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails/v2"
+  },
+  "PROD": {
+    "sync_time_url": "",
+    "tag_details_url": "",
+    "check_txn_url": "",
+    "heartbeat_url": "",
+    "pay_url": "",
+    "query_exception_url": "",
+    "violation_audit_url": "",
+    "cash_detail_url": "",
+    "iin_url": "",
+    "tag_details_v2_url": ""
+  },
+  "STATIC": {
+    "org_id": "PGSH",
+    "plaza_id": "712764",
+    "agency_id": "TCABO",
+    "acquirer_id": "727274",
+    "plaza_geo_code": "11.0185,76.9778",
+    "plaza_name": "PGS hospital",
+    "lanes": [
+      {"id": "IN01", "type": "Hybrid", "desc": "Entry 1", "direction": "N"},
+      {"id": "IN02", "type": "Hybrid", "desc": "Entry 2", "direction": "N"},
+      {"id": "OUT01", "type": "Hybrid", "desc": "Exit 1", "direction": "S"},
+      {"id": "OUT02", "type": "Hybrid", "desc": "Exit 2", "direction": "S"}
+    ]
+  }
+} 
