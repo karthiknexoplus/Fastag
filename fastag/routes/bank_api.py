@@ -235,7 +235,31 @@ def heartbeat():
 
 @banking.route('/banking/query_exception', methods=['GET', 'POST'])
 def query_exception():
-    return render_template('banking/query_exception.html')
+    response = None
+    orgId = 'PGSH'
+    if request.method == 'POST':
+        orgId = request.form.get('orgId', 'PGSH')
+        # Prepare a default exception list (can be enhanced to take user input)
+        from datetime import datetime, timezone
+        now_utc = datetime.now(timezone.utc)
+        recent_fetch_time = now_utc.strftime('%Y-%m-%dT%H:%M:%S')
+        exception_list = [
+            {'excCode': '01', 'lastFetchTime': recent_fetch_time},
+            {'excCode': '02', 'lastFetchTime': recent_fetch_time}
+        ]
+        try:
+            from fastag.bank_client import send_query_exception_list
+            msgId = datetime.now().strftime('%Y%m%d%H%M%S') + 'EXC'
+            result = send_query_exception_list(msgId, orgId, exception_list)
+            if isinstance(result, dict):
+                response = "<b>Query Exception Response:</b><br>"
+                for k, v in result.items():
+                    response += f"<b>{k}:</b> {v}<br>"
+            else:
+                response = result
+        except Exception as e:
+            response = f"<b>Error:</b> {e}"
+    return render_template('banking/query_exception.html', orgId=orgId, response=response)
 
 @banking.route('/banking/request_pay', methods=['GET', 'POST'])
 def request_pay():

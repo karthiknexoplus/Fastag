@@ -1,21 +1,27 @@
 {% extends 'base.html' %}
 {% block title %}Query Exception - Banking{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <h2>Query Exception</h2>
-  <form method="post">
-    <div class="mb-3">
-      <label for="orgId" class="form-label">Org ID</label>
-      <input type="text" class="form-control" id="orgId" name="orgId" value="PGSH">
+<div class="container mt-5" style="max-width: 400px;">
+  <div class="card shadow-sm">
+    <div class="card-body text-center">
+      <h4 class="card-title mb-4"><i class="fas fa-exclamation-circle me-2"></i>Query Exception</h4>
+      <form method="post" autocomplete="off">
+        <button type="submit" class="btn btn-primary btn-lg w-100"><i class="fas fa-paper-plane me-1"></i>Send Query Exception</button>
+      </form>
+      {% if response %}
+      <div class="alert alert-info mt-4" role="alert">
+        {{ response|safe }}
+      </div>
+      {% endif %}
     </div>
-    <button type="submit" class="btn btn-primary">Send Query Exception</button>
-  </form>
-  <hr>
-  <h5>Response</h5>
-  <div id="response">
-    {% if response %}
-      <pre>{{ response|safe }}</pre>
-    {% endif %}
+  </div>
+  <div class="text-center text-muted mt-4" style="font-size: 0.95em;">
+    Powered by Onebee Technology Pvt Ltd<br>
+    Temp: N/A  |  Volt: N/A | Throttled: N/A | Uptime: up 4 hours, 49 minutes | RAM: 504Mi used / 914Mi total | Disk: 3.5G used / 6.8G total (52% full)
+    <hr>
+    Please contact <b>Onebee</b> for pricing and feature access!<br>
+    Mobile: 9500850000<br>
+    Website: <a href="https://www.onebee.in" target="_blank">www.onebee.in</a>
   </div>
 </div>
 {% endblock %} 
