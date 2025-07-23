@@ -216,9 +216,13 @@ def heartbeat():
             {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
             {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
         ])
+        # Generate valid msgId and txn_id (timestamp + 'HBRQ')
+        now = datetime.now()
+        msgId = now.strftime('%Y%m%d%H%M%S') + 'HBRQ'
+        txn_id = msgId
         # Call bank_client to send Heartbeat
         try:
-            result = send_heartbeat(msgId=datetime.now().strftime('%Y%m%d%H%M%S'), orgId=orgId, acquirer_id=acquirerId, plaza_info=plaza_info, lanes=lanes)
+            result = send_heartbeat(msgId=msgId, orgId=orgId, acquirer_id=acquirerId, plaza_info=plaza_info, lanes=lanes, meta=None, signature_placeholder='...', txn_id=txn_id)
             if isinstance(result, dict):
                 response = "<b>Heartbeat Response:</b><br>"
                 for k, v in result.items():
