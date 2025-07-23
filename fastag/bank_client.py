@@ -1847,9 +1847,12 @@ if __name__ == '__main__':
             }
             now = datetime.now()
             ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-            msgId = now.strftime('%Y%m%d%H%M%S%f')[:26]
-            txnId = now.strftime('%Y%m%d%H%M%S%f')[:21]
-            entry_txn_id = txnId
+            date_str = now.strftime('%y%m%d%H%M%S')  # YYMMDDhhmmss
+            plaza_id = plaza_info['id']
+            lane_reader_id = lane['readerId']
+            msgId = f"{plaza_id}{lane_reader_id}{date_str}"
+            txnId = msgId
+            entry_txn_id = msgId
             # Prompt for amount to be debited
             amount_value = input('Enter amount to be debited (e.g. 455.00): ').strip()
             if not amount_value:
