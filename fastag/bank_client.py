@@ -1133,7 +1133,7 @@ def build_query_exception_list_request(msgId, orgId, ts, txn_id, exception_list,
 
 def send_query_exception_list(msgId, orgId, exception_list, signature_placeholder='...'):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    txn_id = str(uuid.uuid4())[:22]
+    txn_id = msgId  # Use msgId as txn_id, just like Heartbeat
     xml_data = build_query_exception_list_request(msgId, orgId, ts, txn_id, exception_list, signature_placeholder)
     url = get_bank_url('query_exception_url')
     headers = {'Content-Type': 'application/xml'}
