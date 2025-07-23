@@ -1521,8 +1521,8 @@ if __name__ == '__main__':
         print('4. Heart Beat')
         print('5. Request Query Exception List')
         print('6. Request Pay')
-        print('0. Exit')
-        choice = input('Enter 1, 2, 3, 4, 5, 6, or 0: ').strip()
+        print('7. Transaction Status')
+        choice = input('Enter 1, 2, 3, 4, 5, 6, 7, or 0: ').strip()
         if choice == '0':
             print('Exiting. Goodbye!')
             break
@@ -1919,5 +1919,76 @@ if __name__ == '__main__':
                 # Optionally parse response here
             except Exception as e:
                 print('[PAY] Error sending Pay request:', e)
+        elif choice == '7':
+            print('--- Transaction Status API Test ---')
+            orgId = input('Enter orgId (e.g. BALI): ').strip() or 'BALI'
+            plazaId = input('Enter plazaId (e.g. 370015): ').strip() or '370015'
+            laneId = input('Enter laneId (e.g. LN002): ').strip() or 'LN002'
+            num_txns = int(input('How many transactions to check? (e.g. 2): ').strip() or '2')
+            txn_status_list = []
+            for i in range(num_txns):
+                txnId = input(f'Enter txnId #{i+1}: ').strip()
+                txnDate = input(f'Enter txnDate for txnId #{i+1} (YYYY-MM-DDTHH:MM:SS): ').strip()
+                txn_status_list.append({'txnId': txnId, 'txnDate': txnDate, 'plazaId': plazaId, 'laneId': laneId})
+            now = datetime.now()
+            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
+            msgId = now.strftime('%d%b%Y%H%M%S%f')[:20]
+            # Build ReqChkTxn XML
+            NS = 'http://npci.org/etc/schema/'
+            nsmap = {'etc': NS}
+            root = etree.Element('{%s}ReqChkTxn' % NS, nsmap=nsmap)
+            etree.SubElement(root, 'Head', {
+                'ver': '1.0',
+                'ts': ts,
+                'orgId': orgId,
+                'msgId': msgId
+            })
+            txn = etree.SubElement(root, 'Txn', {
+                'id': msgId,
+                'note': '',
+                'refId': '',
+                'refUrl': '',
+                'ts': ts,
+                'type': 'ChkTxn',
+                'orgTxnId': ''
+            })
+            txn_status_req_list = etree.SubElement(txn, 'TxnStatusReqList')
+            for status in txn_status_list:
+                etree.SubElement(txn_status_req_list, 'Status', {
+                    'txnId': status['txnId'],
+                    'txnDate': status['txnDate'],
+                    'plazaId': status['plazaId'],
+                    'laneId': status['laneId']
+                })
+            # Print unsigned XML
+            xml_bytes = etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
+            xml_str = xml_bytes.decode() if isinstance(xml_bytes, bytes) else xml_bytes
+            print(f'\n[TRANSACTION STATUS] Request XML (unsigned, no signature):')
+            print(xml_str)
+            # Sign the XML
+            try:
+                req_xml_doc = etree.fromstring(xml_str.encode())
+                signer = XMLSigner(signature_algorithm="rsa-sha256")
+                with open(PRIVATE_KEY_PATH, 'rb') as key_file, open(CERT_PATH, 'rb') as cert_file:
+                    key = key_file.read()
+                    cert = cert_file.read()
+                signed_xml = signer.sign(req_xml_doc, key=key, cert=cert)
+                signed_xml_str = etree.tostring(signed_xml, pretty_print=False, xml_declaration=True, encoding="UTF-8")
+                print('\n[TRANSACTION STATUS] Request XML (signed):')
+                print(signed_xml_str.decode())
+            except Exception as e:
+                print('[TRANSACTION STATUS] Error signing XML:', e)
+                signed_xml_str = xml_str.encode()
+            # Optionally, send the request (uncomment and set the correct URL)
+            # url = 'https://bank-api-url/transaction-status'
+            # headers = {'Content-Type': 'application/xml'}
+            # print("[TRANSACTION STATUS] URL:", url)
+            # print("[TRANSACTION STATUS] Headers:", headers)
+            # try:
+            #     response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
+            #     print("[TRANSACTION STATUS] HTTP Status Code:", response.status_code)
+            #     print("[TRANSACTION STATUS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+            # except Exception as e:
+            #     print('[TRANSACTION STATUS] Error sending request:', e)
         else:
             print('Invalid choice. Please try again.')
