@@ -1134,7 +1134,7 @@ def send_query_exception_list(msgId, orgId, exception_list, signature_placeholde
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txn_id = str(uuid.uuid4())[:22]
     xml_data = build_query_exception_list_request(msgId, orgId, ts, txn_id, exception_list, signature_placeholder)
-    url = os.getenv('BANK_API_EXCEPTIONLIST_URL', 'https://uat-bank-url.example.com/exceptionlist')
+    url = get_bank_url('query_exception_url')
     headers = {'Content-Type': 'application/xml'}
     print("\n[QUERY_EXCEPTION_LIST] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("[QUERY_EXCEPTION_LIST] URL:", url)
