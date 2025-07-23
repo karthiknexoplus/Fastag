@@ -264,6 +264,70 @@
         border-top: 1px solid #eee;
         margin: 0.7rem 0 1rem 0;
     }
+    .barrier-status-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .barrier-status-refresh-all {
+        background: none;
+        border: none;
+        color: #764ba2;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.2rem 0.4rem;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+    .barrier-status-refresh-all:hover {
+        background: #f3e9ff;
+    }
+    .barrier-status-divider {
+        border-top: 1px solid #eee;
+        margin: 0.3rem 0 1rem 0;
+    }
+    .barrier-relay-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-bottom: 0.3rem;
+        box-shadow: 0 1px 4px rgba(80,80,160,0.10);
+        border: 2px solid #fff;
+        transition: box-shadow 0.2s;
+        position: relative;
+    }
+    .barrier-relay-dot.on {
+        background: linear-gradient(135deg, #28a745 60%, #a8e063 100%);
+        box-shadow: 0 0 0 2px #28a74533;
+    }
+    .barrier-relay-dot.off {
+        background: linear-gradient(135deg, #dc3545 60%, #ffb3b3 100%);
+        box-shadow: 0 0 0 2px #dc354533;
+    }
+    .barrier-relay-dot.unknown {
+        background: #e0e0e0;
+        box-shadow: 0 0 0 2px #bbb;
+    }
+    .barrier-relay-label-sleek {
+        font-size: 0.92rem;
+        color: #555;
+        font-weight: 500;
+        margin-top: 0.1rem;
+        letter-spacing: 0.2px;
+    }
+    .barrier-relay-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin: 0 0.5rem;
+    }
+    .barrier-relay-item {
+        flex: 1 1 0;
+        text-align: center;
+        margin: 0 0.5rem;
+    }
 </style>
 {% endblock %}
 
@@ -349,26 +413,23 @@
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card h-100">
                 <div class="card-body pb-2">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="barrier-status-card-header">
                         <div class="stats-label mb-0">Barrier Status</div>
-                        <button class="btn btn-outline-primary btn-sm" onclick="refreshRelayStatus()"><i class="fas fa-sync-alt"></i> Refresh All</button>
+                        <button class="barrier-status-refresh-all" onclick="refreshRelayStatus()" title="Refresh All"><i class="fas fa-sync-alt"></i></button>
                     </div>
                     <div class="barrier-status-divider"></div>
-                    <div class="d-flex justify-content-around align-items-center mt-2 mb-1" id="barrier-status-icons">
-                        <div class="text-center position-relative">
-                            <div id="relay1-icon" class="barrier-relay-icon barrier-relay-unknown"><i class="fas fa-question"></i></div>
-                            <div class="barrier-relay-label">Relay 1</div>
-                            <div class="barrier-relay-refresh" onclick="refreshRelayStatus(1)"><i class="fas fa-sync-alt fa-xs"></i></div>
+                    <div class="barrier-relay-group mt-3 mb-2" id="barrier-status-icons">
+                        <div class="barrier-relay-item">
+                            <span id="relay1-dot" class="barrier-relay-dot unknown" title="Unknown"></span><br>
+                            <span class="barrier-relay-label-sleek">Relay 1</span>
                         </div>
-                        <div class="text-center position-relative">
-                            <div id="relay2-icon" class="barrier-relay-icon barrier-relay-unknown"><i class="fas fa-question"></i></div>
-                            <div class="barrier-relay-label">Relay 2</div>
-                            <div class="barrier-relay-refresh" onclick="refreshRelayStatus(2)"><i class="fas fa-sync-alt fa-xs"></i></div>
+                        <div class="barrier-relay-item">
+                            <span id="relay2-dot" class="barrier-relay-dot unknown" title="Unknown"></span><br>
+                            <span class="barrier-relay-label-sleek">Relay 2</span>
                         </div>
-                        <div class="text-center position-relative">
-                            <div id="relay3-icon" class="barrier-relay-icon barrier-relay-unknown"><i class="fas fa-question"></i></div>
-                            <div class="barrier-relay-label">Relay 3</div>
-                            <div class="barrier-relay-refresh" onclick="refreshRelayStatus(3)"><i class="fas fa-sync-alt fa-xs"></i></div>
+                        <div class="barrier-relay-item">
+                            <span id="relay3-dot" class="barrier-relay-dot unknown" title="Unknown"></span><br>
+                            <span class="barrier-relay-label-sleek">Relay 3</span>
                         </div>
                     </div>
                 </div>
@@ -1354,18 +1415,18 @@ function showTotalEventsTodayDetails() {
 }
 
 function setRelayIcon(relayNum, status) {
-    var iconDiv = document.getElementById('relay' + relayNum + '-icon');
-    if (!iconDiv) return;
-    iconDiv.className = 'barrier-relay-icon';
+    var dot = document.getElementById('relay' + relayNum + '-dot');
+    if (!dot) return;
+    dot.className = 'barrier-relay-dot';
     if (status === 'ON') {
-        iconDiv.classList.add('barrier-relay-on');
-        iconDiv.innerHTML = '<i class="fas fa-toggle-on"></i>';
+        dot.classList.add('on');
+        dot.title = 'ON';
     } else if (status === 'OFF') {
-        iconDiv.classList.add('barrier-relay-off');
-        iconDiv.innerHTML = '<i class="fas fa-toggle-off"></i>';
+        dot.classList.add('off');
+        dot.title = 'OFF';
     } else {
-        iconDiv.classList.add('barrier-relay-unknown');
-        iconDiv.innerHTML = '<i class="fas fa-question"></i>';
+        dot.classList.add('unknown');
+        dot.title = 'Unknown';
     }
 }
 function refreshRelayStatus(relayNum) {
