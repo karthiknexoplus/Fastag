@@ -2,7 +2,7 @@ from flask import Blueprint, request, Response
 import logging
 import xml.etree.ElementTree as ET
 from signxml import XMLVerifier
-from fastag.bank_client import send_sync_time, parse_sync_time_response
+from fastag.bank_client import send_sync_time, parse_sync_time_response, send_tag_details, parse_tag_details_response, API_URLS
 import json
 from fastag.pay_error_codes import PAY_ERROR_CODES
 from flask import Blueprint, render_template, request
@@ -162,7 +162,26 @@ def sync_time():
 
 @banking.route('/banking/tag_details', methods=['GET', 'POST'])
 def tag_details():
-    return render_template('banking/tag_details.html')
+    response = None
+    tagId = ''
+    orgId = API_URLS.get('org_id', 'PGSH') if hasattr(API_URLS, 'get') else 'PGSH'
+    if request.method == 'POST':
+        tagId = request.form.get('tagId', '')
+        orgId = request.form.get('orgId', orgId)
+        # Prepare vehicle_info for tag details
+        vehicle_info = {'tagId': tagId, 'vehicleRegNo': ''}
+        # Use the same logic as send_tag_details, but allow dynamic orgId/tagId
+        try:
+            result = send_tag_details(msgId=datetime.now().strftime('%Y%m%d%H%M%S'), orgId=orgId, vehicle_info=vehicle_info)
+            if isinstance(result, dict):
+                response = "<b>Tag Details Response:</b><br>"
+                for k, v in result.items():
+                    response += f"<b>{k}:</b> {v}<br>"
+            else:
+                response = result
+        except Exception as e:
+            response = f"<b>Error:</b> {e}"
+    return render_template('banking/tag_details.html', tagId=tagId, orgId=orgId, response=response)
 
 @banking.route('/banking/heartbeat', methods=['GET', 'POST'])
 def heartbeat():
