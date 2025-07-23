@@ -824,9 +824,9 @@ def send_tag_details(msgId, orgId, vehicle_info):
     print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
     print(xml_str)
     payload = xml_data
-    # Hardcode the /v2 endpoint
-    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
-    print("[DEBUG] Hardcoded URL for request:", url)
+    # Use correct URL from config
+    url = API_URLS.get('tag_details_url', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails')
+    print("[DEBUG] URL for request:", url)
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
     print("[TAG_DETAILS] Headers:", headers)
@@ -853,9 +853,10 @@ def send_tag_details(msgId, orgId, vehicle_info):
         print("[TAG_DETAILS] Parsed Response:")
         for k, v in parsed.items():
             print(f"  {k}: {v}")
+        return parsed
     except Exception as e:
         print('[TAG_DETAILS] Error sending Tag Details request:', e)
-        return None
+        return {'error': str(e)}
 
 
 def parse_tag_details_response(xml_response):
