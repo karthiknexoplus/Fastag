@@ -889,33 +889,51 @@ def parse_tag_details_response(xml_response):
     }
 
 
-def build_pay_request(amount_value, ts):
+def build_pay_request(
+    msgId,
+    orgId,
+    ts,
+    txnId,
+    entryTxnId,
+    plaza_info,
+    lane,
+    entry_lane,
+    TID,
+    tagId,
+    vehicleRegNo,
+    avc,
+    amount_value,
+    tsRead
+):
     NS = 'http://npci.org/etc/schema/'
     nsmap = {'etc': NS}
     root = etree.Element('{%s}ReqPay' % NS, nsmap=nsmap)
-    head = etree.SubElement(root, 'Head', {
-        'msgId': msgId,
-        'orgId': orgId,
+    # Head
+    etree.SubElement(root, 'Head', {
+        'ver': '1.0',
         'ts': ts,
-        'ver': '1.0'
+        'orgId': orgId,
+        'msgId': msgId
     })
-    meta = etree.SubElement(root, 'Meta')
-    etree.SubElement(meta, 'Tag', {'name': 'BBPSTXNID', 'value': msgId})
+    # Meta (empty)
+    etree.SubElement(root, 'Meta')
+    # Txn
     txn = etree.SubElement(root, 'Txn', {
         'id': txnId,
         'note': '',
-        'orgTxnId': '',
         'refId': '',
         'refUrl': '',
         'ts': ts,
-        'type': 'DEBIT'
+        'type': 'DEBIT',
+        'orgTxnId': ''
     })
     etree.SubElement(txn, 'EntryTxn', {
-        'id': entry_txn_id,
-        'tsRead': ts,
+        'id': txnId,
+        'tsRead': tsRead,
         'ts': ts,
         'type': 'DEBIT'
     })
+    # Plaza
     plaza = etree.SubElement(root, 'Plaza', {
         'geoCode': plaza_info['geoCode'],
         'id': plaza_info['id'],
@@ -930,97 +948,67 @@ def build_pay_request(amount_value, ts):
         'subtype': plaza_info['subtype'],
         'type': plaza_info['type']
     })
-    # Lane/EntryLane logic as before...
-    entry_gate_map = {'IN01': '1', 'IN02': '2'}
-    exit_gate_map = {'OUT01': '1', 'OUT02': '2'}
-    if plaza_info['type'] == 'Parking':
-        # For Parking, always set EntryGate, ExitGate, and Floor to '1'
-        etree.SubElement(plaza, 'Lane', {
-            'direction': lane['direction'],
-            'id': lane['id'],
-            'readerId': lane['readerId'],
-            'Status': 'OPEN',
-            'Mode': 'Normal',
-            'laneType': 'Hybrid',
-            'ExitGate': '1',
-            'Floor': '1'
-        })
-        etree.SubElement(plaza, 'EntryLane', {
-            'direction': lane['direction'],
-            'id': lane['id'],
-            'readerId': lane['readerId'],
-            'Status': 'OPEN',
-            'Mode': 'Normal',
-            'laneType': 'Hybrid',
-            'EntryGate': '1',
-            'Floor': '1'
-        })
-    else:
-        if lane['id'].startswith('OUT'):
-            exit_gate = exit_gate_map.get(lane['id'], '1')
-            etree.SubElement(plaza, 'Lane', {
-                'direction': lane['direction'],
-                'id': lane['id'],
-                'readerId': lane['readerId'],
-                'Status': 'OPEN',
-                'Mode': 'Normal',
-                'laneType': 'Hybrid',
-                'ExitGate': exit_gate,
-                'Floor': '1'
-            })
-        else:
-            etree.SubElement(plaza, 'Lane', {
-                'direction': lane['direction'],
-                'id': lane['id'],
-                'readerId': lane['readerId'],
-                'Status': 'OPEN',
-                'Mode': 'Normal',
-                'laneType': 'Hybrid',
-                'ExitGate': '',
-                'Floor': '1'
-            })
-        if lane['id'].startswith('IN'):
-            entry_gate = entry_gate_map.get(lane['id'], '1')
-            etree.SubElement(plaza, 'EntryLane', {
-                'direction': lane['direction'],
-                'id': lane['id'],
-                'readerId': lane['readerId'],
-                'Status': 'OPEN',
-                'Mode': 'Normal',
-                'laneType': 'Hybrid',
-                'EntryGate': entry_gate,
-                'Floor': '1'
-            })
-        else:
-            etree.SubElement(plaza, 'EntryLane', {
-                'direction': lane['direction'],
-                'id': lane['id'],
-                'readerId': lane['readerId'],
-                'Status': 'OPEN',
-                'Mode': 'Normal',
-                'laneType': 'Hybrid',
-                'EntryGate': '',
-                'Floor': '1'
-            })
+    # Lane
+    etree.SubElement(plaza, 'Lane', {
+        'direction': lane['direction'],
+        'id': lane['id'],
+        'readerId': lane['readerId'],
+        'Status': lane.get('Status', 'OPEN'),
+        'Mode': lane.get('Mode', 'NORMAL'),
+        'laneType': lane.get('laneType', 'Hybrid'),
+        'ExitGate': lane.get('ExitGate', lane['readerId']),
+        'Floor': lane.get('Floor', '1')
+    })
+    # EntryLane
+    etree.SubElement(plaza, 'EntryLane', {
+        'direction': entry_lane['direction'],
+        'id': entry_lane['id'],
+        'readerId': entry_lane['readerId'],
+        'Status': entry_lane.get('Status', 'OPEN'),
+        'Mode': entry_lane.get('Mode', 'NORMAL'),
+        'laneType': entry_lane.get('laneType', 'Hybrid'),
+        'EntryGate': entry_lane.get('EntryGate', entry_lane['readerId']),
+        'Floor': entry_lane.get('Floor', '1')
+    })
+    # ReaderVerificationResult
     rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
-        'publicKeyCVV': '', 'procRestrictionResult': 'ok', 'signAuth': 'VALID', 'tagVerified': 'NETC TAG', 'ts': ts, 'txnCounter': '1', 'txnStatus': 'SUCCESS', 'vehicleAuth': 'YES'
+        'publicKeyCVV': '',
+        'procRestrictionResult': 'ok',
+        'signAuth': 'VALID',
+        'tagVerified': 'NETC TAG',
+        'ts': ts,
+        'txnCounter': '1',
+        'txnStatus': 'SUCCESS',
+        'vehicleAuth': 'UNKNOWN'
     })
     tum = etree.SubElement(rvr, 'TagUserMemory')
-    etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': TID})
+    etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': tagId})
     etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': vehicleRegNo})
     etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': avc})
+    # Vehicle
     vehicle = etree.SubElement(root, 'Vehicle', {
         'TID': TID,
         'tagId': tagId,
         'wim': '',
-        'staticweight': '0'
+        'staticweight': ''
     })
     vdetails = etree.SubElement(vehicle, 'VehicleDetails')
-    etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc.zfill(2)})
+    etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc})
     etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': vehicleRegNo})
+    # Payment
     payment = etree.SubElement(root, 'Payment')
-    amount = etree.SubElement(payment, 'Amount', {'curr': 'INR', 'value': amount_value, 'PriceMode': 'CUSTOM', 'IsOverWeightCharged': 'FALSE', 'PaymentMode': 'Tag'})
-    etree.SubElement(amount, 'OverwightAmount', {'curr': 'INR', 'value': '0', 'PaymentMode': 'Tag'})
+    amount = etree.SubElement(payment, 'Amount', {
+        'curr': 'INR',
+        'value': amount_value,
+        'PriceMode': 'CUSTOM',
+        'IsOverWeightCharged': 'FALSE',
+        'PaymentMode': 'Tag'
+    })
+    etree.SubElement(amount, 'OverwightAmount', {
+        'curr': 'INR',
+        'value': amount_value,
+        'PaymentMode': 'Tag'
+    })
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
@@ -1040,7 +1028,21 @@ def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
     ts = next_ts.strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     entryTxnId = str(uuid.uuid4())[:22]
-    xml_data = build_pay_request(msgId, orgId, ts, txnId, entryTxnId, pay_data, signature_placeholder)
+    xml_data = build_pay_request(
+        msgId,
+        orgId,
+        ts,
+        txnId,
+        entryTxnId,
+        pay_data['plaza_info'],
+        pay_data['lane'],
+        pay_data['entry_lane'],
+        pay_data['TID'],
+        pay_data['tagId'],
+        pay_data['vehicleRegNo'],
+        pay_data['avc'],
+        pay_data['tsRead']
+    )
     url = os.getenv('BANK_API_PAY_URL', 'https://uat-bank-url.example.com/pay')
     headers = {'Content-Type': 'application/xml'}
     print("\n[PAY] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
