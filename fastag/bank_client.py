@@ -1821,6 +1821,35 @@ if __name__ == '__main__':
                 lane = lane_options[int(lane_sel)-1]
             else:
                 lane = lane_options[0]
+            # Prompt for entry and exit lanes
+            print('Select Entry Lane:')
+            entry_lane_options = [
+                {'id': 'IN01', 'direction': 'N', 'readerId': 'N01'},
+                {'id': 'IN02', 'direction': 'N', 'readerId': 'N02'},
+            ]
+            for idx, lane in enumerate(entry_lane_options, 1):
+                print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
+            entry_lane_sel = input(f"Enter 1-{len(entry_lane_options)}: ").strip()
+            if entry_lane_sel.isdigit() and 1 <= int(entry_lane_sel) <= len(entry_lane_options):
+                entry_lane = entry_lane_options[int(entry_lane_sel)-1]
+            else:
+                entry_lane = entry_lane_options[0]
+
+            print('Select Exit Lane:')
+            exit_lane_options = [
+                {'id': 'OUT01', 'direction': 'S', 'readerId': 'T03'},
+                {'id': 'OUT02', 'direction': 'S', 'readerId': 'T04'},
+                {'id': 'OUT03', 'direction': 'S', 'readerId': 'T03'},
+                {'id': 'OUT04', 'direction': 'S', 'readerId': 'T04'},
+            ]
+            for idx, lane in enumerate(exit_lane_options, 1):
+                print(f"{idx}. Lane ID: {lane['id']}, Direction: {lane['direction']}, Reader ID: {lane['readerId']}")
+            exit_lane_sel = input(f"Enter 1-{len(exit_lane_options)}: ").strip()
+            if exit_lane_sel.isdigit() and 1 <= int(exit_lane_sel) <= len(exit_lane_options):
+                lane = exit_lane_options[int(exit_lane_sel)-1]
+            else:
+                lane = exit_lane_options[0]
+
             # Use similar data as Heart Beat for plaza
             orgId = 'PGSH'
             plaza_info = {
@@ -1849,7 +1878,23 @@ if __name__ == '__main__':
                 amount_value = '455.00'
             # Automatically set transaction time to 10 minutes in the past
             ts = (datetime.now() - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%S')
-            xml_data = build_pay_request(amount_value, ts)
+            tsRead = (datetime.now() - timedelta(minutes=15)).strftime('%Y-%m-%dT%H:%M:%S')
+            xml_data = build_pay_request(
+                msgId,
+                orgId,
+                ts,
+                txnId,
+                entry_txn_id,
+                plaza_info,
+                lane,
+                entry_lane,
+                TID,
+                tagId,
+                vehicleRegNo,
+                avc,
+                amount_value,
+                tsRead
+            )
             xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
             if xml_str.startswith('<?xml'):
                 xml_str = xml_str.replace("encoding='utf-8'", 'encoding="UTF-8"', 1)
