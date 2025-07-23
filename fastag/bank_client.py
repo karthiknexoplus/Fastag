@@ -985,7 +985,7 @@ def build_pay_request(
     })
     tum = etree.SubElement(rvr, 'TagUserMemory')
     etree.SubElement(tum, 'Detail', {'name': 'TagSignature', 'value': tagId})
-    etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': vehicleRegNo})
+    etree.SubElement(tum, 'Detail', {'name': 'TagVRN', 'value': 'XXXXXXXXXX'})
     etree.SubElement(tum, 'Detail', {'name': 'TagVC', 'value': avc})
     # Vehicle
     vehicle = etree.SubElement(root, 'Vehicle', {
@@ -996,7 +996,7 @@ def build_pay_request(
     })
     vdetails = etree.SubElement(vehicle, 'VehicleDetails')
     etree.SubElement(vdetails, 'Detail', {'name': 'AVC', 'value': avc})
-    etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': vehicleRegNo})
+    etree.SubElement(vdetails, 'Detail', {'name': 'LPNumber', 'value': 'XXXXXXXXXX'})
     # Payment
     payment = etree.SubElement(root, 'Payment')
     amount = etree.SubElement(payment, 'Amount', {
