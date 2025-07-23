@@ -923,17 +923,10 @@ def build_pay_request(
         'orgTxnId': ''
     })
     # EntryTxn: id same as msgId, tsRead random earlier in the day, ts as current
-    entry_txn_ts = ts
-    # Generate random earlier time in the same day for tsRead
-    ts_date = ts.split('T')[0]
-    random_hour = random.randint(0, int(ts.split('T')[1][:2]))
-    random_minute = random.randint(0, 59)
-    random_second = random.randint(0, 59)
-    tsRead = f"{ts_date}T{random_hour:02d}:{random_minute:02d}:{random_second:02d}"
     etree.SubElement(txn, 'EntryTxn', {
         'id': msgId,
         'tsRead': tsRead,
-        'ts': entry_txn_ts,
+        'ts': ts,
         'type': 'DEBIT'
     })
     # Plaza
@@ -951,13 +944,13 @@ def build_pay_request(
         'subtype': plaza_info['subtype'],
         'type': plaza_info['type']
     })
-    # Lane: id is lane id, readerId is shortened (T03 for OUT03, N04 for IN04, etc.), ExitGate is shortened
     def get_short_reader_id(lane_id):
         if lane_id.startswith('IN'):
             return 'N' + lane_id[2:]
         elif lane_id.startswith('OUT'):
             return 'T' + lane_id[3:]
         return lane_id
+    # Lane
     etree.SubElement(plaza, 'Lane', {
         'direction': lane['direction'],
         'id': lane['id'],
@@ -968,7 +961,7 @@ def build_pay_request(
         'ExitGate': get_short_reader_id(lane['id']),
         'Floor': lane.get('Floor', '1')
     })
-    # EntryLane: id is entry_lane id, readerId is shortened, EntryGate is shortened
+    # EntryLane
     etree.SubElement(plaza, 'EntryLane', {
         'direction': entry_lane['direction'],
         'id': entry_lane['id'],
