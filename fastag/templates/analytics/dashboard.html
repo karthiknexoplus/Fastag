@@ -409,6 +409,7 @@
                 </div>
             </div>
         </div>
+        {% if config.FASTAG_FEATURES_ENABLED %}
         <!-- Barrier Status Card -->
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card h-100">
@@ -435,6 +436,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
     <!-- FASTag vs Non-FASTag Pie Chart, Overstayed Vehicles, Unique Vehicles, Entry/Exit Trend -->
