@@ -147,8 +147,9 @@ API_URLS = BANK_API_URLS.get(API_ENV, BANK_API_URLS['UAT'])
 # Example usage:
 # API_URLS['sync_time_url'], API_URLS['pay_url'], etc.
 
-def get_bank_url():
-    return API_URLS['sync_time_url']
+def get_bank_url(key):
+    env = os.getenv('BANK_API_ENV', 'UAT')
+    return BANK_API_URLS.get(env, {}).get(key)
 
 def build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder='...'):
     root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
@@ -166,7 +167,7 @@ def build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder='...'):
 def send_sync_time(ver, orgId, msgId, signature_placeholder='...'):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     xml_data = build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder)
-    url = get_bank_url()
+    url = get_bank_url('sync_time_url')
     headers = {'Content-Type': 'application/xml'}
     print("\n[SYNC_TIME] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("[SYNC_TIME] URL:", url)
@@ -734,7 +735,7 @@ def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     xml_data = build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_placeholder)
-    url = os.getenv('BANK_API_CHECKTXN_URL', 'https://uat-bank-url.example.com/checktxn')
+    url = get_bank_url('checktxn')
     headers = {'Content-Type': 'application/xml'}
     print("\n[CHECK_TXN] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("[CHECK_TXN] URL:", url)
@@ -826,7 +827,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
     print(xml_str)
     payload = xml_data
     # Use correct URL from config
-    url = API_URLS.get('tag_details_url', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails')
+    url = get_bank_url('tag_details_url')
     print("[DEBUG] URL for request:", url)
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
@@ -1054,7 +1055,7 @@ def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
         pay_data['avc'],
         pay_data['tsRead']
     )
-    url = os.getenv('BANK_API_PAY_URL', 'https://uat-bank-url.example.com/pay')
+    url = get_bank_url('pay')
     headers = {'Content-Type': 'application/xml'}
     print("\n[PAY] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("[PAY] URL:", url)
@@ -1746,7 +1747,7 @@ if __name__ == '__main__':
                 signed_xml = sign_xml(unsigned_xml)
                 print('DEBUG: Signed Heart Beat XML generated.')
                 print(signed_xml.decode() if isinstance(signed_xml, bytes) else signed_xml)
-                url = os.getenv('BANK_API_HEARTBEAT_URL', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/TollplazaHbeatReq')
+                url = get_bank_url('heartbeat_url')
                 headers = {'Content-Type': 'application/xml'}
                 print(f'Heart Beat Endpoint URL: {url}')
                 response = requests.post(url, data=signed_xml, headers=headers, timeout=10, verify=False)
