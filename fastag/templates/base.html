@@ -167,6 +167,35 @@
                         </a></li>
                     </ul>
                 </div>
+                <div class="dropdown d-inline-block">
+                    <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Banking">
+                        <i class="fas fa-university fastag-menu-icon"></i>
+                        <span class="nav-label fastag-menu-label d-none d-md-inline">Banking</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('banking.sync_time') }}">
+                            <i class="fas fa-clock fastag-submenu-icon"></i><span class="fastag-submenu-label">Sync Time</span>
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('banking.tag_details') }}">
+                            <i class="fas fa-id-badge fastag-submenu-icon"></i><span class="fastag-submenu-label">Tag Details</span>
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('banking.heartbeat') }}">
+                            <i class="fas fa-heartbeat fastag-submenu-icon"></i><span class="fastag-submenu-label">Heartbeat</span>
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('banking.query_exception') }}">
+                            <i class="fas fa-question-circle fastag-submenu-icon"></i><span class="fastag-submenu-label">Query Exception</span>
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('banking.request_pay') }}">
+                            <i class="fas fa-money-check-alt fastag-submenu-icon"></i><span class="fastag-submenu-label">Request Pay</span>
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('banking.response_pay') }}">
+                            <i class="fas fa-receipt fastag-submenu-icon"></i><span class="fastag-submenu-label">Response Pay</span>
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('banking.transaction_status') }}">
+                            <i class="fas fa-list-alt fastag-submenu-icon"></i><span class="fastag-submenu-label">Transaction Status</span>
+                        </a></li>
+                    </ul>
+                </div>
                 {% if session.get('user') %}
                 <div class="dropdown d-inline-block">
                     <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Account">
