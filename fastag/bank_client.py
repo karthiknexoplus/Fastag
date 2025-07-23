@@ -922,10 +922,18 @@ def build_pay_request(
         'type': 'DEBIT',
         'orgTxnId': ''
     })
+    # EntryTxn: id same as msgId, tsRead random earlier in the day, ts as current
+    entry_txn_ts = ts
+    # Generate random earlier time in the same day for tsRead
+    ts_date = ts.split('T')[0]
+    random_hour = random.randint(0, int(ts.split('T')[1][:2]))
+    random_minute = random.randint(0, 59)
+    random_second = random.randint(0, 59)
+    tsRead = f"{ts_date}T{random_hour:02d}:{random_minute:02d}:{random_second:02d}"
     etree.SubElement(txn, 'EntryTxn', {
-        'id': txnId,
+        'id': msgId,
         'tsRead': tsRead,
-        'ts': ts,
+        'ts': entry_txn_ts,
         'type': 'DEBIT'
     })
     # Plaza
@@ -943,26 +951,32 @@ def build_pay_request(
         'subtype': plaza_info['subtype'],
         'type': plaza_info['type']
     })
-    # Lane
+    # Lane: id is lane id, readerId is shortened (T03 for OUT03, N04 for IN04, etc.), ExitGate is shortened
+    def get_short_reader_id(lane_id):
+        if lane_id.startswith('IN'):
+            return 'N' + lane_id[2:]
+        elif lane_id.startswith('OUT'):
+            return 'T' + lane_id[3:]
+        return lane_id
     etree.SubElement(plaza, 'Lane', {
         'direction': lane['direction'],
         'id': lane['id'],
-        'readerId': lane['readerId'],
+        'readerId': get_short_reader_id(lane['id']),
         'Status': lane.get('Status', 'OPEN'),
         'Mode': lane.get('Mode', 'NORMAL'),
         'laneType': lane.get('laneType', 'Hybrid'),
-        'ExitGate': lane.get('ExitGate', lane['readerId']),
+        'ExitGate': get_short_reader_id(lane['id']),
         'Floor': lane.get('Floor', '1')
     })
-    # EntryLane
+    # EntryLane: id is entry_lane id, readerId is shortened, EntryGate is shortened
     etree.SubElement(plaza, 'EntryLane', {
         'direction': entry_lane['direction'],
         'id': entry_lane['id'],
-        'readerId': entry_lane['readerId'],
+        'readerId': get_short_reader_id(entry_lane['id']),
         'Status': entry_lane.get('Status', 'OPEN'),
         'Mode': entry_lane.get('Mode', 'NORMAL'),
         'laneType': entry_lane.get('laneType', 'Hybrid'),
-        'EntryGate': entry_lane.get('EntryGate', entry_lane['readerId']),
+        'EntryGate': get_short_reader_id(entry_lane['id']),
         'Floor': entry_lane.get('Floor', '1')
     })
     # ReaderVerificationResult
