@@ -815,7 +815,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
     lane_id = '001'      # Example Lane ID (last 3 digits)
     txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
     vehicle_info = vehicle_info.copy()
-    vehicle_info.setdefault('txn_ts', ts)
+    txn_ts = vehicle_info.get('txn_ts', ts)
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, txn_ts, vehicle_info)
     xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
     if xml_str.startswith('<?xml'):
