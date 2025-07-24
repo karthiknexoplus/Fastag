@@ -5,15 +5,83 @@
   <h2>Request Pay</h2>
   <form method="post">
     <div class="mb-3">
+      <label for="orgId" class="form-label">Org ID</label>
+      <input type="text" class="form-control" id="orgId" name="orgId" value="{{ orgId }}" readonly>
+    </div>
+    <div class="mb-3">
+      <label for="plazaId" class="form-label">Plaza ID</label>
+      <input type="text" class="form-control" id="plazaId" name="plazaId" value="{{ plazaId }}" readonly>
+    </div>
+    <div class="mb-3">
+      <label for="agencyId" class="form-label">Agency ID</label>
+      <input type="text" class="form-control" id="agencyId" name="agencyId" value="{{ agencyId }}" readonly>
+    </div>
+    <div class="mb-3">
+      <label for="acquirerId" class="form-label">Acquirer ID</label>
+      <input type="text" class="form-control" id="acquirerId" name="acquirerId" value="{{ acquirerId }}" readonly>
+    </div>
+    <div class="mb-3">
+      <label for="plazaGeoCode" class="form-label">Plaza Geo Code</label>
+      <input type="text" class="form-control" id="plazaGeoCode" name="plazaGeoCode" value="{{ plazaGeoCode }}" readonly>
+    </div>
+    <div class="mb-3">
       <label for="amount" class="form-label">Amount</label>
-      <input type="text" class="form-control" id="amount" name="amount" value="100">
+      <input type="text" class="form-control" id="amount" name="amount" value="{{ amount }}">
     </div>
     <div class="mb-3">
       <label for="tagId" class="form-label">Tag ID</label>
-      <input type="text" class="form-control" id="tagId" name="tagId" value="">
+      <input type="text" class="form-control" id="tagId" name="tagId" value="{{ tagId }}">
+    </div>
+    <div class="mb-3">
+      <label for="TID" class="form-label">TID</label>
+      <input type="text" class="form-control" id="TID" name="TID" value="{{ TID }}">
+    </div>
+    <div class="mb-3">
+      <label for="vehicleRegNo" class="form-label">Vehicle Reg No</label>
+      <input type="text" class="form-control" id="vehicleRegNo" name="vehicleRegNo" value="{{ vehicleRegNo }}">
+    </div>
+    <div class="mb-3">
+      <label for="avc" class="form-label">AVC</label>
+      <input type="text" class="form-control" id="avc" name="avc" value="{{ avc }}">
     </div>
     <button type="submit" class="btn btn-primary">Send Request Pay</button>
   </form>
+  <hr>
+  <h5>Recent Request Pay Logs</h5>
+  <div id="logs">
+    {% if logs and logs|length > 0 %}
+      <table class="table table-bordered table-sm">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Msg ID</th>
+            <th>Tag ID</th>
+            <th>TID</th>
+            <th>Vehicle Reg No</th>
+            <th>AVC</th>
+            <th>Amount</th>
+            <th>Response</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td>{{ log['request_time'] }}</td>
+            <td>{{ log['msg_id'] }}</td>
+            <td>{{ log['tag_id'] }}</td>
+            <td>{{ log['tid'] }}</td>
+            <td>{{ log['vehicle_reg_no'] }}</td>
+            <td>{{ log['avc'] }}</td>
+            <td>{{ log['amount'] }}</td>
+            <td style="max-width:300px; word-break:break-all; white-space:pre-wrap;">{{ log['response'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No recent pay requests found.</p>
+    {% endif %}
+  </div>
   <hr>
   <h5>Response</h5>
   <div id="response">

@@ -133,6 +133,23 @@ def init_db(db):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (lane_id) REFERENCES lanes (id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS request_pay_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            msg_id TEXT,
+            org_id TEXT,
+            plaza_id TEXT,
+            agency_id TEXT,
+            acquirer_id TEXT,
+            geo_code TEXT,
+            tag_id TEXT,
+            tid TEXT,
+            vehicle_reg_no TEXT,
+            avc TEXT,
+            amount TEXT,
+            request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            response TEXT
+        );
     ''')
     db.commit() 
 
@@ -169,3 +186,22 @@ def log_barrier_event(relay_number, action, user=None, lane_id=None, lane_name=N
     except Exception as e:
         print(f"[ERROR] log_barrier_event failed: {e}")
         logging.error(f"log_barrier_event failed: {e}") 
+
+def log_request_pay(msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response):
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO request_pay_logs (msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response)
+    )
+    db.commit()
+
+def fetch_request_pay_logs(limit=20):
+    db = get_db()
+    cur = db.execute(
+        "SELECT * FROM request_pay_logs ORDER BY request_time DESC LIMIT ?",
+        (limit,)
+    )
+    return cur.fetchall() 

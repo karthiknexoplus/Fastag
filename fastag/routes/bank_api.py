@@ -281,7 +281,70 @@ def query_exception():
 
 @banking.route('/banking/request_pay', methods=['GET', 'POST'])
 def request_pay():
-    return render_template('banking/request_pay.html')
+    from fastag.utils.db import log_request_pay, fetch_request_pay_logs
+    response = None
+    loc = get_location_details()
+    orgId = loc['org_id']
+    plazaId = loc['plaza_id']
+    agencyId = loc['agency_id']
+    acquirerId = loc['acquirer_id']
+    plazaGeoCode = loc['plaza_geo_code']
+    # Defaults for demo
+    TID = ''
+    vehicleRegNo = ''
+    avc = ''
+    amount = '100.00'
+    tagId = ''
+    lane = {'id': 'OUT01', 'direction': 'S', 'readerId': 'T01', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid', 'Floor': '1'}
+    entry_lane = {'id': 'IN01', 'direction': 'N', 'readerId': 'N01', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid', 'Floor': '1'}
+    tsRead = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    if request.method == 'POST':
+        amount = request.form.get('amount', amount)
+        tagId = request.form.get('tagId', tagId)
+        TID = request.form.get('TID', TID)
+        vehicleRegNo = request.form.get('vehicleRegNo', vehicleRegNo)
+        avc = request.form.get('avc', avc)
+        # Optionally allow lane/entry_lane selection
+        # Build plaza_info
+        plaza_info = {
+            'geoCode': plazaGeoCode,
+            'id': plazaId,
+            'name': '',
+            'subtype': 'Covered',
+            'type': 'Parking',
+            'address': '',
+            'fromDistrict': '',
+            'toDistrict': '',
+            'agencyCode': agencyId
+        }
+        pay_data = {
+            'plaza_info': plaza_info,
+            'lane': lane,
+            'entry_lane': entry_lane,
+            'TID': TID,
+            'tagId': tagId,
+            'vehicleRegNo': vehicleRegNo,
+            'avc': avc,
+            'amount_value': amount,
+            'tsRead': tsRead
+        }
+        msgId = datetime.now().strftime('%Y%m%d%H%M%S')
+        try:
+            from fastag.bank_client import send_pay
+            result = send_pay(msgId, orgId, pay_data)
+            if isinstance(result, dict):
+                response = "<b>Pay Response:</b><br>"
+                for k, v in result.items():
+                    response += f"<b>{k}:</b> {v}<br>"
+            else:
+                response = result
+            # Log the request and response
+            log_request_pay(msgId, orgId, plazaId, agencyId, acquirerId, plazaGeoCode, tagId, TID, vehicleRegNo, avc, amount, str(result))
+        except Exception as e:
+            response = f"<b>Error:</b> {e}"
+    # Fetch latest logs
+    logs = fetch_request_pay_logs(20)
+    return render_template('banking/request_pay.html', orgId=orgId, plazaId=plazaId, agencyId=agencyId, acquirerId=acquirerId, plazaGeoCode=plazaGeoCode, TID=TID, vehicleRegNo=vehicleRegNo, avc=avc, amount=amount, tagId=tagId, response=response, logs=logs)
 
 @banking.route('/banking/response_pay', methods=['GET', 'POST'])
 def response_pay():
