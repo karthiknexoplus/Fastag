@@ -124,9 +124,10 @@
 {% endblock %}
 <script>
 function toIST(utcString) {
-    // Parse as UTC
-    let d = new Date(utcString.replace(' ', 'T') + 'Z');
-    // IST offset is +5:30
+    // Convert 'YYYY-MM-DD HH:MM:SS' to 'YYYY-MM-DDTHH:MM:SSZ'
+    let iso = utcString.replace(' ', 'T') + 'Z';
+    let d = new Date(iso);
+    // Add 5 hours 30 minutes for IST
     d.setMinutes(d.getMinutes() + 330);
     // Format as YYYY-MM-DD HH:MM:SS IST
     let y = d.getFullYear();
@@ -137,10 +138,12 @@ function toIST(utcString) {
     let s = ('0' + d.getSeconds()).slice(-2);
     return `${y}-${m}-${day} ${h}:${min}:${s} IST`;
 }
-document.querySelectorAll('.utc-time').forEach(function(td) {
-    let raw = td.textContent.trim();
-    if (raw && !raw.endsWith('IST')) {
-        td.textContent = toIST(raw);
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.utc-time').forEach(function(td) {
+        let raw = td.textContent.trim();
+        if (raw && !raw.endsWith('IST')) {
+            td.textContent = toIST(raw);
+        }
+    });
 });
 </script> 
