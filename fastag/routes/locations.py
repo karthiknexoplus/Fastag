@@ -13,8 +13,14 @@ def locations():
     if request.method == 'POST':
         name = request.form['name']
         address = request.form['address']
+        org_id = request.form.get('org_id')
+        plaza_id = request.form.get('plaza_id')
+        agency_id = request.form.get('agency_id')
+        acquirer_id = request.form.get('acquirer_id')
+        geo_code = request.form.get('geo_code')
         site_id = request.form.get('site_id') or os.urandom(4).hex().upper()
-        db.execute('INSERT INTO locations (name, address, site_id) VALUES (?, ?, ?)', (name, address, site_id))
+        db.execute('INSERT INTO locations (name, address, org_id, plaza_id, agency_id, acquirer_id, geo_code, site_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                   (name, address, org_id, plaza_id, agency_id, acquirer_id, geo_code, site_id))
         db.commit()
         logging.info(f"Location added: {name} ({site_id})")
         flash('Location added!', 'success')
@@ -31,7 +37,13 @@ def edit_location(id):
     if request.method == 'POST':
         name = request.form['name']
         address = request.form['address']
-        db.execute('UPDATE locations SET name = ?, address = ? WHERE id = ?', (name, address, id))
+        org_id = request.form.get('org_id')
+        plaza_id = request.form.get('plaza_id')
+        agency_id = request.form.get('agency_id')
+        acquirer_id = request.form.get('acquirer_id')
+        geo_code = request.form.get('geo_code')
+        db.execute('UPDATE locations SET name = ?, address = ?, org_id = ?, plaza_id = ?, agency_id = ?, acquirer_id = ?, geo_code = ? WHERE id = ?',
+                   (name, address, org_id, plaza_id, agency_id, acquirer_id, geo_code, id))
         db.commit()
         logging.info(f"Location updated: {name} (ID {id})")
         flash('Location updated!', 'success')
@@ -57,16 +69,22 @@ def api_add_location():
     data = request.get_json()
     name = data.get("name")
     address = data.get("address")
+    org_id = data.get("org_id")
+    plaza_id = data.get("plaza_id")
+    agency_id = data.get("agency_id")
+    acquirer_id = data.get("acquirer_id")
+    geo_code = data.get("geo_code")
     if not name or not address:
         return {"success": False, "error": "Missing name or address"}, 400
     site_id = data.get("site_id") or os.urandom(4).hex().upper()
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('INSERT INTO locations (name, address, site_id) VALUES (?, ?, ?)', (name, address, site_id))
+        cursor.execute('INSERT INTO locations (name, address, org_id, plaza_id, agency_id, acquirer_id, geo_code, site_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                       (name, address, org_id, plaza_id, agency_id, acquirer_id, geo_code, site_id))
         db.commit()
         # Fetch updated list
-        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations = db.execute('SELECT * FROM locations').fetchall()
         locations_list = [dict(l) for l in locations]
         logging.info(f"Location added via API: {name} ({site_id})")
         return {"success": True, "locations": locations_list}, 200
@@ -82,17 +100,23 @@ def api_edit_location(id):
     data = request.get_json()
     name = data.get("name")
     address = data.get("address")
+    org_id = data.get("org_id")
+    plaza_id = data.get("plaza_id")
+    agency_id = data.get("agency_id")
+    acquirer_id = data.get("acquirer_id")
+    geo_code = data.get("geo_code")
     if not name or not address:
         return {"success": False, "error": "Missing name or address"}, 400
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('UPDATE locations SET name = ?, address = ? WHERE id = ?', (name, address, id))
+        cursor.execute('UPDATE locations SET name = ?, address = ?, org_id = ?, plaza_id = ?, agency_id = ?, acquirer_id = ?, geo_code = ? WHERE id = ?',
+                       (name, address, org_id, plaza_id, agency_id, acquirer_id, geo_code, id))
         db.commit()
         if cursor.rowcount == 0:
             return {"success": False, "error": "Location not found"}, 404
         # Fetch updated list
-        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations = db.execute('SELECT * FROM locations').fetchall()
         locations_list = [dict(l) for l in locations]
         logging.info(f"Location updated via API: {name} (ID {id})")
         return {"success": True, "locations": locations_list}, 200
@@ -111,7 +135,7 @@ def api_delete_location(id):
         if cursor.rowcount == 0:
             return {"success": False, "error": "Location not found"}, 404
         # Fetch updated list
-        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations = db.execute('SELECT * FROM locations').fetchall()
         locations_list = [dict(l) for l in locations]
         logging.info(f"Location deleted via API (ID {id})")
         return {"success": True, "locations": locations_list}, 200
@@ -124,7 +148,7 @@ def api_view_locations():
     """API endpoint to view all locations"""
     try:
         db = get_db()
-        locations = db.execute('SELECT id, name, address, site_id FROM locations').fetchall()
+        locations = db.execute('SELECT * FROM locations').fetchall()
         locations_list = [dict(l) for l in locations]
         return {"success": True, "locations": locations_list}, 200
     except Exception as e:
