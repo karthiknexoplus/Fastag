@@ -1930,9 +1930,10 @@ if __name__ == '__main__':
                 txnId = input(f'Enter txnId #{i+1}: ').strip()
                 txnDate = input(f'Enter txnDate for txnId #{i+1} (YYYY-MM-DDTHH:MM:SS): ').strip()
                 txn_status_list.append({'txnId': txnId, 'txnDate': txnDate, 'plazaId': plazaId, 'laneId': laneId})
-            now = datetime.now()
-            ts = now.strftime('%Y-%m-%dT%H:%M:%S')
-            msgId = now.strftime('%d%b%Y%H%M%S%f')[:20]
+            # Use the first txnId and txnDate for msgId, txn.id, and ts
+            main_txn = txn_status_list[0]
+            msgId = main_txn['txnId']
+            ts = main_txn['txnDate']
             # Build ReqChkTxn XML
             NS = 'http://npci.org/etc/schema/'
             nsmap = {'etc': NS}
