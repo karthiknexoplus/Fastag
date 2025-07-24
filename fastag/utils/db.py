@@ -123,6 +123,16 @@ def init_db(db):
             FOREIGN KEY (lane_id) REFERENCES lanes (id),
             FOREIGN KEY (reader_id) REFERENCES readers (id)
         );
+
+        CREATE TABLE IF NOT EXISTS tariffs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lane_id INTEGER NOT NULL,
+            from_minutes INTEGER NOT NULL,
+            to_minutes INTEGER NOT NULL,
+            amount REAL NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (lane_id) REFERENCES lanes (id) ON DELETE CASCADE
+        );
     ''')
     db.commit() 
 
