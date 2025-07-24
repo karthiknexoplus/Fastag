@@ -7,6 +7,7 @@ import json
 from fastag.pay_error_codes import PAY_ERROR_CODES
 from flask import Blueprint, render_template, request
 from datetime import datetime
+from fastag.utils.db import get_db
 
 bank_api = Blueprint('bank_api', __name__)
 banking = Blueprint('banking', __name__)
@@ -24,6 +25,25 @@ def parse_and_log_xml(endpoint_name):
         logging.error(f"XML parsing failed: {e}")
         root = None
     return xml_data, root
+
+def get_location_details():
+    db = get_db()
+    loc = db.execute('SELECT * FROM locations ORDER BY id LIMIT 1').fetchone()
+    if not loc:
+        return {
+            'org_id': 'PGSH',
+            'plaza_id': '712764',
+            'agency_id': 'TCABO',
+            'acquirer_id': '727274',
+            'plaza_geo_code': '11.0185,76.9778',
+        }
+    return {
+        'org_id': loc['org_id'],
+        'plaza_id': loc['plaza_id'],
+        'agency_id': loc['agency_id'],
+        'acquirer_id': loc['acquirer_id'],
+        'plaza_geo_code': loc['geo_code'],
+    }
 
 @bank_api.route('/api/bank/sync_time', methods=['POST'])
 def sync_time():
@@ -137,11 +157,12 @@ def exception_response():
 @banking.route('/banking/sync_time', methods=['GET', 'POST'])
 def sync_time():
     response = None
-    orgId = 'PGSH'
+    loc = get_location_details()
+    orgId = loc['org_id']
     msgId = 'AUTO'
     ts = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     if request.method == 'POST':
-        orgId = request.form.get('orgId', 'PGSH')
+        orgId = request.form.get('orgId', orgId)
         msgId = request.form.get('msgId', 'AUTO')
         ts = request.form.get('ts', ts)
         # If msgId or ts is AUTO, generate them
@@ -164,7 +185,8 @@ def sync_time():
 def tag_details():
     response = None
     tagId = ''
-    orgId = API_URLS.get('org_id', 'PGSH') if hasattr(API_URLS, 'get') else 'PGSH'
+    loc = get_location_details()
+    orgId = loc['org_id']
     if request.method == 'POST':
         tagId = request.form.get('tagId', '')
         orgId = request.form.get('orgId', orgId)
@@ -186,12 +208,12 @@ def tag_details():
 @banking.route('/banking/heartbeat', methods=['GET', 'POST'])
 def heartbeat():
     response = None
-    static = API_URLS.get('STATIC', {}) if hasattr(API_URLS, 'get') else {}
-    orgId = static.get('org_id', 'PGSH')
-    plazaId = static.get('plaza_id', '712764')
-    acquirerId = static.get('acquirer_id', '727274')
-    agencyId = static.get('agency_id', 'TCABO')
-    plazaGeoCode = static.get('plaza_geo_code', '11.0185,76.9778')
+    loc = get_location_details()
+    orgId = loc['org_id']
+    plazaId = loc['plaza_id']
+    acquirerId = loc['acquirer_id']
+    agencyId = loc['agency_id']
+    plazaGeoCode = loc['plaza_geo_code']
     if request.method == 'POST':
         orgId = request.form.get('orgId', orgId)
         plazaId = request.form.get('plazaId', plazaId)
@@ -202,7 +224,7 @@ def heartbeat():
         plaza_info = {
             'geoCode': plazaGeoCode,
             'id': plazaId,
-            'name': static.get('plaza_name', ''),
+            'name': '', # Name will be fetched from DB
             'subtype': 'Covered',
             'type': 'Parking',
             'address': '',
@@ -210,12 +232,7 @@ def heartbeat():
             'toDistrict': '',
             'agencyCode': agencyId
         }
-        lanes = static.get('lanes', [
-            {'id': 'IN01', 'direction': 'N', 'readerId': '1', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'IN02', 'direction': 'N', 'readerId': '2', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT01', 'direction': 'S', 'readerId': '3', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-            {'id': 'OUT02', 'direction': 'S', 'readerId': '4', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid'},
-        ])
+        lanes = [] # Lanes will be fetched from DB
         # Generate valid msgId and txn_id (timestamp + 'HBRQ')
         now = datetime.now()
         msgId = now.strftime('%Y%m%d%H%M%S') + 'HBRQ'
@@ -236,7 +253,8 @@ def heartbeat():
 @banking.route('/banking/query_exception', methods=['GET', 'POST'])
 def query_exception():
     response = None
-    orgId = 'PGSH'
+    loc = get_location_details()
+    orgId = loc['org_id']
     if request.method == 'POST':
         orgId = request.form.get('orgId', 'PGSH')
         # Prepare a default exception list (can be enhanced to take user input)
