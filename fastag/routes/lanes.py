@@ -14,7 +14,12 @@ def lanes():
     lanes = []
     readers_map = {}
     if selected_location:
-        lanes = db.execute('SELECT * FROM lanes WHERE location_id = ?', (selected_location,)).fetchall()
+        lanes = db.execute('''
+            SELECT l.*, r.reader_id, r.reader_ip
+            FROM lanes l
+            LEFT JOIN readers r ON l.id = r.lane_id
+            WHERE l.location_id = ?
+        ''', (selected_location,)).fetchall()
         lane_ids = [lane['id'] for lane in lanes]
         if lane_ids:
             qmarks = ','.join('?'*len(lane_ids))
