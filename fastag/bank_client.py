@@ -934,7 +934,7 @@ def build_pay_request(
     })
     # EntryTxn: id same as msgId, tsRead random earlier in the day, ts as current
     etree.SubElement(txn, 'EntryTxn', {
-        'id': msgId,
+        'id': entryTxnId,
         'tsRead': tsRead,
         'ts': ts,
         'type': 'DEBIT'
@@ -1041,8 +1041,13 @@ def send_pay(msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder
         last_ts_per_tag[tagId] = next_ts
         ts = next_ts.strftime('%Y-%m-%dT%H:%M:%S')
         tsRead = (next_ts - timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%M:%S')
-    txnId = str(uuid.uuid4())[:22]
-    entryTxnId = str(uuid.uuid4())[:22]
+    # Generate txnId and entryTxnId in the same format as test_client.py
+    now = datetime.now()
+    date_str = now.strftime('%Y%m%d%H%M%S')
+    plaza_id = pay_data['plaza_info']['id']
+    lane_reader_id = pay_data['lane']['readerId']
+    txnId = f"{plaza_id}{lane_reader_id}{date_str}"
+    entryTxnId = txnId
     xml_data = build_pay_request(
         msgId,
         orgId,
