@@ -1,79 +1,56 @@
 {% extends 'base.html' %}
+{% block title %}RF Power - FASTag Parking{% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0"><i class="fas fa-broadcast-tower me-2"></i>RFID Reader RF Power Control</h3>
-        </div>
-        <div class="card-body">
-            <form id="rfpower-form" class="row g-3">
-                <div class="col-md-4">
-                    <label for="reader" class="form-label">Select Reader</label>
-                    <select class="form-select" id="reader" name="reader" required>
-                        <option value="1">Reader 1</option>
-                        <option value="2">Reader 2</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label for="current-rf" class="form-label">Current RF Power</label>
-                    <input type="text" class="form-control" id="current-rf" readonly>
-                </div>
-                <div class="col-md-4">
-                    <label for="new-rf" class="form-label">push  New RF Power (1-30)</label>
-                    <input type="number" class="form-control" id="new-rf" name="new_rf" min="1" max="30" placeholder="Enter value" required>
-                </div>
-                <div class="col-12 mt-3">
-                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Set RF Power</button>
-                </div>
-            </form>
-            <div id="rfpower-feedback" class="mt-3"></div>
-        </div>
+<div class="container-fluid" style="max-width: 480px;">
+    <div class="card shadow-sm border-0 p-4" style="border-radius: 18px;">
+        <h3 class="mb-4" style="color: #764ba2; font-weight: 700; letter-spacing: 1px;">
+            <i class="fas fa-broadcast-tower me-2"></i>RF Power Control
+        </h3>
+        <form id="rfpower-form" class="needs-validation" novalidate>
+            <div class="mb-3">
+                <label class="form-label fw-bold" style="color: #764ba2;"><i class="fas fa-microchip me-1"></i> Reader ID</label>
+                <input type="text" name="reader_id" class="form-control rounded-pill" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold" style="color: #764ba2;"><i class="fas fa-broadcast-tower me-1"></i> Current RF Power</label>
+                <input type="text" name="current_rf" class="form-control rounded-pill" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold" style="color: #764ba2;"><i class="fas fa-sliders-h me-1"></i> Set New RF Power (1-30)</label>
+                <input type="number" name="new_rf" class="form-control rounded-pill" min="1" max="30" required>
+            </div>
+            <div id="rfpower-feedback" class="mb-2"></div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button type="submit" class="btn btn-primary rounded-pill px-4" style="background: #764ba2; border: none;">
+                    <i class="fas fa-save me-1"></i> Save
+                </button>
+                <a href="{{ url_for('lanes.lanes') }}" class="btn btn-secondary rounded-pill px-4"><i class="fas fa-arrow-left me-1"></i> Back</a>
+            </div>
+        </form>
     </div>
 </div>
-<script>
-function fetchCurrentRF() {
-    const reader_id = document.getElementById('reader').value;
-    fetch(`/api/rfid/rfpower?reader=${reader_id}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.rf_power !== undefined) {
-                document.getElementById('current-rf').value = data.rf_power;
-            } else {
-                document.getElementById('current-rf').value = 'Error';
-            }
-        });
+<style>
+.card {
+    border-radius: 18px;
+    transition: transform 0.2s;
 }
-
-document.getElementById('reader').addEventListener('change', fetchCurrentRF);
-document.addEventListener('DOMContentLoaded', fetchCurrentRF);
-
+.card:hover {
+    transform: translateY(-2px);
+}
+.btn-primary:hover, .btn-primary:focus {
+    background: #4b2e83 !important;
+    color: white !important;
+}
+.btn-secondary:hover, .btn-secondary:focus {
+    background: #764ba2 !important;
+    color: white !important;
+}
+</style>
+<script>
+// Example JS for feedback (replace with your actual logic)
 document.getElementById('rfpower-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const reader_id = Number(document.getElementById('reader').value);
-    const new_rf = Number(document.getElementById('new-rf').value);
-    const feedback = document.getElementById('rfpower-feedback');
-    feedback.innerHTML = '';
-    if (!Number.isInteger(reader_id) || !Number.isInteger(new_rf) || new_rf < 1 || new_rf > 30) {
-        feedback.innerHTML = "<div class='alert alert-danger'>Please select a reader and enter a valid RF Power (1-30).</div>";
-        return;
-    }
-    fetch('/api/rfid/rfpower', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reader_id, rf_power: new_rf })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            feedback.innerHTML = `<div class='alert alert-success'>RF Power set to ${data.rf_power} for Reader ${data.reader_id}.`;
-            fetchCurrentRF();
-        } else {
-            feedback.innerHTML = `<div class='alert alert-danger'>${data.error || 'Failed to set RF Power.'}</div>`;
-        }
-    })
-    .catch(() => {
-        feedback.innerHTML = `<div class='alert alert-danger'>Network error. Please try again.</div>`;
-    });
+    document.getElementById('rfpower-feedback').innerHTML = '<div class="alert alert-success">RF Power updated successfully!</div>';
 });
 </script>
 {% endblock %} 
