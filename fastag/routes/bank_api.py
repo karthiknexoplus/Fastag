@@ -297,7 +297,10 @@ def request_pay():
     tagId = ''
     lane = {'id': 'OUT01', 'direction': 'S', 'readerId': 'T01', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid', 'Floor': '1'}
     entry_lane = {'id': 'IN01', 'direction': 'N', 'readerId': 'N01', 'Status': 'Open', 'Mode': 'Normal', 'laneType': 'Hybrid', 'Floor': '1'}
-    tsRead = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    from datetime import timedelta
+    now = datetime.now()
+    ts = (now - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%S')
+    tsRead = (now - timedelta(minutes=15)).strftime('%Y-%m-%dT%H:%M:%S')
     if request.method == 'POST':
         amount = request.form.get('amount', amount)
         tagId = request.form.get('tagId', tagId)
@@ -326,7 +329,8 @@ def request_pay():
             'vehicleRegNo': vehicleRegNo,
             'avc': avc,
             'amount_value': amount,
-            'tsRead': tsRead
+            'tsRead': tsRead,
+            'ts': ts
         }
         msgId = datetime.now().strftime('%Y%m%d%H%M%S')
         try:
