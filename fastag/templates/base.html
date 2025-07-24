@@ -124,10 +124,6 @@
                 <span class="fw-bold text-dark" style="font-size:1.2rem; letter-spacing:1px;">FASTag Parking</span>
             </a>
             <div class="d-flex align-items-center ms-auto">
-                <a href="{{ url_for('auth.home') }}" class="nav-icon-link {% if request.endpoint == 'auth.home' %}active{% endif %}" title="Dashboard">
-                    <i class="fas fa-home"></i>
-                    <span class="nav-label d-none d-md-inline">Dashboard</span>
-                </a>
                 <a href="{{ url_for('locations.locations') }}" class="nav-icon-link {% if request.endpoint == 'locations.locations' %}active{% endif %}" title="Locations">
                     <i class="fas fa-map-marker-alt"></i>
                     <span class="nav-label d-none d-md-inline">Locations</span>
