@@ -84,7 +84,7 @@
                   <tbody>
                     {% for log in logs %}
                     <tr>
-                      <td>{{ log['request_time'] }}</td>
+                      <td class="utc-time">{{ log['request_time'] }}</td>
                       <td>{{ log['msg_id'] }}</td>
                       <td>{{ log['tag_id'] }}</td>
                       <td>{{ log['tid'] }}</td>
@@ -121,4 +121,26 @@
     </div>
   </div>
 </div>
-{% endblock %} 
+{% endblock %}
+<script>
+function toIST(utcString) {
+    // Parse as UTC
+    let d = new Date(utcString.replace(' ', 'T') + 'Z');
+    // IST offset is +5:30
+    d.setMinutes(d.getMinutes() + 330);
+    // Format as YYYY-MM-DD HH:MM:SS IST
+    let y = d.getFullYear();
+    let m = ('0' + (d.getMonth() + 1)).slice(-2);
+    let day = ('0' + d.getDate()).slice(-2);
+    let h = ('0' + d.getHours()).slice(-2);
+    let min = ('0' + d.getMinutes()).slice(-2);
+    let s = ('0' + d.getSeconds()).slice(-2);
+    return `${y}-${m}-${day} ${h}:${min}:${s} IST`;
+}
+document.querySelectorAll('.utc-time').forEach(function(td) {
+    let raw = td.textContent.trim();
+    if (raw && !raw.endsWith('IST')) {
+        td.textContent = toIST(raw);
+    }
+});
+</script> 
