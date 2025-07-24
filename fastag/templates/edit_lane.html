@@ -5,16 +5,51 @@
     <h2 class="mb-4"><i class="fas fa-pen-to-square me-2"></i>Edit Lane</h2>
     <form method="POST" class="card p-3 shadow-sm border-0">
         <div class="mb-3">
-            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i> Location</label>
-            <select name="location_id" class="form-select" required>
+            <label class="form-label">Plaza ID</label>
+            <select name="plaza_id" class="form-select" required>
                 {% for loc in locations %}
-                <option value="{{ loc['id'] }}" {% if loc['id'] == lane['location_id'] %}selected{% endif %}>{{ loc['name'] }} ({{ loc['site_id'] }})</option>
+                <option value="{{ loc['plaza_id'] }}" {% if loc['plaza_id'] == lane['plaza_id'] %}selected{% endif %}>{{ loc['plaza_id'] }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="mb-3">
-            <label class="form-label"><i class="fas fa-tag me-1"></i> Lane Name</label>
-            <input type="text" name="lane_name" class="form-control" value="{{ lane['lane_name'] }}" required>
+            <label class="form-label">Plaza Name</label>
+            <select name="plaza_name" class="form-select" required>
+                {% for loc in locations %}
+                <option value="{{ loc['name'] }}" {% if loc['name'] == lane['plaza_name'] %}selected{% endif %}>{{ loc['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Lane ID</label>
+            <input type="text" name="lane_id" class="form-control" value="{{ lane['lane_id'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Lane Type</label>
+            <select name="lane_type" class="form-select" required>
+                <option value="Entry" {% if lane['lane_type'] == 'Entry' %}selected{% endif %}>Entry</option>
+                <option value="Exit" {% if lane['lane_type'] == 'Exit' %}selected{% endif %}>Exit</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Lane Desc.</label>
+            <input type="text" name="lane_desc" class="form-control" value="{{ lane['lane_desc'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Lane Direction</label>
+            <select name="lane_direction" class="form-select" required>
+                <option value="N" {% if lane['lane_direction'] == 'N' %}selected{% endif %}>N</option>
+                <option value="S" {% if lane['lane_direction'] == 'S' %}selected{% endif %}>S</option>
+                <option value="E" {% if lane['lane_direction'] == 'E' %}selected{% endif %}>E</option>
+                <option value="W" {% if lane['lane_direction'] == 'W' %}selected{% endif %}>W</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Plaza Lane Direction</label>
+            <select name="plaza_lane_direction" class="form-select" required>
+                <option value="IN" {% if lane['plaza_lane_direction'] == 'IN' %}selected{% endif %}>IN</option>
+                <option value="OUT" {% if lane['plaza_lane_direction'] == 'OUT' %}selected{% endif %}>OUT</option>
+            </select>
         </div>
         <div class="text-end">
             <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save</button>

@@ -22,10 +22,17 @@ def lanes():
             readers_map = {row['lane_id']: row['count'] for row in readers}
     if request.method == 'POST':
         location_id = request.form['location_id']
-        lane_name = request.form['lane_name']
-        db.execute('INSERT INTO lanes (location_id, lane_name) VALUES (?, ?)', (location_id, lane_name))
+        plaza_id = request.form['plaza_id']
+        plaza_name = request.form['plaza_name']
+        lane_id_val = request.form['lane_id']
+        lane_type = request.form['lane_type']
+        lane_desc = request.form['lane_desc']
+        lane_direction = request.form['lane_direction']
+        plaza_lane_direction = request.form['plaza_lane_direction']
+        db.execute('INSERT INTO lanes (location_id, plaza_id, plaza_name, lane_id, lane_type, lane_desc, lane_direction, plaza_lane_direction) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                   (location_id, plaza_id, plaza_name, lane_id_val, lane_type, lane_desc, lane_direction, plaza_lane_direction))
         db.commit()
-        logging.info(f"Lane added: {lane_name} (Location {location_id})")
+        logging.info(f"Lane added: {lane_id_val} (Location {location_id})")
         flash('Lane added!', 'success')
         return redirect(url_for('lanes.lanes', location_id=location_id))
     return render_template('lanes.html', lanes=lanes, locations=locations, selected_location=selected_location, readers_map=readers_map)
@@ -38,13 +45,19 @@ def edit_lane(id):
     lane = db.execute('SELECT * FROM lanes WHERE id = ?', (id,)).fetchone()
     locations = db.execute('SELECT * FROM locations').fetchall()
     if request.method == 'POST':
-        location_id = request.form['location_id']
-        lane_name = request.form['lane_name']
-        db.execute('UPDATE lanes SET location_id = ?, lane_name = ? WHERE id = ?', (location_id, lane_name, id))
+        plaza_id = request.form['plaza_id']
+        plaza_name = request.form['plaza_name']
+        lane_id_val = request.form['lane_id']
+        lane_type = request.form['lane_type']
+        lane_desc = request.form['lane_desc']
+        lane_direction = request.form['lane_direction']
+        plaza_lane_direction = request.form['plaza_lane_direction']
+        db.execute('UPDATE lanes SET plaza_id = ?, plaza_name = ?, lane_id = ?, lane_type = ?, lane_desc = ?, lane_direction = ?, plaza_lane_direction = ? WHERE id = ?',
+                   (plaza_id, plaza_name, lane_id_val, lane_type, lane_desc, lane_direction, plaza_lane_direction, id))
         db.commit()
-        logging.info(f"Lane updated: {lane_name} (ID {id})")
+        logging.info(f"Lane updated: {lane_id_val} (ID {id})")
         flash('Lane updated!', 'success')
-        return redirect(url_for('lanes.lanes', location_id=location_id))
+        return redirect(url_for('lanes.lanes', location_id=lane['location_id']))
     return render_template('edit_lane.html', lane=lane, locations=locations)
 
 @lanes_bp.route('/lanes/delete/<int:id>', methods=['POST'])
@@ -67,17 +80,18 @@ def api_add_lane():
         return {"success": False, "error": "Request must be JSON"}, 400
     data = request.get_json()
     location_id = data.get("location_id")
-    lane_name = data.get("lane_name")
-    if not location_id or not lane_name:
-        return {"success": False, "error": "Missing location_id or lane_name"}, 400
+    lane_id_val = data.get("lane_id")
+    if not location_id or not lane_id_val:
+        return {"success": False, "error": "Missing location_id or lane_id"}, 400
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('INSERT INTO lanes (location_id, lane_name) VALUES (?, ?)', (location_id, lane_name))
+        cursor.execute('INSERT INTO lanes (location_id, plaza_id, plaza_name, lane_id, lane_type, lane_desc, lane_direction, plaza_lane_direction) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                       (location_id, data.get('plaza_id'), data.get('plaza_name'), data.get('lane_id'), data.get('lane_type'), data.get('lane_desc'), data.get('lane_direction'), data.get('plaza_lane_direction')))
         db.commit()
-        lane_id = cursor.lastrowid
-        logging.info(f"Lane added via API: {lane_name} (Location {location_id})")
-        return {"success": True, "lane_id": lane_id}, 201
+        lane_id_db = cursor.lastrowid
+        logging.info(f"Lane added via API: {data.get('lane_id')} (Location {location_id})")
+        return {"success": True, "lane_id": lane_id_db}, 201
     except Exception as e:
         logging.error(f"Error adding lane via API: {e}")
         return {"success": False, "error": str(e)}, 500
@@ -89,17 +103,18 @@ def api_edit_lane(id):
         return {"success": False, "error": "Request must be JSON"}, 400
     data = request.get_json()
     location_id = data.get("location_id")
-    lane_name = data.get("lane_name")
-    if not location_id or not lane_name:
-        return {"success": False, "error": "Missing location_id or lane_name"}, 400
+    lane_id_val = data.get("lane_id")
+    if not location_id or not lane_id_val:
+        return {"success": False, "error": "Missing location_id or lane_id"}, 400
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('UPDATE lanes SET location_id = ?, lane_name = ? WHERE id = ?', (location_id, lane_name, id))
+        cursor.execute('UPDATE lanes SET plaza_id = ?, plaza_name = ?, lane_id = ?, lane_type = ?, lane_desc = ?, lane_direction = ?, plaza_lane_direction = ? WHERE id = ?',
+                       (data.get('plaza_id'), data.get('plaza_name'), data.get('lane_id'), data.get('lane_type'), data.get('lane_desc'), data.get('lane_direction'), data.get('plaza_lane_direction'), id))
         db.commit()
         if cursor.rowcount == 0:
             return {"success": False, "error": "Lane not found"}, 404
-        logging.info(f"Lane updated via API: {lane_name} (ID {id})")
+        logging.info(f"Lane updated via API: {data.get('lane_id')} (ID {id})")
         return {"success": True}, 200
     except Exception as e:
         logging.error(f"Error editing lane via API: {e}")
@@ -128,9 +143,9 @@ def api_view_lanes():
     try:
         db = get_db()
         if location_id:
-            lanes = db.execute('SELECT id, location_id, lane_name FROM lanes WHERE location_id = ?', (location_id,)).fetchall()
+            lanes = db.execute('SELECT * FROM lanes WHERE location_id = ?', (location_id,)).fetchall()
         else:
-            lanes = db.execute('SELECT id, location_id, lane_name FROM lanes').fetchall()
+            lanes = db.execute('SELECT * FROM lanes').fetchall()
         lanes_list = [dict(l) for l in lanes]
         return {"success": True, "lanes": lanes_list}, 200
     except Exception as e:
