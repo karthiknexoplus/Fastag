@@ -84,6 +84,19 @@
             .nav-icon-link { font-size: 1.1rem; padding: 0.4rem 0.5rem; }
             .main-content { padding: 1.2rem 0.5rem; }
         }
+        /* Force Banking menu to use purple color */
+        .navbar-custom .dropdown .nav-icon-link,
+        .navbar-custom .dropdown .nav-icon-link .fastag-menu-icon {
+            color: #764ba2 !important;
+        }
+        .navbar-custom .dropdown .nav-icon-link.active,
+        .navbar-custom .dropdown .nav-icon-link:hover {
+            background: #f3e9ff !important;
+            color: #4b2e83 !important;
+        }
+        .navbar-custom .dropdown .nav-label {
+            color: #764ba2 !important;
+        }
     </style>
     {% block head %}{% endblock %}
     <script>
