@@ -13,7 +13,6 @@ import random
 import xml.dom.minidom
 from uuid import uuid4
 from collections import defaultdict
-import json
 
 app = Flask(__name__)
 
@@ -26,7 +25,7 @@ BANK_ENV = os.getenv('BANK_API_ENV', 'UAT')
 
 # --- XML Signing and Verification Configuration ---
 # Set these to your actual key/cert paths
-PRIVATE_KEY_PATH = "privkey.pem"  # Use the certs directory
+PRIVATE_KEY_PATH = "privkey.pem"  # Use the local project directory copy
 CERT_PATH = "public_cert.pem"      # Use the public cert you shared with the bank
 BANK_CERT_PATH = "../etolluatsigner_Public.crt.txt"                      # Bank's public cert for verifying responses
 
@@ -138,17 +137,11 @@ UAT_TAGS = [
 # Global dictionary to track last used ts per tagId
 last_ts_per_tag = defaultdict(lambda: None)
 
-# Load API URLs from certs/bank_api_urls.json
-with open('bank_api_urls.json', 'r') as f:
-    BANK_API_URLS = json.load(f)
-API_ENV = os.getenv('BANK_API_ENV', 'UAT').upper()
-API_URLS = BANK_API_URLS.get(API_ENV, BANK_API_URLS['UAT'])
-
-# Example usage:
-# API_URLS['sync_time_url'], API_URLS['pay_url'], etc.
-
 def get_bank_url():
-    return API_URLS['sync_time_url']
+    if BANK_ENV.upper() == 'PROD':
+        return PROD_URL
+    return UAT_URL
+
 
 def build_sync_time_request(ver, ts, orgId, msgId, signature_placeholder='...'):
     root = ET.Element('etc:ReqSyncTime', {'xmlns:etc': 'http://npci.org/etc/schema/'})
@@ -815,7 +808,7 @@ def send_tag_details(msgId, orgId, vehicle_info):
     lane_id = '001'      # Example Lane ID (last 3 digits)
     txnId = generate_txn_id(plaza_id, lane_id, datetime.now())
     vehicle_info = vehicle_info.copy()
-    txn_ts = vehicle_info.get('txn_ts', ts)
+    vehicle_info.setdefault('txn_ts', ts)
     xml_data = build_tag_details_request(msgId, orgId, ts, txnId, txn_ts, vehicle_info)
     xml_str = xml_data.decode() if isinstance(xml_data, bytes) else xml_data
     if xml_str.startswith('<?xml'):
@@ -824,9 +817,9 @@ def send_tag_details(msgId, orgId, vehicle_info):
     print(f'\n[TAG_DETAILS] Request XML (unsigned, no signature), TxnId: {txnId}')
     print(xml_str)
     payload = xml_data
-    # Use correct URL from config
-    url = API_URLS.get('tag_details_url', 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails')
-    print("[DEBUG] URL for request:", url)
+    # Hardcode the /v2 endpoint
+    url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqTagDetails'
+    print("[DEBUG] Hardcoded URL for request:", url)
     headers = {'Content-Type': 'application/xml'}
     print("[TAG_DETAILS] URL:", url)
     print("[TAG_DETAILS] Headers:", headers)
@@ -853,10 +846,9 @@ def send_tag_details(msgId, orgId, vehicle_info):
         print("[TAG_DETAILS] Parsed Response:")
         for k, v in parsed.items():
             print(f"  {k}: {v}")
-        return parsed
     except Exception as e:
         print('[TAG_DETAILS] Error sending Tag Details request:', e)
-        return {'error': str(e)}
+        return None
 
 
 def parse_tag_details_response(xml_response):
@@ -959,18 +951,18 @@ def build_pay_request(
             return 'T' + lane_id[3:]
         return lane_id
     # Lane
-        etree.SubElement(plaza, 'Lane', {
-            'direction': lane['direction'],
-            'id': lane['id'],
+    etree.SubElement(plaza, 'Lane', {
+        'direction': lane['direction'],
+        'id': lane['id'],
         'readerId': get_short_reader_id(lane['id']),
         'Status': lane.get('Status', 'OPEN'),
         'Mode': lane.get('Mode', 'NORMAL'),
         'laneType': lane.get('laneType', 'Hybrid'),
         'ExitGate': get_short_reader_id(lane['id']),
         'Floor': lane.get('Floor', '1')
-        })
+    })
     # EntryLane
-        etree.SubElement(plaza, 'EntryLane', {
+    etree.SubElement(plaza, 'EntryLane', {
         'direction': entry_lane['direction'],
         'id': entry_lane['id'],
         'readerId': get_short_reader_id(entry_lane['id']),
@@ -979,7 +971,7 @@ def build_pay_request(
         'laneType': entry_lane.get('laneType', 'Hybrid'),
         'EntryGate': get_short_reader_id(entry_lane['id']),
         'Floor': entry_lane.get('Floor', '1')
-            })
+    })
     # ReaderVerificationResult
     rvr = etree.SubElement(plaza, 'ReaderVerificationResult', {
         'publicKeyCVV': '',
