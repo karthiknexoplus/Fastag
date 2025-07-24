@@ -1024,20 +1024,23 @@ def build_pay_request(
     return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
 
-def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
+def send_pay(msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder='...'):
     tagId = pay_data.get('tagId') if isinstance(pay_data, dict) else None
-    now = datetime.now(timezone.utc)
-    last_ts = last_ts_per_tag.get(tagId)
-    if last_ts:
-        # Add 10 minutes and 1 second to last used ts
-        next_ts = last_ts + timedelta(minutes=10, seconds=1)
-        if next_ts > now + timedelta(days=2):  # Prevent runaway into far future
+    import uuid
+    from datetime import datetime, timezone, timedelta
+    # If ts/tsRead not provided, use legacy logic
+    if ts is None or tsRead is None:
+        now = datetime.now(timezone.utc)
+        last_ts = last_ts_per_tag.get(tagId)
+        if last_ts:
+            next_ts = last_ts + timedelta(minutes=10, seconds=1)
+            if next_ts > now + timedelta(days=2):
+                next_ts = now + timedelta(days=1) - timedelta(minutes=10, seconds=1)
+        else:
             next_ts = now + timedelta(days=1) - timedelta(minutes=10, seconds=1)
-    else:
-        # Start with 1 day in the future minus 10min1s
-        next_ts = now + timedelta(days=1) - timedelta(minutes=10, seconds=1)
-    last_ts_per_tag[tagId] = next_ts
-    ts = next_ts.strftime('%Y-%m-%dT%H:%M:%S')
+        last_ts_per_tag[tagId] = next_ts
+        ts = next_ts.strftime('%Y-%m-%dT%H:%M:%S')
+        tsRead = (next_ts - timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     entryTxnId = str(uuid.uuid4())[:22]
     xml_data = build_pay_request(
@@ -1053,7 +1056,8 @@ def send_pay(msgId, orgId, pay_data, signature_placeholder='...'):
         pay_data['tagId'],
         pay_data['vehicleRegNo'],
         pay_data['avc'],
-        pay_data['tsRead']
+        pay_data['amount_value'],
+        tsRead
     )
     url = get_bank_url('pay')
     headers = {'Content-Type': 'application/xml'}
