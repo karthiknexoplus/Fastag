@@ -307,19 +307,20 @@ def request_pay():
         TID = request.form.get('TID', TID)
         vehicleRegNo = request.form.get('vehicleRegNo', vehicleRegNo)
         avc = request.form.get('avc', avc)
-        # Optionally allow lane/entry_lane selection
-        # Build plaza_info
+        # Use the exact working values from test_client.py
         plaza_info = {
-            'geoCode': plazaGeoCode,
-            'id': plazaId,
-            'name': '',
+            'geoCode': '11,76',  # Use comma, not dot, as in working request
+            'id': '712764',
+            'name': 'PGS hospital',
             'subtype': 'Covered',
             'type': 'Parking',
             'address': '',
             'fromDistrict': '',
             'toDistrict': '',
-            'agencyCode': agencyId
+            'agencyCode': 'TCABO'
         }
+        lane = {'id': 'OUT01', 'direction': 'S', 'readerId': 'T01', 'Status': 'OPEN', 'Mode': 'NORMAL', 'laneType': 'Hybrid', 'ExitGate': 'T01', 'Floor': '1'}
+        entry_lane = {'id': 'IN01', 'direction': 'N', 'readerId': 'N01', 'Status': 'OPEN', 'Mode': 'NORMAL', 'laneType': 'Hybrid', 'EntryGate': 'N01', 'Floor': '1'}
         pay_data = {
             'plaza_info': plaza_info,
             'lane': lane,
