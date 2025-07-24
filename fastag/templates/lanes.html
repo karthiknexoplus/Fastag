@@ -110,6 +110,8 @@
                         <th>Lane Desc.</th>
                         <th>Lane Direction</th>
                         <th>Plaza Lane Direction</th>
+                        <th>Reader ID</th>
+                        <th>Reader IP</th>
                         <th style="width:70px;"></th>
                     </tr>
                 </thead>
@@ -120,10 +122,15 @@
                         <td>{{ lane['plaza_name'] }}</td>
                         <td>{{ lane['lane_id'] }}</td>
                         <td>{{ lane['lane_type'] }}</td>
-                        <td>{{ lane['lane_desc'] }}</td>
+                        <td>Hybrid</td>
                         <td>{{ lane['lane_direction'] }}</td>
                         <td>{{ lane['plaza_lane_direction'] }}</td>
+                        <td>{{ lane['reader_id'] if lane['reader_id'] else '-' }}</td>
+                        <td>{{ lane['reader_ip'] if lane['reader_ip'] else '-' }}</td>
                         <td class="text-center">
+                            <a href="{{ url_for('readers.manage_reader', lane_id=lane['id']) }}" class="btn btn-sm" style="background: #764ba2; color: white; border: none;">
+                                <i class="fas fa-microchip"></i> Manage Reader
+                            </a>
                             <a href="{{ url_for('lanes.edit_lane', id=lane['id']) }}" class="me-2" title="Edit" style="color: #764ba2;">
                                 <i class="fas fa-pen-to-square" style="font-size:1.05rem;"></i>
                             </a>
