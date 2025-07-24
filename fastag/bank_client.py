@@ -1059,7 +1059,7 @@ def send_pay(msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder
         pay_data['amount_value'],
         tsRead
     )
-    url = get_bank_url('pay')
+    url = get_bank_url('pay_url')
     headers = {'Content-Type': 'application/xml'}
     print("\n[PAY] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("[PAY] URL:", url)
