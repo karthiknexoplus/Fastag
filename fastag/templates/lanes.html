@@ -21,6 +21,16 @@
         </div>
     </form>
     {% if selected_location %}
+    <div class="alert alert-info mb-4" style="max-width: 700px;">
+        <strong>Sample Mapping Details:</strong><br>
+        Plaza ID: <b>712764</b> &nbsp; | &nbsp;
+        Plaza Name: <b>PGS hospital</b> &nbsp; | &nbsp;
+        Lane ID: <b>IN01</b> &nbsp; | &nbsp;
+        Lane Type: <b>Entry</b> &nbsp; | &nbsp;
+        Lane Desc.: <b>Hybrid</b> &nbsp; | &nbsp;
+        Lane Direction: <b>N</b> &nbsp; | &nbsp;
+        Plaza Lane Direction: <b>IN</b>
+    </div>
     <form method="POST" class="card p-3 mb-4 shadow-sm border-0 needs-validation" novalidate>
         <div class="row g-3 align-items-center">
             <div class="col-md-3">
@@ -54,8 +64,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label fastag-form-label">Lane Desc.</label>
-                <input type="text" name="lane_desc" class="form-control fs-6" required>
+                <input type="hidden" name="lane_desc" value="Hybrid">
             </div>
         </div>
         <div class="row g-3 align-items-center mt-2">
@@ -105,16 +114,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="table-info">
-                        <td>712764</td>
-                        <td>PGS hospital</td>
-                        <td>IN01</td>
-                        <td>Entry</td>
-                        <td>Hybrid</td>
-                        <td>N</td>
-                        <td>IN</td>
-                        <td class="text-center text-muted">(Sample)</td>
-                    </tr>
                     {% for lane in lanes %}
                     <tr>
                         <td>{{ lane['plaza_id'] }}</td>
