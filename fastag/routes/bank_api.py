@@ -348,18 +348,26 @@ def request_pay():
             response = f"<b>Error:</b> {e}"
     # Fetch latest logs
     logs = fetch_request_pay_logs(20)
-    # Convert log times to IST for display
-    # Ensure we use only 'from datetime import datetime, timezone, timedelta' and not 'import datetime'
+    # Convert log times to IST for display (robust for both UTC and already-IST values)
+    from datetime import datetime, timezone, timedelta
     import pytz
     ist = pytz.timezone('Asia/Kolkata')
     for log in logs:
         try:
-            dt = datetime.strptime(log['request_time'], '%Y-%m-%d %H:%M:%S')
-            dt_utc = dt.replace(tzinfo=timezone.utc)
+            raw = log['request_time']
+            if 'T' in raw:
+                dt = datetime.fromisoformat(raw)
+            else:
+                dt = datetime.strptime(raw, '%Y-%m-%d %H:%M:%S')
+            # If naive, assume UTC
+            if dt.tzinfo is None:
+                dt_utc = dt.replace(tzinfo=timezone.utc)
+            else:
+                dt_utc = dt.astimezone(timezone.utc)
             dt_ist = dt_utc.astimezone(ist)
             log['request_time'] = dt_ist.strftime('%Y-%m-%d %H:%M:%S IST')
         except Exception:
-            pass
+            log['request_time'] = f"{log['request_time']} IST"
     return render_template('banking/request_pay.html', orgId=orgId, plazaId=plazaId, agencyId=agencyId, acquirerId=acquirerId, plazaGeoCode=plazaGeoCode, TID=TID, vehicleRegNo=vehicleRegNo, avc=avc, amount=amount, tagId=tagId, response=response, logs=logs)
 
 @banking.route('/banking/response_pay', methods=['GET', 'POST'])
