@@ -2,92 +2,123 @@
 {% block title %}Request Pay - Banking{% endblock %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Request Pay</h2>
-  <form method="post">
-    <div class="mb-3">
-      <label for="orgId" class="form-label">Org ID</label>
-      <input type="text" class="form-control" id="orgId" name="orgId" value="{{ orgId }}" readonly>
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0" style="border-radius: 1.2rem;">
+        <div class="card-header text-white" style="background: linear-gradient(90deg, #764ba2 0%, #667eea 100%); border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem;">
+          <h3 class="mb-0"><i class="fas fa-money-check-alt me-2"></i>Request Pay</h3>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="orgId" class="form-label fastag-form-label"><i class="fas fa-building fastag-form-icon"></i>Org ID</label>
+                <input type="text" class="form-control" id="orgId" name="orgId" value="{{ orgId }}" readonly>
+              </div>
+              <div class="col-md-6">
+                <label for="plazaId" class="form-label fastag-form-label"><i class="fas fa-archway fastag-form-icon"></i>Plaza ID</label>
+                <input type="text" class="form-control" id="plazaId" name="plazaId" value="{{ plazaId }}" readonly>
+              </div>
+              <div class="col-md-6">
+                <label for="agencyId" class="form-label fastag-form-label"><i class="fas fa-users fastag-form-icon"></i>Agency ID</label>
+                <input type="text" class="form-control" id="agencyId" name="agencyId" value="{{ agencyId }}" readonly>
+              </div>
+              <div class="col-md-6">
+                <label for="acquirerId" class="form-label fastag-form-label"><i class="fas fa-handshake fastag-form-icon"></i>Acquirer ID</label>
+                <input type="text" class="form-control" id="acquirerId" name="acquirerId" value="{{ acquirerId }}" readonly>
+              </div>
+              <div class="col-md-12">
+                <label for="plazaGeoCode" class="form-label fastag-form-label"><i class="fas fa-globe-asia fastag-form-icon"></i>Plaza Geo Code</label>
+                <input type="text" class="form-control" id="plazaGeoCode" name="plazaGeoCode" value="{{ plazaGeoCode }}" readonly>
+              </div>
+              <div class="col-md-6">
+                <label for="amount" class="form-label fastag-form-label"><i class="fas fa-rupee-sign fastag-form-icon"></i>Amount</label>
+                <input type="text" class="form-control" id="amount" name="amount" value="{{ amount }}">
+              </div>
+              <div class="col-md-6">
+                <label for="tagId" class="form-label fastag-form-label"><i class="fas fa-id-badge fastag-form-icon"></i>Tag ID</label>
+                <input type="text" class="form-control" id="tagId" name="tagId" value="{{ tagId }}">
+              </div>
+              <div class="col-md-6">
+                <label for="TID" class="form-label fastag-form-label"><i class="fas fa-barcode fastag-form-icon"></i>TID</label>
+                <input type="text" class="form-control" id="TID" name="TID" value="{{ TID }}">
+              </div>
+              <div class="col-md-6">
+                <label for="vehicleRegNo" class="form-label fastag-form-label"><i class="fas fa-car fastag-form-icon"></i>Vehicle Reg No</label>
+                <input type="text" class="form-control" id="vehicleRegNo" name="vehicleRegNo" value="{{ vehicleRegNo }}">
+              </div>
+              <div class="col-md-6">
+                <label for="avc" class="form-label fastag-form-label"><i class="fas fa-truck-moving fastag-form-icon"></i>AVC</label>
+                <input type="text" class="form-control" id="avc" name="avc" value="{{ avc }}">
+              </div>
+            </div>
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(90deg, #764ba2 0%, #667eea 100%); box-shadow: 0 2px 8px rgba(118,75,162,0.15);">
+                <i class="fas fa-paper-plane me-2"></i>Send Request Pay
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="card mt-4 shadow-sm border-0" style="border-radius: 1.2rem;">
+        <div class="card-header text-white" style="background: linear-gradient(90deg, #764ba2 0%, #667eea 100%); border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem;">
+          <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Request Pay Logs</h5>
+        </div>
+        <div class="card-body p-3">
+          <div id="logs">
+            {% if logs and logs|length > 0 %}
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0" style="background: #fff; border-radius: 0.7rem; overflow: hidden;">
+                  <thead class="table-light">
+                    <tr style="background: #f3e9ff; color: #764ba2;">
+                      <th><i class="fas fa-clock"></i> Time</th>
+                      <th><i class="fas fa-hashtag"></i> Msg ID</th>
+                      <th><i class="fas fa-id-badge"></i> Tag ID</th>
+                      <th><i class="fas fa-barcode"></i> TID</th>
+                      <th><i class="fas fa-car"></i> Vehicle Reg No</th>
+                      <th><i class="fas fa-truck-moving"></i> AVC</th>
+                      <th><i class="fas fa-rupee-sign"></i> Amount</th>
+                      <th><i class="fas fa-receipt"></i> Response</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for log in logs %}
+                    <tr>
+                      <td>{{ log['request_time'] }}</td>
+                      <td>{{ log['msg_id'] }}</td>
+                      <td>{{ log['tag_id'] }}</td>
+                      <td>{{ log['tid'] }}</td>
+                      <td>{{ log['vehicle_reg_no'] }}</td>
+                      <td>{{ log['avc'] }}</td>
+                      <td>{{ log['amount'] }}</td>
+                      <td style="max-width:300px; word-break:break-all; white-space:pre-wrap;">{{ log['response'] }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="text-center text-muted py-3">
+                <i class="fas fa-info-circle fa-2x mb-2"></i><br>
+                No recent pay requests found.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="card mt-4 shadow-sm border-0" style="border-radius: 1.2rem;">
+        <div class="card-header text-white" style="background: linear-gradient(90deg, #764ba2 0%, #667eea 100%); border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem;">
+          <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Response</h5>
+        </div>
+        <div class="card-body">
+          <div id="response">
+            {% if response %}
+              <pre style="background: #f3e9ff; color: #4b2e83; border-radius: 0.5rem; padding: 1rem; font-size: 1.1em;">{{ response|safe }}</pre>
+            {% endif %}
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="mb-3">
-      <label for="plazaId" class="form-label">Plaza ID</label>
-      <input type="text" class="form-control" id="plazaId" name="plazaId" value="{{ plazaId }}" readonly>
-    </div>
-    <div class="mb-3">
-      <label for="agencyId" class="form-label">Agency ID</label>
-      <input type="text" class="form-control" id="agencyId" name="agencyId" value="{{ agencyId }}" readonly>
-    </div>
-    <div class="mb-3">
-      <label for="acquirerId" class="form-label">Acquirer ID</label>
-      <input type="text" class="form-control" id="acquirerId" name="acquirerId" value="{{ acquirerId }}" readonly>
-    </div>
-    <div class="mb-3">
-      <label for="plazaGeoCode" class="form-label">Plaza Geo Code</label>
-      <input type="text" class="form-control" id="plazaGeoCode" name="plazaGeoCode" value="{{ plazaGeoCode }}" readonly>
-    </div>
-    <div class="mb-3">
-      <label for="amount" class="form-label">Amount</label>
-      <input type="text" class="form-control" id="amount" name="amount" value="{{ amount }}">
-    </div>
-    <div class="mb-3">
-      <label for="tagId" class="form-label">Tag ID</label>
-      <input type="text" class="form-control" id="tagId" name="tagId" value="{{ tagId }}">
-    </div>
-    <div class="mb-3">
-      <label for="TID" class="form-label">TID</label>
-      <input type="text" class="form-control" id="TID" name="TID" value="{{ TID }}">
-    </div>
-    <div class="mb-3">
-      <label for="vehicleRegNo" class="form-label">Vehicle Reg No</label>
-      <input type="text" class="form-control" id="vehicleRegNo" name="vehicleRegNo" value="{{ vehicleRegNo }}">
-    </div>
-    <div class="mb-3">
-      <label for="avc" class="form-label">AVC</label>
-      <input type="text" class="form-control" id="avc" name="avc" value="{{ avc }}">
-    </div>
-    <button type="submit" class="btn btn-primary">Send Request Pay</button>
-  </form>
-  <hr>
-  <h5>Recent Request Pay Logs</h5>
-  <div id="logs">
-    {% if logs and logs|length > 0 %}
-      <table class="table table-bordered table-sm">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Msg ID</th>
-            <th>Tag ID</th>
-            <th>TID</th>
-            <th>Vehicle Reg No</th>
-            <th>AVC</th>
-            <th>Amount</th>
-            <th>Response</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for log in logs %}
-          <tr>
-            <td>{{ log['request_time'] }}</td>
-            <td>{{ log['msg_id'] }}</td>
-            <td>{{ log['tag_id'] }}</td>
-            <td>{{ log['tid'] }}</td>
-            <td>{{ log['vehicle_reg_no'] }}</td>
-            <td>{{ log['avc'] }}</td>
-            <td>{{ log['amount'] }}</td>
-            <td style="max-width:300px; word-break:break-all; white-space:pre-wrap;">{{ log['response'] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>No recent pay requests found.</p>
-    {% endif %}
-  </div>
-  <hr>
-  <h5>Response</h5>
-  <div id="response">
-    {% if response %}
-      <pre>{{ response|safe }}</pre>
-    {% endif %}
   </div>
 </div>
 {% endblock %} 
