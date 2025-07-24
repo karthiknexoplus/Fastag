@@ -349,12 +349,11 @@ def request_pay():
     # Fetch latest logs
     logs = fetch_request_pay_logs(20)
     # Convert log times to IST for display
-    from datetime import datetime, timezone, timedelta
+    # Ensure we use only 'from datetime import datetime, timezone, timedelta' and not 'import datetime'
     import pytz
     ist = pytz.timezone('Asia/Kolkata')
     for log in logs:
         try:
-            # Try parsing as UTC first
             dt = datetime.strptime(log['request_time'], '%Y-%m-%d %H:%M:%S')
             dt_utc = dt.replace(tzinfo=timezone.utc)
             dt_ist = dt_utc.astimezone(ist)
