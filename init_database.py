@@ -86,6 +86,11 @@ def init_database():
                 name TEXT NOT NULL,
                 address TEXT NOT NULL,
                 site_id TEXT UNIQUE NOT NULL,
+                org_id INTEGER,
+                plaza_id INTEGER,
+                agency_id INTEGER,
+                acquirer_id INTEGER,
+                geo_code TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS lanes (

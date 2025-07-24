@@ -139,7 +139,7 @@ UAT_TAGS = [
 last_ts_per_tag = defaultdict(lambda: None)
 
 # Load API URLs from certs/bank_api_urls.json
-with open('certs/bank_api_urls.json', 'r') as f:
+with open('bank_api_urls.json', 'r') as f:
     BANK_API_URLS = json.load(f)
 API_ENV = os.getenv('BANK_API_ENV', 'UAT').upper()
 API_URLS = BANK_API_URLS.get(API_ENV, BANK_API_URLS['UAT'])
