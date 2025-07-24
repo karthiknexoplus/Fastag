@@ -140,12 +140,7 @@ def create_app():
     from fastag.routes.kyc_users import kyc_users_bp
     from fastag.routes.admin import admin_bp
     from fastag.routes.analytics import analytics_bp
-    from fastag.routes.fuel_price import fuel_price_bp
-    from fastag.routes.vehicle_finder import vehicle_finder_bp
-    from fastag.routes.bank_finder import bank_finder_bp
-    from fastag.routes.fastag_balance import fastag_balance_bp
     from fastag.routes.google_auth import google_auth_bp, init_oauth
-    from fastag.routes.challan import challan_bp
     from fastag.routes.bank_api import bank_api, banking
     
     # Initialize OAuth
@@ -159,12 +154,7 @@ def create_app():
     app.register_blueprint(kyc_users_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(analytics_bp, url_prefix='/analytics')
-    app.register_blueprint(fuel_price_bp)
-    app.register_blueprint(vehicle_finder_bp)
-    app.register_blueprint(bank_finder_bp)
-    app.register_blueprint(fastag_balance_bp)
     app.register_blueprint(google_auth_bp, url_prefix='/google')
-    app.register_blueprint(challan_bp)
     app.register_blueprint(bank_api)
     app.register_blueprint(banking)
     # DB teardown
