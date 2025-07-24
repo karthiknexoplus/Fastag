@@ -142,6 +142,7 @@ def create_app():
     from fastag.routes.analytics import analytics_bp
     from fastag.routes.google_auth import google_auth_bp, init_oauth
     from fastag.routes.bank_api import bank_api, banking
+    from fastag.routes.tariff import tariff_bp
     
     # Initialize OAuth
     init_oauth(app)
@@ -157,6 +158,7 @@ def create_app():
     app.register_blueprint(google_auth_bp, url_prefix='/google')
     app.register_blueprint(bank_api)
     app.register_blueprint(banking)
+    app.register_blueprint(tariff_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
     @app.context_processor
