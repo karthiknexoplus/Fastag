@@ -328,14 +328,13 @@ def request_pay():
             'tagId': tagId,
             'vehicleRegNo': vehicleRegNo,
             'avc': avc,
-            'amount_value': amount,
-            'tsRead': tsRead,
-            'ts': ts
+            'amount_value': amount
         }
         msgId = datetime.now().strftime('%Y%m%d%H%M%S')
         try:
             from fastag.bank_client import send_pay
-            result = send_pay(msgId, orgId, pay_data)
+            # Patch: pass ts and tsRead as positional args if needed, or update send_pay to accept them
+            result = send_pay(msgId, orgId, pay_data, ts, tsRead)
             if isinstance(result, dict):
                 response = "<b>Pay Response:</b><br>"
                 for k, v in result.items():
