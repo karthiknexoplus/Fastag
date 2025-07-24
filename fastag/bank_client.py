@@ -1044,7 +1044,7 @@ def send_pay(_msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholde
         tsRead = (next_ts - timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%M:%S')
     # Generate msgId, txnId, and entryTxnId in the same format as test_client.py
     now = datetime.now()
-    date_str = now.strftime('%Y%m%d%H%M%S')
+    date_str = now.strftime('%y%m%d%H%M%S')  # 2-digit year
     plaza_id = pay_data['plaza_info']['id']
     lane_reader_id = pay_data['lane']['readerId']
     msgId = f"{plaza_id}{lane_reader_id}{date_str}"

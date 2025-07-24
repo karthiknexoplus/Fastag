@@ -9,7 +9,7 @@
           <h3 class="mb-0"><i class="fas fa-money-check-alt me-2"></i>Request Pay</h3>
         </div>
         <div class="card-body p-4">
-          <form method="post">
+  <form method="post">
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="orgId" class="form-label fastag-form-label"><i class="fas fa-building fastag-form-icon"></i>Org ID</label>
@@ -51,13 +51,13 @@
                 <label for="avc" class="form-label fastag-form-label"><i class="fas fa-truck-moving fastag-form-icon"></i>AVC</label>
                 <input type="text" class="form-control" id="avc" name="avc" value="{{ avc }}">
               </div>
-            </div>
+    </div>
             <div class="d-flex justify-content-end mt-4">
               <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(90deg, #764ba2 0%, #667eea 100%); box-shadow: 0 2px 8px rgba(118,75,162,0.15);">
                 <i class="fas fa-paper-plane me-2"></i>Send Request Pay
               </button>
-            </div>
-          </form>
+    </div>
+  </form>
         </div>
       </div>
       <div class="card mt-4 shadow-sm border-0" style="border-radius: 1.2rem;">
@@ -111,10 +111,10 @@
           <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Response</h5>
         </div>
         <div class="card-body">
-          <div id="response">
-            {% if response %}
+  <div id="response">
+    {% if response %}
               <pre style="background: #f3e9ff; color: #4b2e83; border-radius: 0.5rem; padding: 1rem; font-size: 1.1em;">{{ response|safe }}</pre>
-            {% endif %}
+    {% endif %}
           </div>
         </div>
       </div>

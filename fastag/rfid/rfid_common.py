@@ -95,4 +95,4 @@ def fetch_vehicle_details_from_acko(vehicle_number):
             
     except Exception as e:
         logging.error(f"Error fetching vehicle details for {vehicle_number}: {e}")
-        return None 
+        return None

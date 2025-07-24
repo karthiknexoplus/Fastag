@@ -232,7 +232,7 @@ def api_view_readers():
         readers_list = [dict(r) for r in readers]
         return {"success": True, "readers": readers_list}, 200
     except Exception as e:
-        return {"success": False, "error": str(e)}, 500
+        return {"success": False, "error": str(e)}, 500 
 
 @readers_bp.route('/readers/manage/<int:lane_id>', methods=['GET', 'POST'])
 def manage_reader(lane_id):

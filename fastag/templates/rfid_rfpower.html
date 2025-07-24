@@ -10,23 +10,23 @@
             <div class="mb-3">
                 <label class="form-label fw-bold" style="color: #764ba2;"><i class="fas fa-microchip me-1"></i> Reader ID</label>
                 <input type="text" name="reader_id" class="form-control rounded-pill" required>
-            </div>
+        </div>
             <div class="mb-3">
                 <label class="form-label fw-bold" style="color: #764ba2;"><i class="fas fa-broadcast-tower me-1"></i> Current RF Power</label>
                 <input type="text" name="current_rf" class="form-control rounded-pill" readonly>
-            </div>
+                </div>
             <div class="mb-3">
                 <label class="form-label fw-bold" style="color: #764ba2;"><i class="fas fa-sliders-h me-1"></i> Set New RF Power (1-30)</label>
                 <input type="number" name="new_rf" class="form-control rounded-pill" min="1" max="30" required>
-            </div>
+                </div>
             <div id="rfpower-feedback" class="mb-2"></div>
             <div class="d-flex justify-content-end gap-2 mt-3">
                 <button type="submit" class="btn btn-primary rounded-pill px-4" style="background: #764ba2; border: none;">
                     <i class="fas fa-save me-1"></i> Save
                 </button>
                 <a href="{{ url_for('lanes.lanes') }}" class="btn btn-secondary rounded-pill px-4"><i class="fas fa-arrow-left me-1"></i> Back</a>
-            </div>
-        </form>
+                </div>
+            </form>
     </div>
 </div>
 <style>
