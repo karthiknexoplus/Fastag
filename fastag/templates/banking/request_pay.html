@@ -122,27 +122,19 @@
   </div>
 </div>
 {% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
 <script>
-function toIST(utcString) {
-    // Convert 'YYYY-MM-DD HH:MM:SS' to 'YYYY-MM-DDTHH:MM:SSZ'
-    let iso = utcString.replace(' ', 'T') + 'Z';
-    let d = new Date(iso);
-    // Add 5 hours 30 minutes for IST
-    d.setMinutes(d.getMinutes() + 330);
-    // Format as YYYY-MM-DD HH:MM:SS IST
-    let y = d.getFullYear();
-    let m = ('0' + (d.getMonth() + 1)).slice(-2);
-    let day = ('0' + d.getDate()).slice(-2);
-    let h = ('0' + d.getHours()).slice(-2);
-    let min = ('0' + d.getMinutes()).slice(-2);
-    let s = ('0' + d.getSeconds()).slice(-2);
-    return `${y}-${m}-${day} ${h}:${min}:${s} IST`;
-}
+dayjs.extend(dayjs_plugin_utc);
+dayjs.extend(dayjs_plugin_timezone);
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.utc-time').forEach(function(td) {
         let raw = td.textContent.trim();
         if (raw && !raw.endsWith('IST')) {
-            td.textContent = toIST(raw);
+            // Parse as UTC and convert to Asia/Kolkata
+            let ist = dayjs.utc(raw, 'YYYY-MM-DD HH:mm:ss').tz('Asia/Kolkata');
+            td.textContent = ist.format('YYYY-MM-DD HH:mm:ss') + ' IST';
         }
     });
 });
