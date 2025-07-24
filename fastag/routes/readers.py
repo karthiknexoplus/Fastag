@@ -232,4 +232,34 @@ def api_view_readers():
         readers_list = [dict(r) for r in readers]
         return {"success": True, "readers": readers_list}, 200
     except Exception as e:
-        return {"success": False, "error": str(e)}, 500 
+        return {"success": False, "error": str(e)}, 500
+
+@readers_bp.route('/readers/manage/<int:lane_id>', methods=['GET', 'POST'])
+def manage_reader(lane_id):
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    lane = db.execute('SELECT * FROM lanes WHERE id = ?', (lane_id,)).fetchone()
+    reader = db.execute('SELECT * FROM readers WHERE lane_id = ?', (lane_id,)).fetchone()
+    if request.method == 'POST':
+        reader_id = request.form['reader_id']
+        reader_ip = request.form['reader_ip']
+        if reader:
+            db.execute('UPDATE readers SET reader_id = ?, reader_ip = ? WHERE id = ?', (reader_id, reader_ip, reader['id']))
+            flash('Reader updated!', 'success')
+        else:
+            db.execute('INSERT INTO readers (lane_id, reader_id, reader_ip, mac_address) VALUES (?, ?, ?, ?)', (lane_id, reader_id, reader_ip, '00:00:00:00'))
+            flash('Reader assigned!', 'success')
+        db.commit()
+        return redirect(url_for('readers.manage_reader', lane_id=lane_id))
+    return render_template('manage_reader.html', lane=lane, reader=reader)
+
+@readers_bp.route('/readers/manage/<int:lane_id>/delete', methods=['POST'])
+def delete_reader_for_lane(lane_id):
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    db.execute('DELETE FROM readers WHERE lane_id = ?', (lane_id,))
+    db.commit()
+    flash('Reader deleted!', 'info')
+    return redirect(url_for('readers.manage_reader', lane_id=lane_id)) 

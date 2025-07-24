@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Manage Reader - FASTag Parking{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width: 600px;">
+    <h2 class="mb-4 fs-4">
+        <i class="fas fa-microchip fastag-menu-icon"></i><span class="fastag-menu-label">Manage Reader for Lane: <span style="color: #764ba2;">{{ lane['lane_id'] }}</span></span>
+    </h2>
+    <form method="POST" class="card p-3 mb-4 shadow-sm border-0 needs-validation" novalidate>
+        <div class="mb-3">
+            <label class="form-label">Reader ID</label>
+            <input type="text" name="reader_id" class="form-control" value="{{ reader['reader_id'] if reader else '' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Reader IP</label>
+            <input type="text" name="reader_ip" class="form-control" value="{{ reader['reader_ip'] if reader else '' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">MAC Address</label>
+            <input type="text" class="form-control" value="00:00:00:00" readonly>
+        </div>
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save</button>
+            {% if reader %}
+            <form method="POST" action="{{ url_for('readers.delete_reader_for_lane', lane_id=lane['id']) }}" style="display:inline;">
+                <button type="submit" class="btn btn-danger ms-2" onclick="return confirm('Delete this reader?');"><i class="fas fa-trash-alt me-1"></i> Delete</button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('lanes.lanes', location_id=lane['location_id']) }}" class="btn btn-secondary ms-2">Back</a>
+        </div>
+    </form>
+    {% if reader %}
+    <div class="card p-3 shadow-sm border-0 mt-3">
+        <h5 class="mb-3 fs-5">
+            <i class="fas fa-cogs fastag-menu-icon"></i><span class="fastag-menu-label">Actions</span>
+        </h5>
+        <div class="d-flex gap-3">
+            <form method="POST" action="{{ url_for('readers.open_barrier', id=reader['id']) }}" onsubmit="return confirm('Open barrier for this reader?');">
+                <button type="submit" class="btn btn-success"><i class="fas fa-door-open"></i> Open Barrier</button>
+            </form>
+            <a href="{{ url_for('readers.rfid_rfpower_page') }}" class="btn btn-info" onclick="return confirm('Edit RF Power for this reader?');"><i class="fas fa-broadcast-tower"></i> RF Power</a>
+            <a href="{{ url_for('readers.manage_reader', lane_id=lane['id']) }}" class="btn btn-warning"><i class="fas fa-pen-to-square"></i> Edit</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 
