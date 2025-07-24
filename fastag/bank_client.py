@@ -1021,10 +1021,11 @@ def build_pay_request(
         'value': amount_value,
         'PaymentMode': 'Tag'
     })
-    return etree.tostring(root, encoding='utf-8', xml_declaration=True, pretty_print=False)
+    # At the end of build_pay_request, return XML with declaration and encoding='UTF-8'
+    return etree.tostring(root, encoding='UTF-8', xml_declaration=True, pretty_print=False)
 
 
-def send_pay(msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder='...'):
+def send_pay(_msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder='...'):
     tagId = pay_data.get('tagId') if isinstance(pay_data, dict) else None
     import uuid
     from datetime import datetime, timezone, timedelta
@@ -1041,13 +1042,14 @@ def send_pay(msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder
         last_ts_per_tag[tagId] = next_ts
         ts = next_ts.strftime('%Y-%m-%dT%H:%M:%S')
         tsRead = (next_ts - timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%M:%S')
-    # Generate txnId and entryTxnId in the same format as test_client.py
+    # Generate msgId, txnId, and entryTxnId in the same format as test_client.py
     now = datetime.now()
     date_str = now.strftime('%Y%m%d%H%M%S')
     plaza_id = pay_data['plaza_info']['id']
     lane_reader_id = pay_data['lane']['readerId']
-    txnId = f"{plaza_id}{lane_reader_id}{date_str}"
-    entryTxnId = txnId
+    msgId = f"{plaza_id}{lane_reader_id}{date_str}"
+    txnId = msgId
+    entryTxnId = msgId
     xml_data = build_pay_request(
         msgId,
         orgId,
