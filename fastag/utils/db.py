@@ -53,13 +53,24 @@ def init_db(db):
             name TEXT NOT NULL,
             address TEXT NOT NULL,
             site_id TEXT UNIQUE NOT NULL,
+            org_id TEXT,
+            plaza_id TEXT,
+            agency_id TEXT,
+            acquirer_id TEXT,
+            geo_code TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         
         CREATE TABLE IF NOT EXISTS lanes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             location_id INTEGER NOT NULL,
-            lane_name TEXT NOT NULL,
+            plaza_id TEXT,
+            plaza_name TEXT,
+            lane_id TEXT,
+            lane_type TEXT,
+            lane_desc TEXT,
+            lane_direction TEXT,
+            plaza_lane_direction TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (location_id) REFERENCES locations (id) ON DELETE CASCADE
         );
