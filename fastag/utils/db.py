@@ -112,16 +112,6 @@ def init_db(db):
             FOREIGN KEY (lane_id) REFERENCES lanes (id),
             FOREIGN KEY (reader_id) REFERENCES readers (id)
         );
-
-        CREATE TABLE IF NOT EXISTS tag_vehicle_cache (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tag_id TEXT UNIQUE NOT NULL,
-            vehicle_number TEXT,
-            owner_name TEXT,
-            model_name TEXT,
-            fuel_type TEXT,
-            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
     ''')
     db.commit() 
 

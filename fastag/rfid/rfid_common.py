@@ -95,38 +95,4 @@ def fetch_vehicle_details_from_acko(vehicle_number):
             
     except Exception as e:
         logging.error(f"Error fetching vehicle details for {vehicle_number}: {e}")
-        return None
-
-def cache_vehicle_details(tag_id, vehicle_number, owner_name=None, model_name=None, fuel_type=None):
-    """Cache vehicle details in database"""
-    try:
-        conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-        c = conn.cursor()
-        
-        # Check if already exists
-        c.execute("SELECT vehicle_number FROM tag_vehicle_cache WHERE tag_id=?", (tag_id,))
-        row = c.fetchone()
-        
-        if row:
-            # Update existing record
-            c.execute("""
-                UPDATE tag_vehicle_cache 
-                SET vehicle_number=?, owner_name=?, model_name=?, fuel_type=?, last_updated=CURRENT_TIMESTAMP 
-                WHERE tag_id=?
-            """, (vehicle_number, owner_name, model_name, fuel_type, tag_id))
-            logging.info(f"✓ Updated vehicle details for tag {tag_id}: {vehicle_number}")
-        else:
-            # Insert new record
-            c.execute("""
-                INSERT INTO tag_vehicle_cache (tag_id, vehicle_number, owner_name, model_name, fuel_type) 
-                VALUES (?, ?, ?, ?, ?)
-            """, (tag_id, vehicle_number, owner_name, model_name, fuel_type))
-            logging.info(f"✓ Cached vehicle details for tag {tag_id}: {vehicle_number}")
-        
-        conn.commit()
-        conn.close()
-        return True
-        
-    except Exception as e:
-        logging.error(f"Error caching vehicle details for tag {tag_id}: {e}")
-        return False 
+        return None 
