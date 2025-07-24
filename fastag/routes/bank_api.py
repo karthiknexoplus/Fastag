@@ -348,6 +348,19 @@ def request_pay():
             response = f"<b>Error:</b> {e}"
     # Fetch latest logs
     logs = fetch_request_pay_logs(20)
+    # Convert log times to IST for display
+    from datetime import datetime, timezone, timedelta
+    import pytz
+    ist = pytz.timezone('Asia/Kolkata')
+    for log in logs:
+        try:
+            # Try parsing as UTC first
+            dt = datetime.strptime(log['request_time'], '%Y-%m-%d %H:%M:%S')
+            dt_utc = dt.replace(tzinfo=timezone.utc)
+            dt_ist = dt_utc.astimezone(ist)
+            log['request_time'] = dt_ist.strftime('%Y-%m-%d %H:%M:%S IST')
+        except Exception:
+            pass
     return render_template('banking/request_pay.html', orgId=orgId, plazaId=plazaId, agencyId=agencyId, acquirerId=acquirerId, plazaGeoCode=plazaGeoCode, TID=TID, vehicleRegNo=vehicleRegNo, avc=avc, amount=amount, tagId=tagId, response=response, logs=logs)
 
 @banking.route('/banking/response_pay', methods=['GET', 'POST'])
