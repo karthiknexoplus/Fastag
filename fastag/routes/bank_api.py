@@ -353,7 +353,34 @@ def request_pay():
 
 @banking.route('/banking/response_pay', methods=['GET', 'POST'])
 def response_pay():
-    return render_template('banking/response_pay.html')
+    from fastag.utils.db import fetch_request_pay_logs
+    from fastag.bank_client import send_check_txn
+    response = None
+    logs = fetch_request_pay_logs(50)
+    if request.method == 'POST':
+        # Get the log id from the form
+        log_id = request.form.get('log_id')
+        # Find the log record
+        log = next((l for l in logs if str(l['id']) == str(log_id)), None)
+        if log:
+            # Prepare status_list for check_txn (EntryTxn id, ts, Lane id, etc.)
+            status = {
+                'EntryTxnId': log['msg_id'],
+                'ts': log['request_time'],
+                'LaneId': log['tid'],
+                'direction': '',  # Not stored, can be left blank or fetched if needed
+            }
+            # The API expects a list of dicts or strings; adjust as needed
+            status_list = [status]
+            # Use org_id and msg_id from the log
+            result = send_check_txn(log['msg_id'], log['org_id'], status_list)
+            if isinstance(result, dict):
+                response = "<b>Check Txn Status Response:</b><br>"
+                for k, v in result.items():
+                    response += f"<b>{k}:</b> {v}<br>"
+            else:
+                response = result
+    return render_template('banking/response_pay.html', logs=logs, response=response)
 
 @banking.route('/banking/transaction_status', methods=['GET', 'POST'])
 def transaction_status():
