@@ -75,7 +75,16 @@
         <td>{{ s.txnId|default('') }}</td>
         <td>{{ s.result|default('') }}</td>
         <td>{{ s.errCode|default('') }}</td>
-        <td>{{ s.txnStatus|default('') }}</td>
+        <td>
+          {% set txs = s.txnlist_txnStatus|default('') %}
+          {% if txs == 'FAILURE' %}
+            <b style="color: red">{{ txs }}</b>
+          {% elif txs == 'SUCCESS' %}
+            <b style="color: green">{{ txs }}</b>
+          {% else %}
+            {{ txs }}
+          {% endif %}
+        </td>
         <td>{{ s.plazaId|default('') }}</td>
         <td>{{ s.laneId|default('') }}</td>
         <td>{{ s.settleDate|default('') }}</td>
