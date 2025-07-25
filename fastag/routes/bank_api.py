@@ -356,11 +356,14 @@ def response_pay():
     from fastag.utils.db import fetch_request_pay_logs, fetch_pay_status, insert_pay_status
     from fastag.bank_client import send_check_txn
     import xml.etree.ElementTree as ET
-    from datetime import datetime
+    from datetime import datetime, date
     import json
     from flask import redirect, url_for, request
     response = None
-    logs = fetch_request_pay_logs(50)
+    # Date filter
+    selected_date = request.args.get('date') or date.today().strftime('%Y-%m-%d')
+    # Fetch logs for selected date only
+    logs = [log for log in fetch_request_pay_logs(100) if log['request_time'] and log['request_time'].startswith(selected_date)]
     status_list = []
     status_map = {}
     selected_log_id = None
@@ -377,7 +380,6 @@ def response_pay():
             # Check if status already exists
             status_row = fetch_pay_status(log_id)
             if status_row:
-                # Use stored status
                 response = "<b>Check Txn Status Response (cached):</b><br>"
                 status_json = status_row['status_json']
                 try:
@@ -388,10 +390,8 @@ def response_pay():
                     status_list = result.get('status_list', [])
                 except Exception as e:
                     response += f"<b>Error parsing stored status JSON:</b> {e}"
-                # Show status below after redirect
-                return redirect(url_for('banking.response_pay', log_id=log_id))
+                return redirect(url_for('banking.response_pay', log_id=log_id, date=selected_date))
             else:
-                # Fetch from bank and store
                 try:
                     root = ET.fromstring(log['request_xml'])
                     entry_txn_elems = root.findall('.//EntryTxn')
@@ -435,15 +435,13 @@ def response_pay():
                             if k != 'status_list':
                                 response += f"<b>{k}:</b> {v}<br>"
                         status_list = result.get('status_list', [])
-                        # Store status in DB
                         insert_pay_status(log_id, getattr(result, 'raw_xml', None), json.dumps(result))
                         status_map[log_id] = {'status_json': json.dumps(result)}
                     else:
                         response = result
-                    return redirect(url_for('banking.response_pay', log_id=log_id))
+                    return redirect(url_for('banking.response_pay', log_id=log_id, date=selected_date))
                 except Exception as e:
                     response = f"<b>Error parsing request XML or sending check txn:</b> {e}"
-    # On GET, if log_id param is present, show status for that log
     log_id_param = request.args.get('log_id', type=int)
     if log_id_param:
         status_row = fetch_pay_status(log_id_param)
@@ -458,7 +456,7 @@ def response_pay():
                 status_list = result.get('status_list', [])
             except Exception as e:
                 response += f"<b>Error parsing stored status JSON:</b> {e}"
-    return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list, status_map=status_map)
+    return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list, status_map=status_map, selected_date=selected_date)
 
 @banking.route('/banking/transaction_status', methods=['GET', 'POST'])
 def transaction_status():

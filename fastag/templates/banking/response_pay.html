@@ -1,15 +1,28 @@
 {% extends 'base.html' %}
 {% block title %}Response Pay - Banking{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <h2>Response Pay</h2>
-  <hr>
-  <h5>Pay Request Logs</h5>
+<style>
+  .table-sm, .table-sm th, .table-sm td { font-size: 0.92rem; padding: 0.25rem 0.5rem; }
+  .filter-bar { margin-bottom: 0.5rem; font-size: 0.98rem; }
+  .action-icon-btn { background: none; border: none; padding: 0.2rem 0.4rem; font-size: 1.1rem; cursor: pointer; }
+  .action-icon-btn:focus { outline: none; }
+  #response, .table-sm { font-size: 0.95rem; }
+</style>
+<div class="container mt-3">
+  <h4 style="font-size:1.2rem; font-weight:600; margin-bottom:0.7rem;">Response Pay</h4>
+  <div class="filter-bar d-flex align-items-center">
+    <form method="get" class="d-flex align-items-center" style="gap:0.5rem;">
+      <label for="date" class="me-2 mb-0">Show for date:</label>
+      <input type="date" id="date" name="date" value="{{ selected_date }}" class="form-control form-control-sm" style="width: 160px;">
+      <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+    </form>
+    <span class="ms-auto text-muted" style="font-size:0.93rem;">Powered by Onebee Technology Pvt Ltd</span>
+  </div>
   <form method="post" id="statusForm">
-    <table class="table table-bordered table-sm">
+    <table class="table table-bordered table-sm align-middle">
       <thead>
         <tr>
-          <th>ID</th>
+          <th style="width:2.5rem;">ID</th>
           <th>Msg ID</th>
           <th>Org ID</th>
           <th>Tag ID</th>
@@ -17,7 +30,7 @@
           <th>Vehicle No</th>
           <th>Amount</th>
           <th>Time</th>
-          <th>Action</th>
+          <th style="width:2.5rem; text-align:center;">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -31,11 +44,15 @@
           <td>{{ log.vehicle_reg_no }}</td>
           <td>{{ log.amount }}</td>
           <td>{{ log.request_time }}</td>
-          <td>
+          <td style="text-align:center;">
             {% if status_map[log.id] is defined %}
-              <button type="submit" name="log_id" value="{{ log.id }}" class="btn btn-secondary btn-sm">View Status</button>
+              <button type="submit" name="log_id" value="{{ log.id }}" class="action-icon-btn" title="View Status">
+                <i class="fas fa-eye"></i>
+              </button>
             {% else %}
-              <button type="submit" name="log_id" value="{{ log.id }}" class="btn btn-primary btn-sm">Get Status</button>
+              <button type="submit" name="log_id" value="{{ log.id }}" class="action-icon-btn" title="Get Status">
+                <i class="fas fa-sync-alt"></i>
+              </button>
             {% endif %}
           </td>
         </tr>
@@ -43,14 +60,14 @@
       </tbody>
     </table>
   </form>
-  <h5>Response</h5>
-  <div id="response">
+  <h6 style="font-size:1.05rem; margin-top:1.2rem;">Response</h6>
+  <div id="response" style="font-size:0.97rem;">
     {% if response %}
-      <pre>{{ response|safe }}</pre>
+      <pre style="font-size:0.97rem; margin-bottom:0.5rem;">{{ response|safe }}</pre>
     {% endif %}
   </div>
   {% if status_list %}
-  <h5>Transaction Status Details</h5>
+  <h6 style="font-size:1.05rem; margin-top:0.7rem;">Transaction Status Details</h6>
   <table class="table table-bordered table-sm">
     <thead>
       <tr>
