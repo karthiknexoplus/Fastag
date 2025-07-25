@@ -366,11 +366,17 @@ def response_pay():
             try:
                 root = ET.fromstring(log['request_xml'])
                 ns = {'etc': 'http://npci.org/etc/schema/'}
+                # Prefer EntryTxn if present
+                entry_txn_elem = root.find('.//etc:EntryTxn', ns)
                 txn_elem = root.find('.//etc:Txn', ns)
                 plaza_elem = root.find('.//etc:Plaza', ns)
                 lane_elems = root.findall('.//etc:Lane', ns)
-                txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
-                txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
+                if entry_txn_elem is not None:
+                    txnId = entry_txn_elem.attrib.get('id', '')
+                    txnDate = entry_txn_elem.attrib.get('ts', '')
+                else:
+                    txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
+                    txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
                 plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
                 status_list_req = []
                 for lane_elem in lane_elems:
