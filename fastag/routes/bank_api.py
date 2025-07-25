@@ -364,21 +364,24 @@ def response_pay():
         log = next((l for l in logs if str(l['id']) == str(log_id)), None)
         if log and log['request_xml']:
             try:
+                print("[DEBUG] Stored pay request XML:")
+                print(log['request_xml'])
                 root = ET.fromstring(log['request_xml'])
                 ns = {'etc': 'http://npci.org/etc/schema/'}
                 entry_txn_elems = root.findall('.//etc:EntryTxn', ns)
                 txn_elem = root.find('.//etc:Txn', ns)
                 plaza_elem = root.find('.//etc:Plaza', ns)
                 lane_elems = root.findall('.//etc:Lane', ns)
+                print(f"[DEBUG] Found {len(entry_txn_elems)} EntryTxn, {len(lane_elems)} Lane, plaza_elem: {plaza_elem is not None}")
                 status_list_req = []
                 # If multiple EntryTxn, build a Status for each
                 if entry_txn_elems:
                     for i, entry_txn_elem in enumerate(entry_txn_elems):
                         txnId = entry_txn_elem.attrib.get('id', '')
                         txnDate = entry_txn_elem.attrib.get('ts', '')
-                        # Try to match lane by index, else fallback
                         laneId = lane_elems[i].attrib.get('id') if i < len(lane_elems) else (lane_elems[0].attrib.get('id') if lane_elems else '')
                         plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
+                        print(f"[DEBUG] EntryTxn {i}: id={txnId}, ts={txnDate}, laneId={laneId}, plazaId={plazaId}")
                         status = {
                             'txnId': txnId,
                             'txnDate': txnDate,
@@ -386,15 +389,14 @@ def response_pay():
                             'laneId': laneId
                         }
                         status_list_req.append(status)
-                    # Use the first EntryTxn for parent
                     parent_txnId = entry_txn_elems[0].attrib.get('id', '')
                     parent_txnDate = entry_txn_elems[0].attrib.get('ts', '')
                 else:
-                    # Fallback: single Txn
                     txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
                     txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
                     plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
                     laneId = lane_elems[0].attrib.get('id') if lane_elems else ''
+                    print(f"[DEBUG] Fallback Txn: id={txnId}, ts={txnDate}, laneId={laneId}, plazaId={plazaId}")
                     status_list_req = [{
                         'txnId': txnId,
                         'txnDate': txnDate,
@@ -403,6 +405,7 @@ def response_pay():
                     }]
                     parent_txnId = txnId
                     parent_txnDate = txnDate
+                print(f"[DEBUG] Sending CheckTxn with parent_txnId={parent_txnId}, parent_txnDate={parent_txnDate}")
                 result = send_check_txn(log['msg_id'], log['org_id'], status_list_req, ts=parent_txnDate, txnId=parent_txnId)
                 if isinstance(result, dict):
                     response = "<b>Check Txn Status Response:</b><br>"
