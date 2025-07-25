@@ -359,6 +359,7 @@ def response_pay():
     response = None
     logs = fetch_request_pay_logs(50)
     status_list = []
+    NS = '{http://npci.org/etc/schema/}'
     if request.method == 'POST':
         log_id = request.form.get('log_id')
         log = next((l for l in logs if str(l['id']) == str(log_id)), None)
@@ -367,14 +368,12 @@ def response_pay():
                 print("[DEBUG] Stored pay request XML:")
                 print(log['request_xml'])
                 root = ET.fromstring(log['request_xml'])
-                ns = {'etc': 'http://npci.org/etc/schema/'}
-                entry_txn_elems = root.findall('.//etc:EntryTxn', ns)
-                txn_elem = root.find('.//etc:Txn', ns)
-                plaza_elem = root.find('.//etc:Plaza', ns)
-                lane_elems = root.findall('.//etc:Lane', ns)
+                entry_txn_elems = root.findall('.//' + NS + 'EntryTxn')
+                txn_elem = root.find('.//' + NS + 'Txn')
+                plaza_elem = root.find('.//' + NS + 'Plaza')
+                lane_elems = root.findall('.//' + NS + 'Lane')
                 print(f"[DEBUG] Found {len(entry_txn_elems)} EntryTxn, {len(lane_elems)} Lane, plaza_elem: {plaza_elem is not None}")
                 status_list_req = []
-                # If multiple EntryTxn, build a Status for each
                 if entry_txn_elems:
                     for i, entry_txn_elem in enumerate(entry_txn_elems):
                         txnId = entry_txn_elem.attrib.get('id', '')
