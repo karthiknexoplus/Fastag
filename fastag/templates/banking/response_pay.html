@@ -89,10 +89,10 @@
         fetch(`?log_id=${logId}&date={{ selected_date }}`)
           .then(resp => resp.text())
           .then(html => {
-            // Extract the status table and response from the returned HTML
+            // Only extract the status details table and response for the selected log
             var parser = new DOMParser();
             var doc = parser.parseFromString(html, 'text/html');
-            var statusTable = doc.querySelector('table.table-sm:last-of-type');
+            var statusTable = doc.querySelector('h6:contains("Transaction Status Details") + table');
             var responseBlock = doc.querySelector('#response pre');
             modalBody.innerHTML = '';
             if (responseBlock) {
