@@ -1,63 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watchlist - {{ APP_TITLE }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .watchlist-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-        }
-        .watchlist-table th, .watchlist-table td {
-            vertical-align: middle;
-        }
-        .watchlist-action-btn {
-            margin-right: 0.5em;
-        }
-        .watchlist-type-badge {
-            font-size: 0.95em;
-            padding: 0.3em 0.7em;
-            border-radius: 1em;
-        }
-        .watchlist-type-registered {
-            background: #e0f7fa;
-            color: #00796b;
-        }
-        .watchlist-type-nonuser {
-            background: #fbe9e7;
-            color: #d84315;
-        }
-        .table-responsive { margin-bottom: 2rem; }
-        .floating-add-btn {
-            position: fixed;
-            bottom: 2.5rem;
-            right: 2.5rem;
-            z-index: 1000;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 16px rgba(80,80,160,0.13);
-        }
-        .tab-badge {
-            font-size: 0.9em;
-            margin-left: 0.4em;
-            background: #e0e0e0;
-            color: #333;
-            border-radius: 1em;
-            padding: 0.1em 0.7em;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Watchlist - {{ APP_TITLE }}{% endblock %}
+
+{% block content %}
 <div class="container py-4">
     <div class="watchlist-header">
         <h2><i class="fas fa-eye text-primary me-2"></i>Watchlist</h2>
@@ -76,6 +21,11 @@
     </ul>
     <div class="tab-content">
       <div class="tab-pane fade show active" id="kyc" role="tabpanel">
+        <div class="d-flex justify-content-end mb-2">
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addKycWatchlistModal">
+            <i class="fas fa-user-plus me-1"></i> Add Registered User
+          </button>
+        </div>
         <div class="table-responsive">
           <table class="table table-hover watchlist-table" id="kyc-table">
             <thead class="table-light">
@@ -97,6 +47,11 @@
         </div>
       </div>
       <div class="tab-pane fade" id="nonuser" role="tabpanel">
+        <div class="d-flex justify-content-end mb-2">
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addWatchlistModal">
+            <i class="fas fa-user-plus me-1"></i> Add Non-User Vehicle
+          </button>
+        </div>
         <div class="table-responsive">
           <table class="table table-hover watchlist-table" id="nonuser-table">
             <thead class="table-light">
@@ -114,15 +69,38 @@
         </div>
       </div>
     </div>
-    <button class="btn btn-success floating-add-btn" data-bs-toggle="modal" data-bs-target="#addWatchlistModal" title="Add to Watchlist">
-      <i class="fas fa-user-plus"></i>
-    </button>
-    <!-- Add Modal, Edit Modal, etc. as before -->
+    <!-- Add Registered KYC User Modal -->
+    <div class="modal fade" id="addKycWatchlistModal" tabindex="-1" aria-labelledby="addKycWatchlistModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addKycWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add Registered KYC User</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="add-kyc-watchlist-form">
+              <div class="mb-3">
+                <label for="kycUserSelect" class="form-label">Select KYC User</label>
+                <select class="form-select" id="kycUserSelect" required>
+                  <option value="">Choose...</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="kycReasonInput" class="form-label">Reason (optional)</label>
+                <input type="text" class="form-control" id="kycReasonInput" placeholder="Reason for watchlisting">
+              </div>
+              <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-1"></i>Add</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Add Non-User Modal -->
     <div class="modal fade" id="addWatchlistModal" tabindex="-1" aria-labelledby="addWatchlistModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="addWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add to Watchlist</h5>
+            <h5 class="modal-title" id="addWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add Non-User Vehicle</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -141,6 +119,7 @@
         </div>
       </div>
     </div>
+    <!-- Edit Reason Modal -->
     <div class="modal fade" id="editReasonModal" tabindex="-1" aria-labelledby="editReasonModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -281,11 +260,40 @@ document.getElementById('add-watchlist-form').onsubmit = function(e) {
         }
     });
 };
+document.getElementById('add-kyc-watchlist-form').onsubmit = function(e) {
+    e.preventDefault();
+    const fastag_id = document.getElementById('kycUserSelect').value;
+    const reason = document.getElementById('kycReasonInput').value;
+    fetch('/api/watchlist/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fastag_id, reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            fetchWatchlist();
+            bootstrap.Modal.getInstance(document.getElementById('addKycWatchlistModal')).hide();
+            document.getElementById('add-kyc-watchlist-form').reset();
+        } else {
+            alert('Failed to add to watchlist: ' + (data.error || 'Unknown error'));
+        }
+    });
+};
+// Populate KYC user dropdown
+function fetchKycUsers() {
+    fetch('/api/kyc_users/list')
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('kycUserSelect');
+            select.innerHTML = '<option value="">Choose...</option>' +
+                data.results.map(u => `<option value="${u.fastag_id}">${u.fastag_id} | ${u.name} | ${u.vehicle_number}</option>`).join('');
+        });
+}
+document.getElementById('addKycWatchlistModal').addEventListener('show.bs.modal', fetchKycUsers);
 function viewHistory(id) {
-    // Placeholder: show history section and load activity for this user
     alert('Activity history for user #' + id + ' coming soon!');
 }
 window.onload = fetchWatchlist;
 </script>
-</body>
-</html> 
+{% endblock %} 
