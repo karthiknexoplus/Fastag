@@ -358,10 +358,10 @@ def response_pay():
     import xml.etree.ElementTree as ET
     response = None
     logs = fetch_request_pay_logs(50)
+    status_list = []
     if request.method == 'POST':
         log_id = request.form.get('log_id')
         log = next((l for l in logs if str(l['id']) == str(log_id)), None)
-        status_list = None
         if log and log['request_xml']:
             try:
                 root = ET.fromstring(log['request_xml'])
