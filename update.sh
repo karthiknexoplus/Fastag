@@ -41,6 +41,9 @@ echo ""
 echo "🗄️ Running database initialization (safe)..."
 $PYTHON_EXEC init_database.py
 
+# Ensure all tables and columns are present
+python3 -c "import fastag.utils.db; import fastag; fastag.utils.db.get_db(); fastag.add_missing_columns()"
+
 echo ""
 # 4. Restart Gunicorn service
 echo "🔁 Restarting Gunicorn (API/web app)..."

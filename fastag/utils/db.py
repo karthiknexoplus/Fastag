@@ -122,6 +122,13 @@ def init_db(db):
             fuel_type TEXT,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS watchlist_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fastag_id TEXT NOT NULL,
+            reason TEXT,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     ''')
     db.commit() 
 
