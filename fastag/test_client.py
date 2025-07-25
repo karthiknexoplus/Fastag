@@ -13,6 +13,7 @@ import random
 import xml.dom.minidom
 from uuid import uuid4
 from collections import defaultdict
+import traceback
 
 app = Flask(__name__)
 
@@ -741,6 +742,7 @@ def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
         print('[CHECK_TXN] Skipping XML signing (SIGN_REQUEST is False). Sending unsigned XML!')
         payload = xml_data
     try:
+        print("[CHECK_TXN] About to send POST request")
         response = requests.post(url, data=payload, headers=headers, timeout=10, verify=False)
         print("[CHECK_TXN] HTTP Status Code:", response.status_code)
         print("[CHECK_TXN] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
@@ -751,6 +753,7 @@ def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
         return parsed
     except Exception as e:
         print('[CHECK_TXN] Error sending CheckTxn request:', e)
+        traceback.print_exc()
         return {'error': str(e)}
 
 
