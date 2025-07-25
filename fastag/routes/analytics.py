@@ -2113,4 +2113,21 @@ def api_recent_activity():
         ORDER BY al.timestamp DESC
         LIMIT 50
     """).fetchall()
-    return jsonify({'recent_activity': [list(row) for row in rows]})
+    # Convert timestamps to IST
+    import pytz
+    from datetime import datetime
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    results = []
+    for row in rows:
+        timestamp_str = row[0]
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        results.append([ist_time_str] + list(row[1:]))
+    return jsonify({'recent_activity': results})
