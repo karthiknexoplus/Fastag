@@ -1515,13 +1515,13 @@ function loadLaneUtilization() {
 }
 
 function toIST(utcString) {
+    // Always treat as UTC, never local
     if (!utcString) return '-';
     let utcDate;
     if (utcString.includes('T')) {
-        // ISO string, parse as UTC
         utcDate = new Date(utcString);
     } else {
-        // Parse as 'YYYY-MM-DD HH:MM:SS' as UTC, not local
+        // Parse as 'YYYY-MM-DD HH:MM:SS' as UTC
         const [date, time] = utcString.split(' ');
         if (!date || !time) return utcString;
         const [year, month, day] = date.split('-').map(Number);
@@ -1533,6 +1533,8 @@ function toIST(utcString) {
     const istDate = new Date(utcDate.getTime() + 19800 * 1000);
     // Format as dd/mm/yyyy, HH:MM:SS
     const pad = n => n.toString().padStart(2, '0');
+    // Uncomment for debug:
+    // console.log('RAW:', utcString, 'UTC:', utcDate.toISOString(), 'IST:', istDate.toISOString());
     return `${pad(istDate.getDate())}/${pad(istDate.getMonth() + 1)}/${istDate.getFullYear()}, ${pad(istDate.getHours())}:${pad(istDate.getMinutes())}:${pad(istDate.getSeconds())}`;
 }
 
