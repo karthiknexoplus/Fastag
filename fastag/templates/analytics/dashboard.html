@@ -1515,14 +1515,26 @@ function loadLaneUtilization() {
 }
 
 function toIST(utcString) {
-    // Parse as UTC and convert to IST (UTC+5:30)
+    // Parse as UTC and add 5.5 hours (IST)
     if (!utcString) return '-';
-    const utcDate = new Date(utcString + 'Z'); // force parse as UTC
+    // Try to parse as 'YYYY-MM-DD HH:MM:SS' or ISO
+    let utcDate;
+    if (utcString.includes('T')) {
+        utcDate = new Date(utcString);
+    } else {
+        // Parse as 'YYYY-MM-DD HH:MM:SS'
+        const [date, time] = utcString.split(' ');
+        if (!date || !time) return utcString;
+        const [year, month, day] = date.split('-').map(Number);
+        const [hour, min, sec] = time.split(':').map(Number);
+        utcDate = new Date(Date.UTC(year, month - 1, day, hour, min, sec));
+    }
     if (isNaN(utcDate.getTime())) return utcString;
-    // IST is UTC+5:30
-    const istOffset = 5.5 * 60; // in minutes
-    const istDate = new Date(utcDate.getTime() + istOffset * 60000);
-    return istDate.toLocaleString('en-IN', { hour12: false });
+    // Add 5.5 hours (19800 seconds)
+    const istDate = new Date(utcDate.getTime() + 19800 * 1000);
+    // Format as dd/mm/yyyy, HH:MM:SS
+    const pad = n => n.toString().padStart(2, '0');
+    return `${pad(istDate.getDate())}/${pad(istDate.getMonth() + 1)}/${istDate.getFullYear()}, ${pad(istDate.getHours())}:${pad(istDate.getMinutes())}:${pad(istDate.getSeconds())}`;
 }
 
 function loadRecentActivity() {

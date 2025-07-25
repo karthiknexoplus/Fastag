@@ -321,11 +321,9 @@ def analytics_data():
 
 @analytics_bp.route('/api/current-occupancy-details')
 def current_occupancy_details():
-    """API endpoint to get current occupancy details"""
+    """API endpoint to get current occupancy details (fast: only last 24h)"""
     try:
         db = get_db()
-        
-        # Get vehicles currently in the parking lot (granted access but no exit)
         vehicles = db.execute("""
             SELECT 
                 al1.tag_id,
@@ -341,17 +339,20 @@ def current_occupancy_details():
             LEFT JOIN tag_vehicle_cache tvc ON al1.tag_id = tvc.tag_id
             JOIN lanes l ON al1.lane_id = l.id
             WHERE al1.access_result = 'granted'
-            AND al1.timestamp = (
-                SELECT MAX(al2.timestamp)
-                FROM access_logs al2
-                WHERE al2.tag_id = al1.tag_id
-            )
-            AND NOT EXISTS (
-                SELECT 1 FROM access_logs al3
-                WHERE al3.tag_id = al1.tag_id
-                AND al3.timestamp > al1.timestamp
-                AND al3.access_result = 'denied'
-            )
+              AND al1.timestamp >= datetime('now', '-24 hours')
+              AND al1.timestamp = (
+                  SELECT MAX(al2.timestamp)
+                  FROM access_logs al2
+                  WHERE al2.tag_id = al1.tag_id
+                    AND al2.timestamp >= datetime('now', '-24 hours')
+              )
+              AND NOT EXISTS (
+                  SELECT 1 FROM access_logs al3
+                  WHERE al3.tag_id = al1.tag_id
+                    AND al3.timestamp > al1.timestamp
+                    AND al3.timestamp >= datetime('now', '-24 hours')
+                    AND al3.access_result = 'denied'
+              )
             ORDER BY al1.timestamp DESC
         """).fetchall()
         
@@ -360,32 +361,21 @@ def current_occupancy_details():
         formatted_vehicles = []
         
         for vehicle in vehicles:
-            # Parse the UTC timestamp and convert to IST
             timestamp_str = vehicle[5]  # entry_time
-            
-            # Handle different timestamp formats
             if 'T' in timestamp_str and 'Z' in timestamp_str:
-                # ISO format with Z (UTC)
                 utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
             elif 'T' in timestamp_str:
-                # ISO format without Z, assume UTC
                 utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
             else:
-                # SQLite datetime format, assume UTC
                 utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
                 utc_time = utc_time.replace(tzinfo=pytz.UTC)
-            
-            # Convert to IST
             ist_time = utc_time.astimezone(ist_tz)
             ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-            
-            # Format duration
             duration_hours = vehicle[7] or 0
             if duration_hours < 1:
                 duration = f"{int(duration_hours * 60)} minutes"
             else:
                 duration = f"{duration_hours:.1f} hours"
-            
             formatted_vehicles.append({
                 'tag_id': vehicle[0],
                 'vehicle_number': vehicle[1],
