@@ -361,6 +361,7 @@ def response_pay():
     if request.method == 'POST':
         log_id = request.form.get('log_id')
         log = next((l for l in logs if str(l['id']) == str(log_id)), None)
+        status_list = None
         if log and log['request_xml']:
             try:
                 root = ET.fromstring(log['request_xml'])
@@ -371,7 +372,7 @@ def response_pay():
                 txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
                 txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
                 plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
-                status_list = []
+                status_list_req = []
                 for lane_elem in lane_elems:
                     laneId = lane_elem.attrib.get('id') if lane_elem is not None else ''
                     status = {
@@ -380,25 +381,26 @@ def response_pay():
                         'plazaId': plazaId,
                         'laneId': laneId
                     }
-                    status_list.append(status)
-                if not status_list:
-                    # fallback: single status with whatever we have
-                    status_list = [{
+                    status_list_req.append(status)
+                if not status_list_req:
+                    status_list_req = [{
                         'txnId': txnId,
                         'txnDate': txnDate,
                         'plazaId': plazaId,
                         'laneId': ''
                     }]
-                result = send_check_txn(log['msg_id'], log['org_id'], status_list)
+                result = send_check_txn(log['msg_id'], log['org_id'], status_list_req)
                 if isinstance(result, dict):
                     response = "<b>Check Txn Status Response:</b><br>"
                     for k, v in result.items():
-                        response += f"<b>{k}:</b> {v}<br>"
+                        if k != 'status_list':
+                            response += f"<b>{k}:</b> {v}<br>"
+                    status_list = result.get('status_list', [])
                 else:
                     response = result
             except Exception as e:
                 response = f"<b>Error parsing request XML or sending check txn:</b> {e}"
-    return render_template('banking/response_pay.html', logs=logs, response=response)
+    return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list)
 
 @banking.route('/banking/transaction_status', methods=['GET', 'POST'])
 def transaction_status():

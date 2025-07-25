@@ -764,11 +764,25 @@ def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
 
 
 def parse_check_txn_response(xml_response):
+    import xml.etree.ElementTree as ET
     tree = ET.fromstring(xml_response)
     head = tree.find('Head')
     txn = tree.find('Txn')
     resp = txn.find('Resp') if txn is not None else None
     signature = tree.find('Signature')
+    # Extract all Status elements
+    status_list = []
+    if resp is not None:
+        txn_status_req_list = resp.find('TxnStatusReqList')
+        if txn_status_req_list is not None:
+            for status_elem in txn_status_req_list.findall('Status'):
+                status = {k: v for k, v in status_elem.attrib.items()}
+                # If TxnList is present, extract its attributes too
+                txn_list_elem = status_elem.find('TxnList')
+                if txn_list_elem is not None:
+                    for k, v in txn_list_elem.attrib.items():
+                        status[f'txnlist_{k}'] = v
+                status_list.append(status)
     return {
         'msgId': head.attrib.get('msgId') if head is not None else None,
         'orgId': head.attrib.get('orgId') if head is not None else None,
@@ -779,7 +793,8 @@ def parse_check_txn_response(xml_response):
         'respCode': resp.attrib.get('respCode') if resp is not None else None,
         'totReqCnt': resp.attrib.get('totReqCnt') if resp is not None else None,
         'sucessReqCnt': resp.attrib.get('sucessReqCnt') if resp is not None else None,
-        'signature': signature.text if signature is not None else None
+        'signature': signature.text if signature is not None else None,
+        'status_list': status_list
     }
 
 

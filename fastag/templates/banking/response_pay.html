@@ -45,5 +45,54 @@
       <pre>{{ response|safe }}</pre>
     {% endif %}
   </div>
+  {% if status_list %}
+  <h5>Transaction Status Details</h5>
+  <table class="table table-bordered table-sm">
+    <thead>
+      <tr>
+        <th>txnId</th>
+        <th>result</th>
+        <th>errCode</th>
+        <th>txnStatus</th>
+        <th>plazaId</th>
+        <th>laneId</th>
+        <th>settleDate</th>
+        <th>txnDate</th>
+        <th>txnlist_FareType</th>
+        <th>txnlist_RegNumber</th>
+        <th>txnlist_TollFare</th>
+        <th>txnlist_VehicleClass</th>
+        <th>txnlist_errCode</th>
+        <th>txnlist_txnReaderTime</th>
+        <th>txnlist_txnReceivedTime</th>
+        <th>txnlist_txnStatus</th>
+        <th>txnlist_txnType</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in status_list %}
+      <tr>
+        <td>{{ s.txnId }}</td>
+        <td>{{ s.result }}</td>
+        <td>{{ s.errCode }}</td>
+        <td>{{ s.txnStatus }}</td>
+        <td>{{ s.plazaId }}</td>
+        <td>{{ s.laneId }}</td>
+        <td>{{ s.settleDate }}</td>
+        <td>{{ s.txnDate }}</td>
+        <td>{{ s.txnlist_FareType }}</td>
+        <td>{{ s.txnlist_RegNumber }}</td>
+        <td>{{ s.txnlist_TollFare }}</td>
+        <td>{{ s.txnlist_VehicleClass }}</td>
+        <td>{{ s.txnlist_errCode }}</td>
+        <td>{{ s.txnlist_txnReaderTime }}</td>
+        <td>{{ s.txnlist_txnReceivedTime }}</td>
+        <td>{{ s.txnlist_txnStatus }}</td>
+        <td>{{ s.txnlist_txnType }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
 </div>
 {% endblock %} 
