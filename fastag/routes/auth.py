@@ -216,6 +216,8 @@ def api_watchlist_activity(watchlist_id):
         SELECT 
             al.timestamp, 
             al.lane_id, 
+            l.lane_name,
+            r.type as lane_type,
             al.access_result, 
             al.reason,
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
@@ -225,6 +227,8 @@ def api_watchlist_activity(watchlist_id):
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
         WHERE al.tag_id = ?
         ORDER BY al.timestamp DESC
         LIMIT 50

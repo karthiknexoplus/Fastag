@@ -307,6 +307,23 @@ function fetchKycUsers() {
         });
 }
 document.getElementById('addKycWatchlistModal').addEventListener('show.bs.modal', fetchKycUsers);
+function toIST(utcString) {
+    if (!utcString) return '-';
+    let utcDate;
+    if (utcString.includes('T')) {
+        utcDate = new Date(utcString);
+    } else {
+        const [date, time] = utcString.split(' ');
+        if (!date || !time) return utcString;
+        const [year, month, day] = date.split('-').map(Number);
+        const [hour, min, sec] = time.split(':').map(Number);
+        utcDate = new Date(Date.UTC(year, month - 1, day, hour, min, sec));
+    }
+    if (isNaN(utcDate.getTime())) return utcString;
+    const istDate = new Date(utcDate.getTime() + 19800 * 1000);
+    const pad = n => n.toString().padStart(2, '0');
+    return `${pad(istDate.getDate())}/${pad(istDate.getMonth() + 1)}/${istDate.getFullYear()}, ${pad(istDate.getHours())}:${pad(istDate.getMinutes())}:${pad(istDate.getSeconds())}`;
+}
 function viewHistory(id) {
     const modal = new bootstrap.Modal(document.getElementById('activityHistoryModal'));
     document.getElementById('activity-history-content').innerHTML = '<div class="text-center text-muted">Loading...</div>';
@@ -320,8 +337,9 @@ function viewHistory(id) {
             }
             const rows = data.results.map(log => `
                 <tr>
-                    <td>${log.timestamp}</td>
-                    <td>${log.lane_id}</td>
+                    <td>${toIST(log.timestamp)}</td>
+                    <td>${log.lane_name || log.lane_id}</td>
+                    <td>${log.lane_type ? log.lane_type.charAt(0).toUpperCase() + log.lane_type.slice(1) : '-'}</td>
                     <td>${log.access_result}</td>
                     <td>${log.reason || '-'}</td>
                 </tr>
@@ -330,8 +348,9 @@ function viewHistory(id) {
                 <table class="table table-bordered table-sm">
                     <thead class="table-light">
                         <tr>
-                            <th>Timestamp</th>
+                            <th>Timestamp (IST)</th>
                             <th>Lane</th>
+                            <th>Type</th>
                             <th>Result</th>
                             <th>Reason</th>
                         </tr>
