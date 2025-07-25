@@ -4,12 +4,15 @@
 <style>
   .table-sm, .table-sm th, .table-sm td { font-size: 0.92rem; padding: 0.25rem 0.5rem; }
   .filter-bar { margin-bottom: 0.5rem; font-size: 0.98rem; }
-  .action-icon-btn { background: none; border: none; padding: 0.2rem 0.4rem; font-size: 1.1rem; cursor: pointer; }
+  .action-icon-btn { background: none; border: none; padding: 0.2rem 0.4rem; font-size: 1.15rem; cursor: pointer; color: #764ba2; }
   .action-icon-btn:focus { outline: none; }
+  .action-icon-btn[disabled] { color: #bbb; cursor: not-allowed; }
   #response, .table-sm { font-size: 0.95rem; }
+  .table thead th { background: #f3e9ff; color: #764ba2; }
+  .modal-content { font-size: 0.97rem; }
 </style>
 <div class="container mt-3">
-  <h4 style="font-size:1.2rem; font-weight:600; margin-bottom:0.7rem;">Response Pay</h4>
+  <h4 style="font-size:1.2rem; font-weight:600; margin-bottom:0.7rem; color:#764ba2;">Response Pay</h4>
   <div class="filter-bar d-flex align-items-center">
     <form method="get" class="d-flex align-items-center" style="gap:0.5rem;">
       <label for="date" class="me-2 mb-0">Show for date:</label>
@@ -46,12 +49,12 @@
           <td>{{ log.request_time }}</td>
           <td style="text-align:center;">
             {% if status_map[log.id] is defined %}
-              <button type="submit" name="log_id" value="{{ log.id }}" class="action-icon-btn" title="View Status">
+              <button type="button" class="action-icon-btn" title="View Status" data-bs-toggle="modal" data-bs-target="#statusModal" data-logid="{{ log.id }}">
                 <i class="fas fa-eye"></i>
               </button>
             {% else %}
               <button type="submit" name="log_id" value="{{ log.id }}" class="action-icon-btn" title="Get Status">
-                <i class="fas fa-sync-alt"></i>
+                <i class="fas fa-sync fa-spin-once"></i>
               </button>
             {% endif %}
           </td>
@@ -60,69 +63,49 @@
       </tbody>
     </table>
   </form>
-  <h6 style="font-size:1.05rem; margin-top:1.2rem;">Response</h6>
-  <div id="response" style="font-size:0.97rem;">
-    {% if response %}
-      <pre style="font-size:0.97rem; margin-bottom:0.5rem;">{{ response|safe }}</pre>
-    {% endif %}
+  <!-- Modal for status details -->
+  <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header" style="background:#f3e9ff; color:#764ba2;">
+          <h5 class="modal-title" id="statusModalLabel">Transaction Status Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modalStatusContent">
+          <div class="text-center text-muted">Loading...</div>
+        </div>
+      </div>
+    </div>
   </div>
-  {% if status_list %}
-  <h6 style="font-size:1.05rem; margin-top:0.7rem;">Transaction Status Details</h6>
-  <table class="table table-bordered table-sm">
-    <thead>
-      <tr>
-        <th>txnId</th>
-        <th>result</th>
-        <th>errCode</th>
-        <th>txnStatus</th>
-        <th>plazaId</th>
-        <th>laneId</th>
-        <th>settleDate</th>
-        <th>txnDate</th>
-        <th>txnlist_FareType</th>
-        <th>txnlist_RegNumber</th>
-        <th>txnlist_TollFare</th>
-        <th>txnlist_VehicleClass</th>
-        <th>txnlist_errCode</th>
-        <th>txnlist_txnReaderTime</th>
-        <th>txnlist_txnReceivedTime</th>
-        <th>txnlist_txnStatus</th>
-        <th>txnlist_txnType</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in status_list %}
-      <tr>
-        <td>{{ s.txnId|default('') }}</td>
-        <td>{{ s.result|default('') }}</td>
-        <td>{{ s.errCode|default('') }}</td>
-        <td>
-          {% set txs = s.txnlist_txnStatus|default('') %}
-          {% if txs == 'FAILURE' %}
-            <b style="color: red">{{ txs }}</b>
-          {% elif txs == 'SUCCESS' %}
-            <b style="color: green">{{ txs }}</b>
-          {% else %}
-            {{ txs }}
-          {% endif %}
-        </td>
-        <td>{{ s.plazaId|default('') }}</td>
-        <td>{{ s.laneId|default('') }}</td>
-        <td>{{ s.settleDate|default('') }}</td>
-        <td>{{ s.txnDate|default('') }}</td>
-        <td>{{ s.txnlist_FareType|default('') }}</td>
-        <td>{{ s.txnlist_RegNumber|default('') }}</td>
-        <td>{{ s.txnlist_TollFare|default('') }}</td>
-        <td>{{ s.txnlist_VehicleClass|default('') }}</td>
-        <td>{{ s.txnlist_errCode|default('') }}</td>
-        <td>{{ s.txnlist_txnReaderTime|default('') }}</td>
-        <td>{{ s.txnlist_txnReceivedTime|default('') }}</td>
-        <td>{{ s.txnlist_txnStatus|default('') }}</td>
-        <td>{{ s.txnlist_txnType|default('') }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% endif %}
-</div>
+  <script>
+    // Modal status loader
+    document.addEventListener('DOMContentLoaded', function() {
+      var statusModal = document.getElementById('statusModal');
+      statusModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var logId = button.getAttribute('data-logid');
+        var modalBody = document.getElementById('modalStatusContent');
+        modalBody.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+        fetch(`?log_id=${logId}&date={{ selected_date }}`)
+          .then(resp => resp.text())
+          .then(html => {
+            // Extract the status table and response from the returned HTML
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+            var statusTable = doc.querySelector('table.table-sm:last-of-type');
+            var responseBlock = doc.querySelector('#response pre');
+            modalBody.innerHTML = '';
+            if (responseBlock) {
+              modalBody.innerHTML += responseBlock.outerHTML;
+            }
+            if (statusTable) {
+              modalBody.innerHTML += statusTable.outerHTML;
+            }
+            if (!statusTable && !responseBlock) {
+              modalBody.innerHTML = '<div class="text-center text-muted">No status found.</div>';
+            }
+          });
+      });
+    });
+  </script>
 {% endblock %} 
