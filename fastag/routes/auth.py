@@ -4,6 +4,8 @@ from fastag.utils.db import get_db, log_user_login, log_user_action
 import logging
 import io
 import csv
+from flask import jsonify, request
+import sqlite3
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -146,4 +148,58 @@ def debug_env():
     return {
         "GOOGLE_CLIENT_ID": os.environ.get("GOOGLE_CLIENT_ID"),
         "GOOGLE_CLIENT_SECRET": os.environ.get("GOOGLE_CLIENT_SECRET")
-    } 
+    }
+
+@auth_bp.route('/api/watchlist/list')
+def api_watchlist_list():
+    db = get_db()
+    # Join with kyc_users to get registered user details
+    rows = db.execute('''
+        SELECT w.id, w.fastag_id, w.reason, w.added_at, k.name, k.vehicle_number, k.contact_number, k.address
+        FROM watchlist_users w
+        LEFT JOIN kyc_users k ON w.fastag_id = k.fastag_id
+        ORDER BY w.added_at DESC
+    ''').fetchall()
+    results = []
+    for row in rows:
+        is_registered = row[4] is not None
+        results.append({
+            'id': row[0],
+            'fastag_id': row[1],
+            'reason': row[2],
+            'added_at': row[3],
+            'type': 'Registered' if is_registered else 'Non-User',
+            'name': row[4] or '',
+            'vehicle_number': row[5] or '',
+            'contact_number': row[6] or '',
+            'address': row[7] or ''
+        })
+    return jsonify({'results': results})
+
+@auth_bp.route('/api/watchlist/add', methods=['POST'])
+def api_watchlist_add():
+    data = request.get_json()
+    fastag_id = data.get('fastag_id')
+    reason = data.get('reason', '')
+    if not fastag_id:
+        return jsonify({'success': False, 'error': 'fastag_id required'}), 400
+    db = get_db()
+    db.execute('INSERT INTO watchlist_users (fastag_id, reason) VALUES (?, ?)', (fastag_id, reason))
+    db.commit()
+    return jsonify({'success': True})
+
+@auth_bp.route('/api/watchlist/delete/<int:watchlist_id>', methods=['DELETE'])
+def api_watchlist_delete(watchlist_id):
+    db = get_db()
+    db.execute('DELETE FROM watchlist_users WHERE id = ?', (watchlist_id,))
+    db.commit()
+    return jsonify({'success': True})
+
+@auth_bp.route('/api/watchlist/edit/<int:watchlist_id>', methods=['POST'])
+def api_watchlist_edit(watchlist_id):
+    data = request.get_json()
+    reason = data.get('reason', '')
+    db = get_db()
+    db.execute('UPDATE watchlist_users SET reason = ? WHERE id = ?', (reason, watchlist_id))
+    db.commit()
+    return jsonify({'success': True}) 

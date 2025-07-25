@@ -19,18 +19,26 @@
         .watchlist-action-btn {
             margin-right: 0.5em;
         }
-        .watchlist-history {
+        .watchlist-history, .watchlist-reports {
             background: #f8f9fa;
             border-radius: 1rem;
             padding: 1.5rem;
             margin-top: 2rem;
         }
-        .watchlist-reports {
-            background: #f4f6fb;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-top: 2rem;
+        .watchlist-type-badge {
+            font-size: 0.95em;
+            padding: 0.3em 0.7em;
+            border-radius: 1em;
         }
+        .watchlist-type-registered {
+            background: #e0f7fa;
+            color: #00796b;
+        }
+        .watchlist-type-nonuser {
+            background: #fbe9e7;
+            color: #d84315;
+        }
+        .table-responsive { margin-bottom: 2rem; }
     </style>
 </head>
 <body>
@@ -41,48 +49,33 @@
             <i class="fas fa-user-plus me-1"></i> Add to Watchlist
         </button>
     </div>
-    <table class="table table-hover watchlist-table">
-        <thead class="table-light">
-            <tr>
-                <th><i class="fas fa-user"></i> Name</th>
-                <th><i class="fas fa-id-card"></i> Fastag ID</th>
-                <th><i class="fas fa-car"></i> Vehicle</th>
-                <th><i class="fas fa-clock"></i> Last Seen</th>
-                <th><i class="fas fa-history"></i> History</th>
-                <th><i class="fas fa-cogs"></i> Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Example row, replace with dynamic rows -->
-            <tr>
-                <td>John Doe</td>
-                <td>34161FA8203...</td>
-                <td>KA01ME8993</td>
-                <td>2023-07-25 14:09</td>
-                <td>
-                    <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History">
-                        <i class="fas fa-history"></i>
-                    </button>
-                </td>
-                <td>
-                    <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-            <!-- More rows here -->
-        </tbody>
-    </table>
-    <div class="watchlist-history">
-        <h4><i class="fas fa-history text-secondary me-2"></i>Activity History (Placeholder)</h4>
-        <p>Select a user to view their in/out pattern, denied attempts, and more.</p>
+    <div class="table-responsive">
+        <table class="table table-hover watchlist-table" id="watchlist-table">
+            <thead class="table-light">
+                <tr>
+                    <th><i class="fas fa-user"></i> Name</th>
+                    <th><i class="fas fa-id-card"></i> Fastag ID</th>
+                    <th><i class="fas fa-car"></i> Vehicle</th>
+                    <th><i class="fas fa-phone"></i> Contact</th>
+                    <th><i class="fas fa-map-marker-alt"></i> Address</th>
+                    <th><i class="fas fa-tag"></i> Type</th>
+                    <th><i class="fas fa-clock"></i> Added</th>
+                    <th><i class="fas fa-sticky-note"></i> Reason</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody id="watchlist-tbody">
+                <tr><td colspan="9" class="text-center text-muted">Loading...</td></tr>
+            </tbody>
+        </table>
     </div>
-    <div class="watchlist-reports">
-        <h4><i class="fas fa-file-alt text-secondary me-2"></i>Reports (Placeholder)</h4>
-        <p>Generate and view reports for watchlisted users here.</p>
+    <div class="watchlist-history" id="watchlist-history" style="display:none;">
+        <h4><i class="fas fa-history text-secondary me-2"></i>Activity History</h4>
+        <div id="history-content">Select a user to view their in/out pattern, denied attempts, and more.</div>
+    </div>
+    <div class="watchlist-reports" id="watchlist-reports" style="display:none;">
+        <h4><i class="fas fa-file-alt text-secondary me-2"></i>Reports</h4>
+        <div id="reports-content">Generate and view reports for watchlisted users here.</div>
     </div>
 </div>
 <!-- Add to Watchlist Modal -->
@@ -94,10 +87,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form>
+        <form id="add-watchlist-form">
           <div class="mb-3">
             <label for="fastagIdInput" class="form-label">Fastag ID</label>
-            <input type="text" class="form-control" id="fastagIdInput" placeholder="Enter Fastag ID">
+            <input type="text" class="form-control" id="fastagIdInput" placeholder="Enter Fastag ID" required>
           </div>
           <div class="mb-3">
             <label for="reasonInput" class="form-label">Reason (optional)</label>
@@ -109,6 +102,125 @@
     </div>
   </div>
 </div>
+<!-- Edit Reason Modal -->
+<div class="modal fade" id="editReasonModal" tabindex="-1" aria-labelledby="editReasonModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editReasonModalLabel"><i class="fas fa-edit me-2"></i>Edit Reason</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-reason-form">
+          <input type="hidden" id="editReasonId">
+          <div class="mb-3">
+            <label for="editReasonInput" class="form-label">Reason</label>
+            <input type="text" class="form-control" id="editReasonInput" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-1"></i>Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function renderWatchlistTable(data) {
+    const tbody = document.getElementById('watchlist-tbody');
+    if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No users on the watchlist.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = data.map(user => `
+        <tr data-id="${user.id}">
+            <td>${user.name || '<span class=\'text-muted\'>-</span>'}</td>
+            <td>${user.fastag_id}</td>
+            <td>${user.vehicle_number || '<span class=\'text-muted\'>-</span>'}</td>
+            <td>${user.contact_number || '<span class=\'text-muted\'>-</span>'}</td>
+            <td>${user.address || '<span class=\'text-muted\'>-</span>'}</td>
+            <td><span class="watchlist-type-badge ${user.type === 'Registered' ? 'watchlist-type-registered' : 'watchlist-type-nonuser'}">${user.type}</span></td>
+            <td>${user.added_at}</td>
+            <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
+            <td>
+                <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
+                    <i class="fas fa-history"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+function fetchWatchlist() {
+    fetch('/api/watchlist/list')
+        .then(res => res.json())
+        .then(data => renderWatchlistTable(data.results));
+}
+function deleteWatchlistUser(id) {
+    if (!confirm('Are you sure you want to remove this user from the watchlist?')) return;
+    fetch(`/api/watchlist/delete/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) fetchWatchlist();
+            else alert('Failed to delete user.');
+        });
+}
+function openEditReason(id, reason) {
+    document.getElementById('editReasonId').value = id;
+    document.getElementById('editReasonInput').value = reason;
+    var modal = new bootstrap.Modal(document.getElementById('editReasonModal'));
+    modal.show();
+}
+document.getElementById('edit-reason-form').onsubmit = function(e) {
+    e.preventDefault();
+    const id = document.getElementById('editReasonId').value;
+    const reason = document.getElementById('editReasonInput').value;
+    fetch(`/api/watchlist/edit/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            fetchWatchlist();
+            bootstrap.Modal.getInstance(document.getElementById('editReasonModal')).hide();
+        } else {
+            alert('Failed to update reason.');
+        }
+    });
+};
+document.getElementById('add-watchlist-form').onsubmit = function(e) {
+    e.preventDefault();
+    const fastag_id = document.getElementById('fastagIdInput').value;
+    const reason = document.getElementById('reasonInput').value;
+    fetch('/api/watchlist/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fastag_id, reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            fetchWatchlist();
+            bootstrap.Modal.getInstance(document.getElementById('addWatchlistModal')).hide();
+            document.getElementById('add-watchlist-form').reset();
+        } else {
+            alert('Failed to add to watchlist: ' + (data.error || 'Unknown error'));
+        }
+    });
+};
+function viewHistory(id) {
+    // Placeholder: show history section and load activity for this user
+    document.getElementById('watchlist-history').style.display = '';
+    document.getElementById('history-content').innerHTML = '<div class="text-center text-muted">Loading activity history for user #' + id + '...</div>';
+    // TODO: Fetch and render activity logs for this user
+}
+window.onload = fetchWatchlist;
+</script>
 </body>
 </html> 
