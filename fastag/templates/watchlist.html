@@ -73,7 +73,7 @@
     <div class="modal fade" id="addKycWatchlistModal" tabindex="-1" aria-labelledby="addKycWatchlistModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header purple">
             <h5 class="modal-title" id="addKycWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add Registered KYC User</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -89,7 +89,7 @@
                 <label for="kycReasonInput" class="form-label">Reason (optional)</label>
                 <input type="text" class="form-control" id="kycReasonInput" placeholder="Reason for watchlisting">
               </div>
-              <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-1"></i>Add</button>
+              <button type="submit" class="btn btn-outline-purple w-100"><i class="fas fa-plus me-1"></i>Add</button>
             </form>
           </div>
         </div>
@@ -99,7 +99,7 @@
     <div class="modal fade" id="addWatchlistModal" tabindex="-1" aria-labelledby="addWatchlistModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header purple">
             <h5 class="modal-title" id="addWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add Non-User Vehicle</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -113,7 +113,7 @@
                 <label for="reasonInput" class="form-label">Reason (optional)</label>
                 <input type="text" class="form-control" id="reasonInput" placeholder="Reason for watchlisting">
               </div>
-              <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-1"></i>Add</button>
+              <button type="submit" class="btn btn-outline-purple w-100"><i class="fas fa-plus me-1"></i>Add</button>
             </form>
           </div>
         </div>
@@ -123,7 +123,7 @@
     <div class="modal fade" id="editReasonModal" tabindex="-1" aria-labelledby="editReasonModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header purple">
             <h5 class="modal-title" id="editReasonModalLabel"><i class="fas fa-edit me-2"></i>Edit Reason</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -134,7 +134,7 @@
                 <label for="editReasonInput" class="form-label">Reason</label>
                 <input type="text" class="form-control" id="editReasonInput" required>
               </div>
-              <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-1"></i>Save</button>
+              <button type="submit" class="btn btn-outline-purple w-100"><i class="fas fa-save me-1"></i>Save</button>
             </form>
           </div>
         </div>
@@ -144,7 +144,7 @@
     <div class="modal fade" id="activityHistoryModal" tabindex="-1" aria-labelledby="activityHistoryModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header purple">
             <h5 class="modal-title" id="activityHistoryModalLabel"><i class="fas fa-history me-2"></i>Activity History</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -179,13 +179,13 @@ function renderWatchlistTabs(data) {
                 <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
                 <td>${user.added_at}</td>
                 <td>
-                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
+                    <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
                         <i class="fas fa-history"></i>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\&#39;') : ''}')">
+                    <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\&#39;') : ''}')">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
+                    <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -203,13 +203,13 @@ function renderWatchlistTabs(data) {
                 <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
                 <td>${user.added_at}</td>
                 <td>
-                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
+                    <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
                         <i class="fas fa-history"></i>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\&#39;') : ''}')">
+                    <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\&#39;') : ''}')">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
+                    <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
