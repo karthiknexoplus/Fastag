@@ -355,31 +355,42 @@ def request_pay():
 def response_pay():
     from fastag.utils.db import fetch_request_pay_logs
     from fastag.bank_client import send_check_txn
+    import xml.etree.ElementTree as ET
     response = None
     logs = fetch_request_pay_logs(50)
     if request.method == 'POST':
-        # Get the log id from the form
         log_id = request.form.get('log_id')
-        # Find the log record
         log = next((l for l in logs if str(l['id']) == str(log_id)), None)
-        if log:
-            # Prepare status_list for check_txn (EntryTxn id, ts, Lane id, etc.)
-            status = {
-                'EntryTxnId': log['msg_id'],
-                'ts': log['request_time'],
-                'LaneId': log['tid'],
-                'direction': '',  # Not stored, can be left blank or fetched if needed
-            }
-            # The API expects a list of dicts or strings; adjust as needed
-            status_list = [status]
-            # Use org_id and msg_id from the log
-            result = send_check_txn(log['msg_id'], log['org_id'], status_list)
-            if isinstance(result, dict):
-                response = "<b>Check Txn Status Response:</b><br>"
-                for k, v in result.items():
-                    response += f"<b>{k}:</b> {v}<br>"
-            else:
-                response = result
+        if log and log['request_xml']:
+            # Parse the request_xml to extract txnId, txnDate, plazaId, laneId
+            try:
+                root = ET.fromstring(log['request_xml'])
+                ns = {'etc': 'http://npci.org/etc/schema/'}
+                txn_elem = root.find('.//etc:Txn', ns)
+                plaza_elem = root.find('.//etc:Plaza', ns)
+                lane_elem = root.find('.//etc:Lane', ns)
+                txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
+                txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
+                plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
+                laneId = lane_elem.attrib.get('id') if lane_elem is not None else ''
+                # Build status_list as expected by the bank
+                status = {
+                    'txnId': txnId,
+                    'txnDate': txnDate,
+                    'plazaId': plazaId,
+                    'laneId': laneId
+                }
+                status_list = [status]
+                # Use org_id and msg_id from the log
+                result = send_check_txn(log['msg_id'], log['org_id'], status_list)
+                if isinstance(result, dict):
+                    response = "<b>Check Txn Status Response:</b><br>"
+                    for k, v in result.items():
+                        response += f"<b>{k}:</b> {v}<br>"
+                else:
+                    response = result
+            except Exception as e:
+                response = f"<b>Error parsing request XML or sending check txn:</b> {e}"
     return render_template('banking/response_pay.html', logs=logs, response=response)
 
 @banking.route('/banking/transaction_status', methods=['GET', 'POST'])

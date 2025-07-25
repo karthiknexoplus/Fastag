@@ -735,7 +735,7 @@ def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
     txnId = str(uuid.uuid4())[:22]
     xml_data = build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_placeholder)
-    url = get_bank_url('checktxn')
+    url = get_bank_url('check_txn_url')
     headers = {'Content-Type': 'application/xml'}
     print("\n[CHECK_TXN] Request XML (unsigned):\n", xml_data.decode() if isinstance(xml_data, bytes) else xml_data)
     print("[CHECK_TXN] URL:", url)
