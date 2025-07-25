@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}Heartbeat - Banking{% endblock %}
 {% block content %}
+<style>
+  .btn-purple { background: #764ba2; color: #fff; border: none; }
+  .btn-purple:hover, .btn-purple:focus { background: #5a357d; color: #fff; }
+  .card-header-purple { background: #764ba2; color: #fff; font-weight: 600; }
+  .card-title, .fa-heartbeat { color: #764ba2; }
+</style>
 <div class="container mt-4" style="max-width: 600px;">
   <div class="card shadow-sm">
     <div class="card-body">
@@ -26,13 +32,13 @@
           <span class="input-group-text"><i class="fas fa-globe"></i></span>
           <input type="text" class="form-control" id="plazaGeoCode" name="plazaGeoCode" value="{{ plazaGeoCode or '' }}" placeholder="Plaza Geo Code">
         </div>
-        <button type="submit" class="btn btn-primary w-100 mt-2"><i class="fas fa-paper-plane me-1"></i>Send Heartbeat</button>
+        <button type="submit" class="btn btn-purple w-100 mt-2"><i class="fas fa-paper-plane me-1"></i>Send Heartbeat</button>
       </form>
     </div>
   </div>
   {% if response %}
-  <div class="card mt-4 border-success">
-    <div class="card-header bg-success text-white"><i class="fas fa-check-circle me-1"></i>Response</div>
+  <div class="card mt-4 border-purple" style="border-color:#764ba2 !important;">
+    <div class="card-header card-header-purple"><i class="fas fa-check-circle me-1"></i>Response</div>
     <div class="card-body">
       <div id="response">{{ response|safe }}</div>
     </div>

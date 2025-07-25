@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}Sync Time - Banking{% endblock %}
 {% block content %}
+<style>
+  .btn-purple { background: #764ba2; color: #fff; border: none; }
+  .btn-purple:hover, .btn-purple:focus { background: #5a357d; color: #fff; }
+  .card-header-purple { background: #764ba2; color: #fff; font-weight: 600; }
+  .card-title, .fa-clock { color: #764ba2; }
+</style>
 <div class="container mt-4" style="max-width: 500px;">
   <div class="card shadow-sm">
     <div class="card-body">
@@ -18,13 +24,13 @@
           <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
           <input type="text" class="form-control" id="ts" name="ts" value="{{ ts }}" placeholder="Timestamp">
         </div>
-        <button type="submit" class="btn btn-primary w-100 mt-2"><i class="fas fa-paper-plane me-1"></i>Send Sync Time</button>
+        <button type="submit" class="btn btn-purple w-100 mt-2"><i class="fas fa-paper-plane me-1"></i>Send Sync Time</button>
       </form>
     </div>
   </div>
   {% if response %}
-  <div class="card mt-4 border-success">
-    <div class="card-header bg-success text-white"><i class="fas fa-check-circle me-1"></i>Response</div>
+  <div class="card mt-4 border-purple" style="border-color:#764ba2 !important;">
+    <div class="card-header card-header-purple"><i class="fas fa-check-circle me-1"></i>Response</div>
     <div class="card-body">
       <div id="response">{{ response|safe }}</div>
     </div>
