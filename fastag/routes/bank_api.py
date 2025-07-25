@@ -456,4 +456,4 @@ def response_pay():
                 status_list = result.get('status_list', [])
             except Exception as e:
                 response += f"<b>Error parsing stored status JSON:</b> {e}"
-    return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list, status_map=status_map, selected_date=selected_date) 
+    return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list, status_map=status_map, selected_date=selected_date, log_id=log_id_param) 
