@@ -212,12 +212,22 @@ def api_watchlist_activity(watchlist_id):
     if not entry:
         return jsonify({'success': False, 'error': 'Not found'}), 404
     fastag_id = entry['fastag_id']
-    # Query both tag_id and vehicle_number in access_logs
     logs = db.execute('''
-        SELECT timestamp, lane_id, access_result, reason
-        FROM access_logs
-        WHERE tag_id = ? OR vehicle_number = ?
-        ORDER BY timestamp DESC LIMIT 50
-    ''', (fastag_id, fastag_id)).fetchall()
+        SELECT 
+            al.timestamp, 
+            al.lane_id, 
+            al.access_result, 
+            al.reason,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        WHERE al.tag_id = ?
+        ORDER BY al.timestamp DESC
+        LIMIT 50
+    ''', (fastag_id,)).fetchall()
     results = [dict(row) for row in logs]
     return jsonify({'results': results}) 
