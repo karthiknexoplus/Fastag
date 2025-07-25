@@ -368,6 +368,9 @@ def response_pay():
                 print("[DEBUG] Stored pay request XML:")
                 print(log['request_xml'])
                 root = ET.fromstring(log['request_xml'])
+                print("[DEBUG] All tags in parsed XML:")
+                for elem in root.iter():
+                    print(elem.tag)
                 entry_txn_elems = root.findall('.//' + NS + 'EntryTxn')
                 txn_elem = root.find('.//' + NS + 'Txn')
                 plaza_elem = root.find('.//' + NS + 'Plaza')
