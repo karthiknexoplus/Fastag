@@ -179,13 +179,13 @@ function renderWatchlistTabs(data) {
                 <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
                 <td>${user.added_at}</td>
                 <td>
-                    <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
+                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
                         <i class="fas fa-history"></i>
                     </button>
-                    <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')">
+                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\&#39;') : ''}')">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
+                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -203,13 +203,13 @@ function renderWatchlistTabs(data) {
                 <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
                 <td>${user.added_at}</td>
                 <td>
-                    <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
+                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
                         <i class="fas fa-history"></i>
                     </button>
-                    <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')">
+                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\&#39;') : ''}')">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
+                    <button class="btn btn-outline-secondary btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
