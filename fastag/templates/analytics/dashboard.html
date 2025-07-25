@@ -607,12 +607,20 @@ let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart;
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
-    loadAnalyticsData();
-    loadDeniedFastagActivityFeed();
+    loadCurrentOccupancy();
+    loadTodayGranted();
+    loadUniqueTagsDeniedToday();
+    loadUniqueTagsToday();
+    loadOverstayedVehicles();
+    loadUniqueVehiclesToday();
+    loadFastagVsNonfastag();
+    loadEntryExitTrend();
+    loadHourlyActivity();
+    loadReaderHealth();
     loadTopUsers();
     loadLaneUtilization();
-    refreshRelayStatus(); // Initial load for barrier status
-    // Removed all setInterval auto-refreshes for analytics and feeds
+    loadDeniedFastagActivityFeed();
+    refreshRelayStatus();
 });
 
 function initializeCharts() {
@@ -786,94 +794,126 @@ function initializeCharts() {
     });
 }
 
-function loadAnalyticsData() {
-    fetch('/analytics/api/analytics-data')
-        .then(response => response.json())
+function setCardLoading(id) {
+    document.getElementById(id).innerHTML = '<div class="text-center text-muted">-</div>';
+}
+
+function loadCurrentOccupancy() {
+    setCardLoading('current-occupancy');
+    fetch('/analytics/api/current-occupancy')
+        .then(r => r.json())
         .then(data => {
-            updateStats(data);
-            updateCharts(data);
-            updateTables(data);
-        })
-        .catch(error => {
-            console.error('Error loading analytics data:', error);
+            document.getElementById('current-occupancy').innerHTML = `
+                <div>${data.total ?? '-'}</div>
+                <div style="font-size:0.9rem;">
+                    <span style="color:#28a745;">FASTag: ${data.fastag ?? '-'}</span> |
+                    <span style="color:#007bff;">OEM: ${data.car_oem ?? '-'}</span> |
+                    <span style="color:#ff9800;">Other: ${data.other ?? '-'}</span>
+                </div>`;
         });
 }
-
-function updateStats(data) {
-    // Current Occupancy with breakdown
-    const occ = data.current_occupancy_breakdown || {};
-    document.getElementById('current-occupancy').innerHTML = `
-        <div>${occ.total ?? '-'}</div>
-        <div style="font-size:0.9rem;">
-            <span style="color:#28a745;">FASTag: ${occ.fastag ?? '-'}</span> |
-            <span style="color:#007bff;">OEM: ${occ.car_oem ?? '-'}</span> |
-            <span style="color:#ff9800;">Other: ${occ.other ?? '-'}</span>
-        </div>`;
-    document.getElementById('today-granted').textContent = data.today_stats?.granted || 0;
-    // Unique Tags Denied Today
-    const denied = data.unique_tags_denied_breakdown || {};
-    document.getElementById('today-denied').innerHTML = `
-        <div>${denied.total ?? '-'}</div>
-        <div style="font-size:0.9rem;">
-            <span style="color:#28a745;">FASTag: ${denied.fastag ?? '-'}</span> |
-            <span style="color:#007bff;">OEM: ${denied.car_oem ?? '-'}</span> |
-            <span style="color:#ff9800;">Other: ${denied.other ?? '-'}</span>
-        </div>`;
-    // Unique Tags Today
-    const total = data.unique_tags_breakdown || {};
-    document.getElementById('total-events').innerHTML = `
-        <div>${total.total ?? '-'}</div>
-        <div style="font-size:0.9rem;">
-            <span style="color:#28a745;">FASTag: ${total.fastag ?? '-'}</span> |
-            <span style="color:#007bff;">OEM: ${total.car_oem ?? '-'}</span> |
-            <span style="color:#ff9800;">Other: ${total.other ?? '-'}</span>
-        </div>`;
-    document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
-    document.getElementById('unique-vehicles-today').textContent = data.unique_vehicles_today ?? '-';
+function loadTodayGranted() {
+    setCardLoading('today-granted');
+    fetch('/analytics/api/today-granted')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('today-granted').textContent = data.granted ?? '-';
+        });
 }
-
-function updateCharts(data) {
-    // Update hourly chart
-    if (data.hourly_data) {
-        const labels = data.hourly_data.map(item => item[0] + ':00');
-        const grantedData = data.hourly_data.map(item => item[2]);
-        const deniedData = data.hourly_data.map(item => item[3]);
-        
-        hourlyChart.data.labels = labels;
-        hourlyChart.data.datasets[0].data = grantedData;
-        hourlyChart.data.datasets[1].data = deniedData;
-        hourlyChart.update();
-    }
-
-    // Update reader health chart
-    if (data.reader_health) {
-        // Show type and IP for each reader
-        const labels = data.reader_health.map(item => `${item[2]} (${item[1]})`); // type (ip)
-        const dataValues = data.reader_health.map(item => item[4]); // events_last_24h
-        readerHealthChart.data.labels = labels;
-        readerHealthChart.data.datasets[0].data = dataValues;
-        readerHealthChart.update();
-    }
-
-    // Update FASTag vs Non-FASTag Pie Chart
-    if (data.fastag_vs_nonfastag) {
-        fastagPieChart.data.datasets[0].data = [
-            data.fastag_vs_nonfastag.fastag,
-            data.fastag_vs_nonfastag.nonfastag
-        ];
-        fastagPieChart.update();
-    }
-
-    // Update Entry/Exit Trend Chart
-    if (data.entry_exit_trend) {
-        const labels = data.entry_exit_trend.map(item => item[0] + ':00');
-        const entries = data.entry_exit_trend.map(item => item[1]);
-        const exits = data.entry_exit_trend.map(item => item[2]);
-        entryExitTrendChart.data.labels = labels;
-        entryExitTrendChart.data.datasets[0].data = entries;
-        entryExitTrendChart.data.datasets[1].data = exits;
-        entryExitTrendChart.update();
-    }
+function loadUniqueTagsDeniedToday() {
+    setCardLoading('today-denied');
+    fetch('/analytics/api/unique-tags-denied-today')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('today-denied').innerHTML = `
+                <div>${data.total ?? '-'}</div>
+                <div style="font-size:0.9rem;">
+                    <span style="color:#28a745;">FASTag: ${data.fastag ?? '-'}</span> |
+                    <span style="color:#007bff;">OEM: ${data.car_oem ?? '-'}</span> |
+                    <span style="color:#ff9800;">Other: ${data.other ?? '-'}</span>
+                </div>`;
+        });
+}
+function loadUniqueTagsToday() {
+    setCardLoading('total-events');
+    fetch('/analytics/api/unique-tags-today')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('total-events').innerHTML = `
+                <div>${data.total ?? '-'}</div>
+                <div style="font-size:0.9rem;">
+                    <span style="color:#28a745;">FASTag: ${data.fastag ?? '-'}</span> |
+                    <span style="color:#007bff;">OEM: ${data.car_oem ?? '-'}</span> |
+                    <span style="color:#ff9800;">Other: ${data.other ?? '-'}</span>
+                </div>`;
+        });
+}
+function loadOverstayedVehicles() {
+    setCardLoading('overstayed-vehicles');
+    fetch('/analytics/api/overstayed-vehicles')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
+        });
+}
+function loadUniqueVehiclesToday() {
+    setCardLoading('unique-vehicles-today');
+    fetch('/analytics/api/unique-vehicles-today')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('unique-vehicles-today').textContent = data.unique_vehicles_today ?? '-';
+        });
+}
+function loadFastagVsNonfastag() {
+    fetch('/analytics/api/fastag-vs-nonfastag')
+        .then(r => r.json())
+        .then(data => {
+            fastagPieChart.data.datasets[0].data = [data.fastag, data.nonfastag];
+            fastagPieChart.update();
+        });
+}
+function loadEntryExitTrend() {
+    fetch('/analytics/api/entry-exit-trend')
+        .then(r => r.json())
+        .then(data => {
+            if (data.entry_exit_trend) {
+                const labels = data.entry_exit_trend.map(item => item[0] + ':00');
+                const entries = data.entry_exit_trend.map(item => item[1]);
+                const exits = data.entry_exit_trend.map(item => item[2]);
+                entryExitTrendChart.data.labels = labels;
+                entryExitTrendChart.data.datasets[0].data = entries;
+                entryExitTrendChart.data.datasets[1].data = exits;
+                entryExitTrendChart.update();
+            }
+        });
+}
+function loadHourlyActivity() {
+    fetch('/analytics/api/hourly-activity')
+        .then(r => r.json())
+        .then(data => {
+            if (data.hourly_data) {
+                const labels = data.hourly_data.map(item => item[0] + ':00');
+                const grantedData = data.hourly_data.map(item => item[2]);
+                const deniedData = data.hourly_data.map(item => item[3]);
+                hourlyChart.data.labels = labels;
+                hourlyChart.data.datasets[0].data = grantedData;
+                hourlyChart.data.datasets[1].data = deniedData;
+                hourlyChart.update();
+            }
+        });
+}
+function loadReaderHealth() {
+    fetch('/analytics/api/reader-health')
+        .then(r => r.json())
+        .then(data => {
+            if (data.reader_health) {
+                const labels = data.reader_health.map(item => `${item[2]} (${item[1]})`);
+                const dataValues = data.reader_health.map(item => item[4]);
+                readerHealthChart.data.labels = labels;
+                readerHealthChart.data.datasets[0].data = dataValues;
+                readerHealthChart.update();
+            }
+        });
 }
 
 function getDisplayName(user) {

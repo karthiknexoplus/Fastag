@@ -1920,3 +1920,180 @@ def denied_analysis_api():
         ORDER BY count DESC
     """).fetchall()]
     return jsonify({'denied_analysis': denied_analysis})
+
+@analytics_bp.route('/api/current-occupancy')
+def api_current_occupancy():
+    db = get_db()
+    current_occupancy_rows = db.execute("""
+        SELECT al1.tag_id
+        FROM access_logs al1
+        WHERE al1.access_result = 'granted'
+        AND al1.timestamp = (
+            SELECT MAX(al2.timestamp)
+            FROM access_logs al2
+            WHERE al2.tag_id = al1.tag_id
+        )
+    """).fetchall()
+    occ_fastag = 0
+    occ_car_oem = 0
+    occ_other = 0
+    for row in current_occupancy_rows:
+        tag_id = row[0]
+        if tag_id.startswith('34161'):
+            occ_fastag += 1
+        elif tag_id.startswith('E20'):
+            occ_car_oem += 1
+        else:
+            occ_other += 1
+    return jsonify({
+        'fastag': occ_fastag,
+        'car_oem': occ_car_oem,
+        'other': occ_other,
+        'total': len(current_occupancy_rows)
+    })
+
+@analytics_bp.route('/api/today-granted')
+def api_today_granted():
+    db = get_db()
+    row = db.execute("""
+        SELECT SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as granted
+        FROM access_logs WHERE DATE(timestamp) = DATE('now')
+    """).fetchone()
+    return jsonify({'granted': row[0] or 0})
+
+@analytics_bp.route('/api/unique-tags-denied-today')
+def api_unique_tags_denied_today():
+    db = get_db()
+    denied_tags_rows = db.execute('''
+        SELECT tag_id FROM access_logs WHERE DATE(timestamp) = DATE('now') AND access_result = 'denied'
+    ''').fetchall()
+    denied_tags_set = set()
+    denied_fastag_count = 0
+    denied_car_oem_count = 0
+    denied_other_count = 0
+    for row in denied_tags_rows:
+        tag_id = row[0]
+        if tag_id not in denied_tags_set:
+            denied_tags_set.add(tag_id)
+            if tag_id.startswith('34161'):
+                denied_fastag_count += 1
+            elif tag_id.startswith('E20'):
+                denied_car_oem_count += 1
+            else:
+                denied_other_count += 1
+    return jsonify({
+        'fastag': denied_fastag_count,
+        'car_oem': denied_car_oem_count,
+        'other': denied_other_count,
+        'total': len(denied_tags_set)
+    })
+
+@analytics_bp.route('/api/unique-tags-today')
+def api_unique_tags_today():
+    db = get_db()
+    unique_tags_rows = db.execute('''
+        SELECT tag_id FROM access_logs WHERE DATE(timestamp) = DATE('now')
+    ''').fetchall()
+    unique_tags_set = set()
+    fastag_count = 0
+    car_oem_count = 0
+    other_count = 0
+    for row in unique_tags_rows:
+        tag_id = row[0]
+        if tag_id not in unique_tags_set:
+            unique_tags_set.add(tag_id)
+            if tag_id.startswith('34161'):
+                fastag_count += 1
+            elif tag_id.startswith('E20'):
+                car_oem_count += 1
+            else:
+                other_count += 1
+    return jsonify({
+        'fastag': fastag_count,
+        'car_oem': car_oem_count,
+        'other': other_count,
+        'total': len(unique_tags_set)
+    })
+
+@analytics_bp.route('/api/overstayed-vehicles')
+def api_overstayed_vehicles():
+    db = get_db()
+    overstayed = db.execute('''
+        SELECT COUNT(*) FROM (
+            SELECT tag_id, MAX(timestamp) as last_entry
+            FROM access_logs WHERE access_result = 'granted'
+            GROUP BY tag_id
+            HAVING last_entry <= datetime('now', '-8 hours')
+        )
+    ''').fetchone()[0]
+    return jsonify({'overstayed': overstayed})
+
+@analytics_bp.route('/api/unique-vehicles-today')
+def api_unique_vehicles_today():
+    db = get_db()
+    unique_vehicles_today = db.execute('''
+        SELECT COUNT(DISTINCT tag_id) FROM access_logs WHERE DATE(timestamp) = DATE('now')
+    ''').fetchone()[0]
+    return jsonify({'unique_vehicles_today': unique_vehicles_today})
+
+@analytics_bp.route('/api/fastag-vs-nonfastag')
+def api_fastag_vs_nonfastag():
+    db = get_db()
+    row = db.execute('''
+        SELECT
+            COUNT(DISTINCT CASE WHEN tag_id LIKE '34161%' THEN tag_id END) as fastag_count,
+            COUNT(DISTINCT CASE WHEN tag_id NOT LIKE '34161%' THEN tag_id END) as nonfastag_count
+        FROM access_logs
+        WHERE DATE(timestamp) = DATE('now')
+    ''').fetchone()
+    return jsonify({'fastag': row[0] or 0, 'nonfastag': row[1] or 0})
+
+@analytics_bp.route('/api/entry-exit-trend')
+def api_entry_exit_trend():
+    db = get_db()
+    rows = db.execute('''
+        SELECT strftime('%H', timestamp) as hour,
+            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits
+        FROM access_logs
+        WHERE DATE(timestamp) = DATE('now')
+        GROUP BY hour
+        ORDER BY hour
+    ''').fetchall()
+    return jsonify({'entry_exit_trend': [list(row) for row in rows]})
+
+@analytics_bp.route('/api/hourly-activity')
+def api_hourly_activity():
+    db = get_db()
+    rows = db.execute('''
+        SELECT 
+            strftime('%H', timestamp) as hour,
+            COUNT(*) as total,
+            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as granted,
+            SUM(CASE WHEN access_result = 'denied' THEN 1 ELSE 0 END) as denied
+        FROM access_logs 
+        WHERE timestamp >= datetime('now', '-24 hours')
+        GROUP BY strftime('%H', timestamp)
+        ORDER BY hour
+    ''').fetchall()
+    return jsonify({'hourly_data': [list(row) for row in rows]})
+
+@analytics_bp.route('/api/reader-health')
+def api_reader_health():
+    db = get_db()
+    rows = db.execute('''
+        SELECT 
+            r.id as reader_id,
+            r.reader_ip,
+            r.type,
+            l.lane_name,
+            COUNT(al.id) as events_last_24h,
+            MAX(al.timestamp) as last_activity
+        FROM readers r
+        JOIN lanes l ON r.lane_id = l.id
+        LEFT JOIN access_logs al ON r.id = al.reader_id 
+            AND al.timestamp >= datetime('now', '-24 hours')
+        GROUP BY r.id, r.reader_ip, r.type, l.lane_name
+        ORDER BY r.id
+    ''').fetchall()
+    return jsonify({'reader_health': [list(row) for row in rows]})
