@@ -19,12 +19,6 @@
         .watchlist-action-btn {
             margin-right: 0.5em;
         }
-        .watchlist-history, .watchlist-reports {
-            background: #f8f9fa;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-top: 2rem;
-        }
         .watchlist-type-badge {
             font-size: 0.95em;
             padding: 0.3em 0.7em;
@@ -39,126 +33,199 @@
             color: #d84315;
         }
         .table-responsive { margin-bottom: 2rem; }
+        .floating-add-btn {
+            position: fixed;
+            bottom: 2.5rem;
+            right: 2.5rem;
+            z-index: 1000;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(80,80,160,0.13);
+        }
+        .tab-badge {
+            font-size: 0.9em;
+            margin-left: 0.4em;
+            background: #e0e0e0;
+            color: #333;
+            border-radius: 1em;
+            padding: 0.1em 0.7em;
+        }
     </style>
 </head>
 <body>
 <div class="container py-4">
     <div class="watchlist-header">
         <h2><i class="fas fa-eye text-primary me-2"></i>Watchlist</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addWatchlistModal">
-            <i class="fas fa-user-plus me-1"></i> Add to Watchlist
+    </div>
+    <ul class="nav nav-tabs mb-3" id="watchlistTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="kyc-tab" data-bs-toggle="tab" data-bs-target="#kyc" type="button" role="tab">
+          <i class="fas fa-id-card"></i> Registered KYC Users <span class="tab-badge" id="kyc-count">0</span>
         </button>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover watchlist-table" id="watchlist-table">
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="nonuser-tab" data-bs-toggle="tab" data-bs-target="#nonuser" type="button" role="tab">
+          <i class="fas fa-car"></i> Non-User Vehicles <span class="tab-badge" id="nonuser-count">0</span>
+        </button>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="kyc" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table table-hover watchlist-table" id="kyc-table">
             <thead class="table-light">
-                <tr>
-                    <th><i class="fas fa-user"></i> Name</th>
-                    <th><i class="fas fa-id-card"></i> Fastag ID</th>
-                    <th><i class="fas fa-car"></i> Vehicle</th>
-                    <th><i class="fas fa-phone"></i> Contact</th>
-                    <th><i class="fas fa-map-marker-alt"></i> Address</th>
-                    <th><i class="fas fa-tag"></i> Type</th>
-                    <th><i class="fas fa-clock"></i> Added</th>
-                    <th><i class="fas fa-sticky-note"></i> Reason</th>
-                    <th><i class="fas fa-cogs"></i> Actions</th>
-                </tr>
+              <tr>
+                <th><i class="fas fa-user"></i> Name</th>
+                <th><i class="fas fa-id-card"></i> Fastag ID</th>
+                <th><i class="fas fa-car"></i> Vehicle</th>
+                <th><i class="fas fa-phone"></i> Contact</th>
+                <th><i class="fas fa-map-marker-alt"></i> Address</th>
+                <th><i class="fas fa-sticky-note"></i> Reason</th>
+                <th><i class="fas fa-clock"></i> Added</th>
+                <th><i class="fas fa-cogs"></i> Actions</th>
+              </tr>
             </thead>
-            <tbody id="watchlist-tbody">
-                <tr><td colspan="9" class="text-center text-muted">Loading...</td></tr>
+            <tbody id="kyc-tbody">
+              <tr><td colspan="8" class="text-center text-muted">Loading...</td></tr>
             </tbody>
-        </table>
-    </div>
-    <div class="watchlist-history" id="watchlist-history" style="display:none;">
-        <h4><i class="fas fa-history text-secondary me-2"></i>Activity History</h4>
-        <div id="history-content">Select a user to view their in/out pattern, denied attempts, and more.</div>
-    </div>
-    <div class="watchlist-reports" id="watchlist-reports" style="display:none;">
-        <h4><i class="fas fa-file-alt text-secondary me-2"></i>Reports</h4>
-        <div id="reports-content">Generate and view reports for watchlisted users here.</div>
-    </div>
-</div>
-<!-- Add to Watchlist Modal -->
-<div class="modal fade" id="addWatchlistModal" tabindex="-1" aria-labelledby="addWatchlistModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add to Watchlist</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </table>
+        </div>
       </div>
-      <div class="modal-body">
-        <form id="add-watchlist-form">
-          <div class="mb-3">
-            <label for="fastagIdInput" class="form-label">Fastag ID</label>
-            <input type="text" class="form-control" id="fastagIdInput" placeholder="Enter Fastag ID" required>
+      <div class="tab-pane fade" id="nonuser" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table table-hover watchlist-table" id="nonuser-table">
+            <thead class="table-light">
+              <tr>
+                <th><i class="fas fa-id-card"></i> Fastag ID</th>
+                <th><i class="fas fa-sticky-note"></i> Reason</th>
+                <th><i class="fas fa-clock"></i> Added</th>
+                <th><i class="fas fa-cogs"></i> Actions</th>
+              </tr>
+            </thead>
+            <tbody id="nonuser-tbody">
+              <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-success floating-add-btn" data-bs-toggle="modal" data-bs-target="#addWatchlistModal" title="Add to Watchlist">
+      <i class="fas fa-user-plus"></i>
+    </button>
+    <!-- Add Modal, Edit Modal, etc. as before -->
+    <div class="modal fade" id="addWatchlistModal" tabindex="-1" aria-labelledby="addWatchlistModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add to Watchlist</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="mb-3">
-            <label for="reasonInput" class="form-label">Reason (optional)</label>
-            <input type="text" class="form-control" id="reasonInput" placeholder="Reason for watchlisting">
+          <div class="modal-body">
+            <form id="add-watchlist-form">
+              <div class="mb-3">
+                <label for="fastagIdInput" class="form-label">Fastag ID</label>
+                <input type="text" class="form-control" id="fastagIdInput" placeholder="Enter Fastag ID" required>
+              </div>
+              <div class="mb-3">
+                <label for="reasonInput" class="form-label">Reason (optional)</label>
+                <input type="text" class="form-control" id="reasonInput" placeholder="Reason for watchlisting">
+              </div>
+              <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-1"></i>Add</button>
+            </form>
           </div>
-          <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-1"></i>Add</button>
-        </form>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-<!-- Edit Reason Modal -->
-<div class="modal fade" id="editReasonModal" tabindex="-1" aria-labelledby="editReasonModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editReasonModalLabel"><i class="fas fa-edit me-2"></i>Edit Reason</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="edit-reason-form">
-          <input type="hidden" id="editReasonId">
-          <div class="mb-3">
-            <label for="editReasonInput" class="form-label">Reason</label>
-            <input type="text" class="form-control" id="editReasonInput" required>
+    <div class="modal fade" id="editReasonModal" tabindex="-1" aria-labelledby="editReasonModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editReasonModalLabel"><i class="fas fa-edit me-2"></i>Edit Reason</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-1"></i>Save</button>
-        </form>
+          <div class="modal-body">
+            <form id="edit-reason-form">
+              <input type="hidden" id="editReasonId">
+              <div class="mb-3">
+                <label for="editReasonInput" class="form-label">Reason</label>
+                <input type="text" class="form-control" id="editReasonInput" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-1"></i>Save</button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function renderWatchlistTable(data) {
-    const tbody = document.getElementById('watchlist-tbody');
-    if (!data.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No users on the watchlist.</td></tr>';
-        return;
+function renderWatchlistTabs(data) {
+    const kyc = data.filter(u => u.type === 'Registered');
+    const nonuser = data.filter(u => u.type === 'Non-User');
+    document.getElementById('kyc-count').textContent = kyc.length;
+    document.getElementById('nonuser-count').textContent = nonuser.length;
+    // KYC Table
+    const kycTbody = document.getElementById('kyc-tbody');
+    if (!kyc.length) {
+        kycTbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No registered KYC users on the watchlist.</td></tr>';
+    } else {
+        kycTbody.innerHTML = kyc.map(user => `
+            <tr data-id="${user.id}">
+                <td>${user.name || '<span class=\'text-muted\'>-</span>'}</td>
+                <td>${user.fastag_id}</td>
+                <td>${user.vehicle_number || '<span class=\'text-muted\'>-</span>'}</td>
+                <td>${user.contact_number || '<span class=\'text-muted\'>-</span>'}</td>
+                <td>${user.address || '<span class=\'text-muted\'>-</span>'}</td>
+                <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
+                <td>${user.added_at}</td>
+                <td>
+                    <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
+                        <i class="fas fa-history"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
-    tbody.innerHTML = data.map(user => `
-        <tr data-id="${user.id}">
-            <td>${user.name || '<span class=\'text-muted\'>-</span>'}</td>
-            <td>${user.fastag_id}</td>
-            <td>${user.vehicle_number || '<span class=\'text-muted\'>-</span>'}</td>
-            <td>${user.contact_number || '<span class=\'text-muted\'>-</span>'}</td>
-            <td>${user.address || '<span class=\'text-muted\'>-</span>'}</td>
-            <td><span class="watchlist-type-badge ${user.type === 'Registered' ? 'watchlist-type-registered' : 'watchlist-type-nonuser'}">${user.type}</span></td>
-            <td>${user.added_at}</td>
-            <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
-            <td>
-                <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
-                    <i class="fas fa-history"></i>
-                </button>
-                <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    // Non-User Table
+    const nonuserTbody = document.getElementById('nonuser-tbody');
+    if (!nonuser.length) {
+        nonuserTbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No non-user vehicles on the watchlist.</td></tr>';
+    } else {
+        nonuserTbody.innerHTML = nonuser.map(user => `
+            <tr data-id="${user.id}">
+                <td>${user.fastag_id}</td>
+                <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
+                <td>${user.added_at}</td>
+                <td>
+                    <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
+                        <i class="fas fa-history"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit Reason" onclick="openEditReason(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove" onclick="deleteWatchlistUser(${user.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
 }
 function fetchWatchlist() {
     fetch('/api/watchlist/list')
         .then(res => res.json())
-        .then(data => renderWatchlistTable(data.results));
+        .then(data => renderWatchlistTabs(data.results));
 }
 function deleteWatchlistUser(id) {
     if (!confirm('Are you sure you want to remove this user from the watchlist?')) return;
@@ -216,9 +283,7 @@ document.getElementById('add-watchlist-form').onsubmit = function(e) {
 };
 function viewHistory(id) {
     // Placeholder: show history section and load activity for this user
-    document.getElementById('watchlist-history').style.display = '';
-    document.getElementById('history-content').innerHTML = '<div class="text-center text-muted">Loading activity history for user #' + id + '...</div>';
-    // TODO: Fetch and render activity logs for this user
+    alert('Activity history for user #' + id + ' coming soon!');
 }
 window.onload = fetchWatchlist;
 </script>
