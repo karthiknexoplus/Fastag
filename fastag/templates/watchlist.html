@@ -106,8 +106,8 @@
           <div class="modal-body">
             <form id="add-watchlist-form">
               <div class="mb-3">
-                <label for="fastagIdInput" class="form-label">Fastag ID</label>
-                <input type="text" class="form-control" id="fastagIdInput" placeholder="Enter Fastag ID" required>
+                <label for="vehicleNumberInput" class="form-label">Vehicle Number</label>
+                <input type="text" class="form-control" id="vehicleNumberInput" placeholder="Enter Vehicle Number" required>
               </div>
               <div class="mb-3">
                 <label for="reasonInput" class="form-label">Reason (optional)</label>
@@ -242,12 +242,12 @@ document.getElementById('edit-reason-form').onsubmit = function(e) {
 };
 document.getElementById('add-watchlist-form').onsubmit = function(e) {
     e.preventDefault();
-    const fastag_id = document.getElementById('fastagIdInput').value;
+    const vehicle_number = document.getElementById('vehicleNumberInput').value;
     const reason = document.getElementById('reasonInput').value;
     fetch('/api/watchlist/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fastag_id, reason })
+        body: JSON.stringify({ vehicle_number, reason })
     })
     .then(res => res.json())
     .then(data => {
