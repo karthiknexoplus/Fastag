@@ -208,27 +208,16 @@ def api_watchlist_edit(watchlist_id):
 def api_watchlist_activity(watchlist_id):
     db = get_db()
     # Get watchlist entry
-    entry = db.execute('SELECT fastag_id, vehicle_number FROM watchlist_users WHERE id = ?', (watchlist_id,)).fetchone()
+    entry = db.execute('SELECT fastag_id FROM watchlist_users WHERE id = ?', (watchlist_id,)).fetchone()
     if not entry:
         return jsonify({'success': False, 'error': 'Not found'}), 404
     fastag_id = entry['fastag_id']
-    vehicle_number = entry['vehicle_number']
-    # Prefer fastag_id if present, else vehicle_number
-    if fastag_id:
-        logs = db.execute('''
-            SELECT timestamp, lane_id, access_result, reason
-            FROM access_logs
-            WHERE tag_id = ?
-            ORDER BY timestamp DESC LIMIT 50
-        ''', (fastag_id,)).fetchall()
-    elif vehicle_number:
-        logs = db.execute('''
-            SELECT timestamp, lane_id, access_result, reason
-            FROM access_logs
-            WHERE vehicle_number = ?
-            ORDER BY timestamp DESC LIMIT 50
-        ''', (vehicle_number,)).fetchall()
-    else:
-        logs = []
+    # Query both tag_id and vehicle_number in access_logs
+    logs = db.execute('''
+        SELECT timestamp, lane_id, access_result, reason
+        FROM access_logs
+        WHERE tag_id = ? OR vehicle_number = ?
+        ORDER BY timestamp DESC LIMIT 50
+    ''', (fastag_id, fastag_id)).fetchall()
     results = [dict(row) for row in logs]
     return jsonify({'results': results}) 
