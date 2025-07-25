@@ -356,6 +356,7 @@ def response_pay():
     from fastag.utils.db import fetch_request_pay_logs
     from fastag.bank_client import send_check_txn
     import xml.etree.ElementTree as ET
+    from datetime import datetime
     response = None
     logs = fetch_request_pay_logs(50)
     status_list = []
@@ -370,7 +371,6 @@ def response_pay():
                 print("[DEBUG] All tags in parsed XML:")
                 for elem in root.iter():
                     print(elem.tag)
-                # Use plain tag names for children
                 entry_txn_elems = root.findall('.//EntryTxn')
                 txn_elem = root.find('.//Txn')
                 plaza_elem = root.find('.//Plaza')
@@ -407,8 +407,10 @@ def response_pay():
                     }]
                     parent_txnId = txnId
                     parent_txnDate = txnDate
-                print(f"[DEBUG] Sending CheckTxn with parent_txnId={parent_txnId}, parent_txnDate={parent_txnDate}")
-                result = send_check_txn(log['msg_id'], log['org_id'], status_list_req, ts=parent_txnDate, txnId=parent_txnId)
+                # Auto-generate msgId if missing
+                msg_id = log['msg_id'] if log['msg_id'] else datetime.now().strftime('%Y%m%d%H%M%S')
+                print(f"[DEBUG] Sending CheckTxn with parent_txnId={parent_txnId}, parent_txnDate={parent_txnDate}, msg_id={msg_id}")
+                result = send_check_txn(msg_id, log['org_id'], status_list_req, ts=parent_txnDate, txnId=parent_txnId)
                 if isinstance(result, dict):
                     response = "<b>Check Txn Status Response:</b><br>"
                     for k, v in result.items():
