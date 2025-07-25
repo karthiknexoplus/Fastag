@@ -72,23 +72,23 @@
     <tbody>
       {% for s in status_list %}
       <tr>
-        <td>{{ s.txnId }}</td>
-        <td>{{ s.result }}</td>
-        <td>{{ s.errCode }}</td>
-        <td>{{ s.txnStatus }}</td>
-        <td>{{ s.plazaId }}</td>
-        <td>{{ s.laneId }}</td>
-        <td>{{ s.settleDate }}</td>
-        <td>{{ s.txnDate }}</td>
-        <td>{{ s.txnlist_FareType }}</td>
-        <td>{{ s.txnlist_RegNumber }}</td>
-        <td>{{ s.txnlist_TollFare }}</td>
-        <td>{{ s.txnlist_VehicleClass }}</td>
-        <td>{{ s.txnlist_errCode }}</td>
-        <td>{{ s.txnlist_txnReaderTime }}</td>
-        <td>{{ s.txnlist_txnReceivedTime }}</td>
-        <td>{{ s.txnlist_txnStatus }}</td>
-        <td>{{ s.txnlist_txnType }}</td>
+        <td>{{ s.txnId|default('') }}</td>
+        <td>{{ s.result|default('') }}</td>
+        <td>{{ s.errCode|default('') }}</td>
+        <td>{{ s.txnStatus|default('') }}</td>
+        <td>{{ s.plazaId|default('') }}</td>
+        <td>{{ s.laneId|default('') }}</td>
+        <td>{{ s.settleDate|default('') }}</td>
+        <td>{{ s.txnDate|default('') }}</td>
+        <td>{{ s.txnlist_FareType|default('') }}</td>
+        <td>{{ s.txnlist_RegNumber|default('') }}</td>
+        <td>{{ s.txnlist_TollFare|default('') }}</td>
+        <td>{{ s.txnlist_VehicleClass|default('') }}</td>
+        <td>{{ s.txnlist_errCode|default('') }}</td>
+        <td>{{ s.txnlist_txnReaderTime|default('') }}</td>
+        <td>{{ s.txnlist_txnReceivedTime|default('') }}</td>
+        <td>{{ s.txnlist_txnStatus|default('') }}</td>
+        <td>{{ s.txnlist_txnType|default('') }}</td>
       </tr>
       {% endfor %}
     </tbody>
