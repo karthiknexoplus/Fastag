@@ -56,6 +56,37 @@
             </div>
         </div>
     </form>
+    <div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importKycModal">
+    <i class="fas fa-file-excel me-1"></i> Import from Excel
+  </button>
+</div>
+<!-- Import Modal -->
+<div class="modal fade" id="importKycModal" tabindex="-1" aria-labelledby="importKycModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importKycModalLabel"><i class="fas fa-file-excel me-2"></i>Import KYC Users from Excel/CSV</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3 text-center">
+          <a href="{{ url_for('static', filename='sample_kyc_import.xlsx') }}" class="btn btn-link" download>
+            <i class="fas fa-download"></i> Download Sample Template
+          </a>
+        </div>
+        <form id="import-kyc-form" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="kycFileInput" class="form-label">Select Excel or CSV file</label>
+            <input type="file" class="form-control" id="kycFileInput" name="file" accept=".xlsx,.csv" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100"><i class="fas fa-upload me-1"></i>Upload</button>
+        </form>
+        <div id="import-kyc-msg" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
     <div class="card p-3 shadow-sm border-0 mb-3">
         <button class="btn btn-outline-secondary btn-sm mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterTab" aria-expanded="false" aria-controls="filterTab">
             <i class="fas fa-filter"></i> Filter
@@ -292,5 +323,31 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('export-xlsx-btn').setAttribute('title', 'Contact Onebee for pricing');
     }
 });
+
+document.getElementById('import-kyc-form').onsubmit = function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const fileInput = document.getElementById('kycFileInput');
+  const msgDiv = document.getElementById('import-kyc-msg');
+  msgDiv.innerHTML = '';
+  if (!fileInput.files.length) return;
+  const formData = new FormData(form);
+  fetch('/kyc_users/import', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      msgDiv.innerHTML = '<div class="alert alert-success">' + (data.message || 'Import successful!') + '</div>';
+      setTimeout(() => { location.reload(); }, 1500);
+    } else {
+      msgDiv.innerHTML = '<div class="alert alert-danger">' + (data.error || 'Import failed!') + '</div>';
+    }
+  })
+  .catch(() => {
+    msgDiv.innerHTML = '<div class="alert alert-danger">Import failed!</div>';
+  });
+};
 </script>
 {% endblock %} 

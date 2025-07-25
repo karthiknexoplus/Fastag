@@ -8,6 +8,13 @@ import io
 import csv
 import pytz
 from datetime import datetime
+import os
+from flask import send_file
+import tempfile
+import openpyxl
+import csv
+from openpyxl.utils import get_column_letter
+
 try:
     import openpyxl
 except ImportError:
@@ -370,3 +377,64 @@ def export_kyc_users_xlsx():
         as_attachment=True,
         download_name='kyc_users.xlsx'
     ) 
+
+@kyc_users_bp.route('/kyc_users/import', methods=['POST'])
+def import_kyc_users():
+    db = get_db()
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+    filename = file.filename.lower()
+    added, updated, skipped = 0, 0, 0
+    rows = []
+    if filename.endswith('.xlsx'):
+        wb = openpyxl.load_workbook(file)
+        ws = wb.active
+        for i, row in enumerate(ws.iter_rows(values_only=True)):
+            if i == 0: continue  # skip header
+            rows.append(row)
+    elif filename.endswith('.csv'):
+        reader = csv.reader(file.read().decode('utf-8').splitlines())
+        for i, row in enumerate(reader):
+            if i == 0: continue
+            rows.append(row)
+    else:
+        return jsonify({'success': False, 'error': 'Unsupported file type'}), 400
+    for row in rows:
+        # Expect: Name, Fastag ID, Vehicle Number, Contact Number, Address
+        name = (row[0] or '').strip()
+        fastag_id = (row[1] or '').strip()
+        vehicle_number = (row[2] or '').strip()
+        contact_number = (row[3] or '').strip() if len(row) > 3 else ''
+        address = (row[4] or '').strip() if len(row) > 4 else ''
+        if not fastag_id and not vehicle_number:
+            skipped += 1
+            continue
+        # Upsert: if fastag_id or vehicle_number exists, update; else insert
+        existing = db.execute('SELECT id FROM kyc_users WHERE fastag_id = ? OR vehicle_number = ?', (fastag_id, vehicle_number)).fetchone()
+        if existing:
+            db.execute('UPDATE kyc_users SET name=?, fastag_id=?, vehicle_number=?, contact_number=?, address=? WHERE id=?',
+                (name, fastag_id, vehicle_number, contact_number, address, existing['id']))
+            updated += 1
+        else:
+            db.execute('INSERT INTO kyc_users (name, fastag_id, vehicle_number, contact_number, address) VALUES (?, ?, ?, ?, ?)',
+                (name, fastag_id, vehicle_number, contact_number, address))
+            added += 1
+    db.commit()
+    return jsonify({'success': True, 'message': f'Import complete. Added: {added}, Updated: {updated}, Skipped: {skipped}'})
+
+@kyc_users_bp.route('/kyc_users/sample_template', methods=['GET'])
+def download_sample_kyc_template():
+    # Generate a sample Excel file in memory
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'KYC Users'
+    ws.append(['Name', 'Fastag ID', 'Vehicle Number', 'Contact Number', 'Address'])
+    ws.append(['John Doe', '34161FA8203...', 'KA01ME8993', '9876543210', 'Bangalore'])
+    ws.append(['Jane Smith', '', 'TN01AB1234', '9123456789', 'Chennai'])
+    for col in range(1, 6):
+        ws.column_dimensions[get_column_letter(col)].width = 20
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx')
+    wb.save(tmp.name)
+    tmp.close()
+    return send_file(tmp.name, as_attachment=True, download_name='sample_kyc_import.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
