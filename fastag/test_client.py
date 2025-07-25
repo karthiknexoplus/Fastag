@@ -1983,16 +1983,16 @@ if __name__ == '__main__':
             except Exception as e:
                 print('[TRANSACTION STATUS] Error signing XML:', e)
                 signed_xml_str = xml_str.encode()
-            # Optionally, send the request (uncomment and set the correct URL)
-            # url = 'https://bank-api-url/transaction-status'
-            # headers = {'Content-Type': 'application/xml'}
-            # print("[TRANSACTION STATUS] URL:", url)
-            # print("[TRANSACTION STATUS] Headers:", headers)
-            # try:
-            #     response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
-            #     print("[TRANSACTION STATUS] HTTP Status Code:", response.status_code)
-            #     print("[TRANSACTION STATUS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
-            # except Exception as e:
-            #     print('[TRANSACTION STATUS] Error sending request:', e)
+            # Send the request
+            url = 'https://etolluatapi.idfcfirstbank.com/dimtspay_toll_services/toll/ReqChkTxn'
+            headers = {'Content-Type': 'application/xml'}
+            print("[TRANSACTION STATUS] URL:", url)
+            print("[TRANSACTION STATUS] Headers:", headers)
+            try:
+                response = requests.post(url, data=signed_xml_str, headers=headers, timeout=10, verify=False)
+                print("[TRANSACTION STATUS] HTTP Status Code:", response.status_code)
+                print("[TRANSACTION STATUS] Response Content:\n", response.content.decode() if isinstance(response.content, bytes) else response.content)
+            except Exception as e:
+                print('[TRANSACTION STATUS] Error sending request:', e)
         else:
             print('Invalid choice. Please try again.')
