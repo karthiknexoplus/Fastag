@@ -1135,19 +1135,7 @@ function updateTables(data) {
             // Convert UTC timestamp to IST for display
             let lastActivity = reader[5];
             if (lastActivity && lastActivity !== 'Never') {
-                try {
-                    let d = new Date(lastActivity);
-                    if (isNaN(d.getTime()) && lastActivity.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-                        const [date, time] = lastActivity.split(' ');
-                        const [year, month, day] = date.split('-');
-                        const [hour, min, sec] = time.split(':');
-                        d = new Date(Date.UTC(year, month - 1, day, hour, min, sec));
-                    }
-                    d.setMinutes(d.getMinutes() + 330);
-                    lastActivity = d.toLocaleString('en-IN', { hour12: false });
-                } catch (e) {
-                    // fallback to original string
-                }
+                lastActivity = toIST(lastActivity);
             }
             let eventsCell = reader[4];
             let lastActivityCell = lastActivity;
@@ -1526,6 +1514,17 @@ function loadLaneUtilization() {
     //   .then(...)
 }
 
+function toIST(utcString) {
+    // Parse as UTC and convert to IST (UTC+5:30)
+    if (!utcString) return '-';
+    const utcDate = new Date(utcString + 'Z'); // force parse as UTC
+    if (isNaN(utcDate.getTime())) return utcString;
+    // IST is UTC+5:30
+    const istOffset = 5.5 * 60; // in minutes
+    const istDate = new Date(utcDate.getTime() + istOffset * 60000);
+    return istDate.toLocaleString('en-IN', { hour12: false });
+}
+
 function loadRecentActivity() {
     const recentActivity = document.getElementById('recent-activity');
     recentActivity.innerHTML = '<div class="text-center text-muted">Loading...</div>';
@@ -1582,7 +1581,7 @@ function loadRecentActivity() {
                                     ${activity[2].toUpperCase()}
                                 </span>
                             </div>
-                            <small class="text-muted">${activity[0]}</small>
+                            <small class="text-muted">${toIST(activity[0])}</small>
                         </div>
                     `;
                 }).join('');
