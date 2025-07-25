@@ -140,6 +140,22 @@
         </div>
       </div>
     </div>
+    <!-- Activity History Modal -->
+    <div class="modal fade" id="activityHistoryModal" tabindex="-1" aria-labelledby="activityHistoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="activityHistoryModalLabel"><i class="fas fa-history me-2"></i>Activity History</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="activity-history-content">
+              <div class="text-center text-muted">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -292,7 +308,38 @@ function fetchKycUsers() {
 }
 document.getElementById('addKycWatchlistModal').addEventListener('show.bs.modal', fetchKycUsers);
 function viewHistory(id) {
-    alert('Activity history for user #' + id + ' coming soon!');
+    const modal = new bootstrap.Modal(document.getElementById('activityHistoryModal'));
+    document.getElementById('activity-history-content').innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    modal.show();
+    fetch(`/api/watchlist/activity/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.results || !data.results.length) {
+                document.getElementById('activity-history-content').innerHTML = '<div class="text-center text-muted">No activity found for this user/vehicle.</div>';
+                return;
+            }
+            const rows = data.results.map(log => `
+                <tr>
+                    <td>${log.timestamp}</td>
+                    <td>${log.lane_id}</td>
+                    <td>${log.access_result}</td>
+                    <td>${log.reason || '-'}</td>
+                </tr>
+            `).join('');
+            document.getElementById('activity-history-content').innerHTML = `
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Lane</th>
+                            <th>Result</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            `;
+        });
 }
 window.onload = fetchWatchlist;
 </script>
