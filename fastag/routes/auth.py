@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, current_app, send_file, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, current_app, send_file, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from fastag.utils.db import get_db, log_user_login, log_user_action
 import logging
@@ -32,20 +32,7 @@ def login():
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_pw = generate_password_hash(password)
-        db = get_db()
-        try:
-            db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_pw))
-            db.commit()
-            logging.info(f"New user registered: {username}")
-            flash('Account created! Please log in.', 'success')
-            return redirect(url_for('auth.login'))
-        except:
-            flash('Username already exists', 'danger')
-    return render_template('signup.html')
+    abort(404)
 
 @auth_bp.route('/logout')
 def logout():
