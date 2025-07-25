@@ -63,6 +63,45 @@
       </tbody>
     </table>
   </form>
+
+  {# Status details and response block for modal extraction #}
+  {% if status_list and log_id %}
+    <h6 style="margin-top:1.2rem; color:#764ba2; font-weight:600;">Transaction Status Details</h6>
+    <table class="table table-bordered table-sm align-middle" id="status-details-table">
+      <thead>
+        <tr>
+          <th>Txn ID</th>
+          <th>Result</th>
+          <th>Err Code</th>
+          <th>Txn Status</th>
+          <th>Settle Date</th>
+          <th>Lane ID</th>
+          <th>Plaza ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in status_list %}
+        <tr>
+          <td>{{ s.txnId or s.get('txnId') }}</td>
+          <td>{{ s.result or s.get('result') }}</td>
+          <td>{{ s.errCode or s.get('errCode') }}</td>
+          <td style="font-weight:600; color:{% if s.txnStatus == 'FAILURE' %}#d32f2f{% elif s.txnStatus == 'SUCCESS' %}#388e3c{% else %}#333{% endif %};">
+            {{ s.txnStatus or s.get('txnStatus') }}
+          </td>
+          <td>{{ s.settleDate or s.get('settleDate') }}</td>
+          <td>{{ s.laneId or s.get('laneId') }}</td>
+          <td>{{ s.plazaId or s.get('plazaId') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  {% if response and log_id %}
+    <div id="status-response-block" style="margin-bottom:1rem;">
+      <pre style="background:#f8f8ff; border:1px solid #eee; border-radius:4px; padding:0.7rem; font-size:0.97rem; color:#333;">{{ response|tojson(indent=2) }}</pre>
+    </div>
+  {% endif %}
+
   <!-- Modal for status details -->
   <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -89,11 +128,10 @@
         fetch(`?log_id=${logId}&date={{ selected_date }}`)
           .then(resp => resp.text())
           .then(html => {
-            // Only extract the status details table and response for the selected log
             var parser = new DOMParser();
             var doc = parser.parseFromString(html, 'text/html');
-            var statusTable = doc.querySelector('h6:contains("Transaction Status Details") + table');
-            var responseBlock = doc.querySelector('#response pre');
+            var statusTable = doc.getElementById('status-details-table');
+            var responseBlock = doc.getElementById('status-response-block');
             modalBody.innerHTML = '';
             if (responseBlock) {
               modalBody.innerHTML += responseBlock.outerHTML;
