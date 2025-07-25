@@ -32,20 +32,8 @@ def login():
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_pw = generate_password_hash(password)
-        db = get_db()
-        try:
-            db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_pw))
-            db.commit()
-            logging.info(f"New user registered: {username}")
-            flash('Account created! Please log in.', 'success')
-            return redirect(url_for('auth.login'))
-        except:
-            flash('Username already exists', 'danger')
-    return render_template('signup.html')
+    # Signup disabled
+    return redirect(url_for('auth.login'))
 
 @auth_bp.route('/logout')
 def logout():
