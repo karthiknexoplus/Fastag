@@ -101,6 +101,7 @@ def get_analytics_data():
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
+        WHERE al.timestamp >= datetime('now', '-24 hours')
         ORDER BY al.timestamp DESC
         LIMIT 50
     """).fetchall()
@@ -1924,15 +1925,12 @@ def denied_analysis_api():
 @analytics_bp.route('/api/current-occupancy')
 def api_current_occupancy():
     db = get_db()
+    # Fast version: only consider last 24 hours
     current_occupancy_rows = db.execute("""
-        SELECT al1.tag_id
-        FROM access_logs al1
-        WHERE al1.access_result = 'granted'
-        AND al1.timestamp = (
-            SELECT MAX(al2.timestamp)
-            FROM access_logs al2
-            WHERE al2.tag_id = al1.tag_id
-        )
+        SELECT tag_id, MAX(timestamp) as last_grant
+        FROM access_logs
+        WHERE access_result = 'granted' AND timestamp >= datetime('now', '-24 hours')
+        GROUP BY tag_id
     """).fetchall()
     occ_fastag = 0
     occ_car_oem = 0
@@ -2097,3 +2095,32 @@ def api_reader_health():
         ORDER BY r.id
     ''').fetchall()
     return jsonify({'reader_health': [list(row) for row in rows]})
+
+@analytics_bp.route('/api/recent-activity')
+def api_recent_activity():
+    db = get_db()
+    rows = db.execute("""
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            al.access_result,
+            al.reason,
+            ku.name as user_name,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type,
+            l.lane_name,
+            r.reader_ip,
+            r.type as reader_type,
+            ku.vehicle_number as kyc_vehicle_number
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.timestamp >= datetime('now', '-24 hours')
+        ORDER BY al.timestamp DESC
+        LIMIT 50
+    """).fetchall()
+    return jsonify({'recent_activity': [list(row) for row in rows]})
