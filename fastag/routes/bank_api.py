@@ -362,26 +362,33 @@ def response_pay():
         log_id = request.form.get('log_id')
         log = next((l for l in logs if str(l['id']) == str(log_id)), None)
         if log and log['request_xml']:
-            # Parse the request_xml to extract txnId, txnDate, plazaId, laneId
             try:
                 root = ET.fromstring(log['request_xml'])
                 ns = {'etc': 'http://npci.org/etc/schema/'}
                 txn_elem = root.find('.//etc:Txn', ns)
                 plaza_elem = root.find('.//etc:Plaza', ns)
-                lane_elem = root.find('.//etc:Lane', ns)
+                lane_elems = root.findall('.//etc:Lane', ns)
                 txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
                 txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
                 plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
-                laneId = lane_elem.attrib.get('id') if lane_elem is not None else ''
-                # Build status_list as expected by the bank
-                status = {
-                    'txnId': txnId,
-                    'txnDate': txnDate,
-                    'plazaId': plazaId,
-                    'laneId': laneId
-                }
-                status_list = [status]
-                # Use org_id and msg_id from the log
+                status_list = []
+                for lane_elem in lane_elems:
+                    laneId = lane_elem.attrib.get('id') if lane_elem is not None else ''
+                    status = {
+                        'txnId': txnId,
+                        'txnDate': txnDate,
+                        'plazaId': plazaId,
+                        'laneId': laneId
+                    }
+                    status_list.append(status)
+                if not status_list:
+                    # fallback: single status with whatever we have
+                    status_list = [{
+                        'txnId': txnId,
+                        'txnDate': txnDate,
+                        'plazaId': plazaId,
+                        'laneId': ''
+                    }]
                 result = send_check_txn(log['msg_id'], log['org_id'], status_list)
                 if isinstance(result, dict):
                     response = "<b>Check Txn Status Response:</b><br>"
