@@ -363,6 +363,7 @@ def response_pay():
     logs = fetch_request_pay_logs(50)
     status_list = []
     status_map = {}
+    selected_log_id = None
     # Preload status for all logs
     for log in logs:
         status_row = fetch_pay_status(log['id'])
@@ -370,6 +371,7 @@ def response_pay():
             status_map[log['id']] = status_row
     if request.method == 'POST':
         log_id = int(request.form.get('log_id'))
+        selected_log_id = log_id
         log = next((l for l in logs if l['id'] == log_id), None)
         if log and log['request_xml']:
             # Check if status already exists
@@ -386,7 +388,8 @@ def response_pay():
                     status_list = result.get('status_list', [])
                 except Exception as e:
                     response += f"<b>Error parsing stored status JSON:</b> {e}"
-                return redirect(url_for('banking.response_pay'))
+                # Show status below after redirect
+                return redirect(url_for('banking.response_pay', log_id=log_id))
             else:
                 # Fetch from bank and store
                 try:
@@ -437,9 +440,24 @@ def response_pay():
                         status_map[log_id] = {'status_json': json.dumps(result)}
                     else:
                         response = result
-                    return redirect(url_for('banking.response_pay'))
+                    return redirect(url_for('banking.response_pay', log_id=log_id))
                 except Exception as e:
                     response = f"<b>Error parsing request XML or sending check txn:</b> {e}"
+    # On GET, if log_id param is present, show status for that log
+    log_id_param = request.args.get('log_id', type=int)
+    if log_id_param:
+        status_row = fetch_pay_status(log_id_param)
+        if status_row:
+            response = "<b>Check Txn Status Response (cached):</b><br>"
+            status_json = status_row['status_json']
+            try:
+                result = json.loads(status_json)
+                for k, v in result.items():
+                    if k != 'status_list':
+                        response += f"<b>{k}:</b> {v}<br>"
+                status_list = result.get('status_list', [])
+            except Exception as e:
+                response += f"<b>Error parsing stored status JSON:</b> {e}"
     return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list, status_map=status_map)
 
 @banking.route('/banking/transaction_status', methods=['GET', 'POST'])
