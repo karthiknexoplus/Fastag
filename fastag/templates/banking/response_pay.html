@@ -98,7 +98,7 @@
   {% endif %}
   {% if response and log_id %}
     <div id="status-response-block" style="margin-bottom:1rem;">
-      <pre style="background:#f8f8ff; border:1px solid #eee; border-radius:4px; padding:0.7rem; font-size:0.97rem; color:#333;">{{ response|tojson(indent=2) }}</pre>
+      {{ response|safe }}
     </div>
   {% endif %}
 
