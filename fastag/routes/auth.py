@@ -136,6 +136,10 @@ def api_audit_log():
     data = [dict(a) for a in actions]
     return jsonify({"success": True, "actions": data, "page": page, "per_page": per_page, "count": len(data)})
 
+@auth_bp.route('/watchlist')
+def watchlist():
+    return render_template('watchlist.html')
+
 @auth_bp.route('/debug/env')
 def debug_env():
     import os

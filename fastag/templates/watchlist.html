@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watchlist - {{ APP_TITLE }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .watchlist-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        .watchlist-table th, .watchlist-table td {
+            vertical-align: middle;
+        }
+        .watchlist-action-btn {
+            margin-right: 0.5em;
+        }
+        .watchlist-history {
+            background: #f8f9fa;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .watchlist-reports {
+            background: #f4f6fb;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+    <div class="watchlist-header">
+        <h2><i class="fas fa-eye text-primary me-2"></i>Watchlist</h2>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addWatchlistModal">
+            <i class="fas fa-user-plus me-1"></i> Add to Watchlist
+        </button>
+    </div>
+    <table class="table table-hover watchlist-table">
+        <thead class="table-light">
+            <tr>
+                <th><i class="fas fa-user"></i> Name</th>
+                <th><i class="fas fa-id-card"></i> Fastag ID</th>
+                <th><i class="fas fa-car"></i> Vehicle</th>
+                <th><i class="fas fa-clock"></i> Last Seen</th>
+                <th><i class="fas fa-history"></i> History</th>
+                <th><i class="fas fa-cogs"></i> Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Example row, replace with dynamic rows -->
+            <tr>
+                <td>John Doe</td>
+                <td>34161FA8203...</td>
+                <td>KA01ME8993</td>
+                <td>2023-07-25 14:09</td>
+                <td>
+                    <button class="btn btn-outline-info btn-sm watchlist-action-btn" title="View History">
+                        <i class="fas fa-history"></i>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-primary btn-sm watchlist-action-btn" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm watchlist-action-btn" title="Remove">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            <!-- More rows here -->
+        </tbody>
+    </table>
+    <div class="watchlist-history">
+        <h4><i class="fas fa-history text-secondary me-2"></i>Activity History (Placeholder)</h4>
+        <p>Select a user to view their in/out pattern, denied attempts, and more.</p>
+    </div>
+    <div class="watchlist-reports">
+        <h4><i class="fas fa-file-alt text-secondary me-2"></i>Reports (Placeholder)</h4>
+        <p>Generate and view reports for watchlisted users here.</p>
+    </div>
+</div>
+<!-- Add to Watchlist Modal -->
+<div class="modal fade" id="addWatchlistModal" tabindex="-1" aria-labelledby="addWatchlistModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addWatchlistModalLabel"><i class="fas fa-user-plus me-2"></i>Add to Watchlist</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="fastagIdInput" class="form-label">Fastag ID</label>
+            <input type="text" class="form-control" id="fastagIdInput" placeholder="Enter Fastag ID">
+          </div>
+          <div class="mb-3">
+            <label for="reasonInput" class="form-label">Reason (optional)</label>
+            <input type="text" class="form-control" id="reasonInput" placeholder="Reason for watchlisting">
+          </div>
+          <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-1"></i>Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
