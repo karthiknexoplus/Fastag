@@ -218,6 +218,13 @@ def api_get_all_kyc_users():
     users_list = [dict(user) for user in users]
     return jsonify({"success": True, "users": users_list}), 200
 
+@kyc_users_bp.route('/api/kyc_users/list', methods=['GET'])
+def api_kyc_users_list():
+    db = get_db()
+    users = db.execute('SELECT fastag_id, name, vehicle_number FROM kyc_users ORDER BY name ASC').fetchall()
+    results = [dict(u) for u in users]
+    return jsonify({'results': results})
+
 @kyc_users_bp.route('/api/kyc_users/<int:id>', methods=['PUT'])
 def api_edit_kyc_user(id):
     """API endpoint to edit a KYC user by ID (for mobile app)"""
