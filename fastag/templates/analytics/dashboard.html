@@ -1189,6 +1189,17 @@ function loadDeniedFastagActivityFeed() {
     fetch('/analytics/api/denied-fastag-activity-feed')
         .then(response => response.json())
         .then(data => {
+            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
+            if (!fastagFeaturesEnabled) {
+                feed.innerHTML = `
+                    <div class="text-center text-muted" style="opacity:0.6; padding: 2em;">
+                        <i class="fas fa-lock fa-2x mb-2"></i><br>
+                        Contact ${window.COMPANY_NAME} for pricing to view denied FASTag details.
+                    </div>
+                `;
+                feed.parentElement.classList.add('section-locked');
+                return;
+            }
             if (data.error) {
                 feed.innerHTML = `<div class='text-danger'>${data.error}</div>`;
                 return;
@@ -1197,25 +1208,18 @@ function loadDeniedFastagActivityFeed() {
                 feed.innerHTML = '<div class="text-center text-muted">No denied FASTag tags in the last 24 hours.</div>';
                 return;
             }
-            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
             feed.innerHTML = data.results.map(item => {
                 let vehicleNumber = 'N/A';
                 if (item.vehicle_number) {
                     vehicleNumber = item.vehicle_number;
-                } else if (!fastagFeaturesEnabled) {
-                    vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the vehicle number</span>";
                 }
                 let modelName = 'N/A';
                 if (item.model_name) {
                     modelName = item.model_name;
-                } else if (!fastagFeaturesEnabled) {
-                    modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the model</span>";
                 }
                 let ownerName = 'N/A';
                 if (item.owner_name) {
                     ownerName = item.owner_name;
-                } else if (!fastagFeaturesEnabled) {
-                    ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the owner</span>";
                 }
                 let secondaryInfo = [];
                 if (modelName !== 'N/A') secondaryInfo.push(`Model: ${modelName}`);
