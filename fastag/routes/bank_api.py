@@ -359,7 +359,6 @@ def response_pay():
     response = None
     logs = fetch_request_pay_logs(50)
     status_list = []
-    NS = '{http://npci.org/etc/schema/}'
     if request.method == 'POST':
         log_id = request.form.get('log_id')
         log = next((l for l in logs if str(l['id']) == str(log_id)), None)
@@ -371,10 +370,11 @@ def response_pay():
                 print("[DEBUG] All tags in parsed XML:")
                 for elem in root.iter():
                     print(elem.tag)
-                entry_txn_elems = root.findall('.//' + NS + 'EntryTxn')
-                txn_elem = root.find('.//' + NS + 'Txn')
-                plaza_elem = root.find('.//' + NS + 'Plaza')
-                lane_elems = root.findall('.//' + NS + 'Lane')
+                # Use plain tag names for children
+                entry_txn_elems = root.findall('.//EntryTxn')
+                txn_elem = root.find('.//Txn')
+                plaza_elem = root.find('.//Plaza')
+                lane_elems = root.findall('.//Lane')
                 print(f"[DEBUG] Found {len(entry_txn_elems)} EntryTxn, {len(lane_elems)} Lane, plaza_elem: {plaza_elem is not None}")
                 status_list_req = []
                 if entry_txn_elems:
