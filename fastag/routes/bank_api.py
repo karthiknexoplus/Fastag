@@ -366,36 +366,44 @@ def response_pay():
             try:
                 root = ET.fromstring(log['request_xml'])
                 ns = {'etc': 'http://npci.org/etc/schema/'}
-                # Prefer EntryTxn if present
-                entry_txn_elem = root.find('.//etc:EntryTxn', ns)
+                entry_txn_elems = root.findall('.//etc:EntryTxn', ns)
                 txn_elem = root.find('.//etc:Txn', ns)
                 plaza_elem = root.find('.//etc:Plaza', ns)
                 lane_elems = root.findall('.//etc:Lane', ns)
-                if entry_txn_elem is not None:
-                    txnId = entry_txn_elem.attrib.get('id', '')
-                    txnDate = entry_txn_elem.attrib.get('ts', '')
+                status_list_req = []
+                # If multiple EntryTxn, build a Status for each
+                if entry_txn_elems:
+                    for i, entry_txn_elem in enumerate(entry_txn_elems):
+                        txnId = entry_txn_elem.attrib.get('id', '')
+                        txnDate = entry_txn_elem.attrib.get('ts', '')
+                        # Try to match lane by index, else fallback
+                        laneId = lane_elems[i].attrib.get('id') if i < len(lane_elems) else (lane_elems[0].attrib.get('id') if lane_elems else '')
+                        plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
+                        status = {
+                            'txnId': txnId,
+                            'txnDate': txnDate,
+                            'plazaId': plazaId,
+                            'laneId': laneId
+                        }
+                        status_list_req.append(status)
+                    # Use the first EntryTxn for parent
+                    parent_txnId = entry_txn_elems[0].attrib.get('id', '')
+                    parent_txnDate = entry_txn_elems[0].attrib.get('ts', '')
                 else:
+                    # Fallback: single Txn
                     txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
                     txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
-                plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
-                status_list_req = []
-                for lane_elem in lane_elems:
-                    laneId = lane_elem.attrib.get('id') if lane_elem is not None else ''
-                    status = {
-                        'txnId': txnId,
-                        'txnDate': txnDate,
-                        'plazaId': plazaId,
-                        'laneId': laneId
-                    }
-                    status_list_req.append(status)
-                if not status_list_req:
+                    plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
+                    laneId = lane_elems[0].attrib.get('id') if lane_elems else ''
                     status_list_req = [{
                         'txnId': txnId,
                         'txnDate': txnDate,
                         'plazaId': plazaId,
-                        'laneId': ''
+                        'laneId': laneId
                     }]
-                result = send_check_txn(log['msg_id'], log['org_id'], status_list_req, ts=txnDate, txnId=txnId)
+                    parent_txnId = txnId
+                    parent_txnDate = txnDate
+                result = send_check_txn(log['msg_id'], log['org_id'], status_list_req, ts=parent_txnDate, txnId=parent_txnId)
                 if isinstance(result, dict):
                     response = "<b>Check Txn Status Response:</b><br>"
                     for k, v in result.items():
