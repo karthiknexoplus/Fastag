@@ -127,6 +127,10 @@
                     <i class="fas fa-id-card"></i>
                     <span class="nav-label d-none d-md-inline">KYC Users</span>
                 </a>
+                <a href="/watchlist" class="nav-icon-link {% if request.endpoint == 'watchlist' %}active{% endif %}" title="Watchlist">
+                    <i class="fas fa-eye"></i>
+                    <span class="nav-label d-none d-md-inline">Watchlist</span>
+                </a>
                 <div class="dropdown d-inline-block">
                     <a href="{{ url_for('analytics.dashboard') }}" class="nav-icon-link dropdown-toggle {% if request.endpoint.startswith('analytics.') %}active{% endif %}" data-bs-toggle="dropdown" title="Analytics">
                         <i class="fas fa-chart-line"></i>
