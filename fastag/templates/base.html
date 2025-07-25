@@ -174,9 +174,6 @@
                         <li><a class="dropdown-item" href="{{ url_for('banking.response_pay') }}">
                             <i class="fas fa-receipt fastag-submenu-icon"></i><span class="fastag-submenu-label">Response Pay</span>
                         </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('banking.transaction_status') }}">
-                            <i class="fas fa-list-alt fastag-submenu-icon"></i><span class="fastag-submenu-label">Transaction Status</span>
-                        </a></li>
                     </ul>
                 </div>
                 {% if session.get('user') %}
