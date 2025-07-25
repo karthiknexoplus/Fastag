@@ -1025,7 +1025,7 @@ def build_pay_request(
     return etree.tostring(root, encoding='UTF-8', xml_declaration=True, pretty_print=False)
 
 
-def send_pay(_msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder='...'):
+def send_pay(_msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholder='...', return_xml=False):
     tagId = pay_data.get('tagId') if isinstance(pay_data, dict) else None
     import uuid
     from datetime import datetime, timezone, timedelta
@@ -1088,9 +1088,13 @@ def send_pay(_msgId, orgId, pay_data, ts=None, tsRead=None, signature_placeholde
         print("[PAY] Parsed Response:")
         for k, v in parsed.items():
             print(f"  {k}: {v}")
+        if return_xml:
+            return parsed, xml_data.decode() if isinstance(xml_data, bytes) else xml_data
         return parsed
     except Exception as e:
         print('[PAY] Error sending Pay request:', e)
+        if return_xml:
+            return {'error': str(e)}, xml_data.decode() if isinstance(xml_data, bytes) else xml_data
         return {'error': str(e)}
 
 

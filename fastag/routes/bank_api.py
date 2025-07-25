@@ -335,15 +335,15 @@ def request_pay():
         try:
             from fastag.bank_client import send_pay
             # Patch: pass ts and tsRead as positional args if needed, or update send_pay to accept them
-            result = send_pay(msgId, orgId, pay_data, ts, tsRead)
+            result, reqpay_xml = send_pay(msgId, orgId, pay_data, ts, tsRead, return_xml=True)
             if isinstance(result, dict):
                 response = "<b>Pay Response:</b><br>"
                 for k, v in result.items():
                     response += f"<b>{k}:</b> {v}<br>"
             else:
                 response = result
-            # Log the request and response
-            log_request_pay(msgId, orgId, plazaId, agencyId, acquirerId, plazaGeoCode, tagId, TID, vehicleRegNo, avc, amount, str(result))
+            # Log the request and response, including the full XML
+            log_request_pay(msgId, orgId, plazaId, agencyId, acquirerId, plazaGeoCode, tagId, TID, vehicleRegNo, avc, amount, str(result), reqpay_xml)
         except Exception as e:
             response = f"<b>Error:</b> {e}"
     # Fetch latest logs

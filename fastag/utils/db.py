@@ -187,14 +187,14 @@ def log_barrier_event(relay_number, action, user=None, lane_id=None, lane_name=N
         print(f"[ERROR] log_barrier_event failed: {e}")
         logging.error(f"log_barrier_event failed: {e}") 
 
-def log_request_pay(msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response):
+def log_request_pay(msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response, request_xml):
     db = get_db()
     db.execute(
         """
-        INSERT INTO request_pay_logs (msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO request_pay_logs (msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response, request_xml)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response)
+        (msg_id, org_id, plaza_id, agency_id, acquirer_id, geo_code, tag_id, tid, vehicle_reg_no, avc, amount, response, request_xml)
     )
     db.commit()
 
