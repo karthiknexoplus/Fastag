@@ -150,6 +150,16 @@ def init_db(db):
             request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             response TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS request_pay_status (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pay_log_id INTEGER NOT NULL,
+            status_xml TEXT,
+            status_json TEXT,
+            fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (pay_log_id) REFERENCES request_pay_logs(id) ON DELETE CASCADE,
+            UNIQUE(pay_log_id)
+        );
     ''')
     db.commit() 
 
@@ -205,3 +215,22 @@ def fetch_request_pay_logs(limit=20):
         (limit,)
     )
     return cur.fetchall() 
+
+def insert_pay_status(pay_log_id, status_xml, status_json):
+    db = get_db()
+    db.execute(
+        """
+        INSERT OR REPLACE INTO request_pay_status (pay_log_id, status_xml, status_json)
+        VALUES (?, ?, ?)
+        """,
+        (pay_log_id, status_xml, status_json)
+    )
+    db.commit()
+
+def fetch_pay_status(pay_log_id):
+    db = get_db()
+    cur = db.execute(
+        "SELECT * FROM request_pay_status WHERE pay_log_id = ?",
+        (pay_log_id,)
+    )
+    return cur.fetchone() 

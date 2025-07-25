@@ -32,7 +32,11 @@
           <td>{{ log.amount }}</td>
           <td>{{ log.request_time }}</td>
           <td>
-            <button type="submit" name="log_id" value="{{ log.id }}" class="btn btn-primary btn-sm">Get Status</button>
+            {% if status_map[log.id] is defined %}
+              <button type="submit" name="log_id" value="{{ log.id }}" class="btn btn-secondary btn-sm">View Status</button>
+            {% else %}
+              <button type="submit" name="log_id" value="{{ log.id }}" class="btn btn-primary btn-sm">Get Status</button>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

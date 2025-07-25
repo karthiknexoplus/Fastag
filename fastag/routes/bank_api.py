@@ -353,75 +353,94 @@ def request_pay():
 
 @banking.route('/banking/response_pay', methods=['GET', 'POST'])
 def response_pay():
-    from fastag.utils.db import fetch_request_pay_logs
+    from fastag.utils.db import fetch_request_pay_logs, fetch_pay_status, insert_pay_status
     from fastag.bank_client import send_check_txn
     import xml.etree.ElementTree as ET
     from datetime import datetime
+    import json
+    from flask import redirect, url_for, request
     response = None
     logs = fetch_request_pay_logs(50)
     status_list = []
+    status_map = {}
+    # Preload status for all logs
+    for log in logs:
+        status_row = fetch_pay_status(log['id'])
+        if status_row:
+            status_map[log['id']] = status_row
     if request.method == 'POST':
-        log_id = request.form.get('log_id')
-        log = next((l for l in logs if str(l['id']) == str(log_id)), None)
+        log_id = int(request.form.get('log_id'))
+        log = next((l for l in logs if l['id'] == log_id), None)
         if log and log['request_xml']:
-            try:
-                print("[DEBUG] Stored pay request XML:")
-                print(log['request_xml'])
-                root = ET.fromstring(log['request_xml'])
-                print("[DEBUG] All tags in parsed XML:")
-                for elem in root.iter():
-                    print(elem.tag)
-                entry_txn_elems = root.findall('.//EntryTxn')
-                txn_elem = root.find('.//Txn')
-                plaza_elem = root.find('.//Plaza')
-                lane_elems = root.findall('.//Lane')
-                print(f"[DEBUG] Found {len(entry_txn_elems)} EntryTxn, {len(lane_elems)} Lane, plaza_elem: {plaza_elem is not None}")
-                status_list_req = []
-                if entry_txn_elems:
-                    for i, entry_txn_elem in enumerate(entry_txn_elems):
-                        txnId = entry_txn_elem.attrib.get('id', '')
-                        txnDate = entry_txn_elem.attrib.get('ts', '')
-                        laneId = lane_elems[i].attrib.get('id') if i < len(lane_elems) else (lane_elems[0].attrib.get('id') if lane_elems else '')
-                        plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
-                        print(f"[DEBUG] EntryTxn {i}: id={txnId}, ts={txnDate}, laneId={laneId}, plazaId={plazaId}")
-                        status = {
-                            'txnId': txnId,
-                            'txnDate': txnDate,
-                            'plazaId': plazaId,
-                            'laneId': laneId
-                        }
-                        status_list_req.append(status)
-                    parent_txnId = entry_txn_elems[0].attrib.get('id', '')
-                    parent_txnDate = entry_txn_elems[0].attrib.get('ts', '')
-                else:
-                    txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
-                    txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
-                    plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
-                    laneId = lane_elems[0].attrib.get('id') if lane_elems else ''
-                    print(f"[DEBUG] Fallback Txn: id={txnId}, ts={txnDate}, laneId={laneId}, plazaId={plazaId}")
-                    status_list_req = [{
-                        'txnId': txnId,
-                        'txnDate': txnDate,
-                        'plazaId': plazaId,
-                        'laneId': laneId
-                    }]
-                    parent_txnId = txnId
-                    parent_txnDate = txnDate
-                # Auto-generate msgId if missing
-                msg_id = log['msg_id'] if log['msg_id'] else datetime.now().strftime('%Y%m%d%H%M%S')
-                print(f"[DEBUG] Sending CheckTxn with parent_txnId={parent_txnId}, parent_txnDate={parent_txnDate}, msg_id={msg_id}")
-                result = send_check_txn(msg_id, log['org_id'], status_list_req, ts=parent_txnDate, txnId=parent_txnId)
-                if isinstance(result, dict):
-                    response = "<b>Check Txn Status Response:</b><br>"
+            # Check if status already exists
+            status_row = fetch_pay_status(log_id)
+            if status_row:
+                # Use stored status
+                response = "<b>Check Txn Status Response (cached):</b><br>"
+                status_json = status_row['status_json']
+                try:
+                    result = json.loads(status_json)
                     for k, v in result.items():
                         if k != 'status_list':
                             response += f"<b>{k}:</b> {v}<br>"
                     status_list = result.get('status_list', [])
-                else:
-                    response = result
-            except Exception as e:
-                response = f"<b>Error parsing request XML or sending check txn:</b> {e}"
-    return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list)
+                except Exception as e:
+                    response += f"<b>Error parsing stored status JSON:</b> {e}"
+                return redirect(url_for('banking.response_pay'))
+            else:
+                # Fetch from bank and store
+                try:
+                    root = ET.fromstring(log['request_xml'])
+                    entry_txn_elems = root.findall('.//EntryTxn')
+                    txn_elem = root.find('.//Txn')
+                    plaza_elem = root.find('.//Plaza')
+                    lane_elems = root.findall('.//Lane')
+                    status_list_req = []
+                    if entry_txn_elems:
+                        for i, entry_txn_elem in enumerate(entry_txn_elems):
+                            txnId = entry_txn_elem.attrib.get('id', '')
+                            txnDate = entry_txn_elem.attrib.get('ts', '')
+                            laneId = lane_elems[i].attrib.get('id') if i < len(lane_elems) else (lane_elems[0].attrib.get('id') if lane_elems else '')
+                            plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
+                            status = {
+                                'txnId': txnId,
+                                'txnDate': txnDate,
+                                'plazaId': plazaId,
+                                'laneId': laneId
+                            }
+                            status_list_req.append(status)
+                        parent_txnId = entry_txn_elems[0].attrib.get('id', '')
+                        parent_txnDate = entry_txn_elems[0].attrib.get('ts', '')
+                    else:
+                        txnId = txn_elem.attrib.get('id') if txn_elem is not None else ''
+                        txnDate = txn_elem.attrib.get('ts') if txn_elem is not None else ''
+                        plazaId = plaza_elem.attrib.get('id') if plaza_elem is not None else ''
+                        laneId = lane_elems[0].attrib.get('id') if lane_elems else ''
+                        status_list_req = [{
+                            'txnId': txnId,
+                            'txnDate': txnDate,
+                            'plazaId': plazaId,
+                            'laneId': laneId
+                        }]
+                        parent_txnId = txnId
+                        parent_txnDate = txnDate
+                    msg_id = log['msg_id'] if log['msg_id'] else datetime.now().strftime('%Y%m%d%H%M%S')
+                    result = send_check_txn(msg_id, log['org_id'], status_list_req, ts=parent_txnDate, txnId=parent_txnId)
+                    if isinstance(result, dict):
+                        response = "<b>Check Txn Status Response:</b><br>"
+                        for k, v in result.items():
+                            if k != 'status_list':
+                                response += f"<b>{k}:</b> {v}<br>"
+                        status_list = result.get('status_list', [])
+                        # Store status in DB
+                        insert_pay_status(log_id, getattr(result, 'raw_xml', None), json.dumps(result))
+                        status_map[log_id] = {'status_json': json.dumps(result)}
+                    else:
+                        response = result
+                    return redirect(url_for('banking.response_pay'))
+                except Exception as e:
+                    response = f"<b>Error parsing request XML or sending check txn:</b> {e}"
+    return render_template('banking/response_pay.html', logs=logs, response=response, status_list=status_list, status_map=status_map)
 
 @banking.route('/banking/transaction_status', methods=['GET', 'POST'])
 def transaction_status():
