@@ -731,9 +731,14 @@ def build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_plac
     return ET.tostring(root, encoding='utf-8', method='xml')
 
 
-def send_check_txn(msgId, orgId, status_list, signature_placeholder='...'):
-    ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-    txnId = str(uuid.uuid4())[:22]
+def send_check_txn(msgId, orgId, status_list, ts=None, txnId=None, signature_placeholder='...'):
+    # Use provided ts and txnId if given, else fallback to now/uuid
+    if ts is None:
+        from datetime import datetime, timezone
+        ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
+    if txnId is None:
+        import uuid
+        txnId = str(uuid.uuid4())[:22]
     xml_data = build_check_txn_request(msgId, orgId, ts, txnId, status_list, signature_placeholder)
     url = get_bank_url('check_txn_url')
     headers = {'Content-Type': 'application/xml'}

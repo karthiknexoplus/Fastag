@@ -389,7 +389,7 @@ def response_pay():
                         'plazaId': plazaId,
                         'laneId': ''
                     }]
-                result = send_check_txn(log['msg_id'], log['org_id'], status_list_req)
+                result = send_check_txn(log['msg_id'], log['org_id'], status_list_req, ts=txnDate, txnId=txnId)
                 if isinstance(result, dict):
                     response = "<b>Check Txn Status Response:</b><br>"
                     for k, v in result.items():
