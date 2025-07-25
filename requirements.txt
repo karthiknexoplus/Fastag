@@ -20,3 +20,9 @@ pycparser==2.22
 # Werkzeug 2.2.3
 # gunicorn 20.1.0
 # python-dotenv 1.0.0 
+# NOTE: After deploy, run the following SQL on your DB for analytics performance:
+# CREATE INDEX IF NOT EXISTS idx_accesslogs_tagid_timestamp ON access_logs(tag_id, timestamp);
+# CREATE INDEX IF NOT EXISTS idx_accesslogs_timestamp ON access_logs(timestamp);
+# CREATE INDEX IF NOT EXISTS idx_accesslogs_accessresult_timestamp ON access_logs(access_result, timestamp);
+# CREATE INDEX IF NOT EXISTS idx_accesslogs_laneid_timestamp ON access_logs(lane_id, timestamp);
+# CREATE INDEX IF NOT EXISTS idx_accesslogs_readerid_timestamp ON access_logs(reader_id, timestamp); 

@@ -609,6 +609,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     loadAnalyticsData();
     loadDeniedFastagActivityFeed();
+    loadTopUsers();
+    loadLaneUtilization();
     refreshRelayStatus(); // Initial load for barrier status
     // Removed all setInterval auto-refreshes for analytics and feeds
 });
@@ -893,57 +895,7 @@ function getSecondaryInfo(user) {
 
 function updateTables(data) {
     // Update top users table
-    const topUsersTable = document.getElementById('top-users-table');
     const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
-    if (data.top_users) {
-        topUsersTable.innerHTML = data.top_users.map(user => {
-            // user: [tag_id, user_name, kyc_vehicle_number, cache_vehicle_number, owner_name, model_name, fuel_type, total_events, granted, denied, last_activity]
-            // Vehicle number logic: show KYC, else cache if enabled
-            let vehicleNumber = 'N/A';
-            if (user[2]) {
-                vehicleNumber = user[2];
-            } else if (fastagFeaturesEnabled && user[3]) {
-                vehicleNumber = user[3];
-            } else if (!fastagFeaturesEnabled) {
-                vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the vehicle number</span>";
-            }
-            // Model logic: show KYC, else cache if enabled
-            let modelName = 'N/A';
-            if (user[2] && user[5]) {
-                modelName = user[5];
-            } else if (fastagFeaturesEnabled && user[5]) {
-                modelName = user[5];
-            } else if (!fastagFeaturesEnabled) {
-                modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the model</span>";
-            }
-            // Owner logic: show KYC, else cache if enabled
-            let ownerName = 'N/A';
-            if (user[2] && user[4]) {
-                ownerName = user[4];
-            } else if (fastagFeaturesEnabled && user[4]) {
-                ownerName = user[4];
-            } else if (!fastagFeaturesEnabled) {
-                ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the owner</span>";
-            }
-            // Compose secondary info
-            let secondary = [modelName, ownerName, user[6] ? user[6] : ''].filter(Boolean).join(' • ');
-            return `
-                <tr>
-                    <td>
-                        <div class="fw-bold">${vehicleNumber}</div>
-                        <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
-                    </td>
-                    <td>${vehicleNumber}</td>
-                    <td>${user[7]}</td>
-                    <td>
-                        <span class="status-badge ${user[8] > user[9] ? 'status-granted' : 'status-denied'}">
-                            ${user[8] > user[9] ? 'Active' : 'Denied'}
-                        </span>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
     // Update recent activity
     const recentActivity = document.getElementById('recent-activity');
     if (data.recent_activity) {
@@ -1456,6 +1408,73 @@ function refreshRelayStatus(relayNum) {
                 }
             }
         });
+}
+
+function loadTopUsers() {
+    const topUsersTable = document.getElementById('top-users-table');
+    topUsersTable.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>';
+    fetch('/analytics/api/top-users')
+        .then(response => response.json())
+        .then(data => {
+            if (data.top_users) {
+                topUsersTable.innerHTML = data.top_users.map(user => {
+                    let vehicleNumber = 'N/A';
+                    if (user[2]) {
+                        vehicleNumber = user[2];
+                    } else if (window.fastagFeaturesEnabled && user[3]) {
+                        vehicleNumber = user[3];
+                    } else if (!window.fastagFeaturesEnabled) {
+                        vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the vehicle number</span>";
+                    }
+                    let modelName = 'N/A';
+                    if (user[2] && user[5]) {
+                        modelName = user[5];
+                    } else if (window.fastagFeaturesEnabled && user[5]) {
+                        modelName = user[5];
+                    } else if (!window.fastagFeaturesEnabled) {
+                        modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the model</span>";
+                    }
+                    let ownerName = 'N/A';
+                    if (user[2] && user[4]) {
+                        ownerName = user[4];
+                    } else if (window.fastagFeaturesEnabled && user[4]) {
+                        ownerName = user[4];
+                    } else if (!window.fastagFeaturesEnabled) {
+                        ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the owner</span>";
+                    }
+                    let secondary = [modelName, ownerName, user[6] ? user[6] : ''].filter(Boolean).join(' • ');
+                    return `
+                        <tr>
+                            <td>
+                                <div class="fw-bold">${vehicleNumber}</div>
+                                <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
+                            </td>
+                            <td>${vehicleNumber}</td>
+                            <td>${user[7]}</td>
+                            <td>
+                                <span class="status-badge ${user[8] > user[9] ? 'status-granted' : 'status-denied'}">
+                                    ${user[8] > user[9] ? 'Active' : 'Denied'}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                topUsersTable.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>';
+            }
+        })
+        .catch(() => {
+            topUsersTable.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading data</td></tr>';
+        });
+}
+
+function loadLaneUtilization() {
+    // Implement similar logic for lane utilization if you have a table/chart for it
+    // Example placeholder:
+    // const laneUtilTable = document.getElementById('lane-utilization-table');
+    // laneUtilTable.innerHTML = 'Loading...';
+    // fetch('/analytics/api/lane-utilization')
+    //   .then(...)
 }
 </script>
 
