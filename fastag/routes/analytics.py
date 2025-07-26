@@ -2268,9 +2268,7 @@ def api_recent_entries():
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
-        WHERE al.access_result = 'granted' 
-            AND DATE(al.timestamp) = DATE('now')
-            AND (l.lane_type = 'entry' OR l.lane_name LIKE '%entry%' OR l.lane_name LIKE '%Entry%')
+        WHERE al.access_result = 'granted' AND DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
         LIMIT 100
     ''').fetchall()
@@ -2317,7 +2315,6 @@ def api_recent_exits():
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         WHERE DATE(al.timestamp) = DATE('now')
-            AND (l.lane_type = 'exit' OR l.lane_name LIKE '%exit%' OR l.lane_name LIKE '%Exit%')
         ORDER BY al.timestamp DESC
         LIMIT 100
     ''').fetchall()
