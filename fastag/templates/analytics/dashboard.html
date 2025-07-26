@@ -556,33 +556,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 mb-4">
-            <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-id-card text-primary me-2"></i>
-                    Recent Granted Tags
-                </h5>
-                <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
-                    <table class="table table-modern">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Tag</th>
-                                <th>Vehicle</th>
-                                <th>Owner</th>
-                                <th>Model</th>
-                                <th>Lane</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent-granted-tags-table">
-                            <tr>
-                                <td colspan="6" class="text-center text-muted">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
@@ -665,7 +639,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDeniedFastagActivityFeed();
     refreshRelayStatus();
     loadRecentActivity();
-    loadRecentGrantedTags();
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
     loadMostDeniedTagsFeed();
@@ -1616,31 +1589,7 @@ function loadRecentActivity() {
         });
 }
 
-function loadRecentGrantedTags() {
-    const table = document.getElementById('recent-granted-tags-table');
-    table.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>';
-    fetch('/analytics/api/recent-granted-tags')
-        .then(response => response.json())
-        .then(data => {
-            if (data.recent_granted_tags && data.recent_granted_tags.length > 0) {
-                table.innerHTML = data.recent_granted_tags.map(tag => `
-                    <tr>
-                        <td>${tag.time}</td>
-                        <td>${tag.tag_id}</td>
-                        <td>${tag.vehicle_number || 'N/A'}</td>
-                        <td>${tag.owner_name || 'N/A'}</td>
-                        <td>${tag.model_name || 'N/A'}</td>
-                        <td>${tag.lane_name || 'N/A'}</td>
-                    </tr>
-                `).join('');
-            } else {
-                table.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No data</td></tr>';
-            }
-        })
-        .catch(() => {
-            table.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading data</td></tr>';
-        });
-}
+
 
 function renderGrantedTagActivityItem(tag, showCount) {
     // tag: {tag_id, vehicle_number, owner_name, model_name, lane_name, time, granted_count}
@@ -1791,7 +1740,6 @@ function renderExitTagActivityItem(tag) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadRecentGrantedTags();
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
     loadMostDeniedTagsFeed();
