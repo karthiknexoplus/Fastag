@@ -71,6 +71,7 @@ def init_database():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
+                email TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS activity_log (
@@ -154,7 +155,8 @@ def init_database():
                 FOREIGN KEY (reader_id) REFERENCES readers (id)
             );
         ''')
-        # Example: Add missing column migration (add more as needed)
+        # Add missing column migration (add more as needed)
+        add_column_if_not_exists(cursor, 'users', 'email', 'TEXT')
         # add_column_if_not_exists(cursor, 'kyc_users', 'email', 'TEXT')
         # add_column_if_not_exists(cursor, 'access_logs', 'extra_info', 'TEXT')
         # Print summary

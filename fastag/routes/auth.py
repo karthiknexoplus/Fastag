@@ -34,8 +34,43 @@ def login():
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
-    # Signup disabled
-    return redirect(url_for('auth.login'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        
+        # Validation
+        if not username or not password:
+            flash('Username and password are required', 'danger')
+            return render_template('signup.html')
+        
+        if password != confirm_password:
+            flash('Passwords do not match', 'danger')
+            return render_template('signup.html')
+        
+        if len(password) < 6:
+            flash('Password must be at least 6 characters long', 'danger')
+            return render_template('signup.html')
+        
+        db = get_db()
+        
+        # Check if username already exists
+        existing_user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        if existing_user:
+            flash('Username already exists', 'danger')
+            return render_template('signup.html')
+        
+        # Create new user
+        hashed_password = generate_password_hash(password)
+        db.execute('INSERT INTO users (username, password, created_at) VALUES (?, ?, datetime("now"))', 
+                  (username, hashed_password))
+        db.commit()
+        
+        flash('Account created successfully! Please log in.', 'success')
+        log_user_action(username, 'signup', 'New user registered')
+        return redirect(url_for('auth.login'))
+    
+    return render_template('signup.html')
 
 @auth_bp.route('/logout')
 def logout():

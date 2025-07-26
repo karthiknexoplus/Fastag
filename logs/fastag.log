@@ -842,3 +842,7 @@
  * Running on http://192.168.1.2:5000
 [2025-07-13 12:46:42,279] INFO in _internal: [33mPress CTRL+C to quit[0m
 [2025-07-13 12:46:47,735] INFO in _internal: 127.0.0.1 - - [13/Jul/2025 12:46:47] "GET /analytics/api/current-occupancy-details HTTP/1.1" 200 -
+[2025-07-26 17:59:42,345] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-26 17:59:42,345] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 17:59:42,346] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-26 17:59:42,346] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
