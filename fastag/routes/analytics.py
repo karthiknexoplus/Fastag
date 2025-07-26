@@ -2373,6 +2373,7 @@ def api_real_time_logs():
         from datetime import datetime
         ist_tz = pytz.timezone('Asia/Kolkata')
         result = []
+        skipped = 0
         for row in rows:
             timestamp_str = row[0]
             try:
@@ -2385,20 +2386,22 @@ def api_real_time_logs():
                     utc_time = utc_time.replace(tzinfo=pytz.UTC)
                 ist_time = utc_time.astimezone(ist_tz)
                 ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+                result.append({
+                    'time': ist_time_str,
+                    'tag_id': row[1],
+                    'vehicle_number': row[2] or '',
+                    'owner_name': row[3] or '',
+                    'model_name': row[4] or '',
+                    'lane_name': row[5] or '',
+                    'lane_type': row[6] or '',
+                    'access_result': row[7] or '',
+                    'reason': row[8] or ''
+                })
             except Exception as e:
-                print(f"Error parsing timestamp: {timestamp_str}, error: {e}")
-                ist_time_str = timestamp_str
-            result.append({
-                'time': ist_time_str,
-                'tag_id': row[1],
-                'vehicle_number': row[2] or '',
-                'owner_name': row[3] or '',
-                'model_name': row[4] or '',
-                'lane_name': row[5] or '',
-                'lane_type': row[6] or '',
-                'access_result': row[7] or '',
-                'reason': row[8] or ''
-            })
+                print(f"Skipping log row due to bad timestamp: {timestamp_str}, error: {e}")
+                skipped += 1
+        if skipped > 0:
+            print(f"/api/real-time-logs: Skipped {skipped} rows due to bad timestamps.")
         return jsonify({'real_time_logs': result})
     except Exception as e:
         import traceback
