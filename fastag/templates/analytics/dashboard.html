@@ -566,6 +566,40 @@
             </div>
         </div>
     </div>
+
+    <!-- Real Time Logs Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-bolt text-warning me-2"></i>
+                    Real Time Logs
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Tag</th>
+                                <th>Vehicle</th>
+                                <th>Owner</th>
+                                <th>Model</th>
+                                <th>Lane</th>
+                                <th>Lane Type</th>
+                                <th>Result</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="real-time-logs-table">
+                            <tr>
+                                <td colspan="9" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -1696,126 +1730,4 @@ function renderActivityItem(activity) {
     if (activity.model_name) secondaryInfo.push(`Model: ${activity.model_name}`);
     if (activity.owner_name) secondaryInfo.push(`Owner: ${activity.owner_name}`);
     if (activity.lane_name) secondaryInfo.push(`Lane: ${activity.lane_name}`);
-    if (activity.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${activity.lane_type.toUpperCase()}</span>`);
-    let secondary = secondaryInfo.join(' • ');
-    let itemClass = 'activity-item';
-    let statusBadge = '';
-    if (activity.access_result === 'granted') {
-        itemClass = 'activity-item granted';
-        statusBadge = '<span class="status-badge status-granted">GRANTED</span>';
-    } else if (activity.access_result === 'denied') {
-        itemClass = 'activity-item denied';
-        statusBadge = '<span class="status-badge status-denied">DENIED</span>';
-    }
-    return `
-        <div class="${itemClass}">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="fw-bold">${activity.vehicle_number || activity.tag_id}</div>
-                    <small class="text-muted">Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
-                </div>
-                ${statusBadge}
-            </div>
-            <small class="text-muted">${activity.time || ''}</small>
-        </div>
-    `;
-}
-
-</script>
-
-<!-- Current Occupancy Details Modal -->
-<div class="modal fade" id="currentOccupancyModal" tabindex="-1" aria-labelledby="currentOccupancyModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #667eea; color: white;">
-                <h5 class="modal-title" id="currentOccupancyModalLabel">
-                    <i class="fas fa-car me-2"></i>Current Occupancy Details
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="currentOccupancyModalBody">
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Today's Granted Details Modal -->
-<div class="modal fade" id="todayGrantedModal" tabindex="-1" aria-labelledby="todayGrantedModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #4facfe; color: white;">
-                <h5 class="modal-title" id="todayGrantedModalLabel">
-                    <i class="fas fa-check-circle me-2"></i>Today's Granted Entries
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="todayGrantedModalBody">
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Today's Denied Details Modal -->
-<div class="modal fade" id="todayDeniedModal" tabindex="-1" aria-labelledby="todayDeniedModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #fa709a; color: white;">
-                <h5 class="modal-title" id="todayDeniedModalLabel">
-                    <i class="fas fa-times-circle me-2"></i>Today's Denied Entries Analysis
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="todayDeniedModalBody">
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Total Events Today Details Modal -->
-<div class="modal fade" id="totalEventsTodayModal" tabindex="-1" aria-labelledby="totalEventsTodayModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #a8edea; color: #333;">
-                <h5 class="modal-title" id="totalEventsTodayModalLabel">
-                    <i class="fas fa-list-ol me-2"></i>Today's Events Summary
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="totalEventsTodayModalBody">
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %} 
+    if (activity.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${activity.lane_type.toUpperCase()}</span>`
