@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - FASTag Parking</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html, body { height: 100%; }
+        body { min-height: 100vh; margin: 0; padding: 0; }
+        .split-container { display: flex; height: 100vh; }
+        .left-panel {
+            background: url('{{ url_for('static', filename='branding.jpg') }}') center center/cover no-repeat;
+            color: #fff;
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .left-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(40, 20, 80, 0.55); z-index: 1; }
+        .left-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .app-title { font-size: 2.2rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 1rem; }
+        .welcome-message { font-size: 1.3rem; margin-bottom: 2rem; }
+        .footer { position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center; font-size: 0.95rem; color: #e0e0e0; z-index: 2; }
+        .right-panel { flex: 1; display: flex; align-items: center; justify-content: center; background: #f8f9fa; }
+        .card { border-radius: 1.5rem; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13); }
+        .form-icon { color: #764ba2; }
+        .glass-card { background: rgba(255,255,255,0.18); border-radius: 1.5rem; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.24); padding: 2rem 1.5rem 1.5rem 1.5rem; }
+        .input-group-text { background: #f3e9ff; color: #764ba2; border: none; }
+        .form-control:focus { border-color: #764ba2; box-shadow: 0 0 0 0.2rem rgba(118,75,162,.15); }
+        .gradient-btn { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; transition: box-shadow 0.2s, background 0.2s; }
+        .gradient-btn:hover, .gradient-btn:focus { background: linear-gradient(90deg, #764ba2 0%, #667eea 100%); box-shadow: 0 2px 12px rgba(80,80,160,0.13); color: #fff; }
+        .login-logo-box { width: 110px; height: 110px; background: #fff; border-radius: 1.2rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem; box-shadow: 0 2px 12px rgba(80,80,160,0.13); }
+        .login-logo { width: 70px; height: 70px; object-fit: contain; background: transparent; border-radius: 0.7rem; display: block; }
+    </style>
+</head>
+<body>
+    <div class="split-container">
+        <div class="left-panel">
+            <div class="left-overlay"></div>
+            <div class="left-content">
+                <div class="login-logo-box">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="login-logo">
+                </div>
+                <div class="app-title">FASTag Parking</div>
+                <div class="welcome-message" id="welcome-message"></div>
+            </div>
+            <div class="footer">
+                Powered by Nexoplus Innovations Pvt Ltd
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="glass-card w-100" style="max-width: 340px;">
+                <div class="text-center mb-3">
+                    <i class="fas fa-user-plus fa-2x form-icon mb-2"></i>
+                    <h3 class="fw-bold mb-1 fs-4">Create Account</h3>
+                    <div class="text-muted mb-3 fs-6">Sign up for FASTag Parking</div>
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="font-size:0.95rem; padding:0.5rem 1rem;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+                <form method="POST" autocomplete="off" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control fs-6" name="username" placeholder="Username" required autofocus>
+                            <div class="invalid-feedback">Please enter your username.</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control fs-6" name="password" placeholder="Password" required>
+                            <div class="invalid-feedback">Please enter your password.</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control fs-6" name="confirm" placeholder="Confirm Password" required>
+                            <div class="invalid-feedback">Please confirm your password.</div>
+                        </div>
+                    </div>
+                    <div class="d-grid mb-2">
+                        <button type="submit" class="btn gradient-btn btn-md rounded-pill shadow-sm fs-5"><i class="fas fa-user-plus me-2"></i>Sign Up</button>
+                    </div>
+                    <div class="d-flex align-items-center my-2">
+                        <hr class="flex-grow-1">
+                        <span class="mx-2 text-muted fs-6">or</span>
+                        <hr class="flex-grow-1">
+                    </div>
+                    <div class="d-grid mb-1">
+                        <a href="{{ url_for('google_auth.login') }}" class="btn btn-outline-danger rounded-pill fs-6" style="padding:0.5rem 0; text-decoration:none;">
+                            <i class="fab fa-google me-2"></i>Sign up with Google
+                        </a>
+                    </div>
+                </form>
+                <div class="mt-2 text-center fs-6">
+                    <span>Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Dynamic welcome message based on time
+        const welcome = document.getElementById('welcome-message');
+        const hour = new Date().getHours();
+        let msg = 'Welcome!';
+        if (hour < 5) msg = 'Good Night! Welcome!';
+        else if (hour < 12) msg = 'Good Morning! Welcome!';
+        else if (hour < 17) msg = 'Good Afternoon! Welcome!';
+        else if (hour < 21) msg = 'Good Evening! Welcome!';
+        else msg = 'Good Night! Welcome!';
+        welcome.textContent = msg;
+        // Bootstrap validation
+        (() => {
+          'use strict';
+          const forms = document.querySelectorAll('.needs-validation');
+          Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

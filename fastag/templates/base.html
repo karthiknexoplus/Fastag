@@ -123,10 +123,6 @@
                     <i class="fas fa-home"></i>
                     <span class="nav-label d-none d-md-inline">Dashboard</span>
                 </a>
-                <a href="{{ url_for('all_data.all_data') }}" class="nav-icon-link {% if request.endpoint == 'all_data.all_data' %}active{% endif %}" title="All Data">
-                    <i class="fas fa-database"></i>
-                    <span class="nav-label d-none d-md-inline">All Data</span>
-                </a>
                 <a href="{{ url_for('locations.locations') }}" class="nav-icon-link {% if request.endpoint == 'locations.locations' %}active{% endif %}" title="Locations">
                     <i class="fas fa-map-marker-alt"></i>
                     <span class="nav-label d-none d-md-inline">Locations</span>

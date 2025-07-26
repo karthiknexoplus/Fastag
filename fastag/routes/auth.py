@@ -34,9 +34,9 @@ def login():
 def signup():
     db = get_db()
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form['username'].strip()
         password = request.form['password']
-        confirm = request.form['confirm_password']
+        confirm = request.form.get('confirm')
         if not username or not password or not confirm:
             flash('All fields are required.', 'danger')
             return render_template('signup.html')
@@ -50,8 +50,11 @@ def signup():
         hashed = generate_password_hash(password)
         db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed))
         db.commit()
-        flash('Signup successful! Please log in.', 'success')
-        return redirect(url_for('auth.login'))
+        session['user'] = {'username': username, 'login_method': 'local'}
+        log_user_login(username, 'signup')
+        log_user_action(username, 'signup', 'User registered')
+        flash('Signup successful! You are now logged in.', 'success')
+        return redirect(url_for('auth.home'))
     return render_template('signup.html')
 
 @auth_bp.route('/logout')
