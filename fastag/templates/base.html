@@ -123,31 +123,6 @@
                     <i class="fas fa-home"></i>
                     <span class="nav-label d-none d-md-inline">Dashboard</span>
                 </a>
-                <a href="{{ url_for('locations.locations') }}" class="nav-icon-link {% if request.endpoint == 'locations.locations' %}active{% endif %}" title="Locations">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span class="nav-label d-none d-md-inline">Locations</span>
-                </a>
-                <a href="{{ url_for('lanes.lanes') }}" class="nav-icon-link {% if request.endpoint == 'lanes.lanes' %}active{% endif %}" title="Lanes">
-                    <i class="fas fa-road"></i>
-                    <span class="nav-label d-none d-md-inline">Lanes</span>
-                </a>
-                <div class="dropdown d-inline-block">
-                    <a href="{{ url_for('analytics.dashboard') }}" class="nav-icon-link dropdown-toggle {% if request.endpoint.startswith('analytics.') %}active{% endif %}" data-bs-toggle="dropdown" title="Analytics">
-                        <i class="fas fa-chart-line"></i>
-                        <span class="nav-label d-none d-md-inline">Analytics</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ url_for('analytics.dashboard') }}">
-                            <i class="fas fa-chart-line fastag-submenu-icon"></i><span class="fastag-submenu-label">Dashboard</span>
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('analytics.reports') }}">
-                            <i class="fas fa-file-alt fastag-submenu-icon"></i><span class="fastag-submenu-label">Reports</span>
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('analytics.barrier_events') }}">
-                            <i class="fas fa-door-open fastag-submenu-icon"></i><span class="fastag-submenu-label">Barrier Events</span>
-                        </a></li>
-                    </ul>
-                </div>
                 <a href="{{ url_for('live_status.live_status') }}" class="nav-icon-link {% if request.endpoint == 'live_status.live_status' %}active{% endif %}" title="Live Status">
                     <i class="fas fa-wifi"></i>
                     <span class="nav-label d-none d-md-inline">Live Status</span>
