@@ -2389,4 +2389,4 @@ def api_recent_exits():
             'lane_name': row[5] or '',
             'access_result': row[6] or ''
         })
-    return jsonify({'recent_exits': result})
+    return jsonify({'recent_exits': result, 'debug_count': len(result)})
