@@ -2087,35 +2087,30 @@ def api_reader_health():
 @analytics_bp.route('/api/recent-activity')
 def api_recent_activity():
     db = get_db()
-    rows = db.execute("""
+    rows = db.execute('''
         SELECT 
             al.timestamp,
             al.tag_id,
-            al.access_result,
-            al.reason,
-            ku.name as user_name,
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
-            tvc.fuel_type,
             l.lane_name,
-            r.reader_ip,
-            r.type as reader_type,
-            ku.vehicle_number as kyc_vehicle_number
+            r.type as lane_type,
+            al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
-        WHERE al.timestamp >= datetime('now', '-24 hours')
+        WHERE DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
-        LIMIT 50
-    """).fetchall()
+        LIMIT 100
+    ''').fetchall()
     # Convert timestamps to IST
     import pytz
     from datetime import datetime
     ist_tz = pytz.timezone('Asia/Kolkata')
-    results = []
+    result = []
     for row in rows:
         timestamp_str = row[0]
         if 'T' in timestamp_str and 'Z' in timestamp_str:
@@ -2127,8 +2122,17 @@ def api_recent_activity():
             utc_time = utc_time.replace(tzinfo=pytz.UTC)
         ist_time = utc_time.astimezone(ist_tz)
         ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-        results.append([ist_time_str] + list(row[1:]))
-    return jsonify({'recent_activity': results})
+        result.append({
+            'time': ist_time_str,
+            'tag_id': row[1],
+            'vehicle_number': row[2] or '',
+            'owner_name': row[3] or '',
+            'model_name': row[4] or '',
+            'lane_name': row[5] or '',
+            'lane_type': row[6] or '',
+            'access_result': row[7] or ''
+        })
+    return jsonify({'recent_activity': result})
 
 @analytics_bp.route('/api/top-granted-tags')
 def api_top_granted_tags():

@@ -1021,3 +1021,13 @@
 [2025-07-26 18:51:07,512] INFO in google_auth: Google OAuth initialized successfully
 [2025-07-26 18:51:07,585] WARNING in _internal:  * Debugger is active!
 [2025-07-26 18:51:07,594] INFO in _internal:  * Debugger PIN: 236-585-363
+[2025-07-26 18:53:29,040] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/analytics.py', reloading
+[2025-07-26 18:53:29,365] INFO in _internal:  * Restarting with stat
+[2025-07-26 18:53:29,969] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-26 18:53:29,970] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 18:53:29,970] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-26 18:53:29,970] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 18:53:30,575] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 18:53:30,575] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 18:53:30,643] WARNING in _internal:  * Debugger is active!
+[2025-07-26 18:53:30,650] INFO in _internal:  * Debugger PIN: 236-585-363
