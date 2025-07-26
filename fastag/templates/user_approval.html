@@ -1,150 +1,542 @@
 {% extends 'base.html' %}
 {% block title %}User Approval - FASTag Parking{% endblock %}
+
+{% block extra_css %}
+<style>
+    .approval-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .approval-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+    
+    .approval-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-header-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 20px 20px 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .card-header-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .card-header-modern h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.25rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .card-header-modern .icon {
+        font-size: 1.5rem;
+        margin-right: 0.75rem;
+        opacity: 0.9;
+    }
+    
+    .table-modern {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .table-modern thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none;
+        padding: 1rem 0.75rem;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table-modern tbody td {
+        padding: 1rem 0.75rem;
+        border: none;
+        border-bottom: 1px solid #f1f3f4;
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+    
+    .table-modern tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .table-modern tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+        transform: scale(1.01);
+    }
+    
+    .form-control-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: #f8f9fa;
+    }
+    
+    .form-control-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+    }
+    
+    .btn-modern {
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+    
+    .btn-approve {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .btn-approve:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-pending {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        color: #212529;
+    }
+    
+    .status-approved {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .status-expiring {
+        background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .slide-in-left {
+        animation: slideInLeft 0.6s ease-out;
+    }
+    
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .approval-container {
+            padding: 1rem 0;
+        }
+        
+        .table-modern {
+            font-size: 0.75rem;
+        }
+        
+        .table-modern thead th,
+        .table-modern tbody td {
+            padding: 0.5rem 0.25rem;
+        }
+        
+        .btn-modern {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h2 mb-1 text-dark fw-bold">
-                <i class="fas fa-user-check text-primary me-2"></i>
-                User Approval
-            </h1>
-            <p class="text-muted mb-0">Manage device approvals and monitor expiring devices</p>
+<div class="approval-container">
+    <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="row mb-4 fade-in">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 mb-1 text-white fw-bold floating">
+                            <i class="fas fa-user-check me-3"></i>
+                            User Approval Dashboard
+                        </h1>
+                        <p class="text-white-50 mb-0">Manage device approvals and user assignments with ease</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="stats-card">
+                            <div class="stats-number pulse">{{ devices|length }}</div>
+                            <div class="stats-label">Pending Devices</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row g-3">
-        <div class="col-lg-7">
-            <div class="card p-3 shadow-sm border-0 mb-3">
-                <h5 class="mb-2 fs-6"><i class="fas fa-list fastag-menu-icon"></i> Pending Devices</h5>
-                <div style="max-height: 220px; overflow-y: auto;">
-                <table class="table table-sm table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Device ID</th>
-                            <th>Model</th>
-                            <th>Manufacturer</th>
-                            <th>Android</th>
-                            <th>Assign User</th>
-                            <th>Username</th>
-                            <th>Password</th>
-                            <th>Service IP</th>
-                            <th>From</th>
-                            <th>To</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in devices %}
-                        <tr>
-                            <form method="POST">
-                            <td>{{ d['device_id'] }}<input type="hidden" name="device_id" value="{{ d['id'] }}"></td>
-                            <td>{{ d['model'] }}</td>
-                            <td>{{ d['manufacturer'] }}</td>
-                            <td>{{ d['android_version'] }}</td>
-                            <td>
-                                <select name="assigned_user_id" class="form-select form-select-sm">
-                                    <option value="">-- None --</option>
-                                    {% for u in users %}
-                                    <option value="{{ u['id'] }}">{{ u['username'] }}</option>
+
+        <div class="row g-4">
+            <!-- Pending Devices Section -->
+            <div class="col-lg-8 slide-in-left">
+                <div class="approval-card">
+                    <div class="card-header-modern">
+                        <h3><i class="fas fa-clock icon"></i>Pending Device Approvals</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if devices %}
+                        <div class="table-responsive">
+                            <table class="table table-modern mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Device ID</th>
+                                        <th>Model</th>
+                                        <th>Manufacturer</th>
+                                        <th>Android</th>
+                                        <th>Assign User</th>
+                                        <th>Username</th>
+                                        <th>Password</th>
+                                        <th>Service IP</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for d in devices %}
+                                    <tr>
+                                        <form method="POST">
+                                        <td><strong>{{ d['device_id'] }}</strong><input type="hidden" name="device_id" value="{{ d['id'] }}"></td>
+                                        <td>{{ d['model'] }}</td>
+                                        <td>{{ d['manufacturer'] }}</td>
+                                        <td><span class="status-badge status-pending">{{ d['android_version'] }}</span></td>
+                                        <td>
+                                            <select name="assigned_user_id" class="form-control form-control-modern">
+                                                <option value="">-- Select User --</option>
+                                                {% for u in users %}
+                                                <option value="{{ u['id'] }}">{{ u['username'] }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="username" class="form-control form-control-modern" placeholder="Username" required></td>
+                                        <td><input type="password" name="password" class="form-control form-control-modern" placeholder="Password" required></td>
+                                        <td><input type="text" name="service_ip" class="form-control form-control-modern" value="{{ d['service_ip'] or '' }}" placeholder="192.168.1.100"></td>
+                                        <td><input type="date" name="from_date" class="form-control form-control-modern" required></td>
+                                        <td><input type="date" name="to_date" class="form-control form-control-modern" required></td>
+                                        <td class="text-center">
+                                            <button type="submit" class="btn btn-modern btn-approve" data-bs-toggle="tooltip" title="Approve Device">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-modern btn-edit ms-1" data-bs-toggle="tooltip" title="Edit Device">
+                                                <i class="fas fa-pen-to-square"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this device?');">
+                                                <button type="submit" class="btn btn-modern btn-delete ms-1" data-bs-toggle="tooltip" title="Delete Device">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                        </form>
+                                    </tr>
                                     {% endfor %}
-                                </select>
-                            </td>
-                            <td><input type="text" name="username" class="form-control form-control-sm" required></td>
-                            <td><input type="password" name="password" class="form-control form-control-sm" required></td>
-                            <td><input type="text" name="service_ip" class="form-control form-control-sm" value="{{ d['service_ip'] or '' }}" placeholder="e.g. 192.168.1.100"></td>
-                            <td><input type="date" name="from_date" class="form-control form-control-sm" required></td>
-                            <td><input type="date" name="to_date" class="form-control form-control-sm" required></td>
-                            <td class="text-center">
-                                <button type="submit" class="btn btn-success btn-sm rounded-circle" data-bs-toggle="tooltip" title="Approve"><i class="fas fa-check"></i></button>
-                                <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
-                                <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this device?');">
-                                    <button type="submit" class="btn btn-danger btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
-                                </form>
-                            </td>
-                            </form>
-                        </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         {% else %}
-                        <tr><td colspan="11" class="text-center text-muted">No devices pending approval.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <h5>All Caught Up!</h5>
+                            <p>No devices are currently pending approval.</p>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <div class="card p-3 shadow-sm border-0">
-                <h5 class="mb-2 fs-6"><i class="fas fa-check fastag-menu-icon"></i> Approved Devices</h5>
-                <div style="max-height: 220px; overflow-y: auto;">
-                <table class="table table-sm table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Device ID</th>
-                            <th>Model</th>
-                            <th>User</th>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Days Left</th>
-                            <th>Service IP</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in approved_devices %}
-                        <tr>
-                            <td>{{ d['device_id'] }}</td>
-                            <td>{{ d['model'] }}</td>
-                            <td>{{ d['assigned_username'] or '' }}</td>
-                            <td>{{ d['from_date'] or '' }}</td>
-                            <td>{{ d['to_date'] or '' }}</td>
-                            <td>{% if d['days_left'] is not none %}{{ d['days_left'] }}{% else %}N/A{% endif %}</td>
-                            <td>{{ d['service_ip'] or '' }}</td>
-                            <td class="text-center">
-                                <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-primary btn-sm rounded-circle" data-bs-toggle="tooltip" title="Edit"><i class="fas fa-pen-to-square"></i></a>
-                                <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this device?');">
-                                    <button type="submit" class="btn btn-danger btn-sm rounded-circle ms-1" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
-                                </form>
-                            </td>
-                        </tr>
+
+            <!-- Approved Devices Section -->
+            <div class="col-lg-4 slide-in-right">
+                <div class="approval-card">
+                    <div class="card-header-modern">
+                        <h3><i class="fas fa-check-circle icon"></i>Approved Devices</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if approved_devices %}
+                        <div class="table-responsive">
+                            <table class="table table-modern mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Device ID</th>
+                                        <th>User</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Days Left</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for d in approved_devices %}
+                                    <tr>
+                                        <td><strong>{{ d['device_id'] }}</strong></td>
+                                        <td>{{ d['assigned_username'] or 'Unassigned' }}</td>
+                                        <td>{{ d['from_date'] or 'N/A' }}</td>
+                                        <td>{{ d['to_date'] or 'N/A' }}</td>
+                                        <td>
+                                            {% if d['days_left'] is not none %}
+                                                {% if d['days_left'] <= 7 %}
+                                                    <span class="status-badge status-expiring">{{ d['days_left'] }} days</span>
+                                                {% else %}
+                                                    <span class="status-badge status-approved">{{ d['days_left'] }} days</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{{ url_for('admin.edit_device', device_id=d['id']) }}" class="btn btn-modern btn-edit" data-bs-toggle="tooltip" title="Edit Device">
+                                                <i class="fas fa-pen-to-square"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('admin.delete_device', device_id=d['id']) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this device?');">
+                                                <button type="submit" class="btn btn-modern btn-delete ms-1" data-bs-toggle="tooltip" title="Delete Device">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                         {% else %}
-                        <tr><td colspan="8" class="text-center text-muted">No approved devices yet.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-5">
-            <div class="card p-3 shadow-sm border-0 mb-3">
-                <h5 class="mb-2 fs-6"><i class="fas fa-exclamation-triangle text-warning"></i> Devices Expiring Soon</h5>
-                <div style="max-height: 220px; overflow-y: auto;">
-                <table class="table table-sm table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Device ID</th>
-                            <th>User</th>
-                            <th>To Date</th>
-                            <th>Days Left</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in expiring_devices %}
-                        <tr>
-                            <td>{{ d['device_id'] }}</td>
-                            <td>{{ d['assigned_username'] or '' }}</td>
-                            <td>{{ d['to_date'] or '' }}</td>
-                            <td>{% if d['days_left'] is not none %}{{ d['days_left'] }}{% else %}N/A{% endif %}</td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="4" class="text-center text-muted">No devices expiring soon.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h5>No Approved Devices</h5>
+                            <p>Approved devices will appear here.</p>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-</script> 
+    
+    // Add smooth animations to form submissions
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                submitBtn.disabled = true;
+            }
+        });
+    });
+    
+    // Add hover effects to table rows
+    document.querySelectorAll('.table-modern tbody tr').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add confirmation for delete actions
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to delete this device? This action cannot be undone.')) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Add success animation for approved devices
+    document.querySelectorAll('.btn-approve').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-check"></i> Approving...';
+            this.classList.add('pulse');
+        });
+    });
+});
+</script>
+{% endblock %} 
