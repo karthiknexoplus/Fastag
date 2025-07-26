@@ -566,40 +566,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Real Time Logs Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="chart-container">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-bolt text-warning me-2"></i>
-                    Real Time Logs
-                </h5>
-                <div class="table-responsive">
-                    <table class="table table-modern">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Tag</th>
-                                <th>Vehicle</th>
-                                <th>Owner</th>
-                                <th>Model</th>
-                                <th>Lane</th>
-                                <th>Lane Type</th>
-                                <th>Result</th>
-                                <th>Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody id="real-time-logs-table">
-                            <tr>
-                                <td colspan="9" class="text-center text-muted">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
 
@@ -1747,42 +1713,5 @@ function renderActivityItem(activity) {
         </div>
     `;
 }
-
-// Real Time Logs Table Loader
-function loadRealTimeLogs() {
-    fetch('/api/real-time-logs')
-        .then(r => r.json())
-        .then(data => {
-            const table = document.getElementById('real-time-logs-table');
-            if (data.error) {
-                table.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error: ${data.error}</td></tr>`;
-                return;
-            }
-            if (!data.real_time_logs || data.real_time_logs.length === 0) {
-                table.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No logs found.</td></tr>';
-                return;
-            }
-            table.innerHTML = data.real_time_logs.map(log => `
-                <tr>
-                    <td>${log.time}</td>
-                    <td>${log.tag_id}</td>
-                    <td>${log.vehicle_number}</td>
-                    <td>${log.owner_name}</td>
-                    <td>${log.model_name}</td>
-                    <td>${log.lane_name}</td>
-                    <td>${log.lane_type ? log.lane_type.toUpperCase() : ''}</td>
-                    <td><span class="status-badge ${log.access_result === 'granted' ? 'status-granted' : 'status-denied'}">${log.access_result.toUpperCase()}</span></td>
-                    <td>${log.reason}</td>
-                </tr>
-            `).join('');
-        })
-        .catch((err) => {
-            document.getElementById('real-time-logs-table').innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error loading logs: ${err.message}</td></tr>`;
-        });
-}
-document.addEventListener('DOMContentLoaded', function() {
-    loadRealTimeLogs();
-    setInterval(loadRealTimeLogs, 10000); // auto-refresh every 10s
-});
 </script>
 {% endblock %}
