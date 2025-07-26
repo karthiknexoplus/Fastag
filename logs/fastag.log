@@ -891,3 +891,23 @@
 [2025-07-26 18:26:26,413] INFO in google_auth: Google OAuth initialized successfully
 [2025-07-26 18:26:26,476] WARNING in _internal:  * Debugger is active!
 [2025-07-26 18:26:26,484] INFO in _internal:  * Debugger PIN: 236-585-363
+[2025-07-26 18:28:03,323] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/analytics.py', reloading
+[2025-07-26 18:28:03,439] INFO in _internal:  * Restarting with stat
+[2025-07-26 18:28:03,945] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-26 18:28:03,945] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 18:28:03,946] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-26 18:28:03,946] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 18:28:04,342] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 18:28:04,342] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 18:28:04,409] WARNING in _internal:  * Debugger is active!
+[2025-07-26 18:28:04,415] INFO in _internal:  * Debugger PIN: 236-585-363
+[2025-07-26 18:28:25,601] INFO in _internal:  * Detected change in '/Users/apple/Desktop/Fastag/fastag/routes/analytics.py', reloading
+[2025-07-26 18:28:25,733] INFO in _internal:  * Restarting with stat
+[2025-07-26 18:28:26,016] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-26 18:28:26,016] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 18:28:26,016] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-26 18:28:26,016] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 18:28:26,414] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 18:28:26,414] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 18:28:26,483] WARNING in _internal:  * Debugger is active!
+[2025-07-26 18:28:26,491] INFO in _internal:  * Debugger PIN: 236-585-363

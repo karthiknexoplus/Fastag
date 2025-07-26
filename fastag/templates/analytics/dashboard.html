@@ -571,8 +571,8 @@
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-times-circle text-danger me-2"></i>
-                    Recent Denied Events
+                    <i class="fas fa-clock text-info me-2"></i>
+                    Recent Activity
                 </h5>
                 <div id="recent-exits-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
@@ -1724,13 +1724,26 @@ function renderExitTagActivityItem(tag) {
     if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
     if (tag.lane_name) secondaryInfo.push(`Lane: ${tag.lane_name}`);
     let secondary = secondaryInfo.join(' • ');
+    
+    // Determine styling based on access_result
+    let itemClass = 'activity-item';
+    let statusBadge = '';
+    if (tag.access_result === 'granted') {
+        itemClass = 'activity-item granted';
+        statusBadge = '<span class="status-badge status-granted">GRANTED</span>';
+    } else if (tag.access_result === 'denied') {
+        itemClass = 'activity-item denied';
+        statusBadge = '<span class="status-badge status-denied">DENIED</span>';
+    }
+    
     return `
-        <div class="activity-item">
+        <div class="${itemClass}">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
                     <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
                 </div>
+                ${statusBadge}
             </div>
             <small class="text-muted">${tag.time || ''}</small>
         </div>
