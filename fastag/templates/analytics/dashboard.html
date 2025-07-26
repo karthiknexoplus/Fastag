@@ -1564,24 +1564,23 @@ function loadRecentActivity() {
 
 
 
-function renderGrantedTagActivityItem(tag, showCount) {
-    // tag: {tag_id, vehicle_number, owner_name, model_name, lane_name, time, granted_count}
+function renderGrantedTagActivityItem(activity) {
     let secondaryInfo = [];
-    if (tag.model_name) secondaryInfo.push(`Model: ${tag.model_name}`);
-    if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
-    if (tag.lane_name) secondaryInfo.push(`Lane: ${tag.lane_name}`);
+    if (activity.model_name) secondaryInfo.push(`Model: ${activity.model_name}`);
+    if (activity.owner_name) secondaryInfo.push(`Owner: ${activity.owner_name}`);
+    if (activity.lane_name) secondaryInfo.push(`Lane: ${activity.lane_name}`);
+    if (activity.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${activity.lane_type.toUpperCase()}</span>`);
     let secondary = secondaryInfo.join(' • ');
-    let countBadge = showCount ? `<span class='badge bg-success ms-2'>${tag.granted_count}</span>` : '';
     return `
         <div class="activity-item granted">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
-                    <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
+                    <div class="fw-bold">${activity.vehicle_number || activity.tag_id}</div>
+                    <small class="text-muted">Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
                 </div>
-                ${countBadge}
+                <span class="status-badge status-granted">GRANTED</span>
             </div>
-            <small class="text-muted">${tag.time || ''}</small>
+            <small class="text-muted">${activity.time || ''}</small>
         </div>
     `;
 }
@@ -1637,24 +1636,23 @@ function loadMostDeniedTagsFeed() {
         });
 }
 
-function renderDeniedTagActivityItem(tag) {
-    // tag: {tag_id, vehicle_number, owner_name, model_name, lane_name, time, denied_count}
+function renderDeniedTagActivityItem(activity) {
     let secondaryInfo = [];
-    if (tag.model_name) secondaryInfo.push(`Model: ${tag.model_name}`);
-    if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
-    if (tag.lane_name) secondaryInfo.push(`Lane: ${tag.lane_name}`);
+    if (activity.model_name) secondaryInfo.push(`Model: ${activity.model_name}`);
+    if (activity.owner_name) secondaryInfo.push(`Owner: ${activity.owner_name}`);
+    if (activity.lane_name) secondaryInfo.push(`Lane: ${activity.lane_name}`);
+    if (activity.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${activity.lane_type.toUpperCase()}</span>`);
     let secondary = secondaryInfo.join(' • ');
-    let countBadge = tag.denied_count ? `<span class='badge bg-danger ms-2'>${tag.denied_count}</span>` : '';
     return `
         <div class="activity-item denied">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
-                    <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
+                    <div class="fw-bold">${activity.vehicle_number || activity.tag_id}</div>
+                    <small class="text-muted">Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
                 </div>
-                ${countBadge}
+                <span class="status-badge status-denied">${activity.denied_count}</span>
             </div>
-            <small class="text-muted">${tag.time || ''}</small>
+            <small class="text-muted">${activity.last_denied_time || ''}</small>
         </div>
     `;
 }

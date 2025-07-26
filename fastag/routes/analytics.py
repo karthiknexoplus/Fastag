@@ -2219,41 +2219,50 @@ def api_most_denied_tags():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            MAX(al.timestamp) as last_denied,
-            COUNT(*) as denied_count
+            r.type as lane_type,
+            COUNT(*) as denied_count,
+            MAX(al.timestamp) as last_denied_time
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
-        WHERE al.access_result = 'denied' AND DATE(al.timestamp) = DATE('now')
-        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name, tvc.model_name, l.lane_name
-        ORDER BY denied_count DESC, last_denied DESC
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.access_result = 'denied' 
+          AND DATE(al.timestamp) = DATE('now')
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name, tvc.model_name, l.lane_name, r.type
+        ORDER BY denied_count DESC
         LIMIT 10
     ''').fetchall()
+    
     # Convert timestamps to IST
     import pytz
     from datetime import datetime
     ist_tz = pytz.timezone('Asia/Kolkata')
     result = []
     for row in rows:
-        timestamp_str = row[5]
-        if 'T' in timestamp_str and 'Z' in timestamp_str:
-            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-        elif 'T' in timestamp_str:
-            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        timestamp_str = row[7]  # last_denied_time
+        if timestamp_str:
+            if 'T' in timestamp_str and 'Z' in timestamp_str:
+                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif 'T' in timestamp_str:
+                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+            else:
+                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                utc_time = utc_time.replace(tzinfo=pytz.UTC)
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
         else:
-            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-            utc_time = utc_time.replace(tzinfo=pytz.UTC)
-        ist_time = utc_time.astimezone(ist_tz)
-        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            ist_time_str = ''
+        
         result.append({
             'tag_id': row[0],
             'vehicle_number': row[1] or '',
             'owner_name': row[2] or '',
             'model_name': row[3] or '',
             'lane_name': row[4] or '',
-            'time': ist_time_str,
-            'denied_count': row[6]
+            'lane_type': row[5] or '',
+            'denied_count': row[6],
+            'last_denied_time': ist_time_str
         })
     return jsonify({'most_denied_tags': result})
 
@@ -2267,14 +2276,16 @@ def api_recent_entries():
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
-            l.lane_name
+            l.lane_name,
+            r.type as lane_type,
+            al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
-        WHERE al.access_result = 'granted'
-          AND r.type = 'entry'
+        WHERE al.access_result = 'granted' 
+          AND r.type = 'entry' 
           AND DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
         LIMIT 100
@@ -2301,7 +2312,9 @@ def api_recent_entries():
             'vehicle_number': row[2] or '',
             'owner_name': row[3] or '',
             'model_name': row[4] or '',
-            'lane_name': row[5] or ''
+            'lane_name': row[5] or '',
+            'lane_type': row[6] or '',
+            'access_result': row[7] or ''
         })
     return jsonify({'recent_entries': result})
 
