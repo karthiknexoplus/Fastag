@@ -1803,7 +1803,6 @@ def denied_fastag_activity_feed():
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
             LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             WHERE al.access_result = 'denied'
-                AND al.tag_id LIKE '34161%'
                 AND al.timestamp >= datetime('now', '-24 hours')
             ORDER BY al.timestamp DESC
         ''').fetchall()

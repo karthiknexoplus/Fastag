@@ -1238,17 +1238,6 @@ function loadDeniedFastagActivityFeed() {
     fetch('/analytics/api/denied-fastag-activity-feed')
         .then(response => response.json())
         .then(data => {
-            const fastagFeaturesEnabled = window.fastagFeaturesEnabled;
-            if (!fastagFeaturesEnabled) {
-                feed.innerHTML = `
-                    <div class="text-center text-muted" style="opacity:0.6; padding: 2em;">
-                        <i class="fas fa-lock fa-2x mb-2"></i><br>
-                        Contact ${window.COMPANY_NAME} for pricing to view denied FASTag details.
-                    </div>
-                `;
-                feed.parentElement.classList.add('section-locked');
-                return;
-            }
             if (data.error) {
                 feed.innerHTML = `<div class='text-danger'>${data.error}</div>`;
                 return;
