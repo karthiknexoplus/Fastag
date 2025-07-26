@@ -1730,4 +1730,55 @@ function renderActivityItem(activity) {
     if (activity.model_name) secondaryInfo.push(`Model: ${activity.model_name}`);
     if (activity.owner_name) secondaryInfo.push(`Owner: ${activity.owner_name}`);
     if (activity.lane_name) secondaryInfo.push(`Lane: ${activity.lane_name}`);
-    if (activity.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${activity.lane_type.toUpperCase()}</span>`
+    if (activity.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${activity.lane_type.toUpperCase()}</span>`);
+    let secondary = secondaryInfo.join(' • ');
+    return `
+        <div class="activity-item ${activity.access_result === 'granted' ? 'granted' : 'denied'}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-bold">${activity.vehicle_number || activity.tag_id}</div>
+                    <small class="text-muted">${secondary}</small>
+                </div>
+                <span class="status-badge ${activity.access_result === 'granted' ? 'status-granted' : 'status-denied'}">
+                    ${activity.access_result.toUpperCase()}
+                </span>
+            </div>
+            <small class="text-muted">${activity.time}</small>
+        </div>
+    `;
+}
+
+// Real Time Logs Table Loader
+function loadRealTimeLogs() {
+    fetch('/api/real-time-logs')
+        .then(r => r.json())
+        .then(data => {
+            const table = document.getElementById('real-time-logs-table');
+            if (!data.real_time_logs || data.real_time_logs.length === 0) {
+                table.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No logs found.</td></tr>';
+                return;
+            }
+            table.innerHTML = data.real_time_logs.map(log => `
+                <tr>
+                    <td>${log.time}</td>
+                    <td>${log.tag_id}</td>
+                    <td>${log.vehicle_number}</td>
+                    <td>${log.owner_name}</td>
+                    <td>${log.model_name}</td>
+                    <td>${log.lane_name}</td>
+                    <td>${log.lane_type ? log.lane_type.toUpperCase() : ''}</td>
+                    <td><span class="status-badge ${log.access_result === 'granted' ? 'status-granted' : 'status-denied'}">${log.access_result.toUpperCase()}</span></td>
+                    <td>${log.reason}</td>
+                </tr>
+            `).join('');
+        })
+        .catch(() => {
+            document.getElementById('real-time-logs-table').innerHTML = '<tr><td colspan="9" class="text-center text-danger">Error loading logs</td></tr>';
+        });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    loadRealTimeLogs();
+    setInterval(loadRealTimeLogs, 10000); // auto-refresh every 10s
+});
+</script>
+{% endblock %}
