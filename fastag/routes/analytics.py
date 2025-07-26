@@ -2174,12 +2174,16 @@ def api_recent_granted_tags():
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
-            l.lane_name
+            l.lane_name,
+            r.type as lane_type,
+            al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
-        WHERE al.access_result = 'granted' AND DATE(al.timestamp) = DATE('now')
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.access_result = 'granted' 
+          AND DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
         LIMIT 100
     ''').fetchall()
@@ -2205,7 +2209,9 @@ def api_recent_granted_tags():
             'vehicle_number': row[2] or '',
             'owner_name': row[3] or '',
             'model_name': row[4] or '',
-            'lane_name': row[5] or ''
+            'lane_name': row[5] or '',
+            'lane_type': row[6] or '',
+            'access_result': row[7] or ''
         })
     return jsonify({'recent_granted_tags': result})
 
