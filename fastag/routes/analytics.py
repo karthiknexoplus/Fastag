@@ -977,7 +977,7 @@ def export_data():
                 COUNT(DISTINCT al.tag_id) as unique_vehicles,
                 MAX(al.timestamp) as last_activity,
                 r.reader_ip,
-                r.type as reader_type
+                COALESCE(r.type, 'entry') as reader_type
             FROM access_logs al
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
@@ -1012,7 +1012,7 @@ def export_data():
             SELECT 
                 r.id as reader_id,
                 r.reader_ip,
-                r.type as reader_type,
+                COALESCE(r.type, 'entry') as reader_type,
                 l.lane_name,
                 COUNT(al.id) as events_last_7d,
                 COUNT(CASE WHEN al.timestamp >= datetime('now', '-24 hours') THEN 1 END) as events_last_24h,
