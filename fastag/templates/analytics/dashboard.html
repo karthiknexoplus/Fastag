@@ -1209,10 +1209,16 @@ function loadDeniedFastagActivityFeed() {
     const feed = document.getElementById('denied-fastag-activity-feed');
     feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
     fetch('/analytics/api/denied-fastag-activity-feed')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Denied Fastag data:', data); // Debug log
             if (data.error) {
-                feed.innerHTML = `<div class='text-danger'>${data.error}</div>`;
+                feed.innerHTML = `<div class='text-danger'>Error: ${data.error}</div>`;
                 return;
             }
             if (!data.results || data.results.length === 0) {
@@ -1220,18 +1226,9 @@ function loadDeniedFastagActivityFeed() {
                 return;
             }
             feed.innerHTML = data.results.map(item => {
-                let vehicleNumber = 'N/A';
-                if (item.vehicle_number) {
-                    vehicleNumber = item.vehicle_number;
-                }
-                let modelName = 'N/A';
-                if (item.model_name) {
-                    modelName = item.model_name;
-                }
-                let ownerName = 'N/A';
-                if (item.owner_name) {
-                    ownerName = item.owner_name;
-                }
+                let vehicleNumber = item.vehicle_number || 'N/A';
+                let modelName = item.model_name || 'N/A';
+                let ownerName = item.owner_name || 'N/A';
                 let secondaryInfo = [];
                 if (modelName !== 'N/A') secondaryInfo.push(`Model: ${modelName}`);
                 if (ownerName !== 'N/A') secondaryInfo.push(`Owner: ${ownerName}`);
@@ -1253,7 +1250,8 @@ function loadDeniedFastagActivityFeed() {
             }).join('');
         })
         .catch(err => {
-            feed.innerHTML = `<div class='text-danger'>Error loading denied FASTag data</div>`;
+            console.error('Error loading denied Fastag data:', err);
+            feed.innerHTML = `<div class='text-danger'>Error loading denied FASTag data: ${err.message}</div>`;
         });
 }
 

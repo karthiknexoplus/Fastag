@@ -1787,7 +1787,7 @@ def total_events_today_details():
 
 @analytics_bp.route('/api/denied-fastag-activity-feed')
 def denied_fastag_activity_feed():
-    """Return a feed of unique denied FASTag events (last 24h), deduped by tag_id or vehicle_number, for activity feed display."""
+    """Return a feed of denied FASTag events (last 24h) for activity feed display."""
     try:
         db = get_db()
         denied_rows = db.execute('''
@@ -1805,45 +1805,44 @@ def denied_fastag_activity_feed():
             WHERE al.access_result = 'denied'
                 AND al.timestamp >= datetime('now', '-24 hours')
             ORDER BY al.timestamp DESC
+            LIMIT 50
         ''').fetchall()
-        seen_tag_ids = set()
-        seen_vehicle_numbers = set()
-        unique_entries = []
+        
+        result = []
         for row in denied_rows:
-            tag_id = row[0]
-            vehicle_number = row[1]
-            if tag_id in seen_tag_ids or (vehicle_number and vehicle_number in seen_vehicle_numbers):
-                continue
-            seen_tag_ids.add(tag_id)
-            if vehicle_number:
-                seen_vehicle_numbers.add(vehicle_number)
-            unique_entries.append({
-                'tag_id': tag_id,
-                'vehicle_number': vehicle_number,
-                'owner_name': row[2],
-                'model_name': row[3],
-                'fuel_type': row[4],
-                'timestamp': row[5],
-                'reason': row[6],
+            result.append({
+                'tag_id': row[0] or 'Unknown',
+                'vehicle_number': row[1] or 'Unknown',
+                'owner_name': row[2] or 'Unknown',
+                'model_name': row[3] or 'Unknown',
+                'fuel_type': row[4] or '',
+                'timestamp': row[5] or '',
+                'reason': row[6] or 'No reason specified',
             })
+        
         # Convert timestamps to IST
         import pytz
         from datetime import datetime
         ist_tz = pytz.timezone('Asia/Kolkata')
-        for entry in unique_entries:
+        for entry in result:
             timestamp_str = entry['timestamp']
-            if 'T' in timestamp_str and 'Z' in timestamp_str:
-                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            elif 'T' in timestamp_str:
-                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
-            else:
-                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-                utc_time = utc_time.replace(tzinfo=pytz.UTC)
-            ist_time = utc_time.astimezone(ist_tz)
-            entry['timestamp'] = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-        return jsonify({'results': unique_entries, 'count': len(unique_entries)})
+            if timestamp_str:
+                try:
+                    if 'T' in timestamp_str and 'Z' in timestamp_str:
+                        utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                    elif 'T' in timestamp_str:
+                        utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+                    else:
+                        utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                        utc_time = utc_time.replace(tzinfo=pytz.UTC)
+                    ist_time = utc_time.astimezone(ist_tz)
+                    entry['timestamp'] = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+                except:
+                    entry['timestamp'] = timestamp_str
+        
+        return jsonify({'results': result, 'count': len(result)})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'results': [], 'count': 0}), 500
 
 @analytics_bp.route('/pricing')
 def pricing():
