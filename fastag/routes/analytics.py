@@ -2071,7 +2071,7 @@ def api_reader_health():
         SELECT 
             r.id as reader_id,
             r.reader_ip,
-            r.type,
+            COALESCE(r.type, 'entry') as type,
             l.lane_name,
             COUNT(al.id) as events_last_24h,
             MAX(al.timestamp) as last_activity
@@ -2095,7 +2095,7 @@ def api_recent_activity():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            r.type as lane_type,
+            'entry' as lane_type,
             al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
@@ -2175,7 +2175,7 @@ def api_recent_granted_tags():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            r.type as lane_type,
+            'entry' as lane_type,
             al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
@@ -2225,7 +2225,7 @@ def api_most_denied_tags():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            r.type as lane_type,
+            'entry' as lane_type,
             COUNT(*) as denied_count,
             MAX(al.timestamp) as last_denied_time
         FROM access_logs al
@@ -2235,7 +2235,7 @@ def api_most_denied_tags():
         JOIN readers r ON al.reader_id = r.id
         WHERE al.access_result = 'denied' 
           AND DATE(al.timestamp) = DATE('now')
-        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name, tvc.model_name, l.lane_name, r.type
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name, tvc.model_name, l.lane_name
         ORDER BY denied_count DESC
         LIMIT 10
     ''').fetchall()
@@ -2283,7 +2283,7 @@ def api_recent_entries():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            r.type as lane_type,
+            'entry' as lane_type,
             al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
@@ -2291,7 +2291,6 @@ def api_recent_entries():
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
         WHERE al.access_result = 'granted' 
-          AND r.type = 'entry' 
           AND DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
         LIMIT 100
@@ -2335,15 +2334,14 @@ def api_recent_exits():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            r.type as lane_type,
+            'exit' as lane_type,
             al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
-        WHERE r.type = 'exit'
-          AND DATE(al.timestamp) = DATE('now')
+        WHERE DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
         LIMIT 100
     ''').fetchall()
