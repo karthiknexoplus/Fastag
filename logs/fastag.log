@@ -710,3 +710,71 @@
 [2025-07-05 18:22:46,191] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
 [2025-07-05 18:22:46,210] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
 [2025-07-05 18:22:46,222] INFO in _internal: 127.0.0.1 - - [05/Jul/2025 18:22:46] "[36mGET /static/branding.jpg HTTP/1.1[0m" 304 -
+[2025-07-26 08:01:06,727] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:01:06,727] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:01:06,727] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:01:06,727] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:01:21,546] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:01:21,546] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:01:21,547] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:01:21,547] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:01:41,408] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:01:41,408] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:01:41,408] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:01:41,408] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:01:41,891] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:01:41,892] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:01:47,278] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:01:47,279] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:01:47,279] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:01:47,279] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:01:47,480] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:01:47,481] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:01:47,533] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:01:47,533] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:01:47,533] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:01:47,533] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:01:47,533] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:01:47,533] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:01:52,937] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:01:52,938] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:01:52,938] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:01:52,938] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:01:53,137] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:01:53,137] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:01:53,187] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:01:53,187] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:01:53,187] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:01:53,187] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:01:53,187] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:01:53,187] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:01:53,263] WARNING in __init__: System info command failed: /usr/bin/vcgencmd measure_temp (Command '/usr/bin/vcgencmd measure_temp' returned non-zero exit status 127.)
+[2025-07-26 08:01:53,271] WARNING in __init__: System info command failed: /usr/bin/vcgencmd measure_volts (Command '/usr/bin/vcgencmd measure_volts' returned non-zero exit status 127.)
+[2025-07-26 08:01:53,280] WARNING in __init__: System info command failed: /usr/bin/vcgencmd get_throttled (Command '/usr/bin/vcgencmd get_throttled' returned non-zero exit status 127.)
+[2025-07-26 08:01:53,294] WARNING in __init__: System info command failed: /usr/bin/uptime -p (Command '/usr/bin/uptime -p' returned non-zero exit status 1.)
+[2025-07-26 08:01:53,303] WARNING in __init__: System info command failed: /usr/bin/free -h (Command '/usr/bin/free -h' returned non-zero exit status 127.)
+[2025-07-26 08:01:53,311] WARNING in __init__: System info command failed: /usr/bin/df -h / (Command '/usr/bin/df -h /' returned non-zero exit status 127.)
+[2025-07-26 08:02:55,622] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:02:55,622] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:02:55,622] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:02:55,623] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:02:55,868] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:02:55,869] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:03:01,573] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:03:01,573] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:03:01,573] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:03:01,573] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:03:01,768] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:03:01,768] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:03:01,812] INFO in rfid_service: Initializing GPIO for relay control...
+[2025-07-26 08:03:01,812] WARNING in rfid_service: GPIO is not available, skipping GPIO initialization.
+[2025-07-26 08:03:01,812] WARNING in rfid_service: GPIO is not available, cannot turn off all relays.
+[2025-07-26 08:03:01,812] INFO in rfid_service: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-26 08:03:01,812] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-26 08:03:01,812] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-26 08:03:01,885] WARNING in __init__: System info command failed: /usr/bin/vcgencmd measure_temp (Command '/usr/bin/vcgencmd measure_temp' returned non-zero exit status 127.)
+[2025-07-26 08:03:01,892] WARNING in __init__: System info command failed: /usr/bin/vcgencmd measure_volts (Command '/usr/bin/vcgencmd measure_volts' returned non-zero exit status 127.)
+[2025-07-26 08:03:01,898] WARNING in __init__: System info command failed: /usr/bin/vcgencmd get_throttled (Command '/usr/bin/vcgencmd get_throttled' returned non-zero exit status 127.)
+[2025-07-26 08:03:01,909] WARNING in __init__: System info command failed: /usr/bin/uptime -p (Command '/usr/bin/uptime -p' returned non-zero exit status 1.)
+[2025-07-26 08:03:01,919] WARNING in __init__: System info command failed: /usr/bin/free -h (Command '/usr/bin/free -h' returned non-zero exit status 127.)
+[2025-07-26 08:03:01,927] WARNING in __init__: System info command failed: /usr/bin/df -h / (Command '/usr/bin/df -h /' returned non-zero exit status 127.)
