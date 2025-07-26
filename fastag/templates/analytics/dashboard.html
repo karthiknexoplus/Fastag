@@ -1754,6 +1754,10 @@ function loadRealTimeLogs() {
         .then(r => r.json())
         .then(data => {
             const table = document.getElementById('real-time-logs-table');
+            if (data.error) {
+                table.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error: ${data.error}</td></tr>`;
+                return;
+            }
             if (!data.real_time_logs || data.real_time_logs.length === 0) {
                 table.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No logs found.</td></tr>';
                 return;
@@ -1772,8 +1776,8 @@ function loadRealTimeLogs() {
                 </tr>
             `).join('');
         })
-        .catch(() => {
-            document.getElementById('real-time-logs-table').innerHTML = '<tr><td colspan="9" class="text-center text-danger">Error loading logs</td></tr>';
+        .catch((err) => {
+            document.getElementById('real-time-logs-table').innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error loading logs: ${err.message}</td></tr>`;
         });
 }
 document.addEventListener('DOMContentLoaded', function() {
