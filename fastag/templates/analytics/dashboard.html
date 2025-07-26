@@ -537,7 +537,7 @@
                     <i class="fas fa-sign-out-alt text-primary me-2"></i>
                     Recent Exits
                 </h5>
-                <div id="denied-fastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="recent-exits-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
@@ -571,7 +571,7 @@
                     <i class="fas fa-clock text-info me-2"></i>
                     Recent Activity
                 </h5>
-                <div id="recent-exits-feed" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="recent-activity" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
@@ -1694,6 +1694,7 @@ function renderExitTagActivityItem(tag) {
     if (tag.model_name) secondaryInfo.push(`Model: ${tag.model_name}`);
     if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
     if (tag.lane_name) secondaryInfo.push(`Lane: ${tag.lane_name}`);
+    if (tag.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${tag.lane_type.toUpperCase()}</span>`);
     let secondary = secondaryInfo.join(' • ');
     
     // Determine styling based on access_result

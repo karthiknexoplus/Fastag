@@ -2335,6 +2335,7 @@ def api_recent_exits():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
+            r.type as lane_type,
             al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
@@ -2369,6 +2370,7 @@ def api_recent_exits():
             'owner_name': row[3] or '',
             'model_name': row[4] or '',
             'lane_name': row[5] or '',
-            'access_result': row[6] or ''
+            'lane_type': row[6] or '',
+            'access_result': row[7] or ''
         })
     return jsonify({'recent_exits': result})
