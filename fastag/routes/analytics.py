@@ -2095,7 +2095,7 @@ def api_recent_activity():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            'entry' as lane_type,
+            r.type as lane_type,
             al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
@@ -2106,6 +2106,9 @@ def api_recent_activity():
         ORDER BY al.timestamp DESC
         LIMIT 100
     ''').fetchall()
+    print(f"DEBUG: Found {len(rows)} recent activity entries")
+    for row in rows[:5]:
+        print(f"DEBUG: Activity - Tag: {row[1]}, Result: {row[7]}, Lane: {row[5]}, LaneType: {row[6]}, Time: {row[0]}")
     # Convert timestamps to IST
     import pytz
     from datetime import datetime
