@@ -2341,7 +2341,8 @@ def api_recent_exits():
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
         JOIN readers r ON al.reader_id = r.id
-        WHERE DATE(al.timestamp) = DATE('now')
+        WHERE r.type = 'exit'
+          AND DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
         LIMIT 100
     ''').fetchall()
