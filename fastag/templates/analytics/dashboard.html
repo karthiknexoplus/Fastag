@@ -1501,55 +1501,53 @@ function loadRecentActivity() {
         .then(data => {
             if (data.recent_activity) {
                 recentActivity.innerHTML = data.recent_activity.map(activity => {
-                    // ... existing mapping logic ...
-                    const isGranted = activity[2] === 'granted';
+                    const isGranted = activity.access_result === 'granted';
                     let vehicleNumber = 'N/A';
-                    if (isGranted && activity[12]) {
-                        vehicleNumber = activity[12];
+                    if (isGranted && activity.vehicle_number) {
+                        vehicleNumber = activity.vehicle_number;
                     } else if (!window.fastagFeaturesEnabled) {
                         vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the vehicle number</span>";
-                    } else if (activity[5]) {
-                        vehicleNumber = activity[5];
+                    } else if (activity.vehicle_number) {
+                        vehicleNumber = activity.vehicle_number;
                     }
                     let modelName = 'N/A';
-                    if (isGranted && activity[12] && activity[7]) {
-                        modelName = activity[7];
+                    if (isGranted && activity.vehicle_number && activity.model_name) {
+                        modelName = activity.model_name;
                     } else if (!window.fastagFeaturesEnabled) {
                         modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the model</span>";
-                    } else if (activity[7]) {
-                        modelName = activity[7];
+                    } else if (activity.model_name) {
+                        modelName = activity.model_name;
                     }
                     let ownerName = 'N/A';
-                    if (isGranted && activity[12] && activity[6]) {
-                        ownerName = activity[6];
+                    if (isGranted && activity.vehicle_number && activity.owner_name) {
+                        ownerName = activity.owner_name;
                     } else if (!window.fastagFeaturesEnabled) {
                         ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the owner</span>";
-                    } else if (activity[6]) {
-                        ownerName = activity[6];
+                    } else if (activity.owner_name) {
+                        ownerName = activity.owner_name;
                     }
                     let secondaryInfo = [];
                     if (modelName !== 'N/A') secondaryInfo.push(`Model: ${modelName}`);
                     if (ownerName !== 'N/A') secondaryInfo.push(`Owner: ${ownerName}`);
-                    if (activity[8]) secondaryInfo.push(`Fuel: ${activity[8]}`);
-                    if (activity[9]) secondaryInfo.push(`Lane: ${activity[9]}`);
-                    if (activity[11]) secondaryInfo.push(`Type: ${activity[11].charAt(0).toUpperCase() + activity[11].slice(1)}`);
+                    if (activity.lane_name) secondaryInfo.push(`Lane: ${activity.lane_name}`);
+                    if (activity.lane_type) secondaryInfo.push(`<span class='badge bg-secondary ms-2'>${activity.lane_type.toUpperCase()}</span>`);
                     const secondary = secondaryInfo.join(' • ');
                     let notFastag = '';
-                    if (!activity[1].startsWith('34161')) {
+                    if (!activity.tag_id.startsWith('34161')) {
                         notFastag = 'NOT a FASTAG • ';
                     }
                     return `
-                        <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
+                        <div class="activity-item ${activity.access_result === 'granted' ? 'granted' : 'denied'}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div class="fw-bold">${vehicleNumber}</div>
-                                    <small class="text-muted">${notFastag}Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
+                                    <small class="text-muted">${notFastag}Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
                                 </div>
-                                <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
-                                    ${activity[2].toUpperCase()}
+                                <span class="status-badge ${activity.access_result === 'granted' ? 'status-granted' : 'status-denied'}">
+                                    ${activity.access_result.toUpperCase()}
                                 </span>
                             </div>
-                            <small class="text-muted">${activity[0]}</small>
+                            <small class="text-muted">${activity.time}</small>
                         </div>
                     `;
                 }).join('');
