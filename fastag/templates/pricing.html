@@ -4,14 +4,84 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <style>
+/* Global Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Enhanced Hero Section */
 .hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   color: #fff;
-  padding: 4rem 0 3rem 0;
+  padding: 5rem 0 4rem 0;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
+
 .hero::before {
   content: '';
   position: absolute;
@@ -21,16 +91,40 @@
   bottom: 0;
   background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
   opacity: 0.3;
+  animation: float 6s ease-in-out infinite;
 }
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
 .hero-content {
   position: relative;
   z-index: 2;
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero h1 {
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.hero p {
+  animation: fadeInUp 1s ease-out 0.4s both;
 }
 .pricing-container {
   margin-top: -2rem;
   position: relative;
   z-index: 10;
+  animation: fadeInUp 1s ease-out 0.6s both;
 }
+
 .pricing-row {
   display: flex;
   flex-wrap: wrap;
@@ -38,8 +132,19 @@
   justify-content: center;
   margin-bottom: 3rem;
 }
+
 .pricing-plan {
-  background: #fff;
+  animation: fadeInScale 0.8s ease-out;
+  animation-fill-mode: both;
+}
+
+.pricing-plan:nth-child(1) { animation-delay: 0.1s; }
+.pricing-plan:nth-child(2) { animation-delay: 0.2s; }
+.pricing-plan:nth-child(3) { animation-delay: 0.3s; }
+.pricing-plan:nth-child(4) { animation-delay: 0.4s; }
+.pricing-plan:nth-child(5) { animation-delay: 0.5s; }
+.pricing-plan {
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
   border-radius: 1.5rem;
   box-shadow: 0 15px 40px rgba(0,0,0,0.08);
   flex: 1 1 280px;
@@ -49,10 +154,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 2px solid transparent;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 .pricing-plan::before {
   content: '';
@@ -66,9 +172,14 @@
   transition: opacity 0.3s;
 }
 .pricing-plan:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.15);
   border-color: #667eea;
+  background: linear-gradient(135deg, #fff 0%, #f0f4ff 100%);
+}
+
+.pricing-plan:hover .plan-title {
+  animation: pulse 2s ease-in-out infinite;
 }
 .pricing-plan:hover::before {
   opacity: 1;
@@ -86,13 +197,17 @@
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
   color: white;
   padding: 0.5rem 1.5rem;
   border-radius: 2rem;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.5px;
+  box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+  animation: pulse 2s ease-in-out infinite;
 }
 .plan-header {
   font-size: 1rem;
@@ -106,10 +221,13 @@
   font-size: 1.8rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: gradientShift 4s ease infinite;
+  transition: all 0.3s ease;
 }
 .plan-price {
   font-size: 2rem;
@@ -178,10 +296,16 @@
   font-weight: 600;
   font-size: 1rem;
   padding: 0.8rem 0;
-  transition: all 0.3s;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: none;
   position: relative;
   overflow: hidden;
+  transform: translateY(0);
+}
+
+.plan-cta .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 .plan-cta .btn::before {
   content: '';
@@ -244,10 +368,13 @@
   box-shadow: 0 8px 20px rgba(229,62,62,0.3);
 }
 .comparison-section {
-  background: #f8fafc;
+  background: linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%);
   border-radius: 2rem;
   padding: 3rem 2rem;
   margin: 3rem 0;
+  animation: fadeInUp 1s ease-out 1s both;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+  border: 1px solid rgba(102,126,234,0.1);
 }
 .comparison-table {
   background: white;
@@ -275,12 +402,29 @@
   border-bottom: none;
 }
 .feature-highlights {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   color: white;
   border-radius: 2rem;
   padding: 3rem 2rem;
   margin: 3rem 0;
   text-align: center;
+  animation: fadeInUp 1s ease-out 1.2s both;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-highlights::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain2" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain2)"/></svg>');
+  opacity: 0.3;
+  animation: float 8s ease-in-out infinite;
 }
 .highlight-grid {
   display: grid;
@@ -294,6 +438,22 @@
   padding: 2rem 1.5rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: fadeInScale 0.8s ease-out;
+  animation-fill-mode: both;
+}
+
+.highlight-item:nth-child(1) { animation-delay: 0.1s; }
+.highlight-item:nth-child(2) { animation-delay: 0.2s; }
+.highlight-item:nth-child(3) { animation-delay: 0.3s; }
+.highlight-item:nth-child(4) { animation-delay: 0.4s; }
+.highlight-item:nth-child(5) { animation-delay: 0.5s; }
+.highlight-item:nth-child(6) { animation-delay: 0.6s; }
+
+.highlight-item:hover {
+  transform: translateY(-8px) scale(1.05);
+  background: rgba(255,255,255,0.2);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
 .highlight-item i {
   font-size: 2.5rem;
@@ -301,7 +461,9 @@
   display: block;
 }
 .cta-section {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: linear-gradient(-45deg, #764ba2, #667eea, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   color: white;
   border-radius: 2rem;
   padding: 4rem 2rem;
@@ -309,6 +471,7 @@
   margin: 3rem 0;
   position: relative;
   overflow: hidden;
+  animation: fadeInUp 1s ease-out 1.4s both;
 }
 .cta-section::before {
   content: '';
@@ -496,11 +659,11 @@
     <div class="pricing-plan">
       <div class="plan-header">Enterprise Access</div>
       <div class="plan-title">ShieldAccess</div>
-      <div class="plan-price">
-        <span class="currency">₹</span>
-        <span>1,25,000</span>
-        <span class="period">/site/year</span>
-      </div>
+             <div class="plan-price">
+         <span class="currency">₹</span>
+         <span>1,25,000</span>
+         <span class="period">/one-time</span>
+       </div>
       <div class="plan-desc">Enterprise-grade solution with unlimited scaling and security.</div>
              <ul class="plan-features">
          <li><i class="bi bi-check-circle-fill"></i>Unlimited barriers & readers</li>
@@ -554,7 +717,7 @@
     </div>
   </div>
 
-  <div class="alert alert-info" style="background: linear-gradient(135deg, #e3f2fd, #f3e5f5); border: 1px solid #667eea; border-radius: 1rem; padding: 1.5rem; margin: 2rem 0;">
+  <div class="alert alert-info" style="background: linear-gradient(135deg, #e3f2fd, #f3e5f5); border: 1px solid #667eea; border-radius: 1rem; padding: 1.5rem; margin: 2rem 0; animation: fadeInUp 1s ease-out 0.8s both; box-shadow: 0 10px 30px rgba(102,126,234,0.1);">
     <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Important Notes:</h6>
     <ul class="mb-0" style="font-size: 0.95rem;">
       <li><strong>*</strong> All plans include cloud hosting on Nexoplus servers unless specified otherwise</li>
@@ -585,7 +748,7 @@
             <td>₹25K/year</td>
             <td>₹45K/year</td>
             <td>₹75K/year</td>
-            <td>₹1.25L/year</td>
+                         <td>₹1.25L/one-time</td>
             <td>₹2.25L/one-time</td>
           </tr>
           <tr>
@@ -665,7 +828,7 @@
               <td>1 Year</td>
               <td>1 Year</td>
               <td>1 Year</td>
-              <td>1 Year</td>
+              <td>Lifetime</td>
               <td>Lifetime</td>
             </tr>
         </tbody>
@@ -724,4 +887,74 @@
 <div class="sticky-cta d-lg-none">
   <a href="mailto:sales@onebee.in" class="btn btn-light">Contact Sales</a>
 </div>
+
+<script>
+// Enhanced scroll animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, observerOptions);
+
+// Observe all pricing plans for scroll animations
+document.querySelectorAll('.pricing-plan').forEach(plan => {
+  plan.style.opacity = '0';
+  plan.style.transform = 'translateY(30px)';
+  plan.style.transition = 'all 0.6s ease-out';
+  observer.observe(plan);
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  });
+});
+
+// Enhanced hover effects for pricing plans
+document.querySelectorAll('.pricing-plan').forEach(plan => {
+  plan.addEventListener('mouseenter', function() {
+    this.style.transform = 'translateY(-12px) scale(1.03)';
+  });
+  
+  plan.addEventListener('mouseleave', function() {
+    this.style.transform = 'translateY(0) scale(1)';
+  });
+});
+
+// Parallax effect for hero section
+window.addEventListener('scroll', () => {
+  const scrolled = window.pageYOffset;
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+  }
+});
+
+// Add loading animation
+window.addEventListener('load', () => {
+  document.body.style.opacity = '1';
+  document.body.style.transform = 'translateY(0)';
+});
+
+// Initialize page with fade-in
+document.body.style.opacity = '0';
+document.body.style.transform = 'translateY(20px)';
+document.body.style.transition = 'all 0.8s ease-out';
+</script>
 {% endblock %} 
