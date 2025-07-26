@@ -512,39 +512,21 @@
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-id-card text-primary me-2"></i>
+                    <i class="fas fa-trophy text-primary me-2"></i>
                     Top Granted Tags
                 </h5>
-                <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
-                    <table class="table table-modern">
-                        <thead>
-                            <tr>
-                                <th>Tag</th>
-                                <th>Vehicle</th>
-                                <th>Owner</th>
-                                <th>Model</th>
-                                <th>Granted</th>
-                            </tr>
-                        </thead>
-                        <tbody id="top-granted-tags-table">
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="top-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
+                    <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
         </div>
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-exclamation-triangle text-primary me-2"></i>
-                    Recent Activity
+                    <i class="fas fa-id-card text-primary me-2"></i>
+                    Recent Granted Tags
                 </h5>
-                <div class="feed-filter mb-2">
-                    <input type="text" class="form-control form-control-sm" placeholder="Filter by any field..." oninput="filterFeed('recent-activity', this.value)">
-                </div>
-                <div id="recent-activity" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="recent-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
@@ -651,6 +633,8 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshRelayStatus();
     loadRecentActivity();
     loadRecentGrantedTags();
+    loadTopGrantedTagsFeed();
+    loadRecentGrantedTagsFeed();
 });
 
 function initializeCharts() {
@@ -1633,8 +1617,66 @@ function loadRecentGrantedTags() {
         });
 }
 
+function renderGrantedTagActivityItem(tag, showCount) {
+    // tag: {tag_id, vehicle_number, owner_name, model_name, lane_name, time, granted_count}
+    let secondaryInfo = [];
+    if (tag.model_name) secondaryInfo.push(`Model: ${tag.model_name}`);
+    if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
+    if (tag.lane_name) secondaryInfo.push(`Lane: ${tag.lane_name}`);
+    let secondary = secondaryInfo.join(' • ');
+    let countBadge = showCount ? `<span class='badge bg-success ms-2'>${tag.granted_count}</span>` : '';
+    return `
+        <div class="activity-item granted">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
+                    <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
+                </div>
+                ${countBadge}
+            </div>
+            <small class="text-muted">${tag.time || ''}</small>
+        </div>
+    `;
+}
+
+function loadTopGrantedTagsFeed() {
+    const feed = document.getElementById('top-granted-tags-feed');
+    feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    fetch('/analytics/api/top-granted-tags')
+        .then(response => response.json())
+        .then(data => {
+            if (data.top_granted_tags && data.top_granted_tags.length > 0) {
+                feed.innerHTML = data.top_granted_tags.map(tag => renderGrantedTagActivityItem(tag, true)).join('');
+            } else {
+                feed.innerHTML = '<div class="text-center text-muted">No data</div>';
+            }
+        })
+        .catch(() => {
+            feed.innerHTML = '<div class="text-center text-danger">Error loading data</div>';
+        });
+}
+
+function loadRecentGrantedTagsFeed() {
+    const feed = document.getElementById('recent-granted-tags-feed');
+    feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    fetch('/analytics/api/recent-granted-tags')
+        .then(response => response.json())
+        .then(data => {
+            if (data.recent_granted_tags && data.recent_granted_tags.length > 0) {
+                feed.innerHTML = data.recent_granted_tags.map(tag => renderGrantedTagActivityItem(tag, false)).join('');
+            } else {
+                feed.innerHTML = '<div class="text-center text-muted">No data</div>';
+            }
+        })
+        .catch(() => {
+            feed.innerHTML = '<div class="text-center text-danger">Error loading data</div>';
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadRecentGrantedTags();
+    loadTopGrantedTagsFeed();
+    loadRecentGrantedTagsFeed();
 });
 </script>
 
