@@ -583,6 +583,28 @@
                 </div>
             </div>
         </div>
+        <div class="col-xl-4 mb-4">
+            <div class="chart-container feed-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-sign-in-alt text-success me-2"></i>
+                    Recent Entries
+                </h5>
+                <div id="recent-entries-feed" class="flex-grow-1" style="overflow-y: auto;">
+                    <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 mb-4">
+            <div class="chart-container feed-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-sign-out-alt text-primary me-2"></i>
+                    Recent Exits
+                </h5>
+                <div id="recent-exits-feed" class="flex-grow-1" style="overflow-y: auto;">
+                    <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Reader Health -->
@@ -647,6 +669,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
     loadMostDeniedTagsFeed();
+    loadRecentEntriesFeed();
+    loadRecentExitsFeed();
 });
 
 function initializeCharts() {
@@ -1724,11 +1748,66 @@ function renderDeniedTagActivityItem(tag) {
     `;
 }
 
+function loadRecentEntriesFeed() {
+    const feed = document.getElementById('recent-entries-feed');
+    feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    fetch('/analytics/api/recent-entries')
+        .then(response => response.json())
+        .then(data => {
+            if (data.recent_entries && data.recent_entries.length > 0) {
+                feed.innerHTML = data.recent_entries.map(tag => renderGrantedTagActivityItem(tag, false)).join('');
+            } else {
+                feed.innerHTML = '<div class="text-center text-muted">No data</div>';
+            }
+        })
+        .catch(() => {
+            feed.innerHTML = '<div class="text-center text-danger">Error loading data</div>';
+        });
+}
+
+function loadRecentExitsFeed() {
+    const feed = document.getElementById('recent-exits-feed');
+    feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    fetch('/analytics/api/recent-exits')
+        .then(response => response.json())
+        .then(data => {
+            if (data.recent_exits && data.recent_exits.length > 0) {
+                feed.innerHTML = data.recent_exits.map(tag => renderExitTagActivityItem(tag)).join('');
+            } else {
+                feed.innerHTML = '<div class="text-center text-muted">No data</div>';
+            }
+        })
+        .catch(() => {
+            feed.innerHTML = '<div class="text-center text-danger">Error loading data</div>';
+        });
+}
+
+function renderExitTagActivityItem(tag) {
+    let secondaryInfo = [];
+    if (tag.model_name) secondaryInfo.push(`Model: ${tag.model_name}`);
+    if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
+    if (tag.lane_name) secondaryInfo.push(`Lane: ${tag.lane_name}`);
+    let secondary = secondaryInfo.join(' • ');
+    return `
+        <div class="activity-item">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
+                    <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
+                </div>
+            </div>
+            <small class="text-muted">${tag.time || ''}</small>
+        </div>
+    `;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadRecentGrantedTags();
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
     loadMostDeniedTagsFeed();
+    loadRecentEntriesFeed();
+    loadRecentExitsFeed();
 });
 </script>
 

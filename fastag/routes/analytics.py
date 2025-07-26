@@ -2254,3 +2254,93 @@ def api_most_denied_tags():
             'denied_count': row[6]
         })
     return jsonify({'most_denied_tags': result})
+
+@analytics_bp.route('/api/recent-entries')
+def api_recent_entries():
+    db = get_db()
+    rows = db.execute('''
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            l.lane_name
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        WHERE al.access_result = 'granted' AND DATE(al.timestamp) = DATE('now')
+        ORDER BY al.timestamp DESC
+        LIMIT 100
+    ''').fetchall()
+    # Convert timestamps to IST
+    import pytz
+    from datetime import datetime
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    result = []
+    for row in rows:
+        timestamp_str = row[0]
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        result.append({
+            'time': ist_time_str,
+            'tag_id': row[1],
+            'vehicle_number': row[2] or '',
+            'owner_name': row[3] or '',
+            'model_name': row[4] or '',
+            'lane_name': row[5] or ''
+        })
+    return jsonify({'recent_entries': result})
+
+@analytics_bp.route('/api/recent-exits')
+def api_recent_exits():
+    db = get_db()
+    rows = db.execute('''
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            l.lane_name
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        WHERE al.access_result = 'exit' AND DATE(al.timestamp) = DATE('now')
+        ORDER BY al.timestamp DESC
+        LIMIT 100
+    ''').fetchall()
+    # Convert timestamps to IST
+    import pytz
+    from datetime import datetime
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    result = []
+    for row in rows:
+        timestamp_str = row[0]
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        result.append({
+            'time': ist_time_str,
+            'tag_id': row[1],
+            'vehicle_number': row[2] or '',
+            'owner_name': row[3] or '',
+            'model_name': row[4] or '',
+            'lane_name': row[5] or ''
+        })
+    return jsonify({'recent_exits': result})
