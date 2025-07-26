@@ -34,18 +34,18 @@
 .pricing-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: 1.5rem;
   justify-content: center;
   margin-bottom: 3rem;
 }
 .pricing-plan {
   background: #fff;
-  border-radius: 2rem;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-  flex: 1 1 380px;
-  min-width: 380px;
-  max-width: 420px;
-  padding: 3rem 2.5rem 2.5rem 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+  flex: 1 1 280px;
+  min-width: 280px;
+  max-width: 320px;
+  padding: 2.5rem 2rem 2rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -66,8 +66,8 @@
   transition: opacity 0.3s;
 }
 .pricing-plan:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.15);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.15);
   border-color: #667eea;
 }
 .pricing-plan:hover::before {
@@ -76,7 +76,7 @@
 .pricing-plan.featured {
   border: 2px solid #667eea;
   transform: scale(1.05);
-  box-shadow: 0 25px 70px rgba(102,126,234,0.15);
+  box-shadow: 0 20px 50px rgba(102,126,234,0.15);
 }
 .pricing-plan.featured::before {
   opacity: 1;
@@ -95,7 +95,7 @@
   letter-spacing: 0.5px;
 }
 .plan-header {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   margin-bottom: 0.5rem;
@@ -103,7 +103,7 @@
   text-transform: uppercase;
 }
 .plan-title {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #667eea, #764ba2);
@@ -112,7 +112,7 @@
   background-clip: text;
 }
 .plan-price {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 800;
   color: #2d3748;
   margin-bottom: 0.5rem;
@@ -121,36 +121,36 @@
   gap: 0.5rem;
 }
 .plan-price .currency {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #667eea;
 }
 .plan-price .period {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: #718096;
 }
 .plan-desc {
   color: #718096;
-  font-size: 1.05rem;
-  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
   text-align: center;
-  line-height: 1.6;
-  min-height: 60px;
+  line-height: 1.5;
+  min-height: 50px;
 }
 .plan-features {
   list-style: none;
   padding: 0;
-  margin: 0 0 2rem 0;
+  margin: 0 0 1.5rem 0;
   width: 100%;
 }
 .plan-features li {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  font-size: 1rem;
-  margin-bottom: 0.8rem;
-  padding: 0.5rem 0;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.6rem;
+  padding: 0.3rem 0;
   border-bottom: 1px solid #f7fafc;
 }
 .plan-features li:last-child {
@@ -158,15 +158,15 @@
 }
 .plan-features .bi-check-circle-fill {
   color: #48bb78;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 .plan-features .bi-x-circle-fill {
   color: #e53e3e;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 .plan-features .bi-star-fill {
   color: #ed8936;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 .plan-cta {
   margin-top: auto;
@@ -174,10 +174,10 @@
 }
 .plan-cta .btn {
   width: 100%;
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   font-weight: 600;
-  font-size: 1.1rem;
-  padding: 1rem 0;
+  font-size: 1rem;
+  padding: 0.8rem 0;
   transition: all 0.3s;
   border: none;
   position: relative;
@@ -203,7 +203,7 @@
 .btn-primary:hover {
   background: linear-gradient(135deg, #5a67d8, #6b46c1);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102,126,234,0.3);
+  box-shadow: 0 8px 20px rgba(102,126,234,0.3);
 }
 .btn-outline-primary {
   background: transparent;
@@ -214,7 +214,34 @@
   background: #667eea;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102,126,234,0.3);
+  box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+}
+.btn-success {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+}
+.btn-success:hover {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(72,187,120,0.3);
+}
+.btn-warning {
+  background: linear-gradient(135deg, #ed8936, #dd6b20);
+  color: white;
+}
+.btn-warning:hover {
+  background: linear-gradient(135deg, #dd6b20, #c05621);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(237,137,54,0.3);
+}
+.btn-danger {
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+  color: white;
+}
+.btn-danger:hover {
+  background: linear-gradient(135deg, #c53030, #9b2c2c);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(229,62,62,0.3);
 }
 .comparison-section {
   background: #f8fafc;
@@ -232,15 +259,17 @@
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   font-weight: 600;
-  padding: 1.5rem 1rem;
+  padding: 1.2rem 0.8rem;
   text-align: center;
   border: none;
+  font-size: 0.9rem;
 }
 .comparison-table td {
-  padding: 1rem;
+  padding: 0.8rem;
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid #f7fafc;
+  font-size: 0.9rem;
 }
 .comparison-table tr:last-child td {
   border-bottom: none;
@@ -312,10 +341,20 @@
 .sticky-cta {
   display: none;
 }
+@media (max-width: 1200px) {
+  .pricing-row { 
+    gap: 1rem; 
+  }
+  .pricing-plan { 
+    flex: 1 1 250px;
+    min-width: 250px;
+    max-width: 280px;
+  }
+}
 @media (max-width: 991px) {
   .pricing-row { 
     flex-direction: column; 
-    gap: 2rem; 
+    gap: 1.5rem; 
   }
   .pricing-plan { 
     max-width: 100%; 
@@ -366,6 +405,7 @@
 
 <div class="container pricing-container">
   <div class="pricing-row">
+    <!-- Plan 1: Startkflow -->
     <div class="pricing-plan">
       <div class="plan-header">Basic Access</div>
       <div class="plan-title">Startkflow</div>
@@ -374,53 +414,127 @@
         <span>25,000</span>
         <span class="period">/site/year</span>
       </div>
-      <div class="plan-desc">Complete access control solution for communities, offices, and parking lots with all essential features.</div>
+      <div class="plan-desc">Essential access control for small communities and offices.</div>
       <ul class="plan-features">
-        <li><i class="bi bi-check-circle-fill"></i>Unlimited barriers & UHF readers</li>
-        <li><i class="bi bi-check-circle-fill"></i>Cloud database & secure backup</li>
-        <li><i class="bi bi-check-circle-fill"></i>Web dashboard & mobile app</li>
-        <li><i class="bi bi-check-circle-fill"></i>Owner details & vehicle management</li>
-        <li><i class="bi bi-check-circle-fill"></i>Advanced visitor management</li>
-        <li><i class="bi bi-check-circle-fill"></i>Wiegand & IP reader support</li>
-        <li><i class="bi bi-check-circle-fill"></i>FASTag onboarding via QR</li>
-        <li><i class="bi bi-check-circle-fill"></i>Auto & manual whitelist</li>
-        <li><i class="bi bi-check-circle-fill"></i>Entry/exit history & analytics</li>
-        <li><i class="bi bi-check-circle-fill"></i>WhatsApp/SMS alerts</li>
-        <li><i class="bi bi-check-circle-fill"></i>Remote vehicle lock/unlock</li>
-        <li><i class="bi bi-check-circle-fill"></i>Role-based user management</li>
-        <li><i class="bi bi-check-circle-fill"></i>Priority email & WhatsApp support</li>
-        <li><i class="bi bi-check-circle-fill"></i>1 year subscription</li>
+        <li><i class="bi bi-check-circle-fill"></i>Up to 2 barriers & readers</li>
+        <li><i class="bi bi-check-circle-fill"></i>Cloud database & backup</li>
+        <li><i class="bi bi-check-circle-fill"></i>Web dashboard</li>
+        <li><i class="bi bi-check-circle-fill"></i>Basic visitor management</li>
+        <li><i class="bi bi-check-circle-fill"></i>UHF reader support</li>
+        <li><i class="bi bi-check-circle-fill"></i>Manual whitelist</li>
+        <li><i class="bi bi-check-circle-fill"></i>Entry/exit history</li>
+        <li><i class="bi bi-check-circle-fill"></i>Email support</li>
+        <li><i class="bi bi-x-circle-fill"></i>No mobile app</li>
+        <li><i class="bi bi-x-circle-fill"></i>No API access</li>
       </ul>
       <div class="plan-cta">
         <a href="mailto:sales@onebee.in" class="btn btn-outline-primary">Get Started</a>
       </div>
     </div>
 
+    <!-- Plan 2: VisionGate -->
+    <div class="pricing-plan">
+      <div class="plan-header">Standard Access</div>
+      <div class="plan-title">VisionGate</div>
+      <div class="plan-price">
+        <span class="currency">₹</span>
+        <span>45,000</span>
+        <span class="period">/site/year</span>
+      </div>
+      <div class="plan-desc">Enhanced features for growing communities and businesses.</div>
+      <ul class="plan-features">
+        <li><i class="bi bi-check-circle-fill"></i>Up to 5 barriers & readers</li>
+        <li><i class="bi bi-check-circle-fill"></i>Cloud database & backup</li>
+        <li><i class="bi bi-check-circle-fill"></i>Web dashboard & mobile app</li>
+        <li><i class="bi bi-check-circle-fill"></i>Owner details & vehicle info</li>
+        <li><i class="bi bi-check-circle-fill"></i>Advanced visitor management</li>
+        <li><i class="bi bi-check-circle-fill"></i>Wiegand & IP reader support</li>
+        <li><i class="bi bi-check-circle-fill"></i>FASTag onboarding via QR</li>
+        <li><i class="bi bi-check-circle-fill"></i>Auto & manual whitelist</li>
+        <li><i class="bi bi-check-circle-fill"></i>WhatsApp/SMS alerts (limited)</li>
+        <li><i class="bi bi-check-circle-fill"></i>Priority email support</li>
+      </ul>
+      <div class="plan-cta">
+        <a href="mailto:sales@onebee.in" class="btn btn-success">Get Started</a>
+      </div>
+    </div>
+
+    <!-- Plan 3: QuantumPass -->
     <div class="pricing-plan featured">
       <div class="featured-badge">Most Popular</div>
-      <div class="plan-header">Enterprise Plus+</div>
+      <div class="plan-header">Professional Access</div>
+      <div class="plan-title">QuantumPass</div>
+      <div class="plan-price">
+        <span class="currency">₹</span>
+        <span>75,000</span>
+        <span class="period">/site/year</span>
+      </div>
+      <div class="plan-desc">Professional solution with advanced analytics and integrations.</div>
+      <ul class="plan-features">
+        <li><i class="bi bi-check-circle-fill"></i>Up to 10 barriers & readers</li>
+        <li><i class="bi bi-check-circle-fill"></i>Everything in VisionGate</li>
+        <li><i class="bi bi-check-circle-fill"></i>Advanced analytics dashboard</li>
+        <li><i class="bi bi-check-circle-fill"></i>Multi-site management</li>
+        <li><i class="bi bi-check-circle-fill"></i>Custom report designer</li>
+        <li><i class="bi bi-check-circle-fill"></i>API access (limited)</li>
+        <li><i class="bi bi-check-circle-fill"></i>WhatsApp/SMS alerts (high quota)</li>
+        <li><i class="bi bi-check-circle-fill"></i>Remote vehicle lock/unlock</li>
+        <li><i class="bi bi-check-circle-fill"></i>Role-based user management</li>
+        <li><i class="bi bi-check-circle-fill"></i>Priority phone & WhatsApp support</li>
+      </ul>
+      <div class="plan-cta">
+        <a href="mailto:sales@onebee.in" class="btn btn-warning">Get Started</a>
+      </div>
+    </div>
+
+    <!-- Plan 4: ShieldAccess -->
+    <div class="pricing-plan">
+      <div class="plan-header">Enterprise Access</div>
+      <div class="plan-title">ShieldAccess</div>
+      <div class="plan-price">
+        <span class="currency">₹</span>
+        <span>1,25,000</span>
+        <span class="period">/site/year</span>
+      </div>
+      <div class="plan-desc">Enterprise-grade solution with unlimited scaling and security.</div>
+      <ul class="plan-features">
+        <li><i class="bi bi-check-circle-fill"></i>Unlimited barriers & readers</li>
+        <li><i class="bi bi-check-circle-fill"></i>Everything in QuantumPass</li>
+        <li><i class="bi bi-check-circle-fill"></i>Advanced security features</li>
+        <li><i class="bi bi-check-circle-fill"></i>Custom integrations support</li>
+        <li><i class="bi bi-check-circle-fill"></i>White-labeled mobile apps</li>
+        <li><i class="bi bi-check-circle-fill"></i>Full API access</li>
+        <li><i class="bi bi-check-circle-fill"></i>Dedicated support team</li>
+        <li><i class="bi bi-check-circle-fill"></i>24/7 emergency assistance</li>
+        <li><i class="bi bi-check-circle-fill"></i>On-site deployment support</li>
+        <li><i class="bi bi-check-circle-fill"></i>Annual maintenance included</li>
+      </ul>
+      <div class="plan-cta">
+        <a href="mailto:sales@onebee.in" class="btn btn-danger">Contact Sales</a>
+      </div>
+    </div>
+
+    <!-- Plan 5: AsguardKey -->
+    <div class="pricing-plan">
+      <div class="plan-header">Ultimate Solution</div>
       <div class="plan-title">AsguardKey</div>
       <div class="plan-price">
         <span class="currency">₹</span>
         <span>2,25,000</span>
         <span class="period">/one-time</span>
       </div>
-      <div class="plan-desc">Complete enterprise solution with dedicated whitelabeling, source code access, and unlimited customization.</div>
+      <div class="plan-desc">Complete solution with source code access and whitelabeling.</div>
       <ul class="plan-features">
-                 <li><i class="bi bi-star-fill"></i>Everything in Startkflow</li>
+        <li><i class="bi bi-star-fill"></i>Everything in ShieldAccess</li>
         <li><i class="bi bi-star-fill"></i>Complete source code access</li>
         <li><i class="bi bi-star-fill"></i>Dedicated whitelabeling</li>
         <li><i class="bi bi-star-fill"></i>Custom branding & domain</li>
-        <li><i class="bi bi-star-fill"></i>API access & documentation</li>
-        <li><i class="bi-star-fill"></i>Custom integrations support</li>
-        <li><i class="bi bi-star-fill"></i>Advanced analytics dashboard</li>
-        <li><i class="bi bi-star-fill"></i>Multi-site management</li>
-        <li><i class="bi bi-star-fill"></i>Custom report designer</li>
+        <li><i class="bi bi-star-fill"></i>Full API access & documentation</li>
+        <li><i class="bi bi-star-fill"></i>Custom integrations support</li>
         <li><i class="bi bi-star-fill"></i>White-labeled mobile apps</li>
         <li><i class="bi bi-star-fill"></i>Dedicated support team</li>
         <li><i class="bi bi-star-fill"></i>24/7 emergency assistance</li>
         <li><i class="bi bi-star-fill"></i>Lifetime updates & maintenance</li>
-        <li><i class="bi bi-star-fill"></i>On-site deployment support</li>
       </ul>
       <div class="plan-cta">
         <a href="mailto:sales@onebee.in" class="btn btn-primary">Contact Sales</a>
@@ -432,71 +546,94 @@
     <h3 class="text-center fw-bold mb-4">Feature Comparison</h3>
     <div class="table-responsive">
       <table class="table comparison-table">
-                 <thead>
-           <tr>
-             <th>Feature</th>
-             <th>Startkflow</th>
-             <th>AsguardKey</th>
-           </tr>
-         </thead>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Startkflow</th>
+            <th>VisionGate</th>
+            <th>QuantumPass</th>
+            <th>ShieldAccess</th>
+            <th>AsguardKey</th>
+          </tr>
+        </thead>
         <tbody>
           <tr>
-            <td><strong>Subscription Model</strong></td>
-            <td>Annual (₹25,000/year)</td>
-            <td>One-time (₹2,25,000)</td>
+            <td><strong>Price</strong></td>
+            <td>₹25K/year</td>
+            <td>₹45K/year</td>
+            <td>₹75K/year</td>
+            <td>₹1.25L/year</td>
+            <td>₹2.25L/one-time</td>
           </tr>
           <tr>
             <td><strong>Barriers & Readers</strong></td>
+            <td>Up to 2</td>
+            <td>Up to 5</td>
+            <td>Up to 10</td>
             <td>Unlimited</td>
             <td>Unlimited</td>
-          </tr>
-          <tr>
-            <td><strong>Cloud Database</strong></td>
-            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-            <td><i class="bi bi-check-circle-fill text-success"></i></td>
           </tr>
           <tr>
             <td><strong>Mobile App</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
+            <td><i class="bi bi-check-circle-fill text-success"></i></td>
+            <td><i class="bi bi-check-circle-fill text-success"></i></td>
             <td><i class="bi bi-check-circle-fill text-success"></i></td>
             <td><i class="bi bi-check-circle-fill text-success"></i></td>
           </tr>
           <tr>
             <td><strong>Visitor Management</strong></td>
+            <td>Basic</td>
+            <td>Advanced</td>
+            <td>Advanced</td>
             <td>Advanced</td>
             <td>Advanced</td>
           </tr>
           <tr>
-            <td><strong>Source Code Access</strong></td>
+            <td><strong>Analytics</strong></td>
+            <td>Basic</td>
+            <td>Basic</td>
+            <td>Advanced</td>
+            <td>Advanced</td>
+            <td>Advanced</td>
+          </tr>
+          <tr>
+            <td><strong>API Access</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
+            <td>Limited</td>
+            <td>Full</td>
+            <td>Full</td>
+          </tr>
+          <tr>
+            <td><strong>Source Code</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
             <td><i class="bi bi-x-circle-fill text-danger"></i></td>
             <td><i class="bi bi-check-circle-fill text-success"></i></td>
           </tr>
           <tr>
             <td><strong>Whitelabeling</strong></td>
             <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-          </tr>
-          <tr>
-            <td><strong>Custom Branding</strong></td>
             <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-          </tr>
-          <tr>
-            <td><strong>API Access</strong></td>
-            <td>Limited</td>
-            <td>Full Access</td>
-          </tr>
-          <tr>
-            <td><strong>Custom Integrations</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
             <td><i class="bi bi-x-circle-fill text-danger"></i></td>
             <td><i class="bi bi-check-circle-fill text-success"></i></td>
           </tr>
           <tr>
             <td><strong>Support</strong></td>
-            <td>Priority Email & WhatsApp</td>
-            <td>Dedicated Team + 24/7</td>
+            <td>Email</td>
+            <td>Priority Email</td>
+            <td>Phone & WhatsApp</td>
+            <td>Dedicated Team</td>
+            <td>Dedicated Team</td>
           </tr>
           <tr>
             <td><strong>Updates</strong></td>
+            <td>1 Year</td>
+            <td>1 Year</td>
+            <td>1 Year</td>
             <td>1 Year</td>
             <td>Lifetime</td>
           </tr>
