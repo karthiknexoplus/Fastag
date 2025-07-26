@@ -991,7 +991,7 @@ def export_data():
             query += " WHERE " + " AND ".join(conditions)
         
         query += """
-            GROUP BY l.id, l.lane_name, r.reader_ip, r.type
+            GROUP BY l.id, l.lane_name, r.reader_ip
             ORDER BY total_events DESC
         """
         
@@ -1027,7 +1027,7 @@ def export_data():
             JOIN lanes l ON r.lane_id = l.id
             LEFT JOIN access_logs al ON r.id = al.reader_id 
                 AND al.timestamp >= datetime('now', '-7 days')
-            GROUP BY r.id, r.reader_ip, r.type, l.lane_name
+            GROUP BY r.id, r.reader_ip, l.lane_name
             ORDER BY r.id
         """
         
@@ -2079,7 +2079,7 @@ def api_reader_health():
         JOIN lanes l ON r.lane_id = l.id
         LEFT JOIN access_logs al ON r.id = al.reader_id 
             AND al.timestamp >= datetime('now', '-24 hours')
-        GROUP BY r.id, r.reader_ip, r.type, l.lane_name
+        GROUP BY r.id, r.reader_ip, l.lane_name
         ORDER BY r.id
     ''').fetchall()
     return jsonify({'reader_health': [list(row) for row in rows]})
