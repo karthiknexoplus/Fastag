@@ -381,7 +381,9 @@
   border-radius: 1.5rem;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  font-size: 0.9rem;
 }
+
 .comparison-table th {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
@@ -391,12 +393,35 @@
   border: none;
   font-size: 0.9rem;
 }
+
 .comparison-table td {
   padding: 0.8rem;
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid #f7fafc;
   font-size: 0.9rem;
+}
+
+.comparison-table .table-primary {
+  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+  font-weight: 600;
+}
+
+.comparison-table .table-secondary {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  font-weight: 700;
+  color: #2d3748;
+  text-align: center;
+}
+
+.comparison-table .table-secondary td {
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.comparison-table tbody tr:hover {
+  background: rgba(102,126,234,0.05);
+  transition: all 0.3s ease;
 }
 .comparison-table tr:last-child td {
   border-bottom: none;
@@ -731,10 +756,10 @@
   <div class="comparison-section">
     <h3 class="text-center fw-bold mb-4">Feature Comparison</h3>
     <div class="table-responsive">
-      <table class="table comparison-table">
+            <table class="table comparison-table">
         <thead>
           <tr>
-            <th>Feature</th>
+            <th style="min-width: 200px;">Feature</th>
             <th>Startkflow</th>
             <th>VisionGate</th>
             <th>QuantumPass</th>
@@ -743,94 +768,333 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><strong>Price</strong></td>
+          <!-- Pricing & Duration -->
+          <tr class="table-primary">
+            <td><strong>💰 Pricing & Duration</strong></td>
             <td>₹25K/year</td>
             <td>₹45K/year</td>
             <td>₹75K/year</td>
-                         <td>₹1.25L/one-time</td>
+            <td>₹1.25L/one-time</td>
             <td>₹2.25L/one-time</td>
+          </tr>
+          <tr class="table-primary">
+            <td><strong>🔄 Updates & Maintenance</strong></td>
+            <td>1 Year updates</td>
+            <td>1 Year updates</td>
+            <td>1 Year updates</td>
+            <td>Lifetime updates</td>
+            <td>Lifetime updates</td>
+          </tr>
+
+          <!-- Hardware & Infrastructure -->
+          <tr class="table-secondary">
+            <td><strong>🏗️ Hardware & Infrastructure</strong></td>
+            <td colspan="5"></td>
           </tr>
           <tr>
             <td><strong>Barriers & Readers</strong></td>
-            <td>Up to 2</td>
-            <td>Up to 5</td>
-            <td>Up to 10</td>
+            <td>Up to 2 devices</td>
+            <td>Up to 5 devices</td>
+            <td>Up to 10 devices</td>
+            <td>Unlimited devices</td>
+            <td>Unlimited devices</td>
+          </tr>
+          <tr>
+            <td><strong>Database Storage</strong></td>
+            <td>Local storage only</td>
+            <td>Cloud database + backup</td>
+            <td>Cloud database + backup</td>
+            <td>Cloud database + backup</td>
+            <td>Cloud database + backup</td>
+          </tr>
+          <tr>
+            <td><strong>Server Ownership</strong></td>
+            <td>Nexoplus servers</td>
+            <td>Nexoplus servers</td>
+            <td>Customer's server</td>
+            <td>Customer's server</td>
+            <td>Customer's server</td>
+          </tr>
+          <tr>
+            <td><strong>Reader Support</strong></td>
+            <td>Basic RFID only</td>
+            <td>Wiegand + IP readers</td>
+            <td>Wiegand + IP readers</td>
+            <td>All reader types</td>
+            <td>All reader types</td>
+          </tr>
+
+          <!-- Software Features -->
+          <tr class="table-secondary">
+            <td><strong>💻 Software Features</strong></td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td><strong>Web Dashboard</strong></td>
+            <td>Basic interface</td>
+            <td>Full dashboard</td>
+            <td>Advanced dashboard</td>
+            <td>Enterprise dashboard</td>
+            <td>Custom dashboard</td>
+          </tr>
+          <tr>
+            <td><strong>Mobile App Access</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><span class="text-danger">1 user only</span></td>
+            <td>Unlimited users</td>
+            <td>Unlimited users</td>
+          </tr>
+          <tr>
+            <td><strong>User Management</strong></td>
+            <td>Basic users</td>
+            <td>Owner + vehicle details</td>
+            <td>Role-based users</td>
+            <td>Advanced user roles</td>
+            <td>Custom user roles</td>
+          </tr>
+          <tr>
+            <td><strong>Vehicle Management</strong></td>
+            <td>Basic vehicle info</td>
+            <td>Owner + vehicle details</td>
+            <td>Advanced vehicle tracking</td>
+            <td>Complete vehicle history</td>
+            <td>Custom vehicle fields</td>
+          </tr>
+
+          <!-- Access Control Features -->
+          <tr class="table-secondary">
+            <td><strong>🚪 Access Control Features</strong></td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td><strong>FASTag Recognition</strong></td>
+            <td>Basic recognition</td>
+            <td>QR onboarding</td>
+            <td>Advanced recognition</td>
+            <td>AI-powered recognition</td>
+            <td>Custom recognition</td>
+          </tr>
+          <tr>
+            <td><strong>Whitelist Management</strong></td>
+            <td>Manual only</td>
+            <td>Auto + manual</td>
+            <td>Smart whitelist</td>
+            <td>Advanced whitelist</td>
+            <td>Custom whitelist</td>
+          </tr>
+          <tr>
+            <td><strong>Visitor Management</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-check-circle-fill text-success"></i> QR codes + tracking</td>
+            <td><i class="bi bi-check-circle-fill text-success"></i> Advanced visitor system</td>
+            <td><i class="bi bi-check-circle-fill text-success"></i> Custom visitor system</td>
+          </tr>
+          <tr>
+            <td><strong>Remote Control</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td>Lock/unlock vehicles</td>
+            <td>Full remote control</td>
+            <td>Custom remote features</td>
+          </tr>
+
+          <!-- Analytics & Reporting -->
+          <tr class="table-secondary">
+            <td><strong>📊 Analytics & Reporting</strong></td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td><strong>Basic Reports</strong></td>
+            <td>Simple reports</td>
+            <td>Enhanced reports</td>
+            <td>Advanced reports</td>
+            <td>Custom reports</td>
+            <td>Custom reports</td>
+          </tr>
+          <tr>
+            <td><strong>Analytics Dashboard</strong></td>
+            <td>Basic analytics</td>
+            <td>Basic analytics</td>
+            <td>Advanced analytics</td>
+            <td>Enterprise analytics</td>
+            <td>Custom analytics</td>
+          </tr>
+          <tr>
+            <td><strong>Real-time Monitoring</strong></td>
+            <td>Basic monitoring</td>
+            <td>Enhanced monitoring</td>
+            <td>Real-time alerts</td>
+            <td>Advanced monitoring</td>
+            <td>Custom monitoring</td>
+          </tr>
+          <tr>
+            <td><strong>Data Export</strong></td>
+            <td>Basic export</td>
+            <td>CSV export</td>
+            <td>Multiple formats</td>
+            <td>All formats</td>
+            <td>Custom exports</td>
+          </tr>
+
+          <!-- Notifications & Alerts -->
+          <tr class="table-secondary">
+            <td><strong>🔔 Notifications & Alerts</strong></td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td><strong>WhatsApp Alerts</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td>Limited quota</td>
+            <td>High quota</td>
             <td>Unlimited</td>
             <td>Unlimited</td>
           </tr>
-                      <tr>
-              <td><strong>Mobile App</strong></td>
-              <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-              <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-              <td><span class="text-danger">1 user only</span></td>
-              <td>Unlimited users</td>
-              <td>Unlimited users</td>
-            </tr>
-                      <tr>
-              <td><strong>Visitor Management</strong></td>
-              <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-              <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-              <td><i class="bi bi-check-circle-fill text-success"></i></td>
-              <td><i class="bi bi-check-circle-fill text-success"></i></td>
-              <td><i class="bi bi-check-circle-fill text-success"></i></td>
-            </tr>
           <tr>
-            <td><strong>Analytics</strong></td>
-            <td>Basic</td>
-            <td>Basic</td>
-            <td>Advanced</td>
-            <td>Advanced</td>
-            <td>Advanced</td>
+            <td><strong>SMS Alerts</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td>Limited quota</td>
+            <td>High quota</td>
+            <td>Unlimited</td>
+            <td>Unlimited</td>
+          </tr>
+          <tr>
+            <td><strong>Email Notifications</strong></td>
+            <td>Basic emails</td>
+            <td>Enhanced emails</td>
+            <td>Custom emails</td>
+            <td>Advanced emails</td>
+            <td>Custom emails</td>
+          </tr>
+
+          <!-- Integration & API -->
+          <tr class="table-secondary">
+            <td><strong>🔗 Integration & API</strong></td>
+            <td colspan="5"></td>
           </tr>
           <tr>
             <td><strong>API Access</strong></td>
-            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td>Limited</td>
-            <td>Full</td>
-            <td>Full</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td>Limited API</td>
+            <td>Full API access</td>
+            <td>Full API access</td>
           </tr>
           <tr>
-            <td><strong>Source Code</strong></td>
-            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-            <td><i class="bi bi-check-circle-fill text-success"></i></td>
+            <td><strong>Third-party Integrations</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td>Basic integrations</td>
+            <td>Advanced integrations</td>
+            <td>Custom integrations</td>
           </tr>
-                      <tr>
-              <td><strong>Branding</strong></td>
-              <td>Nexoplus only</td>
-              <td>Nexoplus only</td>
-              <td>Nexoplus only</td>
-              <td>Nexoplus only</td>
-              <td>Customer branding</td>
-            </tr>
           <tr>
-            <td><strong>Support</strong></td>
-            <td>Email</td>
-            <td>Priority Email</td>
-            <td>Phone & WhatsApp</td>
-            <td>Dedicated Team</td>
-            <td>Dedicated Team</td>
+            <td><strong>Source Code Access</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-check-circle-fill text-success"></i> Full source code</td>
           </tr>
-                      <tr>
-              <td><strong>Server Ownership</strong></td>
-              <td>Nexoplus</td>
-              <td>Nexoplus</td>
-              <td>Customer</td>
-              <td>Customer</td>
-              <td>Customer</td>
-            </tr>
-            <tr>
-              <td><strong>Updates</strong></td>
-              <td>1 Year</td>
-              <td>1 Year</td>
-              <td>1 Year</td>
-              <td>Lifetime</td>
-              <td>Lifetime</td>
-            </tr>
+
+          <!-- Branding & Customization -->
+          <tr class="table-secondary">
+            <td><strong>🎨 Branding & Customization</strong></td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td><strong>Branding</strong></td>
+            <td>Nexoplus branding only</td>
+            <td>Nexoplus branding only</td>
+            <td>Nexoplus branding only</td>
+            <td>Nexoplus branding only</td>
+            <td>Customer branding</td>
+          </tr>
+          <tr>
+            <td><strong>White-label Mobile Apps</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-check-circle-fill text-success"></i> Available</td>
+          </tr>
+          <tr>
+            <td><strong>Custom UI/UX</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-check-circle-fill text-success"></i> Available</td>
+          </tr>
+
+          <!-- Support & Services -->
+          <tr class="table-secondary">
+            <td><strong>🛠️ Support & Services</strong></td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td><strong>Support Level</strong></td>
+            <td>Email support</td>
+            <td>Priority email support</td>
+            <td>Phone + WhatsApp support</td>
+            <td>Dedicated support team</td>
+            <td>Dedicated support team</td>
+          </tr>
+          <tr>
+            <td><strong>Response Time</strong></td>
+            <td>24-48 hours</td>
+            <td>12-24 hours</td>
+            <td>2-4 hours</td>
+            <td>1-2 hours</td>
+            <td>30 minutes</td>
+          </tr>
+          <tr>
+            <td><strong>Emergency Support</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td>24/7 emergency assistance</td>
+            <td>24/7 emergency assistance</td>
+          </tr>
+          <tr>
+            <td><strong>On-site Support</strong></td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td><i class="bi bi-x-circle-fill text-danger"></i> Not available</td>
+            <td>On-site deployment support</td>
+            <td>On-site deployment support</td>
+          </tr>
+          <tr>
+            <td><strong>Training & Documentation</strong></td>
+            <td>Basic documentation</td>
+            <td>Enhanced documentation</td>
+            <td>Video tutorials</td>
+            <td>Custom training</td>
+            <td>Custom training</td>
+          </tr>
+
+          <!-- Maintenance & AMC -->
+          <tr class="table-secondary">
+            <td><strong>🔧 Maintenance & AMC</strong></td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td><strong>Maintenance</strong></td>
+            <td>Included (1 year)</td>
+            <td>Included (1 year)</td>
+            <td>Included (1 year)</td>
+            <td>AMC required</td>
+            <td>Lifetime updates only</td>
+          </tr>
+          <tr>
+            <td><strong>AMC (Annual Maintenance Contract)</strong></td>
+            <td>Not applicable</td>
+            <td>Not applicable</td>
+            <td>Not applicable</td>
+            <td>Required for maintenance</td>
+            <td>Not required</td>
+          </tr>
         </tbody>
       </table>
     </div>
