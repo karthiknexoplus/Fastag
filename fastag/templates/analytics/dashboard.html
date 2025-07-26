@@ -548,6 +548,17 @@
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-times-circle text-danger me-2"></i>
+                    Most Denied Tags Today
+                </h5>
+                <div id="most-denied-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
+                    <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 mb-4">
+            <div class="chart-container feed-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
                     <i class="fas fa-id-card text-primary me-2"></i>
                     Recent Granted Tags
                 </h5>
@@ -635,6 +646,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRecentGrantedTags();
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
+    loadMostDeniedTagsFeed();
 });
 
 function initializeCharts() {
@@ -1673,10 +1685,50 @@ function loadRecentGrantedTagsFeed() {
         });
 }
 
+function loadMostDeniedTagsFeed() {
+    const feed = document.getElementById('most-denied-tags-feed');
+    feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
+    fetch('/analytics/api/most-denied-tags')
+        .then(response => response.json())
+        .then(data => {
+            if (data.most_denied_tags && data.most_denied_tags.length > 0) {
+                feed.innerHTML = data.most_denied_tags.map(tag => renderDeniedTagActivityItem(tag)).join('');
+            } else {
+                feed.innerHTML = '<div class="text-center text-muted">No data</div>';
+            }
+        })
+        .catch(() => {
+            feed.innerHTML = '<div class="text-center text-danger">Error loading data</div>';
+        });
+}
+
+function renderDeniedTagActivityItem(tag) {
+    // tag: {tag_id, vehicle_number, owner_name, model_name, lane_name, time, denied_count}
+    let secondaryInfo = [];
+    if (tag.model_name) secondaryInfo.push(`Model: ${tag.model_name}`);
+    if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
+    if (tag.lane_name) secondaryInfo.push(`Lane: ${tag.lane_name}`);
+    let secondary = secondaryInfo.join(' • ');
+    let countBadge = tag.denied_count ? `<span class='badge bg-danger ms-2'>${tag.denied_count}</span>` : '';
+    return `
+        <div class="activity-item denied">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
+                    <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
+                </div>
+                ${countBadge}
+            </div>
+            <small class="text-muted">${tag.time || ''}</small>
+        </div>
+    `;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadRecentGrantedTags();
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
+    loadMostDeniedTagsFeed();
 });
 </script>
 
