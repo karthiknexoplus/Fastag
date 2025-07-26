@@ -512,22 +512,23 @@
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-users text-primary me-2"></i>
-                    Top Active Users
+                    <i class="fas fa-id-card text-primary me-2"></i>
+                    Top Granted Tags
                 </h5>
                 <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                     <table class="table table-modern">
                         <thead>
                             <tr>
-                                <th>User</th>
+                                <th>Tag</th>
                                 <th>Vehicle</th>
-                                <th>Events</th>
-                                <th>Status</th>
+                                <th>Owner</th>
+                                <th>Model</th>
+                                <th>Granted</th>
                             </tr>
                         </thead>
-                        <tbody id="top-users-table">
+                        <tbody id="top-granted-tags-table">
                             <tr>
-                                <td colspan="4" class="text-center text-muted">Loading...</td>
+                                <td colspan="5" class="text-center text-muted">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -559,6 +560,33 @@
                 </div>
                 <div id="denied-fastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 mb-4">
+            <div class="chart-container feed-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-id-card text-primary me-2"></i>
+                    Recent Granted Tags
+                </h5>
+                <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Tag</th>
+                                <th>Vehicle</th>
+                                <th>Owner</th>
+                                <th>Model</th>
+                                <th>Lane</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-granted-tags-table">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -617,11 +645,12 @@ document.addEventListener('DOMContentLoaded', function() {
     loadEntryExitTrend();
     loadHourlyActivity();
     loadReaderHealth();
-    loadTopUsers();
+    loadTopGrantedTags();
     loadLaneUtilization();
     loadDeniedFastagActivityFeed();
     refreshRelayStatus();
     loadRecentActivity();
+    loadRecentGrantedTags();
 });
 
 function initializeCharts() {
@@ -1451,61 +1480,28 @@ function refreshRelayStatus(relayNum) {
         });
 }
 
-function loadTopUsers() {
-    const topUsersTable = document.getElementById('top-users-table');
-    topUsersTable.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>';
-    fetch('/analytics/api/top-users')
+function loadTopGrantedTags() {
+    const table = document.getElementById('top-granted-tags-table');
+    table.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>';
+    fetch('/analytics/api/top-granted-tags')
         .then(response => response.json())
         .then(data => {
-            if (data.top_users) {
-                topUsersTable.innerHTML = data.top_users.map(user => {
-                    let vehicleNumber = 'N/A';
-                    if (user[2]) {
-                        vehicleNumber = user[2];
-                    } else if (window.fastagFeaturesEnabled && user[3]) {
-                        vehicleNumber = user[3];
-                    } else if (!window.fastagFeaturesEnabled) {
-                        vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the vehicle number</span>";
-                    }
-                    let modelName = 'N/A';
-                    if (user[2] && user[5]) {
-                        modelName = user[5];
-                    } else if (window.fastagFeaturesEnabled && user[5]) {
-                        modelName = user[5];
-                    } else if (!window.fastagFeaturesEnabled) {
-                        modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the model</span>";
-                    }
-                    let ownerName = 'N/A';
-                    if (user[2] && user[4]) {
-                        ownerName = user[4];
-                    } else if (window.fastagFeaturesEnabled && user[4]) {
-                        ownerName = user[4];
-                    } else if (!window.fastagFeaturesEnabled) {
-                        ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the owner</span>";
-                    }
-                    let secondary = [modelName, ownerName, user[6] ? user[6] : ''].filter(Boolean).join(' • ');
-                    return `
-                        <tr>
-                            <td>
-                                <div class="fw-bold">${vehicleNumber}</div>
-                                <small class="text-muted">${user[0]}${secondary ? ' • ' + secondary : ''}</small>
-                            </td>
-                            <td>${vehicleNumber}</td>
-                            <td>${user[7]}</td>
-                            <td>
-                                <span class="status-badge ${user[8] > user[9] ? 'status-granted' : 'status-denied'}">
-                                    ${user[8] > user[9] ? 'Active' : 'Denied'}
-                                </span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
+            if (data.top_granted_tags && data.top_granted_tags.length > 0) {
+                table.innerHTML = data.top_granted_tags.map(tag => `
+                    <tr>
+                        <td>${tag.tag_id}</td>
+                        <td>${tag.vehicle_number || 'N/A'}</td>
+                        <td>${tag.owner_name || 'N/A'}</td>
+                        <td>${tag.model_name || 'N/A'}</td>
+                        <td>${tag.granted_count}</td>
+                    </tr>
+                `).join('');
             } else {
-                topUsersTable.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>';
+                table.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No data</td></tr>';
             }
         })
         .catch(() => {
-            topUsersTable.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading data</td></tr>';
+            table.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading data</td></tr>';
         });
 }
 
@@ -1610,6 +1606,36 @@ function loadRecentActivity() {
             recentActivity.innerHTML = '<div class="text-center text-danger">Error loading</div>';
         });
 }
+
+function loadRecentGrantedTags() {
+    const table = document.getElementById('recent-granted-tags-table');
+    table.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>';
+    fetch('/analytics/api/recent-granted-tags')
+        .then(response => response.json())
+        .then(data => {
+            if (data.recent_granted_tags && data.recent_granted_tags.length > 0) {
+                table.innerHTML = data.recent_granted_tags.map(tag => `
+                    <tr>
+                        <td>${tag.time}</td>
+                        <td>${tag.tag_id}</td>
+                        <td>${tag.vehicle_number || 'N/A'}</td>
+                        <td>${tag.owner_name || 'N/A'}</td>
+                        <td>${tag.model_name || 'N/A'}</td>
+                        <td>${tag.lane_name || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                table.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No data</td></tr>';
+            }
+        })
+        .catch(() => {
+            table.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading data</td></tr>';
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentGrantedTags();
+});
 </script>
 
 <!-- Current Occupancy Details Modal -->
