@@ -32,7 +32,27 @@ def login():
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return redirect(url_for('auth.login'))
+    db = get_db()
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        confirm = request.form['confirm_password']
+        if not username or not password or not confirm:
+            flash('All fields are required.', 'danger')
+            return render_template('signup.html')
+        if password != confirm:
+            flash('Passwords do not match.', 'danger')
+            return render_template('signup.html')
+        existing = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        if existing:
+            flash('Username already exists.', 'danger')
+            return render_template('signup.html')
+        hashed = generate_password_hash(password)
+        db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed))
+        db.commit()
+        flash('Signup successful! Please log in.', 'success')
+        return redirect(url_for('auth.login'))
+    return render_template('signup.html')
 
 @auth_bp.route('/logout')
 def logout():

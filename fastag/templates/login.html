@@ -109,6 +109,17 @@
             box-shadow: 0 2px 12px rgba(80,80,160,0.13);
             color: #fff;
         }
+        .login-logo {
+            width: 110px;
+            height: 70px;
+            object-fit: contain;
+            border-radius: 1.2rem;
+            background: #fff;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 2px 12px rgba(80,80,160,0.13);
+            padding: 0.7rem 1.2rem;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -116,7 +127,7 @@
         <div class="left-panel">
             <div class="left-overlay"></div>
             <div class="left-content">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="width:70px; height:70px; object-fit:contain; border-radius:50%; background:#fff; margin-bottom:1.2rem; box-shadow:0 2px 8px rgba(80,80,160,0.10);">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="login-logo">
                 <div class="app-title">FASTag Parking</div>
                 <div class="welcome-message" id="welcome-message"></div>
             </div>
