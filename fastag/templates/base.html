@@ -137,6 +137,10 @@
                     <i class="fas fa-user-check fastag-menu-icon"></i>
                     <span class="nav-label d-none d-md-inline">User Approval</span>
                 </a>
+                <a href="{{ url_for('pricing.pricing') }}" class="nav-icon-link {% if request.endpoint == 'pricing.pricing' %}active{% endif %}" title="Pricing">
+                    <i class="fas fa-tags fastag-menu-icon"></i>
+                    <span class="nav-label d-none d-md-inline">Pricing</span>
+                </a>
                 <div class="dropdown d-inline-block">
                     <a href="#" class="nav-icon-link dropdown-toggle" data-bs-toggle="dropdown" title="Fastag">
                         <i class="fas fa-tags fastag-menu-icon"></i>

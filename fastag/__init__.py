@@ -125,6 +125,7 @@ def create_app():
     from fastag.routes.challan import challan_bp
     from fastag.routes.live_status import live_status_bp
     from fastag.routes.all_data import all_data_bp
+    from fastag.routes.pricing import pricing_bp
     
     # Initialize OAuth
     init_oauth(app)
@@ -145,6 +146,7 @@ def create_app():
     app.register_blueprint(challan_bp)
     app.register_blueprint(live_status_bp)
     app.register_blueprint(all_data_bp)
+    app.register_blueprint(pricing_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
     @app.context_processor
