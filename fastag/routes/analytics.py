@@ -2275,6 +2275,23 @@ def api_most_denied_tags():
 @analytics_bp.route('/api/recent-entries')
 def api_recent_entries():
     db = get_db()
+    
+    # Debug: Check if readers table has type column
+    try:
+        reader_check = db.execute("SELECT id, reader_ip, type FROM readers LIMIT 1").fetchone()
+        print(f"DEBUG: Reader check result: {reader_check}")
+    except Exception as e:
+        print(f"DEBUG: Error checking readers table: {e}")
+    
+    # Debug: Check what entry readers exist
+    try:
+        entry_readers = db.execute("SELECT id, reader_ip, type FROM readers WHERE type = 'entry'").fetchall()
+        print(f"DEBUG: Entry readers found: {len(entry_readers)}")
+        for reader in entry_readers:
+            print(f"DEBUG: Entry reader - ID: {reader[0]}, IP: {reader[1]}, Type: {reader[2]}")
+    except Exception as e:
+        print(f"DEBUG: Error checking entry readers: {e}")
+    
     rows = db.execute('''
         SELECT 
             al.timestamp,
@@ -2295,6 +2312,11 @@ def api_recent_entries():
         ORDER BY al.timestamp DESC
         LIMIT 100
     ''').fetchall()
+    
+    print(f"DEBUG: Found {len(rows)} recent entries")
+    for row in rows[:5]:  # Show first 5 for debugging
+        print(f"DEBUG: Entry - Tag: {row[1]}, Result: {row[7]}, Time: {row[0]}")
+    
     # Convert timestamps to IST
     import pytz
     from datetime import datetime
