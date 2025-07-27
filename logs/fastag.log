@@ -1352,3 +1352,9 @@
 [2025-07-27 08:14:14,984] INFO in google_auth: Google OAuth initialized successfully
 [2025-07-27 08:14:15,053] WARNING in _internal:  * Debugger is active!
 [2025-07-27 08:14:15,060] INFO in _internal:  * Debugger PIN: 236-585-363
+[2025-07-27 08:15:55,632] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-27 08:15:55,632] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-27 08:15:55,632] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-27 08:15:55,632] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-27 08:15:56,257] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-27 08:15:56,258] INFO in google_auth: Google OAuth initialized successfully
