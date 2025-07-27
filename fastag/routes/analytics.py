@@ -573,17 +573,18 @@ def reports():
 
 @analytics_bp.route('/api/export-data')
 def export_data():
-    """Export data as CSV"""
+    """Export data as CSV or Excel"""
     import csv
-    from io import StringIO
-    
+    from io import StringIO, BytesIO
+    import pytz
+    from datetime import datetime
+    from flask import Response
     report_type = request.args.get('type', 'access_logs')
+    export_format = request.args.get('format', 'csv')
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     vehicle_number = request.args.get('vehicle_number', '')
-    
     db = get_db()
-    
     if report_type == 'access_logs':
         query = """
             SELECT 
@@ -604,40 +605,55 @@ def export_data():
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
         """
-        
         conditions = []
         if start_date and end_date:
             conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
-        
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
-        
         query += " ORDER BY al.timestamp DESC"
-        
         rows = db.execute(query).fetchall()
-        
-        # Create CSV
-        output = StringIO()
-        writer = csv.writer(output)
-        writer.writerow(['Timestamp', 'Tag ID', 'Access Result', 'Reason', 'User Name', 'Vehicle Number', 'Owner Name', 'Model Name', 'Fuel Type', 'Lane', 'Reader IP'])
-        
+        headers = ['Timestamp', 'Tag ID', 'Access Result', 'Reason', 'User Name', 'Vehicle Number', 'Owner Name', 'Model Name', 'Fuel Type', 'Lane', 'Reader IP']
         # Convert UTC timestamps to IST
-        utc_tz = pytz.UTC
         ist_tz = pytz.timezone('Asia/Kolkata')
-        
-        for row in rows:
-            # Convert UTC timestamp to IST
-            utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
-            ist_time = utc_time.astimezone(ist_tz)
-            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-            
-            # Create new row with IST timestamp
+        def convert_row(row):
+            try:
+                utc_time = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+                ist_time = utc_time.astimezone(ist_tz)
+                ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                ist_time_str = row[0]
             new_row = list(row)
             new_row[0] = ist_time_str
-            writer.writerow(new_row)
-        
-        filename = f'access_logs_{datetime.now().strftime("%Y%m%d")}.csv'
-    
+            return new_row
+        data_rows = [convert_row(row) for row in rows]
+        if export_format == 'excel':
+            from openpyxl import Workbook
+            wb = Workbook()
+            ws = wb.active
+            ws.append(headers)
+            for row in data_rows:
+                ws.append(row)
+            output = BytesIO()
+            wb.save(output)
+            output.seek(0)
+            filename = f'access_logs_{datetime.now().strftime("%Y%m%d")}.xlsx'
+            return Response(
+                output.getvalue(),
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                headers={'Content-Disposition': f'attachment; filename={filename}'}
+            )
+        else:
+            output = StringIO()
+            writer = csv.writer(output)
+            writer.writerow(headers)
+            for row in data_rows:
+                writer.writerow(row)
+            filename = f'access_logs_{datetime.now().strftime("%Y%m%d")}.csv'
+            return Response(
+                output.getvalue(),
+                mimetype='text/csv',
+                headers={'Content-Disposition': f'attachment; filename={filename}'}
+            )
     elif report_type == 'entry_reports':
         query = """
             SELECT 
