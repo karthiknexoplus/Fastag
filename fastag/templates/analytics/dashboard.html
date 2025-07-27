@@ -277,17 +277,9 @@
         max-height: 60px !important;
     }
     
-    /* Overstayed Vehicles Innovative Card Styles */
-    .overstayed-count-overlay {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 10;
-        text-align: left;
-    }
-    
+    /* Overstayed Vehicles Redesigned Card Styles */
     .overstayed-number {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
         color: #fff;
         line-height: 1;
@@ -296,50 +288,60 @@
     }
     
     .overstayed-label {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.9);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
-    .overstayed-chart-container {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 60px;
+    .overstayed-icon {
+        opacity: 0.8;
+    }
+    
+    .overstayed-chart-section {
         background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
-    }
-    
-    .overstayed-chart-container canvas {
-        max-height: 60px !important;
-    }
-    
-    .overstayed-info {
-        position: absolute;
-        bottom: 5px;
-        right: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        z-index: 10;
-    }
-    
-    .overstayed-duration, .overstayed-trend {
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.9);
-        background: rgba(0, 0, 0, 0.2);
-        padding: 2px 6px;
         border-radius: 10px;
-        backdrop-filter: blur(5px);
+        padding: 10px;
+        height: 100px;
         display: flex;
         align-items: center;
-        gap: 3px;
+        justify-content: center;
     }
     
-    .overstayed-duration i, .overstayed-trend i {
-        font-size: 0.6rem;
+    .overstayed-chart-section canvas {
+        max-height: 100px !important;
+    }
+    
+    .overstayed-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .overstayed-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px;
+        border-radius: 8px;
+        backdrop-filter: blur(5px);
+    }
+    
+    .overstayed-info-item i {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .overstayed-info-item small {
+        font-size: 0.65rem;
+        opacity: 0.8;
+    }
+    
+    .overstayed-info-item .fw-bold {
+        font-size: 0.85rem;
+        margin-top: 2px;
     }
     .status-badge {
         padding: 0.25rem 0.75rem;
@@ -735,25 +737,38 @@
         </div>
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card danger h-100 dashboard-row-equal-height">
-                <div class="card-body position-relative p-0">
-                    <!-- Big Count Overlay -->
-                    <div class="overstayed-count-overlay">
-                        <div class="overstayed-number" id="overstayed-vehicles">-</div>
-                        <div class="overstayed-label">Overstayed</div>
-                    </div>
-                    <!-- Mini Chart -->
-                    <div class="overstayed-chart-container">
-                        <canvas id="overstayedVehiclesChart" height="80"></canvas>
-                    </div>
-                    <!-- Additional Info -->
-                    <div class="overstayed-info">
-                        <div class="overstayed-duration">
-                            <i class="fas fa-clock text-warning"></i>
-                            <span id="avg-overstay-time">-</span>
+                <div class="card-body position-relative p-3">
+                    <!-- Header with Count -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div class="overstayed-number" id="overstayed-vehicles">-</div>
+                            <div class="overstayed-label">Overstayed Vehicles</div>
                         </div>
-                        <div class="overstayed-trend">
+                        <div class="overstayed-icon">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Section -->
+                    <div class="overstayed-chart-section mb-3">
+                        <canvas id="overstayedVehiclesChart" height="100"></canvas>
+                    </div>
+                    
+                    <!-- Info Grid -->
+                    <div class="overstayed-info-grid">
+                        <div class="overstayed-info-item">
+                            <i class="fas fa-clock text-warning"></i>
+                            <div>
+                                <small class="text-white-50">Avg Duration</small>
+                                <div class="fw-bold text-white" id="avg-overstay-time">-</div>
+                            </div>
+                        </div>
+                        <div class="overstayed-info-item">
                             <i class="fas fa-arrow-up text-danger"></i>
-                            <span id="overstay-trend">-</span>
+                            <div>
+                                <small class="text-white-50">Trend</small>
+                                <div class="fw-bold text-white" id="overstay-trend">-</div>
+                            </div>
                         </div>
                     </div>
                 </div>
