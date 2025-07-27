@@ -1337,10 +1337,20 @@
     <div class="row">
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-sign-in-alt text-success me-2"></i>
-                    Recent Entries
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-sign-in-alt text-success me-2"></i>
+                        Recent Entries
+                    </h5>
+                    <div>
+                        <button id="export-entries-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="exportEntries('csv')">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button id="export-entries-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="exportEntries('excel')">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="recent-entries-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
@@ -1348,10 +1358,20 @@
         </div>
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-sign-out-alt text-primary me-2"></i>
-                    Recent Exits
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-sign-out-alt text-primary me-2"></i>
+                        Recent Exits
+                    </h5>
+                    <div>
+                        <button id="export-exits-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="exportExits('csv')">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button id="export-exits-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="exportExits('excel')">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="recent-exits-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
@@ -1359,10 +1379,20 @@
         </div>
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-id-card text-primary me-2"></i>
-                    Recent Granted Tags
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-id-card text-primary me-2"></i>
+                        Recent Granted Tags
+                    </h5>
+                    <div>
+                        <button id="export-granted-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="exportGranted('csv')">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button id="export-granted-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="exportGranted('excel')">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="recent-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
@@ -3415,6 +3445,31 @@ function renderActivityItem(activity) {
             <small class="text-muted">${activity.time}</small>
                 </div>
     `;
+}
+
+function exportEntries(format) {
+    const link = document.createElement('a');
+    link.href = `/analytics/api/export-recent-entries?format=${format}`;
+    link.download = `recent_entries.${format === 'excel' ? 'xlsx' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+function exportExits(format) {
+    const link = document.createElement('a');
+    link.href = `/analytics/api/export-recent-exits?format=${format}`;
+    link.download = `recent_exits.${format === 'excel' ? 'xlsx' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+function exportGranted(format) {
+    const link = document.createElement('a');
+    link.href = `/analytics/api/export-recent-granted-tags?format=${format}`;
+    link.download = `recent_granted_tags.${format === 'excel' ? 'xlsx' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 </script>
 
