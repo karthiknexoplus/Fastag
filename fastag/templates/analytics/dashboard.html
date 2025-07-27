@@ -300,13 +300,14 @@
     }
     
     .overstayed-chart-section {
-        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
         border-radius: 10px;
         padding: 10px;
         height: 100px;
         display: flex;
         align-items: center;
         justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .overstayed-chart-section canvas {
@@ -2451,16 +2452,16 @@ function createOverstayedVehiclesChart(overstayedCount) {
             datasets: [{
                 label: 'Overstayed Vehicles',
                 data: finalData,
-                borderColor: '#ff6b6b',
-                backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                borderWidth: 2,
+                borderColor: '#FFD700',
+                backgroundColor: 'rgba(255, 215, 0, 0.3)',
+                borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 3,
-                pointBackgroundColor: '#ff6b6b',
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: '#FFD700',
                 pointBorderColor: '#fff',
-                pointBorderWidth: 2
+                pointBorderWidth: 3
             }]
         },
         options: {
