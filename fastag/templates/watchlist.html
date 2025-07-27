@@ -177,7 +177,7 @@ function renderWatchlistTabs(data) {
                 <td>${user.contact_number || '<span class=\'text-muted\'>-</span>'}</td>
                 <td>${user.address || '<span class=\'text-muted\'>-</span>'}</td>
                 <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
-                <td>${user.added_at}</td>
+                <td>${toIST(user.added_at)}</td>
                 <td>
                     <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
                         <i class="fas fa-history"></i>
@@ -201,7 +201,7 @@ function renderWatchlistTabs(data) {
             <tr data-id="${user.id}">
                 <td>${user.fastag_id}</td>
                 <td>${user.reason || '<span class=\'text-muted\'>-</span>'}</td>
-                <td>${user.added_at}</td>
+                <td>${toIST(user.added_at)}</td>
                 <td>
                     <button class="btn btn-outline-purple btn-sm watchlist-action-btn" title="View History" onclick="viewHistory(${user.id})">
                         <i class="fas fa-history"></i>
