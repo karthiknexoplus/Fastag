@@ -2070,17 +2070,17 @@ def api_hourly_activity():
 def api_reader_health():
     db = get_db()
     # Group by reader type for the last 24 hours
-    rows = db.execute('''
-        SELECT 
+        rows = db.execute('''
+            SELECT 
             COALESCE(r.type, 'entry') as reader_type,
             COUNT(al.id) as events_last_24h
-        FROM readers r
+            FROM readers r
         LEFT JOIN access_logs al ON r.id = al.reader_id 
             AND al.timestamp >= datetime('now', '-24 hours')
         GROUP BY reader_type
         ORDER BY reader_type
     ''').fetchall()
-
+    
     # Format for the frontend chart: [[reader_type, events_last_24h], ...]
     result = []
     for row in rows:
@@ -2088,7 +2088,7 @@ def api_reader_health():
             row[0],  # reader_type
             row[1]   # events_last_24h
         ])
-
+    
     return jsonify({'reader_health': result})
 
 @analytics_bp.route('/api/top-granted-tags')
@@ -2416,56 +2416,56 @@ def api_real_time_logs():
 @analytics_bp.route('/api/recent-activity')
 def api_recent_activity():
     try:
-        db = get_db()
-        rows = db.execute("""
-            SELECT 
-                al.timestamp,
-                al.tag_id,
-                al.access_result,
-                al.reason,
+    db = get_db()
+    rows = db.execute("""
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            al.access_result,
+            al.reason,
                 COALESCE(ku.name, tvc.owner_name) as user_name,
-                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
-                COALESCE(ku.name, tvc.owner_name) as owner_name,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
                 COALESCE(tvc.model_name, '') as model_name,
                 COALESCE(tvc.fuel_type, '') as fuel_type,
-                l.lane_name,
+            l.lane_name,
                 r.type as lane_type,
-                r.reader_ip
-            FROM access_logs al
-            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
-            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
-            JOIN lanes l ON al.lane_id = l.id
-            JOIN readers r ON al.reader_id = r.id
-            ORDER BY al.timestamp DESC
-            LIMIT 50
-        """).fetchall()
-        ist_tz = pytz.timezone('Asia/Kolkata')
-        activities = []
-        for row in rows:
-            timestamp_str = row[0]
-            # Parse as UTC and convert to IST
-            try:
-                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-                utc_time = utc_time.replace(tzinfo=pytz.UTC)
-                ist_time = utc_time.astimezone(ist_tz)
-                ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-            except Exception:
-                ist_time_str = timestamp_str
-            activities.append({
-                'time': ist_time_str,
-                'tag_id': row[1],
-                'access_result': row[2],
-                'reason': row[3],
-                'user_name': row[4],
-                'vehicle_number': row[5],
-                'owner_name': row[6],
-                'model_name': row[7],
-                'fuel_type': row[8],
-                'lane_name': row[9],
-                'lane_type': row[10],
-                'reader_ip': row[11],
-            })
-        return jsonify({'recent_activity': activities})
+            r.reader_ip
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        ORDER BY al.timestamp DESC
+        LIMIT 50
+    """).fetchall()
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    activities = []
+    for row in rows:
+        timestamp_str = row[0]
+        # Parse as UTC and convert to IST
+        try:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            ist_time_str = timestamp_str
+        activities.append({
+            'time': ist_time_str,
+            'tag_id': row[1],
+            'access_result': row[2],
+            'reason': row[3],
+            'user_name': row[4],
+            'vehicle_number': row[5],
+            'owner_name': row[6],
+            'model_name': row[7],
+            'fuel_type': row[8],
+            'lane_name': row[9],
+            'lane_type': row[10],
+            'reader_ip': row[11],
+        })
+    return jsonify({'recent_activity': activities})
     except Exception as e:
         import traceback
         print(f"Error in /api/recent-activity: {e}\n{traceback.format_exc()}")
@@ -2772,13 +2772,13 @@ def api_anomaly_detection():
                     dq.popleft()
                 if len(dq) >= 3:
                     last_access = dq[-1]
-                    anomalies.append({
-                        'type': 'high',
-                        'title': 'Unusual Access Pattern',
+            anomalies.append({
+                'type': 'high',
+                'title': 'Unusual Access Pattern',
                         'desc': f"Vehicle {tag_id} accessed {len(dq)} times in 15 minutes",
                         'time': f"{(datetime.utcnow() - last_access).seconds//60} minutes ago",
-                        'severity': 'high'
-                    })
+                'severity': 'high'
+            })
                     break
         # 2. Extended stay detection (vehicles parked for over 8 hours)
         extended_stays = db.execute("""
@@ -2797,13 +2797,13 @@ def api_anomaly_detection():
             tag_ids = [row[0] for row in extended_stays]
             if tag_ids:
                 desc = f"{len(tag_ids)} vehicles parked for over 8 hours: {', '.join(tag_ids[:5])}{'...' if len(tag_ids) > 5 else ''}"
-                anomalies.append({
-                    'type': 'medium',
-                    'title': 'Extended Stay Detected',
+            anomalies.append({
+                'type': 'medium',
+                'title': 'Extended Stay Detected',
                     'desc': desc,
                     'time': f"{(datetime.utcnow() - datetime.strptime(extended_stays[0][1], '%Y-%m-%d %H:%M:%S')).seconds//60} minutes ago",
-                    'severity': 'medium'
-                })
+                'severity': 'medium'
+            })
         # 3. Low activity periods (unusually low traffic)
         if total_records > 10:
             now = datetime.utcnow()
@@ -2822,13 +2822,13 @@ def api_anomaly_detection():
                 )
             """).fetchone()[0] or 10
             if activity_count < (avg_activity * 0.3):
-                anomalies.append({
-                    'type': 'low',
-                    'title': 'Low Activity Period',
+                    anomalies.append({
+                        'type': 'low',
+                        'title': 'Low Activity Period',
                     'desc': f"Unusually low traffic between {window_start.strftime('%H:%M')}-{window_end.strftime('%H:%M')}",
                     'time': f"{(datetime.utcnow() - window_end).seconds//60} minutes ago",
-                    'severity': 'low'
-                })
+                        'severity': 'low'
+                    })
         # 4. First-Time and Rare Visitors
         # First-Time: first ever access is within last 24h
         first_time_visitors = db.execute("""
