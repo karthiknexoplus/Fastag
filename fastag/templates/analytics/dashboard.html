@@ -271,6 +271,10 @@
         height: 60px;
         position: relative;
         margin-top: 5px;
+        background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(255, 107, 157, 0.05) 100%);
+        border-radius: 8px;
+        padding: 5px;
+        border: 1px solid rgba(255, 107, 157, 0.2);
     }
     
     .mini-chart-container canvas {
@@ -2465,13 +2469,16 @@ function createTodayActivityMiniChart(hourlyData) {
             datasets: [{
                 label: 'Total Events',
                 data: totalData,
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                borderWidth: 2,
+                borderColor: '#FF6B9D',
+                backgroundColor: 'rgba(255, 107, 157, 0.3)',
+                borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 3
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: '#FF6B9D',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2
             }]
         },
         options: {
