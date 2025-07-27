@@ -1776,13 +1776,13 @@ function loadHourlyActivity() {
         });
 }
 function loadReaderHealth() {
-    fetch('/analytics/api/reader-health', {timeout: 10000})
+    fetch('/analytics/api/reader-health-dashboard', {timeout: 10000})
         .then(r => r.json())
         .then(data => {
             console.log('Reader Health API response:', data);
-            if (data.reader_health && data.reader_health.length > 0) {
-                const labels = data.reader_health.map(item => item[0]);
-                const dataValues = data.reader_health.map(item => item[1]);
+            if (data.readers && data.readers.length > 0) {
+                const labels = data.readers.map(item => item.reader_type);
+                const dataValues = data.readers.map(item => item.total_events);
                 console.log('Setting chart labels:', labels);
                 console.log('Setting chart data:', dataValues);
                 readerHealthChart.data.labels = labels;
