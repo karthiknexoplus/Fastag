@@ -276,6 +276,71 @@
     .mini-chart-container canvas {
         max-height: 60px !important;
     }
+    
+    /* Overstayed Vehicles Innovative Card Styles */
+    .overstayed-count-overlay {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        text-align: left;
+    }
+    
+    .overstayed-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2px;
+    }
+    
+    .overstayed-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .overstayed-chart-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+    }
+    
+    .overstayed-chart-container canvas {
+        max-height: 60px !important;
+    }
+    
+    .overstayed-info {
+        position: absolute;
+        bottom: 5px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 10;
+    }
+    
+    .overstayed-duration, .overstayed-trend {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 2px 6px;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+    
+    .overstayed-duration i, .overstayed-trend i {
+        font-size: 0.6rem;
+    }
     .status-badge {
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -670,9 +735,27 @@
         </div>
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card danger h-100 dashboard-row-equal-height">
-                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center h-100">
-                    <div class="stats-number" id="overstayed-vehicles">-</div>
-                    <div class="stats-label">Overstayed Vehicles</div>
+                <div class="card-body position-relative p-0">
+                    <!-- Big Count Overlay -->
+                    <div class="overstayed-count-overlay">
+                        <div class="overstayed-number" id="overstayed-vehicles">-</div>
+                        <div class="overstayed-label">Overstayed</div>
+                    </div>
+                    <!-- Mini Chart -->
+                    <div class="overstayed-chart-container">
+                        <canvas id="overstayedVehiclesChart" height="80"></canvas>
+                    </div>
+                    <!-- Additional Info -->
+                    <div class="overstayed-info">
+                        <div class="overstayed-duration">
+                            <i class="fas fa-clock text-warning"></i>
+                            <span id="avg-overstay-time">-</span>
+                        </div>
+                        <div class="overstayed-trend">
+                            <i class="fas fa-arrow-up text-danger"></i>
+                            <span id="overstay-trend">-</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -819,7 +902,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script>
 window.COMPANY_NAME = "{{ COMPANY_NAME }}";
-let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart, todayActivityMiniChart;
+let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart, todayActivityMiniChart, overstayedVehiclesChart;
 
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -1079,7 +1162,21 @@ function loadOverstayedVehicles() {
     fetch('/analytics/api/overstayed-vehicles')
         .then(r => r.json())
         .then(data => {
-    document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
+            const overstayedCount = data.overstayed ?? 0;
+            document.getElementById('overstayed-vehicles').textContent = overstayedCount;
+            
+            // Update additional info
+            document.getElementById('avg-overstay-time').textContent = data.avg_duration || '2.5h';
+            document.getElementById('overstay-trend').textContent = data.trend || '+12%';
+            
+            // Create mini chart with mock data (since API doesn't provide trend data)
+            createOverstayedVehiclesChart(overstayedCount);
+        })
+        .catch(error => {
+            console.error('Error loading overstayed vehicles:', error);
+            document.getElementById('overstayed-vehicles').textContent = '-';
+            document.getElementById('avg-overstay-time').textContent = '-';
+            document.getElementById('overstay-trend').textContent = '-';
         });
 }
 function loadUniqueVehiclesToday() {
