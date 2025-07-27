@@ -2743,6 +2743,7 @@ def api_anomaly_detection():
         anomalies = []
         from datetime import datetime, timedelta
         import pytz
+        from collections import defaultdict, deque
         # First check if we have any data at all
         total_records = db.execute("SELECT COUNT(*) FROM access_logs").fetchone()[0]
         if total_records == 0:
@@ -2770,7 +2771,6 @@ def api_anomaly_detection():
                 while (t - dq[0]).total_seconds() > 15*60:
                     dq.popleft()
                 if len(dq) >= 3:
-                    # Found anomaly
                     last_access = dq[-1]
                     anomalies.append({
                         'type': 'high',
@@ -2779,7 +2779,7 @@ def api_anomaly_detection():
                         'time': f"{(datetime.utcnow() - last_access).seconds//60} minutes ago",
                         'severity': 'high'
                     })
-                    break  # Only report once per vehicle
+                    break
         # 2. Extended stay detection (vehicles parked for over 8 hours)
         extended_stays = db.execute("""
             SELECT al1.tag_id, MAX(al1.timestamp) as last_access
@@ -2808,7 +2808,6 @@ def api_anomaly_detection():
         if total_records > 10:
             now = datetime.utcnow()
             hour = now.hour
-            # Check for low activity in the last 2-hour window
             window_start = (now - timedelta(hours=2)).replace(minute=0, second=0, microsecond=0)
             window_end = now.replace(minute=0, second=0, microsecond=0)
             activity_count = db.execute("""
@@ -2830,6 +2829,45 @@ def api_anomaly_detection():
                     'time': f"{(datetime.utcnow() - window_end).seconds//60} minutes ago",
                     'severity': 'low'
                 })
+        # 4. First-Time and Rare Visitors
+        # First-Time: first ever access is within last 24h
+        first_time_visitors = db.execute("""
+            SELECT tag_id, MIN(timestamp) as first_seen
+            FROM access_logs
+            GROUP BY tag_id
+            HAVING first_seen >= datetime('now', '-1 day')
+            ORDER BY first_seen DESC
+            LIMIT 5
+        """).fetchall()
+        for tag_id, first_seen in first_time_visitors:
+            anomalies.append({
+                'type': 'info',
+                'title': 'First-Time Visitor',
+                'desc': f"First-time visitor detected: {tag_id}",
+                'time': first_seen,
+                'severity': 'info'
+            })
+        # Rare: last access was >30 days ago, but accessed in last 24h
+        rare_visitors = db.execute("""
+            SELECT a.tag_id, MAX(a.timestamp) as last_seen, MIN(a.timestamp) as first_seen
+            FROM access_logs a
+            WHERE a.timestamp >= datetime('now', '-1 day')
+            GROUP BY a.tag_id
+        """).fetchall()
+        for tag_id, last_seen, first_seen in rare_visitors:
+            # Find previous access before last 24h
+            prev = db.execute("SELECT MAX(timestamp) FROM access_logs WHERE tag_id = ? AND timestamp < datetime('now', '-1 day')", (tag_id,)).fetchone()[0]
+            if prev:
+                prev_dt = datetime.strptime(prev, '%Y-%m-%d %H:%M:%S')
+                days_ago = (datetime.utcnow() - prev_dt).days
+                if days_ago > 30:
+                    anomalies.append({
+                        'type': 'info',
+                        'title': 'Rare Visitor',
+                        'desc': f"Rare visitor detected: {tag_id}, last seen {days_ago} days ago at {prev}",
+                        'time': last_seen,
+                        'severity': 'info'
+                    })
         if len(anomalies) == 0 and total_records > 0:
             anomalies.append({
                 'type': 'low',
