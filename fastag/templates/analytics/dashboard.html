@@ -1039,7 +1039,7 @@
                     <div class="barrier-status-card-header">
                         <div class="stats-label mb-0">Barrier Status</div>
                         <div>
-                            <button class="barrier-status-refresh-all" onclick="refreshRelayStatus()" title="Refresh All"><i class="fas fa-sync-alt"></i></button>
+                        <button class="barrier-status-refresh-all" onclick="refreshRelayStatus()" title="Refresh All"><i class="fas fa-sync-alt"></i></button>
                             <button class="barrier-status-refresh-all" onclick="turnOnAllRelays()" title="Turn All ON" style="margin-left: 5px;"><i class="fas fa-power-off text-success"></i></button>
                             <button class="barrier-status-refresh-all" onclick="turnOffAllRelays()" title="Turn All OFF" style="margin-left: 5px;"><i class="fas fa-power-off text-danger"></i></button>
                         </div>
@@ -1782,15 +1782,15 @@ function loadReaderHealth() {
             if (data.reader_health && data.reader_health.length > 0) {
                 const labels = data.reader_health.map(item => `${item[2]} (${item[1]})`);
                 const dataValues = data.reader_health.map(item => item[4]);
-                readerHealthChart.data.labels = labels;
-                readerHealthChart.data.datasets[0].data = dataValues;
-                readerHealthChart.update();
+        readerHealthChart.data.labels = labels;
+        readerHealthChart.data.datasets[0].data = dataValues;
+        readerHealthChart.update();
             } else {
                 // No data - show empty chart with message
                 readerHealthChart.data.labels = ['No Events'];
                 readerHealthChart.data.datasets[0].data = [0];
-                readerHealthChart.update();
-            }
+        readerHealthChart.update();
+    }
         })
         .catch(() => {
             // Show error state
@@ -1906,9 +1906,9 @@ function updateTables(data) {
                         </div>
                         <div class="activity-status">
                             <span class="status-badge-enhanced ${isGranted ? 'status-granted' : 'status-denied'}">
-                                ${activity[2].toUpperCase()}
-                            </span>
-                        </div>
+                            ${activity[2].toUpperCase()}
+                        </span>
+                    </div>
                     </div>
                     <div class="activity-details">
                         <div class="detail-row">

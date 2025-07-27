@@ -2068,55 +2068,26 @@ def api_hourly_activity():
 @analytics_bp.route('/api/reader-health')
 def api_reader_health():
     db = get_db()
-    
-    # Check if we have any access logs
-    total_events = db.execute("SELECT COUNT(*) FROM access_logs").fetchone()[0]
-    
-    if total_events == 0:
-        # No events - return reader status with zero events
-        rows = db.execute('''
-            SELECT 
-                r.id as reader_id,
-                r.reader_ip,
-                COALESCE(r.type, 'entry') as type,
-                l.lane_name,
-                0 as events_last_24h,
-                NULL as last_activity
-            FROM readers r
-            LEFT JOIN lanes l ON r.lane_id = l.id
-            ORDER BY r.id
-        ''').fetchall()
-    else:
-        # Has events - get real data for last 24 hours
-        rows = db.execute('''
-            SELECT 
-                r.id as reader_id,
-                r.reader_ip,
-                COALESCE(r.type, 'entry') as type,
-                l.lane_name,
-                COUNT(al.id) as events_last_24h,
-                MAX(al.timestamp) as last_activity
-            FROM readers r
-            LEFT JOIN lanes l ON r.lane_id = l.id
-            LEFT JOIN access_logs al ON r.id = al.reader_id 
-                AND al.timestamp >= datetime('now', '-24 hours')
-            GROUP BY r.id, r.reader_ip, l.lane_name
-            ORDER BY r.id
-        ''').fetchall()
-    
-    # Convert to list format expected by the chart
+    # Group by reader type for the last 24 hours
+    rows = db.execute('''
+        SELECT 
+            COALESCE(r.type, 'entry') as reader_type,
+            COUNT(al.id) as events_last_24h
+        FROM readers r
+        LEFT JOIN access_logs al ON r.id = al.reader_id 
+            AND al.timestamp >= datetime('now', '-24 hours')
+        GROUP BY reader_type
+        ORDER BY reader_type
+    ''').fetchall()
+
+    # Format for the frontend chart: [[reader_type, events_last_24h], ...]
     result = []
     for row in rows:
-        # Format: [reader_id, reader_ip, type, lane_name, events_last_24h, last_activity]
         result.append([
-            row[0],  # reader_id
-            row[1],  # reader_ip
-            row[2],  # type
-            row[3],  # lane_name
-            row[4],  # events_last_24h
-            row[5]   # last_activity
+            row[0],  # reader_type
+            row[1]   # events_last_24h
         ])
-    
+
     return jsonify({'reader_health': result})
 
 @analytics_bp.route('/api/top-granted-tags')
