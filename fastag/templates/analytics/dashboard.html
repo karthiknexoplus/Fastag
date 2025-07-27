@@ -1428,6 +1428,14 @@ document.addEventListener('DOMContentLoaded', function() {
     loadMostDeniedTagsFeed();
     loadRecentEntriesFeed();
     loadRecentExitsFeed();
+    document.getElementById('export-csv-btn').addEventListener('click', function() {
+        const url = '/analytics/api/export-data?type=access_logs';
+        window.open(url, '_blank');
+    });
+    document.getElementById('export-excel-btn').addEventListener('click', function() {
+        const url = '/analytics/api/export-data?type=access_logs&format=excel';
+        window.open(url, '_blank');
+    });
 });
 
 function initializeCharts() {
