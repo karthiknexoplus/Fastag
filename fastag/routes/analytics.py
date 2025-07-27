@@ -2068,21 +2068,42 @@ def api_hourly_activity():
 @analytics_bp.route('/api/reader-health')
 def api_reader_health():
     db = get_db()
-    rows = db.execute('''
-        SELECT 
-            r.id as reader_id,
-            r.reader_ip,
-            COALESCE(r.type, 'entry') as type,
-            l.lane_name,
-            COUNT(al.id) as events_last_24h,
-            MAX(al.timestamp) as last_activity
-        FROM readers r
-        JOIN lanes l ON r.lane_id = l.id
-        LEFT JOIN access_logs al ON r.id = al.reader_id 
-            AND al.timestamp >= datetime('now', '-24 hours')
-        GROUP BY r.id, r.reader_ip, l.lane_name
-        ORDER BY r.id
-    ''').fetchall()
+    
+    # Check if we have any access logs
+    total_events = db.execute("SELECT COUNT(*) FROM access_logs").fetchone()[0]
+    
+    if total_events == 0:
+        # No events - return reader status with zero events
+        rows = db.execute('''
+            SELECT 
+                r.id as reader_id,
+                r.reader_ip,
+                COALESCE(r.type, 'entry') as type,
+                l.lane_name,
+                0 as events_last_24h,
+                NULL as last_activity
+            FROM readers r
+            LEFT JOIN lanes l ON r.lane_id = l.id
+            ORDER BY r.id
+        ''').fetchall()
+    else:
+        # Has events - get real data
+        rows = db.execute('''
+            SELECT 
+                r.id as reader_id,
+                r.reader_ip,
+                COALESCE(r.type, 'entry') as type,
+                l.lane_name,
+                COUNT(al.id) as events_last_24h,
+                MAX(al.timestamp) as last_activity
+            FROM readers r
+            LEFT JOIN lanes l ON r.lane_id = l.id
+            LEFT JOIN access_logs al ON r.id = al.reader_id 
+                AND al.timestamp >= datetime('now', '-24 hours')
+            GROUP BY r.id, r.reader_ip, l.lane_name
+            ORDER BY r.id
+        ''').fetchall()
+    
     return jsonify({'reader_health': [list(row) for row in rows]})
 
 @analytics_bp.route('/api/top-granted-tags')
