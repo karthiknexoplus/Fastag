@@ -340,10 +340,13 @@ kycUserSearch.addEventListener('blur', function() {
 
 function toIST(utcString) {
     if (!utcString) return '-';
+    // Always parse as UTC, regardless of browser local time
     let utcDate;
     if (utcString.includes('T')) {
-        utcDate = new Date(utcString);
+        // ISO format, treat as UTC
+        utcDate = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z');
     } else {
+        // 'YYYY-MM-DD HH:MM:SS' format
         const [date, time] = utcString.split(' ');
         if (!date || !time) return utcString;
         const [year, month, day] = date.split('-').map(Number);
@@ -351,7 +354,8 @@ function toIST(utcString) {
         utcDate = new Date(Date.UTC(year, month - 1, day, hour, min, sec));
     }
     if (isNaN(utcDate.getTime())) return utcString;
-    const istDate = new Date(utcDate.getTime() + 19800 * 1000);
+    // Add 5.5 hours for IST
+    const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
     const pad = n => n.toString().padStart(2, '0');
     return `${pad(istDate.getDate())}/${pad(istDate.getMonth() + 1)}/${istDate.getFullYear()}, ${pad(istDate.getHours())}:${pad(istDate.getMinutes())}:${pad(istDate.getSeconds())}`;
 }
