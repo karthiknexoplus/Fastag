@@ -2797,13 +2797,13 @@ def api_anomaly_detection():
             tag_ids = [row[0] for row in extended_stays]
             if tag_ids:
                 desc = f"{len(tag_ids)} vehicles parked for over 8 hours: {', '.join(tag_ids[:5])}{'...' if len(tag_ids) > 5 else ''}"
-            anomalies.append({
-                'type': 'medium',
-                'title': 'Extended Stay Detected',
+                anomalies.append({
+                    'type': 'medium',
+                    'title': 'Extended Stay Detected',
                     'desc': desc,
                     'time': f"{(datetime.utcnow() - datetime.strptime(extended_stays[0][1], '%Y-%m-%d %H:%M:%S')).seconds//60} minutes ago",
-                'severity': 'medium'
-            })
+                    'severity': 'medium'
+                })
         # 3. Low activity periods (unusually low traffic)
         if total_records > 10:
             now = datetime.utcnow()
@@ -2822,13 +2822,13 @@ def api_anomaly_detection():
                 )
             """).fetchone()[0] or 10
             if activity_count < (avg_activity * 0.3):
-                    anomalies.append({
-                        'type': 'low',
-                        'title': 'Low Activity Period',
+                anomalies.append({
+                    'type': 'low',
+                    'title': 'Low Activity Period',
                     'desc': f"Unusually low traffic between {window_start.strftime('%H:%M')}-{window_end.strftime('%H:%M')}",
                     'time': f"{(datetime.utcnow() - window_end).seconds//60} minutes ago",
-                        'severity': 'low'
-                    })
+                    'severity': 'low'
+                })
         # 4. First-Time and Rare Visitors
         # First-Time: first ever access is within last 24h
         first_time_visitors = db.execute("""
