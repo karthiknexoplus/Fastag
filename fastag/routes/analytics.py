@@ -3116,7 +3116,7 @@ def export_top_granted_tags():
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         WHERE al.access_result = 'granted'
           AND DATE(al.timestamp) BETWEEN ? AND ?
-        GROUP BY vehicle_number, owner_name, model_name
+        GROUP BY COALESCE(ku.vehicle_number, tvc.vehicle_number), COALESCE(ku.name, tvc.owner_name), tvc.model_name
         ORDER BY granted_count DESC
         LIMIT 10
     ''', (start_date, end_date)).fetchall()
