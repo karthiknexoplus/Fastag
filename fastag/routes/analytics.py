@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import sqlite3
 import json
 import pytz
+from collections import defaultdict, deque
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -2740,12 +2741,11 @@ def api_anomaly_detection():
     try:
         db = get_db()
         anomalies = []
-        
+        from datetime import datetime, timedelta
+        import pytz
         # First check if we have any data at all
         total_records = db.execute("SELECT COUNT(*) FROM access_logs").fetchone()[0]
-        
         if total_records == 0:
-            # No data available - return system status
             anomalies.append({
                 'type': 'low',
                 'title': 'System Status',
@@ -2754,34 +2754,35 @@ def api_anomaly_detection():
                 'severity': 'info'
             })
             return jsonify({'anomalies': anomalies})
-        
-        # 1. Unusual access patterns (same vehicle multiple times in short period)
-        unusual_patterns = db.execute("""
-            SELECT 
-                tag_id,
-                COUNT(*) as access_count,
-                MAX(timestamp) as last_access,
-                MIN(timestamp) as first_access
-            FROM access_logs 
+        # 1. Unusual access patterns (3+ accesses in any 15-min window in last hour)
+        recent_logs = db.execute("""
+            SELECT tag_id, timestamp FROM access_logs 
             WHERE timestamp >= datetime('now', '-1 hour')
-            GROUP BY tag_id
-            HAVING access_count > 3
-            ORDER BY access_count DESC
-            LIMIT 3
+            ORDER BY tag_id, timestamp
         """).fetchall()
-        
-        for pattern in unusual_patterns:
-            anomalies.append({
-                'type': 'high',
-                'title': 'Unusual Access Pattern',
-                'desc': f"Vehicle {pattern[0]} accessed {pattern[1]} times in 1 hour",
-                'time': 'Just detected',
-                'severity': 'high'
-            })
-        
+        tag_times = defaultdict(list)
+        for tag_id, ts in recent_logs:
+            tag_times[tag_id].append(datetime.strptime(ts, '%Y-%m-%d %H:%M:%S'))
+        for tag_id, times in tag_times.items():
+            dq = deque()
+            for t in times:
+                dq.append(t)
+                while (t - dq[0]).total_seconds() > 15*60:
+                    dq.popleft()
+                if len(dq) >= 3:
+                    # Found anomaly
+                    last_access = dq[-1]
+                    anomalies.append({
+                        'type': 'high',
+                        'title': 'Unusual Access Pattern',
+                        'desc': f"Vehicle {tag_id} accessed {len(dq)} times in 15 minutes",
+                        'time': f"{(datetime.utcnow() - last_access).seconds//60} minutes ago",
+                        'severity': 'high'
+                    })
+                    break  # Only report once per vehicle
         # 2. Extended stay detection (vehicles parked for over 8 hours)
         extended_stays = db.execute("""
-            SELECT COUNT(DISTINCT tag_id) as extended_count
+            SELECT al1.tag_id, MAX(al1.timestamp) as last_access
             FROM access_logs al1
             WHERE al1.access_result = 'granted'
             AND al1.timestamp = (
@@ -2790,51 +2791,45 @@ def api_anomaly_detection():
                 WHERE al2.tag_id = al1.tag_id
             )
             AND al1.timestamp <= datetime('now', '-8 hours')
-        """).fetchone()
-        
-        if extended_stays and extended_stays[0] > 0:
-            anomalies.append({
-                'type': 'medium',
-                'title': 'Extended Stay Detected',
-                'desc': f"{extended_stays[0]} vehicles parked for over 8 hours",
-                'time': '15 minutes ago',
-                'severity': 'medium'
-            })
-        
-        # 3. Low activity periods (unusually low traffic) - only if we have enough data
-        if total_records > 10:  # Only check if we have some historical data
-            current_hour = datetime.now().hour
-            current_hour_activity = db.execute("""
-                SELECT COUNT(*) as activity_count
-                FROM access_logs 
-                WHERE strftime('%H', timestamp) = ? 
-                AND timestamp >= datetime('now', '-1 hour')
-            """, (f"{current_hour:02d}",)).fetchone()
-            
-            avg_hourly_activity = db.execute("""
-                SELECT AVG(hourly_count) as avg_activity
-                FROM (
-                    SELECT COUNT(*) as hourly_count
-                    FROM access_logs 
+            GROUP BY al1.tag_id
+        """).fetchall()
+        if extended_stays:
+            tag_ids = [row[0] for row in extended_stays]
+            if tag_ids:
+                desc = f"{len(tag_ids)} vehicles parked for over 8 hours: {', '.join(tag_ids[:5])}{'...' if len(tag_ids) > 5 else ''}"
+                anomalies.append({
+                    'type': 'medium',
+                    'title': 'Extended Stay Detected',
+                    'desc': desc,
+                    'time': f"{(datetime.utcnow() - datetime.strptime(extended_stays[0][1], '%Y-%m-%d %H:%M:%S')).seconds//60} minutes ago",
+                    'severity': 'medium'
+                })
+        # 3. Low activity periods (unusually low traffic)
+        if total_records > 10:
+            now = datetime.utcnow()
+            hour = now.hour
+            # Check for low activity in the last 2-hour window
+            window_start = (now - timedelta(hours=2)).replace(minute=0, second=0, microsecond=0)
+            window_end = now.replace(minute=0, second=0, microsecond=0)
+            activity_count = db.execute("""
+                SELECT COUNT(*) FROM access_logs
+                WHERE timestamp >= ? AND timestamp < ?
+            """, (window_start.strftime('%Y-%m-%d %H:%M:%S'), window_end.strftime('%Y-%m-%d %H:%M:%S'))).fetchone()[0]
+            avg_activity = db.execute("""
+                SELECT AVG(cnt) FROM (
+                    SELECT COUNT(*) as cnt FROM access_logs
                     WHERE timestamp >= datetime('now', '-7 days')
                     GROUP BY strftime('%H', timestamp)
                 )
-            """).fetchone()
-            
-            if current_hour_activity and avg_hourly_activity:
-                current_count = current_hour_activity[0]
-                avg_count = avg_hourly_activity[0] or 10
-                
-                if current_count < (avg_count * 0.3):  # Less than 30% of average
-                    anomalies.append({
-                        'type': 'low',
-                        'title': 'Low Activity Period',
-                        'desc': f"Unusually low traffic in current hour ({current_count} vs avg {round(avg_count)})",
-                        'time': '1 hour ago',
-                        'severity': 'low'
-                    })
-        
-        # If no anomalies detected and we have data, show system status
+            """).fetchone()[0] or 10
+            if activity_count < (avg_activity * 0.3):
+                anomalies.append({
+                    'type': 'low',
+                    'title': 'Low Activity Period',
+                    'desc': f"Unusually low traffic between {window_start.strftime('%H:%M')}-{window_end.strftime('%H:%M')}",
+                    'time': f"{(datetime.utcnow() - window_end).seconds//60} minutes ago",
+                    'severity': 'low'
+                })
         if len(anomalies) == 0 and total_records > 0:
             anomalies.append({
                 'type': 'low',
@@ -2843,7 +2838,6 @@ def api_anomaly_detection():
                 'time': 'System check',
                 'severity': 'info'
             })
-        
         return jsonify({'anomalies': anomalies})
     except Exception as e:
         import traceback
