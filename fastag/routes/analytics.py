@@ -606,6 +606,13 @@ def export_data():
             JOIN readers r ON al.reader_id = r.id
         """
         conditions = []
+        # Default to last 7 days if no start_date/end_date provided
+        if not start_date or not end_date:
+            from datetime import datetime, timedelta
+            now = datetime.utcnow()
+            seven_days_ago = now - timedelta(days=7)
+            start_date = seven_days_ago.strftime('%Y-%m-%d')
+            end_date = now.strftime('%Y-%m-%d')
         if start_date and end_date:
             conditions.append(f"DATE(al.timestamp) BETWEEN '{start_date}' AND '{end_date}'")
         if conditions:
