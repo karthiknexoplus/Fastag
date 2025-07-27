@@ -452,3 +452,74 @@ def relay_status():
     except Exception as e:
         logger.error(f"Error in /api/relay-status: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500 
+
+@api.route('/relay/<int:relay_number>/<action>', methods=['POST'])
+def relay_control(relay_number, action):
+    """
+    Control individual relays. 
+    relay_number: 1, 2, or 3
+    action: 'on' or 'off'
+    """
+    try:
+        if relay_number not in [1, 2, 3]:
+            return jsonify({"success": False, "error": "Invalid relay number. Must be 1, 2, or 3."}), 400
+        
+        if action not in ['on', 'off']:
+            return jsonify({"success": False, "error": "Invalid action. Must be 'on' or 'off'."}), 400
+        
+        relay_controller = current_app.relay_controller
+        
+        if action == 'on':
+            success = relay_controller.turn_on(relay_number)
+        else:  # action == 'off'
+            success = relay_controller.turn_off(relay_number)
+        
+        if success:
+            return jsonify({
+                "success": True, 
+                "relay": relay_number, 
+                "action": action,
+                "message": f"Relay {relay_number} turned {action.upper()}"
+            }), 200
+        else:
+            return jsonify({
+                "success": False, 
+                "error": f"Failed to turn {action} relay {relay_number}"
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error in /api/relay/{relay_number}/{action}: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@api.route('/relay/all/<action>', methods=['POST'])
+def relay_control_all(action):
+    """
+    Control all relays at once.
+    action: 'on' or 'off'
+    """
+    try:
+        if action not in ['on', 'off']:
+            return jsonify({"success": False, "error": "Invalid action. Must be 'on' or 'off'."}), 400
+        
+        relay_controller = current_app.relay_controller
+        results = []
+        
+        for relay_num in [1, 2, 3]:
+            if action == 'on':
+                success = relay_controller.turn_on(relay_num)
+            else:  # action == 'off'
+                success = relay_controller.turn_off(relay_num)
+            results.append({"relay": relay_num, "success": success})
+        
+        all_success = all(result["success"] for result in results)
+        
+        return jsonify({
+            "success": all_success,
+            "action": action,
+            "results": results,
+            "message": f"All relays turned {action.upper()}" if all_success else "Some relays failed to turn " + action.upper()
+        }), 200 if all_success else 500
+            
+    except Exception as e:
+        logger.error(f"Error in /api/relay/all/{action}: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500 

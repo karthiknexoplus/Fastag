@@ -283,6 +283,19 @@
     .barrier-status-refresh-all:hover {
         background: #f3e9ff;
     }
+    .barrier-relay-dot {
+        transition: all 0.3s ease;
+    }
+    .barrier-relay-dot:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    }
+    .barrier-relay-dot.on:hover {
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
+    }
+    .barrier-relay-dot.off:hover {
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.3);
+    }
     .barrier-status-divider {
         border-top: 1px solid #eee;
         margin: 0.3rem 0 1rem 0;
@@ -416,20 +429,24 @@
                 <div class="card-body pb-2">
                     <div class="barrier-status-card-header">
                         <div class="stats-label mb-0">Barrier Status</div>
-                        <button class="barrier-status-refresh-all" onclick="refreshRelayStatus()" title="Refresh All"><i class="fas fa-sync-alt"></i></button>
+                        <div>
+                            <button class="barrier-status-refresh-all" onclick="refreshRelayStatus()" title="Refresh All"><i class="fas fa-sync-alt"></i></button>
+                            <button class="barrier-status-refresh-all" onclick="turnOnAllRelays()" title="Turn All ON" style="margin-left: 5px;"><i class="fas fa-power-off text-success"></i></button>
+                            <button class="barrier-status-refresh-all" onclick="turnOffAllRelays()" title="Turn All OFF" style="margin-left: 5px;"><i class="fas fa-power-off text-danger"></i></button>
+                        </div>
                     </div>
                     <div class="barrier-status-divider"></div>
                     <div class="barrier-relay-group mt-3 mb-2" id="barrier-status-icons">
                         <div class="barrier-relay-item">
-                            <span id="relay1-dot" class="barrier-relay-dot unknown" title="Unknown"></span><br>
+                            <span id="relay1-dot" class="barrier-relay-dot unknown" title="Unknown" onclick="toggleRelay(1)" style="cursor: pointer;"></span><br>
                             <span class="barrier-relay-label-sleek">Relay 1</span>
                         </div>
                         <div class="barrier-relay-item">
-                            <span id="relay2-dot" class="barrier-relay-dot unknown" title="Unknown"></span><br>
+                            <span id="relay2-dot" class="barrier-relay-dot unknown" title="Unknown" onclick="toggleRelay(2)" style="cursor: pointer;"></span><br>
                             <span class="barrier-relay-label-sleek">Relay 2</span>
                         </div>
                         <div class="barrier-relay-item">
-                            <span id="relay3-dot" class="barrier-relay-dot unknown" title="Unknown"></span><br>
+                            <span id="relay3-dot" class="barrier-relay-dot unknown" title="Unknown" onclick="toggleRelay(3)" style="cursor: pointer;"></span><br>
                             <span class="barrier-relay-label-sleek">Relay 3</span>
                         </div>
                     </div>
@@ -550,9 +567,9 @@
                 </h5>
                 <div id="most-denied-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
-                </div>
             </div>
         </div>
+    </div>
 
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
@@ -791,13 +808,13 @@ function loadCurrentOccupancy() {
     fetch('/analytics/api/current-occupancy', {timeout: 10000})
         .then(r => r.json())
         .then(data => {
-            document.getElementById('current-occupancy').innerHTML = `
+    document.getElementById('current-occupancy').innerHTML = `
                 <div>${data.total ?? '-'}</div>
-                <div style="font-size:0.9rem;">
+        <div style="font-size:0.9rem;">
                     <span style="color:#28a745;">FASTag: ${data.fastag ?? '-'}</span> |
                     <span style="color:#007bff;">OEM: ${data.car_oem ?? '-'}</span> |
                     <span style="color:#ff9800;">Other: ${data.other ?? '-'}</span>
-                </div>`;
+        </div>`;
         })
         .catch(() => {
             document.getElementById('current-occupancy').innerHTML = '<div class="text-center text-danger">Error loading</div>';
@@ -816,13 +833,13 @@ function loadUniqueTagsDeniedToday() {
     fetch('/analytics/api/unique-tags-denied-today')
         .then(r => r.json())
         .then(data => {
-            document.getElementById('today-denied').innerHTML = `
+    document.getElementById('today-denied').innerHTML = `
                 <div>${data.total ?? '-'}</div>
-                <div style="font-size:0.9rem;">
+        <div style="font-size:0.9rem;">
                     <span style="color:#28a745;">FASTag: ${data.fastag ?? '-'}</span> |
                     <span style="color:#007bff;">OEM: ${data.car_oem ?? '-'}</span> |
                     <span style="color:#ff9800;">Other: ${data.other ?? '-'}</span>
-                </div>`;
+        </div>`;
         });
 }
 function loadUniqueTagsToday() {
@@ -830,13 +847,13 @@ function loadUniqueTagsToday() {
     fetch('/analytics/api/unique-tags-today')
         .then(r => r.json())
         .then(data => {
-            document.getElementById('total-events').innerHTML = `
+    document.getElementById('total-events').innerHTML = `
                 <div>${data.total ?? '-'}</div>
-                <div style="font-size:0.9rem;">
+        <div style="font-size:0.9rem;">
                     <span style="color:#28a745;">FASTag: ${data.fastag ?? '-'}</span> |
                     <span style="color:#007bff;">OEM: ${data.car_oem ?? '-'}</span> |
                     <span style="color:#ff9800;">Other: ${data.other ?? '-'}</span>
-                </div>`;
+        </div>`;
         });
 }
 function loadOverstayedVehicles() {
@@ -844,7 +861,7 @@ function loadOverstayedVehicles() {
     fetch('/analytics/api/overstayed-vehicles')
         .then(r => r.json())
         .then(data => {
-            document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
+    document.getElementById('overstayed-vehicles').textContent = data.overstayed ?? '-';
         });
 }
 function loadUniqueVehiclesToday() {
@@ -852,7 +869,7 @@ function loadUniqueVehiclesToday() {
     fetch('/analytics/api/unique-vehicles-today')
         .then(r => r.json())
         .then(data => {
-            document.getElementById('unique-vehicles-today').textContent = data.unique_vehicles_today ?? '-';
+    document.getElementById('unique-vehicles-today').textContent = data.unique_vehicles_today ?? '-';
         });
 }
 function loadFastagVsNonfastag() {
@@ -882,28 +899,28 @@ function loadHourlyActivity() {
     fetch('/analytics/api/hourly-activity')
         .then(r => r.json())
         .then(data => {
-            if (data.hourly_data) {
-                const labels = data.hourly_data.map(item => item[0] + ':00');
-                const grantedData = data.hourly_data.map(item => item[2]);
-                const deniedData = data.hourly_data.map(item => item[3]);
-                hourlyChart.data.labels = labels;
-                hourlyChart.data.datasets[0].data = grantedData;
-                hourlyChart.data.datasets[1].data = deniedData;
-                hourlyChart.update();
-            }
+    if (data.hourly_data) {
+        const labels = data.hourly_data.map(item => item[0] + ':00');
+        const grantedData = data.hourly_data.map(item => item[2]);
+        const deniedData = data.hourly_data.map(item => item[3]);
+        hourlyChart.data.labels = labels;
+        hourlyChart.data.datasets[0].data = grantedData;
+        hourlyChart.data.datasets[1].data = deniedData;
+        hourlyChart.update();
+    }
         });
 }
 function loadReaderHealth() {
     fetch('/analytics/api/reader-health', {timeout: 10000})
         .then(r => r.json())
         .then(data => {
-            if (data.reader_health) {
+    if (data.reader_health) {
                 const labels = data.reader_health.map(item => `${item[2]} (${item[1]})`);
                 const dataValues = data.reader_health.map(item => item[4]);
-                readerHealthChart.data.labels = labels;
-                readerHealthChart.data.datasets[0].data = dataValues;
-                readerHealthChart.update();
-            }
+        readerHealthChart.data.labels = labels;
+        readerHealthChart.data.datasets[0].data = dataValues;
+        readerHealthChart.update();
+    }
         })
         .catch(() => {
             // Optionally show error in the chart area
@@ -1403,6 +1420,158 @@ function refreshRelayStatus(relayNum) {
         });
 }
 
+function toggleRelay(relayNumber) {
+    // Get current status to determine what action to take
+    fetch('/api/relay-status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.status) {
+                const currentStatus = data.status['relay' + relayNumber];
+                const newAction = currentStatus === 'ON' ? 'off' : 'on';
+                
+                // Send the toggle command
+                fetch(`/api/relay/${relayNumber}/${newAction}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Update the UI immediately
+                        setRelayIcon(relayNumber, newAction.toUpperCase());
+                        // Show success message
+                        showToast(`Relay ${relayNumber} turned ${newAction.toUpperCase()}`, 'success');
+                    } else {
+                        showToast(`Failed to turn ${newAction} relay ${relayNumber}: ${result.error}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error toggling relay:', error);
+                    showToast(`Error controlling relay ${relayNumber}`, 'error');
+                });
+            } else {
+                showToast('Unable to get current relay status', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error getting relay status:', error);
+            showToast('Error getting relay status', 'error');
+        });
+}
+
+function turnOnRelay(relayNumber) {
+    fetch(`/api/relay/${relayNumber}/on`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            setRelayIcon(relayNumber, 'ON');
+            showToast(`Relay ${relayNumber} turned ON`, 'success');
+        } else {
+            showToast(`Failed to turn ON relay ${relayNumber}: ${result.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error turning on relay:', error);
+        showToast(`Error turning ON relay ${relayNumber}`, 'error');
+    });
+}
+
+function turnOffRelay(relayNumber) {
+    fetch(`/api/relay/${relayNumber}/off`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            setRelayIcon(relayNumber, 'OFF');
+            showToast(`Relay ${relayNumber} turned OFF`, 'success');
+        } else {
+            showToast(`Failed to turn OFF relay ${relayNumber}: ${result.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error turning off relay:', error);
+        showToast(`Error turning OFF relay ${relayNumber}`, 'error');
+    });
+}
+
+function turnOnAllRelays() {
+    fetch('/api/relay/all/on', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            for (let i = 1; i <= 3; i++) {
+                setRelayIcon(i, 'ON');
+            }
+            showToast('All relays turned ON', 'success');
+        } else {
+            showToast(`Failed to turn ON all relays: ${result.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error turning on all relays:', error);
+        showToast('Error turning ON all relays', 'error');
+    });
+}
+
+function turnOffAllRelays() {
+    fetch('/api/relay/all/off', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            for (let i = 1; i <= 3; i++) {
+                setRelayIcon(i, 'OFF');
+            }
+            showToast('All relays turned OFF', 'success');
+        } else {
+            showToast(`Failed to turn OFF all relays: ${result.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error turning off all relays:', error);
+        showToast('Error turning OFF all relays', 'error');
+    });
+}
+
+function showToast(message, type = 'info') {
+    // Create a simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 3000);
+}
+
 function loadTopGrantedTags() {
     const table = document.getElementById('top-granted-tags-table');
     table.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>';
@@ -1510,13 +1679,13 @@ function loadRecentActivity() {
                                 <div>
                                     <div class="fw-bold">${vehicleNumber}</div>
                                     <small class="text-muted">${notFastag}Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
-                                </div>
+            </div>
                                 <span class="status-badge ${activity.access_result === 'granted' ? 'status-granted' : 'status-denied'}">
                                     ${activity.access_result.toUpperCase()}
                                 </span>
-                            </div>
+                    </div>
                             <small class="text-muted">${activity.time}</small>
-                        </div>
+                </div>
                     `;
                 }).join('');
             } else {
@@ -1543,7 +1712,7 @@ function renderGrantedTagActivityItem(activity) {
                 <div>
                     <div class="fw-bold">${activity.vehicle_number || activity.tag_id}</div>
                     <small class="text-muted">Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
-                </div>
+            </div>
                 <span class="status-badge status-granted">GRANTED</span>
             </div>
             <small class="text-muted">${activity.time || ''}</small>
@@ -1615,11 +1784,11 @@ function renderDeniedTagActivityItem(activity) {
                 <div>
                     <div class="fw-bold">${activity.vehicle_number || activity.tag_id}</div>
                     <small class="text-muted">Tag: ${activity.tag_id}${secondary ? ' • ' + secondary : ''}</small>
-                </div>
-                <span class="status-badge status-denied">${activity.denied_count}</span>
             </div>
+                <span class="status-badge status-denied">${activity.denied_count}</span>
+                    </div>
             <small class="text-muted">${activity.last_denied_time || ''}</small>
-        </div>
+                </div>
     `;
 }
 
@@ -1682,11 +1851,11 @@ function renderExitTagActivityItem(tag) {
                 <div>
                     <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
                     <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
-                </div>
-                ${statusBadge}
             </div>
+                ${statusBadge}
+                    </div>
             <small class="text-muted">${tag.time || ''}</small>
-        </div>
+                </div>
     `;
 }
 
@@ -1716,14 +1885,14 @@ function renderActivityItem(activity) {
                 <div>
                     <div class="fw-bold">${activity.vehicle_number || activity.tag_id}</div>
                     <small class="text-muted">${secondary}</small>
-                </div>
+            </div>
                 <span class="status-badge ${activity.access_result === 'granted' ? 'status-granted' : 'status-denied'}">
                     ${activity.access_result.toUpperCase()}
                 </span>
-            </div>
+                    </div>
             <small class="text-muted">${activity.time}</small>
-        </div>
+                </div>
     `;
 }
 </script>
-{% endblock %}
+{% endblock %} 
