@@ -265,6 +265,17 @@
         font-weight: 600;
         color: #495057;
     }
+    
+    /* Mini Chart Styles */
+    .mini-chart-container {
+        height: 60px;
+        position: relative;
+        margin-top: 5px;
+    }
+    
+    .mini-chart-container canvas {
+        max-height: 60px !important;
+    }
     .status-badge {
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -625,6 +636,23 @@
             </div>
         </div>
         {% endif %}
+        <!-- Today's Activity Mini-Chart -->
+        <div class="col-xl-9 col-md-6 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body pb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="stats-label mb-0">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            Today's Activity Trend
+                        </h6>
+                        <small class="text-white-50" id="activity-summary">Loading...</small>
+                    </div>
+                    <div class="mini-chart-container">
+                        <canvas id="todayActivityMiniChart" height="60"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- FASTag vs Non-FASTag Pie Chart, Overstayed Vehicles, Unique Vehicles, Entry/Exit Trend -->
@@ -791,7 +819,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script>
 window.COMPANY_NAME = "{{ COMPANY_NAME }}";
-let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart;
+let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart, todayActivityMiniChart;
 
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -2139,6 +2167,133 @@ function renderDeniedFastagActivityItem(item) {
     `;
 }
 
+function loadTodayActivityMiniChart() {
+    fetch('/analytics/api/hourly-activity')
+        .then(response => response.json())
+        .then(data => {
+            if (data.hourly_data && data.hourly_data.length > 0) {
+                createTodayActivityMiniChart(data.hourly_data);
+                updateActivitySummary(data.hourly_data);
+            } else {
+                document.getElementById('activity-summary').textContent = 'No data available';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading mini chart data:', error);
+            document.getElementById('activity-summary').textContent = 'Error loading data';
+        });
+}
+
+function createTodayActivityMiniChart(hourlyData) {
+    const ctx = document.getElementById('todayActivityMiniChart');
+    if (!ctx) return;
+    
+    // Prepare data for mini chart
+    const labels = hourlyData.map(item => item.hour);
+    const grantedData = hourlyData.map(item => item.granted);
+    const deniedData = hourlyData.map(item => item.denied);
+    
+    // Find peak hour
+    const totalData = hourlyData.map(item => item.granted + item.denied);
+    const maxIndex = totalData.indexOf(Math.max(...totalData));
+    const peakHour = labels[maxIndex];
+    
+    // Calculate current hour activity
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentHourData = hourlyData.find(item => parseInt(item.hour) === currentHour);
+    const currentActivity = currentHourData ? (currentHourData.granted + currentHourData.denied) : 0;
+    
+    // Calculate average
+    const totalEvents = totalData.reduce((sum, val) => sum + val, 0);
+    const average = totalEvents / totalData.length;
+    
+    // Update summary
+    document.getElementById('activity-summary').textContent = 
+        `Peak: ${peakHour}:00 | Current: ${currentActivity} | Avg: ${average.toFixed(1)}/hr`;
+    
+    // Create mini chart
+    todayActivityMiniChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Events',
+                data: totalData,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: function(context) {
+                            return `${context[0].label}:00`;
+                        },
+                        label: function(context) {
+                            const hourData = hourlyData[context.dataIndex];
+                            return [
+                                `Total: ${context.parsed.y} events`,
+                                `Granted: ${hourData.granted}`,
+                                `Denied: ${hourData.denied}`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: { display: false },
+                    ticks: {
+                        maxTicksLimit: 8,
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        font: { size: 10 }
+                    }
+                },
+                y: {
+                    display: false,
+                    grid: { display: false }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            elements: {
+                point: {
+                    hoverRadius: 4,
+                    hoverBorderWidth: 2
+                }
+            }
+        }
+    });
+}
+
+function updateActivitySummary(hourlyData) {
+    const totalEvents = hourlyData.reduce((sum, item) => sum + item.granted + item.denied, 0);
+    const currentHour = new Date().getHours();
+    const currentHourData = hourlyData.find(item => parseInt(item.hour) === currentHour);
+    const currentActivity = currentHourData ? (currentHourData.granted + currentHourData.denied) : 0;
+    
+    const maxEvents = Math.max(...hourlyData.map(item => item.granted + item.denied));
+    const peakHour = hourlyData.find(item => (item.granted + item.denied) === maxEvents);
+    
+    const summary = `Peak: ${peakHour.hour}:00 | Current: ${currentActivity} | Total: ${totalEvents}`;
+    document.getElementById('activity-summary').textContent = summary;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
@@ -2147,6 +2302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRecentExitsFeed();
     loadRecentActivity();
     loadDeniedFastagActivityFeed();
+    loadTodayActivityMiniChart();
 });
 
 // In the JS function that renders Recent Activity, add lane_type to the display
