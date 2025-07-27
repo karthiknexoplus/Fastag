@@ -2648,6 +2648,20 @@ def api_anomaly_detection():
         db = get_db()
         anomalies = []
         
+        # First check if we have any data at all
+        total_records = db.execute("SELECT COUNT(*) FROM access_logs").fetchone()[0]
+        
+        if total_records == 0:
+            # No data available - return system status
+            anomalies.append({
+                'type': 'low',
+                'title': 'System Status',
+                'desc': 'No access logs available yet. System is ready for operation.',
+                'time': 'System check',
+                'severity': 'info'
+            })
+            return jsonify({'anomalies': anomalies})
+        
         # 1. Unusual access patterns (same vehicle multiple times in short period)
         unusual_patterns = db.execute("""
             SELECT 
@@ -2694,38 +2708,51 @@ def api_anomaly_detection():
                 'severity': 'medium'
             })
         
-        # 3. Low activity periods (unusually low traffic)
-        current_hour = datetime.now().hour
-        current_hour_activity = db.execute("""
-            SELECT COUNT(*) as activity_count
-            FROM access_logs 
-            WHERE strftime('%H', timestamp) = ? 
-            AND timestamp >= datetime('now', '-1 hour')
-        """, (f"{current_hour:02d}",)).fetchone()
-        
-        avg_hourly_activity = db.execute("""
-            SELECT AVG(hourly_count) as avg_activity
-            FROM (
-                SELECT COUNT(*) as hourly_count
+        # 3. Low activity periods (unusually low traffic) - only if we have enough data
+        if total_records > 10:  # Only check if we have some historical data
+            current_hour = datetime.now().hour
+            current_hour_activity = db.execute("""
+                SELECT COUNT(*) as activity_count
                 FROM access_logs 
-                WHERE timestamp >= datetime('now', '-7 days')
-                GROUP BY strftime('%H', timestamp)
-            )
-        """).fetchone()
-        
-        if current_hour_activity and avg_hourly_activity:
-            current_count = current_hour_activity[0]
-            avg_count = avg_hourly_activity[0] or 10
+                WHERE strftime('%H', timestamp) = ? 
+                AND timestamp >= datetime('now', '-1 hour')
+            """, (f"{current_hour:02d}",)).fetchone()
             
-            if current_count < (avg_count * 0.3):  # Less than 30% of average
-                anomalies.append({
-                    'type': 'low',
-                    'title': 'Low Activity Period',
-                    'desc': f"Unusually low traffic in current hour ({current_count} vs avg {round(avg_count)})",
-                    'time': '1 hour ago',
-                    'severity': 'low'
-                })
+            avg_hourly_activity = db.execute("""
+                SELECT AVG(hourly_count) as avg_activity
+                FROM (
+                    SELECT COUNT(*) as hourly_count
+                    FROM access_logs 
+                    WHERE timestamp >= datetime('now', '-7 days')
+                    GROUP BY strftime('%H', timestamp)
+                )
+            """).fetchone()
+            
+            if current_hour_activity and avg_hourly_activity:
+                current_count = current_hour_activity[0]
+                avg_count = avg_hourly_activity[0] or 10
+                
+                if current_count < (avg_count * 0.3):  # Less than 30% of average
+                    anomalies.append({
+                        'type': 'low',
+                        'title': 'Low Activity Period',
+                        'desc': f"Unusually low traffic in current hour ({current_count} vs avg {round(avg_count)})",
+                        'time': '1 hour ago',
+                        'severity': 'low'
+                    })
+        
+        # If no anomalies detected and we have data, show system status
+        if len(anomalies) == 0 and total_records > 0:
+            anomalies.append({
+                'type': 'low',
+                'title': 'System Status',
+                'desc': 'No anomalies detected. System is running normally.',
+                'time': 'System check',
+                'severity': 'info'
+            })
         
         return jsonify({'anomalies': anomalies})
     except Exception as e:
+        import traceback
+        print(f"Error in anomaly detection: {e}\n{traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
