@@ -2495,55 +2495,87 @@ def api_reader_health_dashboard():
     try:
         db = get_db()
         
-        # Get reader health data for last hour
+        # Check if we have any access logs
+        total_access_logs = db.execute("SELECT COUNT(*) FROM access_logs").fetchone()[0]
+        
+        # Get all readers with their basic info
         reader_health_rows = db.execute("""
             SELECT 
                 r.id as reader_id,
                 r.reader_ip,
                 r.type as reader_type,
-                COUNT(*) as total_events,
-                SUM(CASE WHEN al.access_result = 'granted' THEN 1 ELSE 0 END) as granted_events,
-                SUM(CASE WHEN al.access_result = 'denied' THEN 1 ELSE 0 END) as denied_events,
-                MAX(al.timestamp) as last_event_time,
-                CASE 
-                    WHEN (SELECT COUNT(*) FROM access_logs WHERE timestamp >= datetime('now', '-1 hour')) > 0 
-                    THEN COUNT(*) * 100.0 / (SELECT COUNT(*) FROM access_logs WHERE timestamp >= datetime('now', '-1 hour'))
-                    ELSE 99.5
-                END as uptime_percentage
+                l.lane_name
             FROM readers r
-            LEFT JOIN access_logs al ON r.id = al.reader_id 
-                AND al.timestamp >= datetime('now', '-1 hour')
-            GROUP BY r.id, r.reader_ip, r.type
+            LEFT JOIN lanes l ON r.lane_id = l.id
             ORDER BY r.id
         """).fetchall()
         
         readers = []
         for row in reader_health_rows:
-            # Calculate uptime based on events in last hour
-            uptime = min(99.9, max(95.0, row[7] or 99.5))  # Ensure reasonable range
+            reader_id = row[0]
+            reader_ip = row[1]
+            reader_type = row[2]
+            lane_name = row[3] or 'Unknown'
             
-            # Calculate time since last event
-            last_event = row[6]
-            if last_event:
-                last_event_dt = datetime.strptime(last_event, '%Y-%m-%d %H:%M:%S')
-                now = datetime.now()
-                time_diff = now - last_event_dt
-                minutes_ago = int(time_diff.total_seconds() / 60)
-                last_event_str = f"{minutes_ago} min ago" if minutes_ago > 0 else "Just now"
+            if total_access_logs == 0:
+                # No access logs - show reader as available but no activity
+                readers.append({
+                    'reader_id': reader_id,
+                    'reader_ip': reader_ip,
+                    'reader_type': reader_type,
+                    'lane_name': lane_name,
+                    'total_events': 0,
+                    'granted_events': 0,
+                    'denied_events': 0,
+                    'uptime_percentage': 100.0,  # Reader is available
+                    'last_event': 'No events yet',
+                    'status': 'available',
+                    'events_per_hour': 0
+                })
             else:
-                last_event_str = "No recent events"
-            
-            readers.append({
-                'reader_id': row[0],
-                'reader_ip': row[1],
-                'reader_type': row[2],
-                'total_events': row[3] or 0,
-                'granted_events': row[4] or 0,
-                'denied_events': row[5] or 0,
-                'uptime_percentage': uptime,
-                'last_event': last_event_str,
-                'status': 'online' if row[3] and row[3] > 0 else 'offline'
-            })
+                # Has access logs - get real data for last hour
+                hour_data = db.execute("""
+                    SELECT 
+                        COUNT(*) as total_events,
+                        SUM(CASE WHEN al.access_result = 'granted' THEN 1 ELSE 0 END) as granted_events,
+                        SUM(CASE WHEN al.access_result = 'denied' THEN 1 ELSE 0 END) as denied_events,
+                        MAX(al.timestamp) as last_event_time
+                    FROM access_logs al
+                    WHERE al.reader_id = ? AND al.timestamp >= datetime('now', '-1 hour')
+                """, (reader_id,)).fetchone()
+                
+                total_events = hour_data[0] or 0
+                granted_events = hour_data[1] or 0
+                denied_events = hour_data[2] or 0
+                last_event_time = hour_data[3]
+                
+                # Calculate uptime based on whether reader has any events in last hour
+                uptime = 100.0 if total_events > 0 else 0.0
+                
+                # Calculate time since last event
+                if last_event_time:
+                    from datetime import datetime
+                    last_event_dt = datetime.strptime(last_event_time, '%Y-%m-%d %H:%M:%S')
+                    now = datetime.now()
+                    time_diff = now - last_event_dt
+                    minutes_ago = int(time_diff.total_seconds() / 60)
+                    last_event_str = f"{minutes_ago} min ago" if minutes_ago > 0 else "Just now"
+                else:
+                    last_event_str = "No recent events"
+                
+                readers.append({
+                    'reader_id': reader_id,
+                    'reader_ip': reader_ip,
+                    'reader_type': reader_type,
+                    'lane_name': lane_name,
+                    'total_events': total_events,
+                    'granted_events': granted_events,
+                    'denied_events': denied_events,
+                    'uptime_percentage': uptime,
+                    'last_event': last_event_str,
+                    'status': 'online' if total_events > 0 else 'offline',
+                    'events_per_hour': total_events
+                })
         
         return jsonify({'readers': readers})
     except Exception as e:

@@ -1221,49 +1221,8 @@
                     <i class="fas fa-heartbeat text-success me-2"></i>
                     Reader Health Dashboard
                 </h5>
-                <div class="reader-health-grid">
-                    <div class="reader-status-card" id="reader1-status">
-                        <div class="reader-header">
-                            <i class="fas fa-wifi"></i>
-                            <span>Reader 1 (Entry)</span>
-                            <div class="status-indicator online"></div>
-                        </div>
-                        <div class="reader-metrics">
-                            <div class="metric">
-                                <span class="metric-label">Uptime</span>
-                                <span class="metric-value" id="reader1-uptime">99.8%</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Events/hr</span>
-                                <span class="metric-value" id="reader1-events">24</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Last Event</span>
-                                <span class="metric-value" id="reader1-last">2 min ago</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="reader-status-card" id="reader2-status">
-                        <div class="reader-header">
-                            <i class="fas fa-wifi"></i>
-                            <span>Reader 2 (Exit)</span>
-                            <div class="status-indicator online"></div>
-                        </div>
-                        <div class="reader-metrics">
-                            <div class="metric">
-                                <span class="metric-label">Uptime</span>
-                                <span class="metric-value" id="reader2-uptime">99.9%</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Events/hr</span>
-                                <span class="metric-value" id="reader2-events">18</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Last Event</span>
-                                <span class="metric-value" id="reader2-last">5 min ago</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="reader-health-grid" id="reader-health-container">
+                    <!-- Reader cards will be populated dynamically -->
                 </div>
             </div>
         </div>
@@ -1820,16 +1779,24 @@ function loadReaderHealth() {
     fetch('/analytics/api/reader-health', {timeout: 10000})
         .then(r => r.json())
         .then(data => {
-    if (data.reader_health) {
+            if (data.reader_health && data.reader_health.length > 0) {
                 const labels = data.reader_health.map(item => `${item[2]} (${item[1]})`);
                 const dataValues = data.reader_health.map(item => item[4]);
-        readerHealthChart.data.labels = labels;
-        readerHealthChart.data.datasets[0].data = dataValues;
-        readerHealthChart.update();
-    }
+                readerHealthChart.data.labels = labels;
+                readerHealthChart.data.datasets[0].data = dataValues;
+                readerHealthChart.update();
+            } else {
+                // No data - show empty chart with message
+                readerHealthChart.data.labels = ['No Events'];
+                readerHealthChart.data.datasets[0].data = [0];
+                readerHealthChart.update();
+            }
         })
         .catch(() => {
-            // Optionally show error in the chart area
+            // Show error state
+            readerHealthChart.data.labels = ['Error'];
+            readerHealthChart.data.datasets[0].data = [0];
+            readerHealthChart.update();
         });
 }
 
@@ -3170,29 +3137,49 @@ function loadReaderHealth() {
     fetch('/analytics/api/reader-health-dashboard')
         .then(r => r.json())
         .then(data => {
+            const container = document.getElementById('reader-health-container');
             if (data.readers && data.readers.length > 0) {
+                container.innerHTML = '';
                 data.readers.forEach((reader, index) => {
-                    if (index < 2) { // Only handle first 2 readers
-                        const readerNum = index + 1;
-                        document.getElementById(`reader${readerNum}-uptime`).textContent = reader.uptime_percentage.toFixed(1) + '%';
-                        document.getElementById(`reader${readerNum}-events`).textContent = reader.total_events;
-                        document.getElementById(`reader${readerNum}-last`).textContent = reader.last_event;
-                        
-                        // Update status indicator
-                        const statusIndicator = document.querySelector(`#reader${readerNum}-status .status-indicator`);
-                        if (statusIndicator) {
-                            statusIndicator.className = `status-indicator ${reader.status}`;
-                        }
-                    }
+                    const readerCard = document.createElement('div');
+                    readerCard.className = 'reader-status-card';
+                    readerCard.id = `reader${index + 1}-status`;
+                    
+                    const statusClass = reader.status === 'online' || reader.status === 'available' ? 'online' : 'offline';
+                    const statusText = reader.status === 'available' ? 'Available' : (reader.status === 'online' ? 'Online' : 'Offline');
+                    
+                    readerCard.innerHTML = `
+                        <div class="reader-header">
+                            <i class="fas fa-wifi"></i>
+                            <span>Reader ${index + 1} (${reader.reader_type.charAt(0).toUpperCase() + reader.reader_type.slice(1)})</span>
+                            <div class="status-indicator ${statusClass}"></div>
+                        </div>
+                        <div class="reader-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Uptime</span>
+                                <span class="metric-value">${reader.uptime_percentage.toFixed(1)}%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Events/hr</span>
+                                <span class="metric-value">${reader.events_per_hour || reader.total_events || 0}</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Last Event</span>
+                                <span class="metric-value">${reader.last_event}</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(readerCard);
                 });
+            } else {
+                container.innerHTML = '<div class="text-muted text-center p-3">No readers configured</div>';
             }
         })
         .catch(error => {
             console.error('Error loading reader health:', error);
+            const container = document.getElementById('reader-health-container');
+            container.innerHTML = '<div class="text-danger text-center p-3">Error loading reader health data</div>';
         });
-    
-    // Refresh every 30 seconds
-    setInterval(loadReaderHealth, 30000);
 }
 
 // Peak Time Predictions
