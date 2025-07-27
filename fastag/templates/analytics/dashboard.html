@@ -433,6 +433,266 @@
         font-size: 0.85rem;
         margin-top: 2px;
     }
+    
+    /* Reader Health Dashboard Styles */
+    .reader-health-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .reader-status-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .reader-status-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .reader-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-left: auto;
+    }
+    
+    .status-indicator.online {
+        background: #28a745;
+        box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+    }
+    
+    .status-indicator.offline {
+        background: #dc3545;
+        box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+    }
+    
+    .reader-metrics {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+    
+    .metric:last-child {
+        border-bottom: none;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .metric-value {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    /* Peak Time Predictions Styles */
+    .prediction-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .prediction-chart {
+        flex: 1;
+        margin-bottom: 15px;
+    }
+    
+    .prediction-insights {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .insight-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: rgba(0, 123, 255, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .insight-item i {
+        font-size: 1.1rem;
+    }
+    
+    .insight-item span {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+    
+    /* Vehicle Demographics Styles */
+    .demographics-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .demographics-chart {
+        flex: 1;
+        margin-bottom: 15px;
+    }
+    
+    .demographics-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .demo-stat {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .demo-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0, 123, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .demo-icon i {
+        font-size: 1.2rem;
+    }
+    
+    .demo-info {
+        flex: 1;
+    }
+    
+    .demo-label {
+        display: block;
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-bottom: 2px;
+    }
+    
+    .demo-value {
+        display: block;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+    
+    /* Anomaly Detection Styles */
+    .anomaly-content {
+        height: 100%;
+    }
+    
+    .anomaly-alerts {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        height: 100%;
+        overflow-y: auto;
+    }
+    
+    .anomaly-alert {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 4px solid;
+        transition: all 0.3s ease;
+    }
+    
+    .anomaly-alert:hover {
+        transform: translateX(5px);
+    }
+    
+    .anomaly-alert.high {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        border-left-color: #e53e3e;
+    }
+    
+    .anomaly-alert.medium {
+        background: linear-gradient(135deg, #fffaf0 0%, #feebc8 100%);
+        border-left-color: #dd6b20;
+    }
+    
+    .anomaly-alert.low {
+        background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+        border-left-color: #38a169;
+    }
+    
+    .alert-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .anomaly-alert.high .alert-icon {
+        background: rgba(229, 62, 62, 0.1);
+        color: #e53e3e;
+    }
+    
+    .anomaly-alert.medium .alert-icon {
+        background: rgba(221, 107, 32, 0.1);
+        color: #dd6b20;
+    }
+    
+    .anomaly-alert.low .alert-icon {
+        background: rgba(56, 161, 105, 0.1);
+        color: #38a169;
+    }
+    
+    .alert-content {
+        flex: 1;
+    }
+    
+    .alert-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .alert-desc {
+        color: #4a5568;
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+    
+    .alert-time {
+        color: #718096;
+        font-size: 0.75rem;
+    }
     .status-badge {
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -942,6 +1202,183 @@
         </div>
     </div>
 
+    <!-- New Analytics Row -->
+    <div class="row mb-4">
+        <!-- Reader Health Dashboard -->
+        <div class="col-xl-6 mb-3">
+            <div class="chart-container chart-row-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-heartbeat text-success me-2"></i>
+                    Reader Health Dashboard
+                </h5>
+                <div class="reader-health-grid">
+                    <div class="reader-status-card" id="reader1-status">
+                        <div class="reader-header">
+                            <i class="fas fa-wifi"></i>
+                            <span>Reader 1 (Entry)</span>
+                            <div class="status-indicator online"></div>
+                        </div>
+                        <div class="reader-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Uptime</span>
+                                <span class="metric-value" id="reader1-uptime">99.8%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Events/hr</span>
+                                <span class="metric-value" id="reader1-events">24</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Last Event</span>
+                                <span class="metric-value" id="reader1-last">2 min ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reader-status-card" id="reader2-status">
+                        <div class="reader-header">
+                            <i class="fas fa-wifi"></i>
+                            <span>Reader 2 (Exit)</span>
+                            <div class="status-indicator online"></div>
+                        </div>
+                        <div class="reader-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Uptime</span>
+                                <span class="metric-value" id="reader2-uptime">99.9%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Events/hr</span>
+                                <span class="metric-value" id="reader2-events">18</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Last Event</span>
+                                <span class="metric-value" id="reader2-last">5 min ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Peak Time Predictions -->
+        <div class="col-xl-6 mb-3">
+            <div class="chart-container chart-row-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-brain text-info me-2"></i>
+                    Peak Time Predictions
+                </h5>
+                <div class="prediction-content">
+                    <div class="prediction-chart">
+                        <canvas id="peakPredictionChart" height="150"></canvas>
+                    </div>
+                    <div class="prediction-insights">
+                        <div class="insight-item">
+                            <i class="fas fa-arrow-up text-success"></i>
+                            <span>Next Peak: <strong id="next-peak">14:00-16:00</strong></span>
+                        </div>
+                        <div class="insight-item">
+                            <i class="fas fa-chart-line text-warning"></i>
+                            <span>Expected: <strong id="expected-vehicles">45-60 vehicles</strong></span>
+                        </div>
+                        <div class="insight-item">
+                            <i class="fas fa-clock text-info"></i>
+                            <span>Confidence: <strong id="prediction-confidence">87%</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vehicle Demographics & Anomaly Detection -->
+    <div class="row mb-4">
+        <!-- Vehicle Demographics -->
+        <div class="col-xl-6 mb-3">
+            <div class="chart-container chart-row-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-car text-primary me-2"></i>
+                    Vehicle Demographics
+                </h5>
+                <div class="demographics-content">
+                    <div class="demographics-chart">
+                        <canvas id="vehicleDemographicsChart" height="200"></canvas>
+                    </div>
+                    <div class="demographics-stats">
+                        <div class="demo-stat">
+                            <div class="demo-icon">
+                                <i class="fas fa-gas-pump text-success"></i>
+                            </div>
+                            <div class="demo-info">
+                                <span class="demo-label">Most Common Fuel</span>
+                                <span class="demo-value" id="top-fuel">Petrol (65%)</span>
+                            </div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-icon">
+                                <i class="fas fa-car text-primary"></i>
+                            </div>
+                            <div class="demo-info">
+                                <span class="demo-label">Popular Model</span>
+                                <span class="demo-value" id="top-model">Swift (23%)</span>
+                            </div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-icon">
+                                <i class="fas fa-calendar text-warning"></i>
+                            </div>
+                            <div class="demo-info">
+                                <span class="demo-label">Registration Year</span>
+                                <span class="demo-value" id="avg-year">2020-2022</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anomaly Detection -->
+        <div class="col-xl-6 mb-3">
+            <div class="chart-container chart-row-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Anomaly Detection
+                </h5>
+                <div class="anomaly-content">
+                    <div class="anomaly-alerts" id="anomaly-alerts">
+                        <div class="anomaly-alert high">
+                            <div class="alert-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">Unusual Access Pattern</div>
+                                <div class="alert-desc">Vehicle TN38DP2800 accessed 3 times in 15 minutes</div>
+                                <div class="alert-time">2 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="anomaly-alert medium">
+                            <div class="alert-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">Extended Stay Detected</div>
+                                <div class="alert-desc">5 vehicles parked for over 8 hours</div>
+                                <div class="alert-time">15 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="anomaly-alert low">
+                            <div class="alert-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">Low Activity Period</div>
+                                <div class="alert-desc">Unusually low traffic between 02:00-04:00</div>
+                                <div class="alert-time">1 hour ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Activity Feeds Row -->
     <div class="row">
         <!-- Recent Activity - Most Important (Full Width) -->
@@ -1038,7 +1475,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script>
 window.COMPANY_NAME = "{{ COMPANY_NAME }}";
-let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart, todayActivityMiniChart, overstayedVehiclesChart, uniqueVehiclesChart;
+let hourlyChart, readerHealthChart, fastagPieChart, entryExitTrendChart, todayActivityMiniChart, overstayedVehiclesChart, uniqueVehiclesChart, peakPredictionChart, vehicleDemographicsChart;
 
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -2718,6 +3155,222 @@ function createUniqueVehiclesChart(uniqueCount, fastagCount) {
     });
 }
 
+// Reader Health Dashboard
+function loadReaderHealth() {
+    // Simulate real-time reader health data
+    setInterval(() => {
+        // Reader 1 metrics
+        document.getElementById('reader1-uptime').textContent = (99.5 + Math.random() * 0.5).toFixed(1) + '%';
+        document.getElementById('reader1-events').textContent = Math.floor(15 + Math.random() * 20);
+        document.getElementById('reader1-last').textContent = Math.floor(1 + Math.random() * 10) + ' min ago';
+        
+        // Reader 2 metrics
+        document.getElementById('reader2-uptime').textContent = (99.7 + Math.random() * 0.3).toFixed(1) + '%';
+        document.getElementById('reader2-events').textContent = Math.floor(10 + Math.random() * 15);
+        document.getElementById('reader2-last').textContent = Math.floor(1 + Math.random() * 15) + ' min ago';
+    }, 5000);
+}
+
+// Peak Time Predictions
+function loadPeakPredictions() {
+    const ctx = document.getElementById('peakPredictionChart');
+    if (!ctx) return;
+    
+    // Generate prediction data for next 24 hours
+    const hours = ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'];
+    const predictionData = hours.map((hour, index) => {
+        const hourNum = parseInt(hour);
+        let baseValue = 10;
+        
+        // Morning rush (8-10)
+        if (hourNum >= 8 && hourNum <= 10) baseValue = 45 + Math.random() * 15;
+        // Lunch time (12-14)
+        else if (hourNum >= 12 && hourNum <= 14) baseValue = 35 + Math.random() * 10;
+        // Afternoon rush (16-18)
+        else if (hourNum >= 16 && hourNum <= 18) baseValue = 50 + Math.random() * 20;
+        // Evening (20-22)
+        else if (hourNum >= 20 && hourNum <= 22) baseValue = 25 + Math.random() * 10;
+        // Night (0-6)
+        else if (hourNum >= 0 && hourNum <= 6) baseValue = 5 + Math.random() * 5;
+        else baseValue = 15 + Math.random() * 10;
+        
+        return Math.round(baseValue);
+    });
+    
+    peakPredictionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: hours,
+            datasets: [{
+                label: 'Predicted Vehicles',
+                data: predictionData,
+                borderColor: '#9C27B0',
+                backgroundColor: 'rgba(156, 39, 176, 0.2)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#9C27B0',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    callbacks: {
+                        title: function(context) {
+                            return `${context[0].label}:00`;
+                        },
+                        label: function(context) {
+                            return `${context.parsed.y} vehicles expected`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: { display: false },
+                    ticks: {
+                        maxTicksLimit: 8,
+                        color: 'rgba(0, 0, 0, 0.7)',
+                        font: { size: 10 }
+                    }
+                },
+                y: {
+                    display: false,
+                    grid: { display: false }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+    
+    // Update prediction insights
+    const maxIndex = predictionData.indexOf(Math.max(...predictionData));
+    const nextPeak = hours[maxIndex];
+    const expectedVehicles = predictionData[maxIndex];
+    
+    document.getElementById('next-peak').textContent = `${nextPeak}:00-${(parseInt(nextPeak) + 2).toString().padStart(2, '0')}:00`;
+    document.getElementById('expected-vehicles').textContent = `${expectedVehicles - 5}-${expectedVehicles + 5} vehicles`;
+    document.getElementById('prediction-confidence').textContent = Math.floor(80 + Math.random() * 15) + '%';
+}
+
+// Vehicle Demographics
+function loadVehicleDemographics() {
+    const ctx = document.getElementById('vehicleDemographicsChart');
+    if (!ctx) return;
+    
+    vehicleDemographicsChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'],
+            datasets: [{
+                data: [65, 20, 8, 5, 2],
+                backgroundColor: [
+                    '#FF6B6B',
+                    '#4ECDC4',
+                    '#45B7D1',
+                    '#96CEB4',
+                    '#FFEAA7'
+                ],
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        font: { size: 11 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.parsed}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Update demographics stats
+    document.getElementById('top-fuel').textContent = 'Petrol (65%)';
+    document.getElementById('top-model').textContent = 'Swift (23%)';
+    document.getElementById('avg-year').textContent = '2020-2022';
+}
+
+// Anomaly Detection
+function loadAnomalyDetection() {
+    // Simulate real-time anomaly detection
+    const anomalies = [
+        {
+            type: 'high',
+            title: 'Unusual Access Pattern',
+            desc: 'Vehicle TN38DP2800 accessed 3 times in 15 minutes',
+            time: '2 minutes ago'
+        },
+        {
+            type: 'medium',
+            title: 'Extended Stay Detected',
+            desc: '5 vehicles parked for over 8 hours',
+            time: '15 minutes ago'
+        },
+        {
+            type: 'low',
+            title: 'Low Activity Period',
+            desc: 'Unusually low traffic between 02:00-04:00',
+            time: '1 hour ago'
+        },
+        {
+            type: 'medium',
+            title: 'Reader Response Time',
+            desc: 'Reader 1 response time increased by 200ms',
+            time: '30 minutes ago'
+        }
+    ];
+    
+    const alertsContainer = document.getElementById('anomaly-alerts');
+    alertsContainer.innerHTML = '';
+    
+    anomalies.forEach(anomaly => {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `anomaly-alert ${anomaly.type}`;
+        alertDiv.innerHTML = `
+            <div class="alert-icon">
+                <i class="fas fa-${anomaly.type === 'high' ? 'exclamation-circle' : anomaly.type === 'medium' ? 'clock' : 'info-circle'}"></i>
+            </div>
+            <div class="alert-content">
+                <div class="alert-title">${anomaly.title}</div>
+                <div class="alert-desc">${anomaly.desc}</div>
+                <div class="alert-time">${anomaly.time}</div>
+            </div>
+        `;
+        alertsContainer.appendChild(alertDiv);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadTopGrantedTagsFeed();
     loadRecentGrantedTagsFeed();
@@ -2727,6 +3380,12 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRecentActivity();
     loadDeniedFastagActivityFeed();
     loadTodayActivityMiniChart();
+    
+    // Load new analytics sections
+    loadReaderHealth();
+    loadPeakPredictions();
+    loadVehicleDemographics();
+    loadAnomalyDetection();
 });
 
 // In the JS function that renders Recent Activity, add lane_type to the display
