@@ -1448,7 +1448,7 @@ function loadDeniedFastagActivityFeed() {
                 return;
             }
             if (!data.results || data.results.length === 0) {
-                feed.innerHTML = '<div class="text-center text-muted">No denied FASTag events in the last 24 hours.</div>';
+                feed.innerHTML = '<div class="text-center text-muted">No denied FASTag events in the last 2 days.</div>';
                 return;
             }
             feed.innerHTML = data.results.map(item => renderDeniedFastagActivityItem(item)).join('');

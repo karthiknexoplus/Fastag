@@ -1804,9 +1804,9 @@ def denied_fastag_activity_feed():
             LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             WHERE al.access_result = 'denied'
                 AND al.tag_id LIKE '34161%'
-                AND al.timestamp >= datetime('now', '-24 hours')
+                AND al.timestamp >= datetime('now', '-2 days')
             ORDER BY al.timestamp DESC
-            LIMIT 50
+            LIMIT 100
         ''').fetchall()
         
         result = []
