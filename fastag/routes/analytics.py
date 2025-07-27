@@ -2125,7 +2125,7 @@ def api_recent_granted_tags():
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             tvc.model_name,
             l.lane_name,
-            'entry' as lane_type,
+            r.type as lane_type,
             al.access_result
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
