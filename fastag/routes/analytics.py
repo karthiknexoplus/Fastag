@@ -2221,7 +2221,7 @@ def api_most_denied_tags():
         GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name, tvc.model_name, l.lane_name
         ORDER BY denied_count DESC
         LIMIT 10
-    ''').fetchall()
+    ''', (start_date, end_date)).fetchall()
     
     # Convert timestamps to IST
     import pytz
@@ -3150,7 +3150,7 @@ def export_most_denied_tags():
         JOIN readers r ON al.reader_id = r.id
         WHERE al.access_result = 'denied'
           AND DATE(al.timestamp) BETWEEN ? AND ?
-        GROUP BY al.tag_id, vehicle_number, owner_name, model_name, l.lane_name
+        GROUP BY al.tag_id, COALESCE(ku.vehicle_number, tvc.vehicle_number), COALESCE(ku.name, tvc.owner_name), tvc.model_name, l.lane_name
         ORDER BY denied_count DESC
         LIMIT 10
     ''', (start_date, end_date)).fetchall()
