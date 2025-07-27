@@ -23,7 +23,7 @@
         background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
     }
     .stats-card.danger {
-        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff4757 100%);
     }
     .stats-card.info {
         background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
@@ -324,10 +324,18 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15);
         padding: 8px;
         border-radius: 8px;
         backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .overstayed-info-item:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     .overstayed-info-item i {
