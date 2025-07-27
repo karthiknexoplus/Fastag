@@ -1443,6 +1443,7 @@ function loadDeniedFastagActivityFeed() {
         })
         .then(data => {
             console.log('Denied FASTag Activity data:', data); // Debug log
+            console.log('Results count:', data.results ? data.results.length : 'undefined');
             if (data.error) {
                 feed.innerHTML = `<div class='text-danger'>Error: ${data.error}</div>`;
                 return;
@@ -1451,7 +1452,17 @@ function loadDeniedFastagActivityFeed() {
                 feed.innerHTML = '<div class="text-center text-muted">No denied FASTag events in the last 2 days.</div>';
                 return;
             }
-            feed.innerHTML = data.results.map(item => renderDeniedFastagActivityItem(item)).join('');
+            console.log('Rendering', data.results.length, 'items');
+            const renderedItems = data.results.map(item => {
+                try {
+                    return renderDeniedFastagActivityItem(item);
+                } catch (error) {
+                    console.error('Error rendering item:', item, error);
+                    return `<div class="text-danger">Error rendering item: ${error.message}</div>`;
+                }
+            });
+            feed.innerHTML = renderedItems.join('');
+            console.log('Rendering complete');
         })
         .catch(err => {
             console.error('Error loading denied FASTag activity data:', err);
