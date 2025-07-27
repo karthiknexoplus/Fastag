@@ -340,24 +340,16 @@ kycUserSearch.addEventListener('blur', function() {
 
 function toIST(utcString) {
     if (!utcString) return '-';
-    // Always parse as UTC, regardless of browser local time
     let utcDate;
     if (utcString.includes('T')) {
-        // ISO format, treat as UTC
         utcDate = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z');
     } else {
-        // 'YYYY-MM-DD HH:MM:SS' format
-        const [date, time] = utcString.split(' ');
-        if (!date || !time) return utcString;
-        const [year, month, day] = date.split('-').map(Number);
-        const [hour, min, sec] = time.split(':').map(Number);
-        utcDate = new Date(Date.UTC(year, month - 1, day, hour, min, sec));
+        // Convert 'YYYY-MM-DD HH:MM:SS' to 'YYYY-MM-DDTHH:MM:SSZ' (treat as UTC)
+        utcDate = new Date(utcString.replace(' ', 'T') + 'Z');
     }
     if (isNaN(utcDate.getTime())) return utcString;
-    // Add 5.5 hours for IST
-    const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
-    const pad = n => n.toString().padStart(2, '0');
-    return `${pad(istDate.getDate())}/${pad(istDate.getMonth() + 1)}/${istDate.getFullYear()}, ${pad(istDate.getHours())}:${pad(istDate.getMinutes())}:${pad(istDate.getSeconds())}`;
+    // Format in IST using browser's Intl API
+    return utcDate.toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(',', '');
 }
 function viewHistory(id) {
     const modal = new bootstrap.Modal(document.getElementById('activityHistoryModal'));
