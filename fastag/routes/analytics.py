@@ -1,10 +1,13 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, Response
 from fastag.utils.db import get_db
 from datetime import datetime, timedelta
 import sqlite3
 import json
 import pytz
 from collections import defaultdict, deque
+from openpyxl import Workbook
+import csv
+from io import StringIO, BytesIO
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -2924,3 +2927,296 @@ def test_export():
         mimetype='text/csv',
         headers={'Content-Disposition': 'attachment; filename=test_export.csv'}
     )
+
+def _get_date_range():
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    if not start_date or not end_date:
+        now = datetime.utcnow()
+        seven_days_ago = now - timedelta(days=7)
+        start_date = seven_days_ago.strftime('%Y-%m-%d')
+        end_date = now.strftime('%Y-%m-%d')
+    return start_date, end_date
+
+def _export_response(headers, data_rows, filename_base, export_format):
+    if export_format == 'excel':
+        wb = Workbook()
+        ws = wb.active
+        ws.append(headers)
+        for row in data_rows:
+            ws.append(row)
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        filename = f'{filename_base}_{datetime.now().strftime("%Y%m%d")}.xlsx'
+        return Response(
+            output.getvalue(),
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={'Content-Disposition': f'attachment; filename={filename}'}
+        )
+    else:
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(headers)
+        for row in data_rows:
+            writer.writerow(row)
+        filename = f'{filename_base}_{datetime.now().strftime("%Y%m%d")}.csv'
+        return Response(
+            output.getvalue(),
+            mimetype='text/csv',
+            headers={'Content-Disposition': f'attachment; filename={filename}'}
+        )
+
+# 1. Export Recent Entries
+@analytics_bp.route('/api/export-recent-entries')
+def export_recent_entries():
+    db = get_db()
+    export_format = request.args.get('format', 'csv')
+    start_date, end_date = _get_date_range()
+    rows = db.execute('''
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            l.lane_name,
+            'entry' as lane_type,
+            al.access_result
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE r.type = 'entry'
+          AND DATE(al.timestamp) BETWEEN ? AND ?
+        ORDER BY al.timestamp DESC
+    ''', (start_date, end_date)).fetchall()
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    data_rows = []
+    for row in rows:
+        timestamp_str = row[0]
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        data_rows.append([
+            ist_time_str, row[1], row[2] or '', row[3] or '', row[4] or '', row[5] or '', row[6] or '', row[7] or ''
+        ])
+    headers = ['Time', 'Tag ID', 'Vehicle Number', 'Owner Name', 'Model Name', 'Lane Name', 'Lane Type', 'Access Result']
+    return _export_response(headers, data_rows, 'recent_entries', export_format)
+
+# 2. Export Recent Exits
+@analytics_bp.route('/api/export-recent-exits')
+def export_recent_exits():
+    db = get_db()
+    export_format = request.args.get('format', 'csv')
+    start_date, end_date = _get_date_range()
+    rows = db.execute('''
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            l.lane_name,
+            'exit' as lane_type,
+            al.access_result
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE r.type = 'exit'
+          AND DATE(al.timestamp) BETWEEN ? AND ?
+        ORDER BY al.timestamp DESC
+    ''', (start_date, end_date)).fetchall()
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    data_rows = []
+    for row in rows:
+        timestamp_str = row[0]
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        data_rows.append([
+            ist_time_str, row[1], row[2] or '', row[3] or '', row[4] or '', row[5] or '', row[6] or '', row[7] or ''
+        ])
+    headers = ['Time', 'Tag ID', 'Vehicle Number', 'Owner Name', 'Model Name', 'Lane Name', 'Lane Type', 'Access Result']
+    return _export_response(headers, data_rows, 'recent_exits', export_format)
+
+# 3. Export Recent Granted Tags
+@analytics_bp.route('/api/export-recent-granted-tags')
+def export_recent_granted_tags():
+    db = get_db()
+    export_format = request.args.get('format', 'csv')
+    start_date, end_date = _get_date_range()
+    rows = db.execute('''
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            l.lane_name,
+            r.type as lane_type,
+            al.access_result
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.access_result = 'granted'
+          AND DATE(al.timestamp) BETWEEN ? AND ?
+        ORDER BY al.timestamp DESC
+    ''', (start_date, end_date)).fetchall()
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    data_rows = []
+    for row in rows:
+        timestamp_str = row[0]
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        data_rows.append([
+            ist_time_str, row[1], row[2] or '', row[3] or '', row[4] or '', row[5] or '', row[6] or '', row[7] or ''
+        ])
+    headers = ['Time', 'Tag ID', 'Vehicle Number', 'Owner Name', 'Model Name', 'Lane Name', 'Lane Type', 'Access Result']
+    return _export_response(headers, data_rows, 'recent_granted_tags', export_format)
+
+# 4. Export Top Granted Tags
+@analytics_bp.route('/api/export-top-granted-tags')
+def export_top_granted_tags():
+    db = get_db()
+    export_format = request.args.get('format', 'csv')
+    start_date, end_date = _get_date_range()
+    rows = db.execute('''
+        SELECT 
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            COUNT(*) as granted_count
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        WHERE al.access_result = 'granted'
+          AND DATE(al.timestamp) BETWEEN ? AND ?
+        GROUP BY vehicle_number, owner_name, model_name
+        ORDER BY granted_count DESC
+        LIMIT 10
+    ''', (start_date, end_date)).fetchall()
+    data_rows = []
+    for row in rows:
+        data_rows.append([
+            row[0] or '', row[1] or '', row[2] or '', row[3]
+        ])
+    headers = ['Vehicle Number', 'Owner Name', 'Model Name', 'Granted Count']
+    return _export_response(headers, data_rows, 'top_granted_tags', export_format)
+
+# 5. Export Most Denied Tags
+@analytics_bp.route('/api/export-most-denied-tags')
+def export_most_denied_tags():
+    db = get_db()
+    export_format = request.args.get('format', 'csv')
+    start_date, end_date = _get_date_range()
+    rows = db.execute('''
+        SELECT 
+            al.tag_id,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            l.lane_name,
+            COUNT(*) as denied_count,
+            MAX(al.timestamp) as last_denied_time
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.access_result = 'denied'
+          AND DATE(al.timestamp) BETWEEN ? AND ?
+        GROUP BY al.tag_id, vehicle_number, owner_name, model_name, l.lane_name
+        ORDER BY denied_count DESC
+        LIMIT 10
+    ''', (start_date, end_date)).fetchall()
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    data_rows = []
+    for row in rows:
+        timestamp_str = row[6]  # last_denied_time
+        if timestamp_str:
+            if 'T' in timestamp_str and 'Z' in timestamp_str:
+                utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif 'T' in timestamp_str:
+                utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+            else:
+                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                utc_time = utc_time.replace(tzinfo=pytz.UTC)
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            ist_time_str = ''
+        data_rows.append([
+            row[0], row[1] or '', row[2] or '', row[3] or '', row[4] or '', row[5], ist_time_str
+        ])
+    headers = ['Tag ID', 'Vehicle Number', 'Owner Name', 'Model Name', 'Lane Name', 'Denied Count', 'Last Denied Time']
+    return _export_response(headers, data_rows, 'most_denied_tags', export_format)
+
+# 6. Export Denied FASTag Activity
+@analytics_bp.route('/api/export-denied-fastag-activity')
+def export_denied_fastag_activity():
+    db = get_db()
+    export_format = request.args.get('format', 'csv')
+    start_date, end_date = _get_date_range()
+    rows = db.execute('''
+        SELECT 
+            al.timestamp,
+            al.tag_id,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            l.lane_name,
+            r.type as lane_type,
+            al.access_result,
+            al.reason
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.access_result = 'denied'
+          AND DATE(al.timestamp) BETWEEN ? AND ?
+        ORDER BY al.timestamp DESC
+    ''', (start_date, end_date)).fetchall()
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    data_rows = []
+    for row in rows:
+        timestamp_str = row[0]
+        if 'T' in timestamp_str and 'Z' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        elif 'T' in timestamp_str:
+            utc_time = datetime.fromisoformat(timestamp_str + '+00:00')
+        else:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+        ist_time = utc_time.astimezone(ist_tz)
+        ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        data_rows.append([
+            ist_time_str, row[1], row[2] or '', row[3] or '', row[4] or '', row[5] or '', row[6] or '', row[7] or '', row[8] or ''
+        ])
+    headers = ['Time', 'Tag ID', 'Vehicle Number', 'Owner Name', 'Model Name', 'Lane Name', 'Lane Type', 'Access Result', 'Reason']
+    return _export_response(headers, data_rows, 'denied_fastag_activity', export_format)
