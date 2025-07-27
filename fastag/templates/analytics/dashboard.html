@@ -1780,17 +1780,17 @@ function loadReaderHealth() {
         .then(r => r.json())
         .then(data => {
             if (data.reader_health && data.reader_health.length > 0) {
-                const labels = data.reader_health.map(item => `${item[2]} (${item[1]})`);
-                const dataValues = data.reader_health.map(item => item[4]);
-        readerHealthChart.data.labels = labels;
-        readerHealthChart.data.datasets[0].data = dataValues;
-        readerHealthChart.update();
+                const labels = data.reader_health.map(item => item[0]);
+                const dataValues = data.reader_health.map(item => item[1]);
+                readerHealthChart.data.labels = labels;
+                readerHealthChart.data.datasets[0].data = dataValues;
+                readerHealthChart.update();
             } else {
                 // No data - show empty chart with message
                 readerHealthChart.data.labels = ['No Events'];
                 readerHealthChart.data.datasets[0].data = [0];
-        readerHealthChart.update();
-    }
+                readerHealthChart.update();
+            }
         })
         .catch(() => {
             // Show error state
