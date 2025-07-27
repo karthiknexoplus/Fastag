@@ -2416,16 +2416,17 @@ def api_recent_activity():
                 al.tag_id,
                 al.access_result,
                 al.reason,
-                ku.name as user_name,
-                ku.vehicle_number,
-                ku.name as owner_name,
-                '' as model_name,
-                '' as fuel_type,
+                COALESCE(ku.name, tvc.owner_name) as user_name,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+                COALESCE(ku.name, tvc.owner_name) as owner_name,
+                COALESCE(tvc.model_name, '') as model_name,
+                COALESCE(tvc.fuel_type, '') as fuel_type,
                 l.lane_name,
                 r.type as lane_type,
                 r.reader_ip
             FROM access_logs al
             LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
             JOIN lanes l ON al.lane_id = l.id
             JOIN readers r ON al.reader_id = r.id
             ORDER BY al.timestamp DESC
