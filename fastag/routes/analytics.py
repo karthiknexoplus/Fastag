@@ -2478,10 +2478,8 @@ def api_reader_health_dashboard():
     """Get real reader health data"""
     try:
         db = get_db()
-        
         # Check if we have any access logs
         total_access_logs = db.execute("SELECT COUNT(*) FROM access_logs").fetchone()[0]
-        
         # Get all readers with their basic info
         reader_health_rows = db.execute("""
             SELECT 
@@ -2493,14 +2491,12 @@ def api_reader_health_dashboard():
             LEFT JOIN lanes l ON r.lane_id = l.id
             ORDER BY r.id
         """).fetchall()
-        
         readers = []
         for row in reader_health_rows:
             reader_id = row[0]
             reader_ip = row[1]
             reader_type = row[2]
             lane_name = row[3] or 'Unknown'
-            
             if total_access_logs == 0:
                 # No access logs - show reader as available but no activity
                 readers.append({
@@ -2527,26 +2523,22 @@ def api_reader_health_dashboard():
                     FROM access_logs al
                     WHERE al.reader_id = ? AND al.timestamp >= datetime('now', '-1 hour')
                 """, (reader_id,)).fetchone()
-                
                 total_events = hour_data[0] or 0
                 granted_events = hour_data[1] or 0
                 denied_events = hour_data[2] or 0
                 last_event_time = hour_data[3]
-                
                 # Calculate uptime based on whether reader has any events in last hour
                 uptime = 100.0 if total_events > 0 else 0.0
-                
-                # Calculate time since last event
+                # Calculate time since last event (assume DB is UTC)
                 if last_event_time:
-                    from datetime import datetime
-                    last_event_dt = datetime.strptime(last_event_time, '%Y-%m-%d %H:%M:%S')
-                    now = datetime.now()
-                    time_diff = now - last_event_dt
+                    from datetime import datetime, timezone
+                    last_event_dt = datetime.strptime(last_event_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
+                    now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+                    time_diff = now_utc - last_event_dt
                     minutes_ago = int(time_diff.total_seconds() / 60)
                     last_event_str = f"{minutes_ago} min ago" if minutes_ago > 0 else "Just now"
                 else:
                     last_event_str = "No recent events"
-                
                 readers.append({
                     'reader_id': reader_id,
                     'reader_ip': reader_ip,
@@ -2560,7 +2552,6 @@ def api_reader_health_dashboard():
                     'status': 'online' if total_events > 0 else 'offline',
                     'events_per_hour': total_events
                 })
-        
         return jsonify({'readers': readers})
     except Exception as e:
         import traceback
