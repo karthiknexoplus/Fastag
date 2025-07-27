@@ -1448,7 +1448,6 @@ document.addEventListener('DOMContentLoaded', function() {
         link.click();
         document.body.removeChild(link);
     });
-    
     document.getElementById('export-excel-btn').addEventListener('click', function() {
         const link = document.createElement('a');
         link.href = '/analytics/api/export-data?type=access_logs&format=excel';
@@ -1773,15 +1772,15 @@ function loadReaderHealth() {
                 const dataValues = data.readers.map(item => item.total_events);
                 console.log('Setting chart labels:', labels);
                 console.log('Setting chart data:', dataValues);
-                readerHealthChart.data.labels = labels;
-                readerHealthChart.data.datasets[0].data = dataValues;
-                readerHealthChart.update();
+        readerHealthChart.data.labels = labels;
+        readerHealthChart.data.datasets[0].data = dataValues;
+        readerHealthChart.update();
             } else {
                 // No data - show empty chart with message
                 readerHealthChart.data.labels = ['No Events'];
                 readerHealthChart.data.datasets[0].data = [0];
-                readerHealthChart.update();
-            }
+        readerHealthChart.update();
+    }
         })
         .catch(() => {
             // Show error state
@@ -2624,6 +2623,25 @@ function loadRecentActivity() {
         .catch(() => {
             recentActivity.innerHTML = '<div class="text-center text-danger">Error loading</div>';
         });
+}
+
+// Export functions for Recent Activity
+function exportRecentActivityCSV() {
+    const link = document.createElement('a');
+    link.href = '/analytics/api/export-data?type=access_logs&format=csv';
+    link.download = 'recent_activity.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportRecentActivityExcel() {
+    const link = document.createElement('a');
+    link.href = '/analytics/api/export-data?type=access_logs&format=excel';
+    link.download = 'recent_activity.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 

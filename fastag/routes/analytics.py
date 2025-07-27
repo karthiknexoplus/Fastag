@@ -2080,7 +2080,7 @@ def api_reader_health():
         GROUP BY reader_type
         ORDER BY reader_type
     ''').fetchall()
-
+    
     # Format for the frontend chart: [[reader_type, events_last_24h], ...]
     result = []
     for row in rows:
@@ -2088,7 +2088,7 @@ def api_reader_health():
             row[0],  # reader_type
             row[1]   # events_last_24h
         ])
-
+    
     return jsonify({'reader_health': result})
 
 @analytics_bp.route('/api/top-granted-tags')
@@ -2772,13 +2772,13 @@ def api_anomaly_detection():
                     dq.popleft()
                 if len(dq) >= 3:
                     last_access = dq[-1]
-                    anomalies.append({
-                        'type': 'high',
-                        'title': 'Unusual Access Pattern',
+            anomalies.append({
+                'type': 'high',
+                'title': 'Unusual Access Pattern',
                         'desc': f"Vehicle {tag_id} accessed {len(dq)} times in 15 minutes",
                         'time': f"{(datetime.utcnow() - last_access).seconds//60} minutes ago",
-                        'severity': 'high'
-                    })
+                'severity': 'high'
+            })
                     break
         # 2. Extended stay detection (vehicles parked for over 8 hours)
         extended_stays = db.execute("""
