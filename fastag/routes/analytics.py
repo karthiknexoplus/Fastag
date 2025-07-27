@@ -2087,7 +2087,7 @@ def api_reader_health():
             ORDER BY r.id
         ''').fetchall()
     else:
-        # Has events - get real data
+        # Has events - get real data for last 24 hours
         rows = db.execute('''
             SELECT 
                 r.id as reader_id,
@@ -2104,7 +2104,20 @@ def api_reader_health():
             ORDER BY r.id
         ''').fetchall()
     
-    return jsonify({'reader_health': [list(row) for row in rows]})
+    # Convert to list format expected by the chart
+    result = []
+    for row in rows:
+        # Format: [reader_id, reader_ip, type, lane_name, events_last_24h, last_activity]
+        result.append([
+            row[0],  # reader_id
+            row[1],  # reader_ip
+            row[2],  # type
+            row[3],  # lane_name
+            row[4],  # events_last_24h
+            row[5]   # last_activity
+        ])
+    
+    return jsonify({'reader_health': result})
 
 @analytics_bp.route('/api/top-granted-tags')
 def api_top_granted_tags():
