@@ -1779,9 +1779,12 @@ function loadReaderHealth() {
     fetch('/analytics/api/reader-health', {timeout: 10000})
         .then(r => r.json())
         .then(data => {
+            console.log('Reader Health API response:', data);
             if (data.reader_health && data.reader_health.length > 0) {
                 const labels = data.reader_health.map(item => item[0]);
                 const dataValues = data.reader_health.map(item => item[1]);
+                console.log('Setting chart labels:', labels);
+                console.log('Setting chart data:', dataValues);
                 readerHealthChart.data.labels = labels;
                 readerHealthChart.data.datasets[0].data = dataValues;
                 readerHealthChart.update();
