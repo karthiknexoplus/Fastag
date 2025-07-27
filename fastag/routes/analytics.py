@@ -2070,11 +2070,11 @@ def api_hourly_activity():
 def api_reader_health():
     db = get_db()
     # Group by reader type for the last 24 hours
-        rows = db.execute('''
-            SELECT 
+    rows = db.execute('''
+        SELECT 
             COALESCE(r.type, 'entry') as reader_type,
             COUNT(al.id) as events_last_24h
-            FROM readers r
+        FROM readers r
         LEFT JOIN access_logs al ON r.id = al.reader_id 
             AND al.timestamp >= datetime('now', '-24 hours')
         GROUP BY reader_type
