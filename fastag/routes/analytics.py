@@ -2897,3 +2897,23 @@ def api_anomaly_detection():
         import traceback
         print(f"Error in anomaly detection: {e}\n{traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
+
+@analytics_bp.route('/api/test-export')
+def test_export():
+    """Test export endpoint to verify functionality"""
+    import csv
+    from io import StringIO
+    from flask import Response
+    
+    # Create a simple test CSV
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Test', 'Data', 'Export'])
+    writer.writerow(['Row1', 'Value1', 'Value2'])
+    writer.writerow(['Row2', 'Value3', 'Value4'])
+    
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=test_export.csv'}
+    )

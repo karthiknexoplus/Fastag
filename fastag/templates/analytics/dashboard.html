@@ -1441,21 +1441,35 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add export button event listeners
     document.getElementById('export-csv-btn').addEventListener('click', function() {
-        const link = document.createElement('a');
-        link.href = '/analytics/api/export-data?type=access_logs&format=csv';
-        link.download = 'recent_activity.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        console.log('CSV export button clicked');
+        try {
+            const link = document.createElement('a');
+            link.href = '/analytics/api/export-data?type=access_logs&format=csv';
+            link.download = 'recent_activity.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            console.log('CSV export link created and clicked');
+        } catch (error) {
+            console.error('Error in CSV export:', error);
+            alert('Error exporting CSV. Please check console for details.');
+        }
     });
     
     document.getElementById('export-excel-btn').addEventListener('click', function() {
-        const link = document.createElement('a');
-        link.href = '/analytics/api/export-data?type=access_logs&format=excel';
-        link.download = 'recent_activity.xlsx';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        console.log('Excel export button clicked');
+        try {
+            const link = document.createElement('a');
+            link.href = '/analytics/api/export-data?type=access_logs&format=excel';
+            link.download = 'recent_activity.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            console.log('Excel export link created and clicked');
+        } catch (error) {
+            console.error('Error in Excel export:', error);
+            alert('Error exporting Excel. Please check console for details.');
+        }
     });
 });
 
