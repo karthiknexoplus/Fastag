@@ -3157,218 +3157,233 @@ function createUniqueVehiclesChart(uniqueCount, fastagCount) {
 
 // Reader Health Dashboard
 function loadReaderHealth() {
-    // Simulate real-time reader health data
-    setInterval(() => {
-        // Reader 1 metrics
-        document.getElementById('reader1-uptime').textContent = (99.5 + Math.random() * 0.5).toFixed(1) + '%';
-        document.getElementById('reader1-events').textContent = Math.floor(15 + Math.random() * 20);
-        document.getElementById('reader1-last').textContent = Math.floor(1 + Math.random() * 10) + ' min ago';
-        
-        // Reader 2 metrics
-        document.getElementById('reader2-uptime').textContent = (99.7 + Math.random() * 0.3).toFixed(1) + '%';
-        document.getElementById('reader2-events').textContent = Math.floor(10 + Math.random() * 15);
-        document.getElementById('reader2-last').textContent = Math.floor(1 + Math.random() * 15) + ' min ago';
-    }, 5000);
+    fetch('/analytics/api/reader-health-dashboard')
+        .then(r => r.json())
+        .then(data => {
+            if (data.readers && data.readers.length > 0) {
+                data.readers.forEach((reader, index) => {
+                    if (index < 2) { // Only handle first 2 readers
+                        const readerNum = index + 1;
+                        document.getElementById(`reader${readerNum}-uptime`).textContent = reader.uptime_percentage.toFixed(1) + '%';
+                        document.getElementById(`reader${readerNum}-events`).textContent = reader.total_events;
+                        document.getElementById(`reader${readerNum}-last`).textContent = reader.last_event;
+                        
+                        // Update status indicator
+                        const statusIndicator = document.querySelector(`#reader${readerNum}-status .status-indicator`);
+                        if (statusIndicator) {
+                            statusIndicator.className = `status-indicator ${reader.status}`;
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading reader health:', error);
+        });
+    
+    // Refresh every 30 seconds
+    setInterval(loadReaderHealth, 30000);
 }
 
 // Peak Time Predictions
 function loadPeakPredictions() {
-    const ctx = document.getElementById('peakPredictionChart');
-    if (!ctx) return;
-    
-    // Generate prediction data for next 24 hours
-    const hours = ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'];
-    const predictionData = hours.map((hour, index) => {
-        const hourNum = parseInt(hour);
-        let baseValue = 10;
-        
-        // Morning rush (8-10)
-        if (hourNum >= 8 && hourNum <= 10) baseValue = 45 + Math.random() * 15;
-        // Lunch time (12-14)
-        else if (hourNum >= 12 && hourNum <= 14) baseValue = 35 + Math.random() * 10;
-        // Afternoon rush (16-18)
-        else if (hourNum >= 16 && hourNum <= 18) baseValue = 50 + Math.random() * 20;
-        // Evening (20-22)
-        else if (hourNum >= 20 && hourNum <= 22) baseValue = 25 + Math.random() * 10;
-        // Night (0-6)
-        else if (hourNum >= 0 && hourNum <= 6) baseValue = 5 + Math.random() * 5;
-        else baseValue = 15 + Math.random() * 10;
-        
-        return Math.round(baseValue);
-    });
-    
-    peakPredictionChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: hours,
-            datasets: [{
-                label: 'Predicted Vehicles',
-                data: predictionData,
-                borderColor: '#9C27B0',
-                backgroundColor: 'rgba(156, 39, 176, 0.2)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#9C27B0',
-                pointBorderColor: '#FFFFFF',
-                pointBorderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    callbacks: {
-                        title: function(context) {
-                            return `${context[0].label}:00`;
-                        },
-                        label: function(context) {
-                            return `${context.parsed.y} vehicles expected`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    display: true,
-                    grid: { display: false },
-                    ticks: {
-                        maxTicksLimit: 8,
-                        color: 'rgba(0, 0, 0, 0.7)',
-                        font: { size: 10 }
-                    }
+    fetch('/analytics/api/peak-predictions')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('peakPredictionChart');
+            if (!ctx) return;
+            
+            const hourlyPredictions = data.hourly_predictions || [];
+            const nextPeak = data.next_peak || {};
+            
+            // Prepare chart data
+            const hours = hourlyPredictions.map(p => p.hour);
+            const predictionData = hourlyPredictions.map(p => p.predicted_vehicles);
+            
+            peakPredictionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [{
+                        label: 'Predicted Vehicles',
+                        data: predictionData,
+                        borderColor: '#9C27B0',
+                        backgroundColor: 'rgba(156, 39, 176, 0.2)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#9C27B0',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2
+                    }]
                 },
-                y: {
-                    display: false,
-                    grid: { display: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            callbacks: {
+                                title: function(context) {
+                                    return `${context[0].label}:00`;
+                                },
+                                label: function(context) {
+                                    return `${context.parsed.y} vehicles expected`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { display: false },
+                            ticks: {
+                                maxTicksLimit: 8,
+                                color: 'rgba(0, 0, 0, 0.7)',
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            display: false,
+                            grid: { display: false }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
                 }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            }
-        }
-    });
-    
-    // Update prediction insights
-    const maxIndex = predictionData.indexOf(Math.max(...predictionData));
-    const nextPeak = hours[maxIndex];
-    const expectedVehicles = predictionData[maxIndex];
-    
-    document.getElementById('next-peak').textContent = `${nextPeak}:00-${(parseInt(nextPeak) + 2).toString().padStart(2, '0')}:00`;
-    document.getElementById('expected-vehicles').textContent = `${expectedVehicles - 5}-${expectedVehicles + 5} vehicles`;
-    document.getElementById('prediction-confidence').textContent = Math.floor(80 + Math.random() * 15) + '%';
+            });
+            
+            // Update prediction insights
+            document.getElementById('next-peak').textContent = nextPeak.time_range || '14:00-16:00';
+            document.getElementById('expected-vehicles').textContent = nextPeak.expected_vehicles || '30-40 vehicles';
+            document.getElementById('prediction-confidence').textContent = (nextPeak.confidence || 85) + '%';
+        })
+        .catch(error => {
+            console.error('Error loading peak predictions:', error);
+        });
 }
 
 // Vehicle Demographics
 function loadVehicleDemographics() {
-    const ctx = document.getElementById('vehicleDemographicsChart');
-    if (!ctx) return;
-    
-    vehicleDemographicsChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'],
-            datasets: [{
-                data: [65, 20, 8, 5, 2],
-                backgroundColor: [
-                    '#FF6B6B',
-                    '#4ECDC4',
-                    '#45B7D1',
-                    '#96CEB4',
-                    '#FFEAA7'
-                ],
-                borderWidth: 2,
-                borderColor: '#FFFFFF'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true,
-                        font: { size: 11 }
-                    }
+    fetch('/analytics/api/vehicle-demographics')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('vehicleDemographicsChart');
+            if (!ctx) return;
+            
+            const fuelTypes = data.fuel_types || [];
+            const topModels = data.top_models || [];
+            const yearAnalysis = data.year_analysis || {};
+            
+            // Prepare chart data
+            const labels = fuelTypes.map(f => f.type);
+            const values = fuelTypes.map(f => f.percentage);
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
+            
+            vehicleDemographicsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#FFFFFF'
+                    }]
                 },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.label}: ${context.parsed}%`;
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed}%`;
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-    });
-    
-    // Update demographics stats
-    document.getElementById('top-fuel').textContent = 'Petrol (65%)';
-    document.getElementById('top-model').textContent = 'Swift (23%)';
-    document.getElementById('avg-year').textContent = '2020-2022';
+            });
+            
+            // Update demographics stats
+            const topFuel = fuelTypes[0] || { type: 'Unknown', percentage: 0 };
+            const topModel = topModels[0] || { model: 'Unknown', percentage: 0 };
+            
+            document.getElementById('top-fuel').textContent = `${topFuel.type} (${topFuel.percentage}%)`;
+            document.getElementById('top-model').textContent = `${topModel.model} (${topModel.percentage}%)`;
+            document.getElementById('avg-year').textContent = yearAnalysis.range || 'Unknown';
+        })
+        .catch(error => {
+            console.error('Error loading vehicle demographics:', error);
+        });
 }
 
 // Anomaly Detection
 function loadAnomalyDetection() {
-    // Simulate real-time anomaly detection
-    const anomalies = [
-        {
-            type: 'high',
-            title: 'Unusual Access Pattern',
-            desc: 'Vehicle TN38DP2800 accessed 3 times in 15 minutes',
-            time: '2 minutes ago'
-        },
-        {
-            type: 'medium',
-            title: 'Extended Stay Detected',
-            desc: '5 vehicles parked for over 8 hours',
-            time: '15 minutes ago'
-        },
-        {
-            type: 'low',
-            title: 'Low Activity Period',
-            desc: 'Unusually low traffic between 02:00-04:00',
-            time: '1 hour ago'
-        },
-        {
-            type: 'medium',
-            title: 'Reader Response Time',
-            desc: 'Reader 1 response time increased by 200ms',
-            time: '30 minutes ago'
-        }
-    ];
-    
-    const alertsContainer = document.getElementById('anomaly-alerts');
-    alertsContainer.innerHTML = '';
-    
-    anomalies.forEach(anomaly => {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `anomaly-alert ${anomaly.type}`;
-        alertDiv.innerHTML = `
-            <div class="alert-icon">
-                <i class="fas fa-${anomaly.type === 'high' ? 'exclamation-circle' : anomaly.type === 'medium' ? 'clock' : 'info-circle'}"></i>
-            </div>
-            <div class="alert-content">
-                <div class="alert-title">${anomaly.title}</div>
-                <div class="alert-desc">${anomaly.desc}</div>
-                <div class="alert-time">${anomaly.time}</div>
-            </div>
-        `;
-        alertsContainer.appendChild(alertDiv);
-    });
+    fetch('/analytics/api/anomaly-detection')
+        .then(r => r.json())
+        .then(data => {
+            const anomalies = data.anomalies || [];
+            const alertsContainer = document.getElementById('anomaly-alerts');
+            alertsContainer.innerHTML = '';
+            
+            if (anomalies.length === 0) {
+                alertsContainer.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <div>No anomalies detected</div>
+                        <small>System is running normally</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            anomalies.forEach(anomaly => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `anomaly-alert ${anomaly.type}`;
+                alertDiv.innerHTML = `
+                    <div class="alert-icon">
+                        <i class="fas fa-${anomaly.type === 'high' ? 'exclamation-circle' : anomaly.type === 'medium' ? 'clock' : 'info-circle'}"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">${anomaly.title}</div>
+                        <div class="alert-desc">${anomaly.desc}</div>
+                        <div class="alert-time">${anomaly.time}</div>
+                    </div>
+                `;
+                alertsContainer.appendChild(alertDiv);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading anomaly detection:', error);
+            const alertsContainer = document.getElementById('anomaly-alerts');
+            alertsContainer.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <div>Error loading anomalies</div>
+                    <small>Please try again later</small>
+                </div>
+            `;
+        });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
