@@ -1404,10 +1404,20 @@
     <div class="row">
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-trophy text-primary me-2"></i>
-                    Top Granted Tags
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-trophy text-primary me-2"></i>
+                        Top Granted Tags
+                    </h5>
+                    <div>
+                        <button id="export-topgranted-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="exportTopGranted('csv')">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button id="export-topgranted-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="exportTopGranted('excel')">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="top-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
@@ -1415,10 +1425,20 @@
         </div>
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-times-circle text-danger me-2"></i>
-                    Most Denied Tags Today
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        Most Denied Tags Today
+                    </h5>
+                    <div>
+                        <button id="export-mostdenied-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="exportMostDenied('csv')">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button id="export-mostdenied-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="exportMostDenied('excel')">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="most-denied-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
@@ -1426,10 +1446,20 @@
         </div>
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
-                <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                    Denied FASTag Activity
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Denied FASTag Activity
+                    </h5>
+                    <div>
+                        <button id="export-deniedfastag-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="exportDeniedFastag('csv')">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button id="export-deniedfastag-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="exportDeniedFastag('excel')">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="denied-fastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
@@ -3467,6 +3497,31 @@ function exportGranted(format) {
     const link = document.createElement('a');
     link.href = `/analytics/api/export-recent-granted-tags?format=${format}`;
     link.download = `recent_granted_tags.${format === 'excel' ? 'xlsx' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportTopGranted(format) {
+    const link = document.createElement('a');
+    link.href = `/analytics/api/export-top-granted-tags?format=${format}`;
+    link.download = `top_granted_tags.${format === 'excel' ? 'xlsx' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+function exportMostDenied(format) {
+    const link = document.createElement('a');
+    link.href = `/analytics/api/export-most-denied-tags?format=${format}`;
+    link.download = `most_denied_tags.${format === 'excel' ? 'xlsx' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+function exportDeniedFastag(format) {
+    const link = document.createElement('a');
+    link.href = `/analytics/api/export-denied-fastag-activity?format=${format}`;
+    link.download = `denied_fastag_activity.${format === 'excel' ? 'xlsx' : 'csv'}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
