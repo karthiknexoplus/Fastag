@@ -376,14 +376,14 @@
     }
     
     .unique-chart-section {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.05) 100%);
         border-radius: 10px;
         padding: 10px;
         height: 100px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
     
     .unique-chart-section canvas {
@@ -2655,17 +2655,22 @@ function createUniqueVehiclesChart(uniqueCount, fastagCount) {
     });
     
     uniqueVehiclesChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: hours,
             datasets: [{
                 label: 'Unique Vehicles',
                 data: hourlyData,
-                backgroundColor: 'rgba(23, 162, 184, 0.8)',
-                borderColor: '#17a2b8',
-                borderWidth: 1,
-                borderRadius: 4,
-                borderSkipped: false
+                borderColor: '#00FFFF',
+                backgroundColor: 'rgba(0, 255, 255, 0.3)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#00FFFF',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2
             }]
         },
         options: {
