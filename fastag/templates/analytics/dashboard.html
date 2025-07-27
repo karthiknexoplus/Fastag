@@ -1318,10 +1318,10 @@
                         Recent Activity (All Events)
                     </h5>
                     <div>
-                        <button id="export-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="console.log('CSV button clicked via onclick')">
+                        <button id="export-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="exportData('csv')">
                             <i class="fas fa-file-csv"></i>
                         </button>
-                        <button id="export-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="console.log('Excel button clicked via onclick')">
+                        <button id="export-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="exportData('excel')">
                             <i class="fas fa-file-excel"></i>
                         </button>
                     </div>
@@ -1485,6 +1485,23 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Excel export button not found');
     }
 });
+
+// Export data function
+function exportData(format) {
+    console.log('Export data function called with format:', format);
+    try {
+        const link = document.createElement('a');
+        link.href = `/analytics/api/export-data?type=access_logs&format=${format}`;
+        link.download = `recent_activity.${format === 'excel' ? 'xlsx' : 'csv'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        console.log(`${format.toUpperCase()} export link created and clicked`);
+    } catch (error) {
+        console.error(`Error in ${format.toUpperCase()} export:`, error);
+        alert(`Error exporting ${format.toUpperCase()}. Please check console for details.`);
+    }
+}
 
 function initializeCharts() {
     // Hourly Chart
