@@ -554,56 +554,66 @@
     
     .demographics-chart {
         flex: 1;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
+        min-height: 120px;
     }
     
     .demographics-stats {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
     }
     
     .demo-stat {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 12px;
-        padding: 10px;
+        text-align: center;
+        padding: 8px;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 8px;
         border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .demo-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     
     .demo-icon {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: rgba(0, 123, 255, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0;
+        margin-bottom: 6px;
     }
     
     .demo-icon i {
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
     
     .demo-info {
-        flex: 1;
+        width: 100%;
     }
     
     .demo-label {
         display: block;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #6c757d;
         margin-bottom: 2px;
+        font-weight: 500;
     }
     
     .demo-value {
         display: block;
         font-weight: 600;
         color: #495057;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+        line-height: 1.2;
     }
     
     /* Anomaly Detection Styles */
@@ -1299,7 +1309,7 @@
                 </h5>
                 <div class="demographics-content">
                     <div class="demographics-chart">
-                        <canvas id="vehicleDemographicsChart" height="200"></canvas>
+                        <canvas id="vehicleDemographicsChart" height="120"></canvas>
                     </div>
                     <div class="demographics-stats">
                         <div class="demo-stat">
@@ -1307,7 +1317,7 @@
                                 <i class="fas fa-gas-pump text-success"></i>
                             </div>
                             <div class="demo-info">
-                                <span class="demo-label">Most Common Fuel</span>
+                                <span class="demo-label">Top Fuel</span>
                                 <span class="demo-value" id="top-fuel">Petrol (65%)</span>
                             </div>
                         </div>
@@ -1316,7 +1326,7 @@
                                 <i class="fas fa-car text-primary"></i>
                             </div>
                             <div class="demo-info">
-                                <span class="demo-label">Popular Model</span>
+                                <span class="demo-label">Top Model</span>
                                 <span class="demo-value" id="top-model">Swift (23%)</span>
                             </div>
                         </div>
@@ -1325,7 +1335,7 @@
                                 <i class="fas fa-calendar text-warning"></i>
                             </div>
                             <div class="demo-info">
-                                <span class="demo-label">Registration Year</span>
+                                <span class="demo-label">Reg Year</span>
                                 <span class="demo-value" id="avg-year">2020-2022</span>
                             </div>
                         </div>
@@ -3294,7 +3304,7 @@ function loadVehicleDemographics() {
                     datasets: [{
                         data: values,
                         backgroundColor: colors.slice(0, labels.length),
-                        borderWidth: 2,
+                        borderWidth: 1,
                         borderColor: '#FFFFFF'
                     }]
                 },
@@ -3305,9 +3315,10 @@ function loadVehicleDemographics() {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 15,
+                                padding: 8,
                                 usePointStyle: true,
-                                font: { size: 11 }
+                                font: { size: 9 },
+                                boxWidth: 8
                             }
                         },
                         tooltip: {
