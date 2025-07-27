@@ -94,6 +94,177 @@
     .activity-item.denied {
         border-left-color: #dc3545;
     }
+    
+    /* Enhanced Activity Item Styles */
+    .activity-item-enhanced {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 0.8rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .activity-item-enhanced::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item-enhanced:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .activity-item-enhanced.granted::before {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .activity-item-enhanced.denied::before {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    }
+    
+    .activity-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+    
+    .activity-item-enhanced.granted .activity-icon {
+        background: rgba(40, 167, 69, 0.1);
+    }
+    
+    .activity-item-enhanced.denied .activity-icon {
+        background: rgba(220, 53, 69, 0.1);
+    }
+    
+    .activity-main-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .vehicle-number {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.3rem;
+        line-height: 1.2;
+    }
+    
+    .tag-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .tag-id {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: #6c757d;
+        background: #f8f9fa;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .tag-type-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .fastag-badge {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .other-badge {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+    
+    .activity-status {
+        flex-shrink: 0;
+    }
+    
+    .status-badge-enhanced {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-badge-enhanced.status-granted {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .status-badge-enhanced.status-denied {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        color: white;
+    }
+    
+    .activity-details {
+        margin-left: 3.5rem;
+    }
+    
+    .detail-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .detail-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .detail-item i {
+        width: 16px;
+        text-align: center;
+    }
+    
+    .timestamp {
+        font-weight: 600;
+        color: #495057;
+    }
     .status-badge {
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -971,10 +1142,10 @@ function updateTables(data) {
     if (data.recent_activity) {
         recentActivity.innerHTML = data.recent_activity.map(activity => {
             // Mask vehicle/model/owner if feature disabled and not from kyc_users, but for GRANTED show if from kyc_users
-            const isGranted = activity[2] === 'granted';
+            const isGrantedStatus = activity[2] === 'granted';
             // Vehicle number
             let vehicleNumber = 'N/A';
-            if (isGranted && activity[12]) {
+            if (isGrantedStatus && activity[12]) {
                 vehicleNumber = activity[12];
             } else if (!fastagFeaturesEnabled) {
                 vehicleNumber = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the vehicle number</span>";
@@ -983,7 +1154,7 @@ function updateTables(data) {
             }
             // Model
             let modelName = 'N/A';
-            if (isGranted && activity[12] && activity[7]) {
+            if (isGrantedStatus && activity[12] && activity[7]) {
                 modelName = activity[7];
             } else if (!fastagFeaturesEnabled) {
                 modelName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the model</span>";
@@ -992,7 +1163,7 @@ function updateTables(data) {
             }
             // Owner
             let ownerName = 'N/A';
-            if (isGranted && activity[12] && activity[6]) {
+            if (isGrantedStatus && activity[12] && activity[6]) {
                 ownerName = activity[6];
             } else if (!fastagFeaturesEnabled) {
                 ownerName = "<span style='font-size:0.92em;color:#764ba2;'><i class='fas fa-lock'></i> Contact " + window.COMPANY_NAME + " for pricing to view the owner</span>";
@@ -1010,18 +1181,72 @@ function updateTables(data) {
             if (!activity[1].startsWith('34161')) {
                 notFastag = 'NOT a FASTAG • ';
             }
+            const isGranted = activity[2] === 'granted';
+            const isEntry = activity[11] === 'entry';
+            const isFastag = activity[1].startsWith('34161');
+            
+            // Color coding based on status and type
+            let cardClass = 'activity-item-enhanced';
+            let iconClass = '';
+            let iconColor = '';
+            
+            if (isGranted) {
+                cardClass += ' granted';
+                iconClass = isEntry ? 'fas fa-sign-in-alt' : 'fas fa-sign-out-alt';
+                iconColor = '#28a745';
+            } else {
+                cardClass += ' denied';
+                iconClass = 'fas fa-times-circle';
+                iconColor = '#dc3545';
+            }
+            
+            // Tag type indicator
+            let tagTypeBadge = '';
+            if (isFastag) {
+                tagTypeBadge = '<span class="tag-type-badge fastag-badge"><i class="fas fa-tag"></i> FASTag</span>';
+            } else {
+                tagTypeBadge = '<span class="tag-type-badge other-badge"><i class="fas fa-tag"></i> Other</span>';
+            }
+            
             return `
-                <div class="activity-item ${activity[2] === 'granted' ? 'granted' : 'denied'}">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="fw-bold">${vehicleNumber}</div>
-                            <small class="text-muted">${notFastag}Tag: ${activity[1]}${secondary ? ' • ' + secondary : ''}</small>
+                <div class="${cardClass}">
+                    <div class="activity-header">
+                        <div class="activity-icon" style="color: ${iconColor};">
+                            <i class="${iconClass}"></i>
                         </div>
-                        <span class="status-badge ${activity[2] === 'granted' ? 'status-granted' : 'status-denied'}">
-                            ${activity[2].toUpperCase()}
-                        </span>
+                        <div class="activity-main-info">
+                            <div class="vehicle-number">${vehicleNumber}</div>
+                            <div class="tag-info">
+                                <span class="tag-id">${activity[1]}</span>
+                                ${tagTypeBadge}
+                            </div>
+                        </div>
+                        <div class="activity-status">
+                            <span class="status-badge-enhanced ${isGranted ? 'status-granted' : 'status-denied'}">
+                                ${activity[2].toUpperCase()}
+                            </span>
+                        </div>
                     </div>
-                    <small class="text-muted">${activity[0]}</small>
+                    <div class="activity-details">
+                        <div class="detail-row">
+                            ${secondaryInfo.length > 0 ? `
+                                <div class="detail-item">
+                                    <i class="fas fa-info-circle text-info"></i>
+                                    <span>${secondaryInfo.join(' • ')}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-item">
+                                <i class="fas fa-clock text-muted"></i>
+                                <span class="timestamp">${activity[0]}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt text-primary"></i>
+                                <span>${activity[9] || 'Unknown Lane'}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
         }).join('');
