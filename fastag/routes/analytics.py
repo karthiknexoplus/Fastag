@@ -2416,56 +2416,56 @@ def api_real_time_logs():
 @analytics_bp.route('/api/recent-activity')
 def api_recent_activity():
     try:
-    db = get_db()
-    rows = db.execute("""
-        SELECT 
-            al.timestamp,
-            al.tag_id,
-            al.access_result,
-            al.reason,
+        db = get_db()
+        rows = db.execute("""
+            SELECT 
+                al.timestamp,
+                al.tag_id,
+                al.access_result,
+                al.reason,
                 COALESCE(ku.name, tvc.owner_name) as user_name,
-            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
-            COALESCE(ku.name, tvc.owner_name) as owner_name,
+                COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+                COALESCE(ku.name, tvc.owner_name) as owner_name,
                 COALESCE(tvc.model_name, '') as model_name,
                 COALESCE(tvc.fuel_type, '') as fuel_type,
-            l.lane_name,
+                l.lane_name,
                 r.type as lane_type,
-            r.reader_ip
-        FROM access_logs al
-        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
-        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
-        JOIN lanes l ON al.lane_id = l.id
-        JOIN readers r ON al.reader_id = r.id
-        ORDER BY al.timestamp DESC
-        LIMIT 50
-    """).fetchall()
-    ist_tz = pytz.timezone('Asia/Kolkata')
-    activities = []
-    for row in rows:
-        timestamp_str = row[0]
-        # Parse as UTC and convert to IST
-        try:
-            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-            utc_time = utc_time.replace(tzinfo=pytz.UTC)
-            ist_time = utc_time.astimezone(ist_tz)
-            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
-        except Exception:
-            ist_time_str = timestamp_str
-        activities.append({
-            'time': ist_time_str,
-            'tag_id': row[1],
-            'access_result': row[2],
-            'reason': row[3],
-            'user_name': row[4],
-            'vehicle_number': row[5],
-            'owner_name': row[6],
-            'model_name': row[7],
-            'fuel_type': row[8],
-            'lane_name': row[9],
-            'lane_type': row[10],
-            'reader_ip': row[11],
-        })
-    return jsonify({'recent_activity': activities})
+                r.reader_ip
+            FROM access_logs al
+            LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+            LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+            JOIN lanes l ON al.lane_id = l.id
+            JOIN readers r ON al.reader_id = r.id
+            ORDER BY al.timestamp DESC
+            LIMIT 50
+        """).fetchall()
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        activities = []
+        for row in rows:
+            timestamp_str = row[0]
+            # Parse as UTC and convert to IST
+            try:
+                utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                utc_time = utc_time.replace(tzinfo=pytz.UTC)
+                ist_time = utc_time.astimezone(ist_tz)
+                ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                ist_time_str = timestamp_str
+            activities.append({
+                'time': ist_time_str,
+                'tag_id': row[1],
+                'access_result': row[2],
+                'reason': row[3],
+                'user_name': row[4],
+                'vehicle_number': row[5],
+                'owner_name': row[6],
+                'model_name': row[7],
+                'fuel_type': row[8],
+                'lane_name': row[9],
+                'lane_type': row[10],
+                'reader_ip': row[11],
+            })
+        return jsonify({'recent_activity': activities})
     except Exception as e:
         import traceback
         print(f"Error in /api/recent-activity: {e}\n{traceback.format_exc()}")
