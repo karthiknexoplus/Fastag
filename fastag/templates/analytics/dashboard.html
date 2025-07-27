@@ -3526,6 +3526,30 @@ function exportDeniedFastag(format) {
     link.click();
     document.body.removeChild(link);
 }
+
+function renderGrantedTagActivityItem(tag, isTopGranted) {
+    let secondaryInfo = [];
+    if (tag.model_name) secondaryInfo.push(`Model: ${tag.model_name}`);
+    if (tag.owner_name) secondaryInfo.push(`Owner: ${tag.owner_name}`);
+    let secondary = secondaryInfo.join(' • ');
+    let itemClass = 'activity-item granted';
+    // Show count for Top Granted Tags
+    let statusBadge = isTopGranted
+        ? `<span class="status-badge status-granted">GRANTED <span class='badge bg-primary ms-1'>x ${tag.granted_count}</span></span>`
+        : '<span class="status-badge status-granted">GRANTED</span>';
+    return `
+        <div class="${itemClass}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-bold">${tag.vehicle_number || tag.tag_id}</div>
+                    <small class="text-muted">Tag: ${tag.tag_id}${secondary ? ' • ' + secondary : ''}</small>
+                </div>
+                ${statusBadge}
+            </div>
+            <small class="text-muted">${tag.time || ''}</small>
+        </div>
+    `;
+}
 </script>
 
 <!-- Modal for Current Occupancy Details -->
