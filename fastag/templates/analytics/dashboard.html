@@ -1318,10 +1318,10 @@
                         Recent Activity (All Events)
                     </h5>
                     <div>
-                        <button id="export-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV">
+                        <button id="export-csv-btn" class="btn btn-sm btn-outline-primary me-2" title="Export as CSV" onclick="console.log('CSV button clicked via onclick')">
                             <i class="fas fa-file-csv"></i>
                         </button>
-                        <button id="export-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel">
+                        <button id="export-excel-btn" class="btn btn-sm btn-outline-success" title="Export as Excel" onclick="console.log('Excel button clicked via onclick')">
                             <i class="fas fa-file-excel"></i>
                         </button>
                     </div>
@@ -1439,38 +1439,51 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRecentEntriesFeed();
     loadRecentExitsFeed();
     
-    // Add export button event listeners
-    document.getElementById('export-csv-btn').addEventListener('click', function() {
-        console.log('CSV export button clicked');
-        try {
-            const link = document.createElement('a');
-            link.href = '/analytics/api/export-data?type=access_logs&format=csv';
-            link.download = 'recent_activity.csv';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            console.log('CSV export link created and clicked');
-        } catch (error) {
-            console.error('Error in CSV export:', error);
-            alert('Error exporting CSV. Please check console for details.');
-        }
-    });
+    // Add export button event listeners with proper error handling
+    const csvBtn = document.getElementById('export-csv-btn');
+    const excelBtn = document.getElementById('export-excel-btn');
     
-    document.getElementById('export-excel-btn').addEventListener('click', function() {
-        console.log('Excel export button clicked');
-        try {
-            const link = document.createElement('a');
-            link.href = '/analytics/api/export-data?type=access_logs&format=excel';
-            link.download = 'recent_activity.xlsx';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            console.log('Excel export link created and clicked');
-        } catch (error) {
-            console.error('Error in Excel export:', error);
-            alert('Error exporting Excel. Please check console for details.');
-        }
-    });
+    if (csvBtn) {
+        csvBtn.addEventListener('click', function() {
+            console.log('CSV export button clicked');
+            try {
+                const link = document.createElement('a');
+                link.href = '/analytics/api/export-data?type=access_logs&format=csv';
+                link.download = 'recent_activity.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                console.log('CSV export link created and clicked');
+            } catch (error) {
+                console.error('Error in CSV export:', error);
+                alert('Error exporting CSV. Please check console for details.');
+            }
+        });
+        console.log('CSV export button listener added');
+    } else {
+        console.error('CSV export button not found');
+    }
+    
+    if (excelBtn) {
+        excelBtn.addEventListener('click', function() {
+            console.log('Excel export button clicked');
+            try {
+                const link = document.createElement('a');
+                link.href = '/analytics/api/export-data?type=access_logs&format=excel';
+                link.download = 'recent_activity.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                console.log('Excel export link created and clicked');
+            } catch (error) {
+                console.error('Error in Excel export:', error);
+                alert('Error exporting Excel. Please check console for details.');
+            }
+        });
+        console.log('Excel export button listener added');
+    } else {
+        console.error('Excel export button not found');
+    }
 });
 
 function initializeCharts() {
