@@ -1434,7 +1434,7 @@ function refreshData() {
 function loadDeniedFastagActivityFeed() {
     const feed = document.getElementById('denied-fastag-activity-feed');
     feed.innerHTML = '<div class="text-center text-muted">Loading...</div>';
-    fetch('/analytics/api/recent-exits')
+    fetch('/analytics/api/denied-fastag-activity-feed')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1442,20 +1442,20 @@ function loadDeniedFastagActivityFeed() {
             return response.json();
         })
         .then(data => {
-            console.log('Recent Exits data:', data); // Debug log
+            console.log('Denied FASTag Activity data:', data); // Debug log
             if (data.error) {
                 feed.innerHTML = `<div class='text-danger'>Error: ${data.error}</div>`;
                 return;
             }
-            if (!data.recent_exits || data.recent_exits.length === 0) {
-                feed.innerHTML = '<div class="text-center text-muted">No exit events in the last 24 hours.</div>';
+            if (!data.results || data.results.length === 0) {
+                feed.innerHTML = '<div class="text-center text-muted">No denied FASTag events in the last 24 hours.</div>';
                 return;
             }
-            feed.innerHTML = data.recent_exits.map(item => renderExitTagActivityItem(item)).join('');
+            feed.innerHTML = data.results.map(item => renderDeniedFastagActivityItem(item)).join('');
         })
         .catch(err => {
-            console.error('Error loading recent exits data:', err);
-            feed.innerHTML = `<div class='text-danger'>Error loading recent exits data: ${err.message}</div>`;
+            console.error('Error loading denied FASTag activity data:', err);
+            feed.innerHTML = `<div class='text-danger'>Error loading denied FASTag activity data: ${err.message}</div>`;
         });
 }
 
@@ -2100,6 +2100,59 @@ function renderExitTagActivityItem(tag) {
                     </div>
             <small class="text-muted">${tag.time || ''}</small>
                 </div>
+    `;
+}
+
+function renderDeniedFastagActivityItem(item) {
+    const isFastag = item.tag_id && item.tag_id.startsWith('34161');
+    
+    // Enhanced styling for denied FASTag activity
+    return `
+        <div class="activity-item-enhanced denied">
+            <div class="activity-header">
+                <div class="activity-icon" style="color: #dc3545;">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="activity-main-info">
+                    <div class="vehicle-number">${item.vehicle_number || 'N/A'}</div>
+                    <div class="tag-info">
+                        <span class="tag-id">${item.tag_id}</span>
+                        <span class="tag-type-badge ${isFastag ? 'fastag-badge' : 'other-badge'}">
+                            <i class="fas fa-tag"></i> ${isFastag ? 'FASTag' : 'Other'}
+                        </span>
+                    </div>
+                </div>
+                <div class="activity-status">
+                    <span class="status-badge-enhanced status-denied">DENIED</span>
+                </div>
+            </div>
+            <div class="activity-details">
+                <div class="detail-row">
+                    ${item.owner_name && item.owner_name !== 'Unknown' ? `
+                        <div class="detail-item">
+                            <i class="fas fa-user text-info"></i>
+                            <span>Owner: ${item.owner_name}</span>
+                        </div>
+                    ` : ''}
+                    ${item.model_name && item.model_name !== 'Unknown' ? `
+                        <div class="detail-item">
+                            <i class="fas fa-car text-primary"></i>
+                            <span>Model: ${item.model_name}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <i class="fas fa-clock text-muted"></i>
+                        <span class="timestamp">${item.timestamp}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        <span>Reason: ${item.reason}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     `;
 }
 
