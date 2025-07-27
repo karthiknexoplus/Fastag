@@ -80,10 +80,10 @@
           <div class="modal-body">
             <form id="add-kyc-watchlist-form">
               <div class="mb-3">
-                <label for="kycUserSelect" class="form-label">Select KYC User</label>
-                <select class="form-select" id="kycUserSelect" required>
-                  <option value="">Choose...</option>
-                </select>
+                <label for="kycUserSearch" class="form-label">Search KYC User (by name or vehicle number)</label>
+                <input type="text" class="form-control" id="kycUserSearch" placeholder="Type name or vehicle number..." autocomplete="off" required>
+                <div id="kycUserSuggestions" class="list-group position-absolute w-100" style="z-index: 1051;"></div>
+                <input type="hidden" id="kycUserSelect" required>
               </div>
               <div class="mb-3">
                 <label for="kycReasonInput" class="form-label">Reason (optional)</label>
@@ -296,17 +296,48 @@ document.getElementById('add-kyc-watchlist-form').onsubmit = function(e) {
         }
     });
 };
-// Populate KYC user dropdown
-function fetchKycUsers() {
-    fetch('/api/kyc_users/list')
-        .then(res => res.json())
-        .then(data => {
-            const select = document.getElementById('kycUserSelect');
-            select.innerHTML = '<option value="">Choose...</option>' +
-                data.results.map(u => `<option value="${u.fastag_id}">${u.fastag_id} | ${u.name} | ${u.vehicle_number}</option>`).join('');
-        });
-}
-document.getElementById('addKycWatchlistModal').addEventListener('show.bs.modal', fetchKycUsers);
+// --- KYC User Autocomplete ---
+const kycUserSearch = document.getElementById('kycUserSearch');
+const kycUserSuggestions = document.getElementById('kycUserSuggestions');
+const kycUserSelect = document.getElementById('kycUserSelect');
+let kycUserTimer = null;
+
+kycUserSearch.addEventListener('input', function() {
+    const q = this.value.trim();
+    kycUserSuggestions.innerHTML = '';
+    kycUserSelect.value = '';
+    if (q.length < 2) return;
+    clearTimeout(kycUserTimer);
+    kycUserTimer = setTimeout(() => {
+        fetch(`/analytics/api/search-kyc-users?q=${encodeURIComponent(q)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.results.length) {
+                    kycUserSuggestions.innerHTML = '<div class="list-group-item text-muted">No matches found</div>';
+                    return;
+                }
+                kycUserSuggestions.innerHTML = data.results.map(u =>
+                    `<button type="button" class="list-group-item list-group-item-action" data-id="${u.fastag_id}" data-name="${u.name}" data-veh="${u.vehicle_number}">
+                        ${u.fastag_id} | ${u.name} | ${u.vehicle_number}
+                    </button>`
+                ).join('');
+            });
+    }, 200);
+});
+
+kycUserSuggestions.addEventListener('click', function(e) {
+    if (e.target && e.target.matches('button[data-id]')) {
+        kycUserSelect.value = e.target.getAttribute('data-id');
+        kycUserSearch.value = `${e.target.getAttribute('data-name')} | ${e.target.getAttribute('data-veh')}`;
+        kycUserSuggestions.innerHTML = '';
+    }
+});
+
+// Hide suggestions when clicking outside
+kycUserSearch.addEventListener('blur', function() {
+    setTimeout(() => { kycUserSuggestions.innerHTML = ''; }, 200);
+});
+
 function toIST(utcString) {
     if (!utcString) return '-';
     let utcDate;

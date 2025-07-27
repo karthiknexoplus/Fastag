@@ -3220,3 +3220,26 @@ def export_denied_fastag_activity():
         ])
     headers = ['Time', 'Tag ID', 'Vehicle Number', 'Owner Name', 'Model Name', 'Lane Name', 'Lane Type', 'Access Result', 'Reason']
     return _export_response(headers, data_rows, 'denied_fastag_activity', export_format)
+
+@analytics_bp.route('/api/search-kyc-users')
+def search_kyc_users():
+    db = get_db()
+    q = request.args.get('q', '').strip()
+    if not q or len(q) < 2:
+        return jsonify({'results': []})
+    rows = db.execute('''
+        SELECT fastag_id, name, vehicle_number
+        FROM kyc_users
+        WHERE name LIKE ? OR vehicle_number LIKE ?
+        ORDER BY name ASC
+        LIMIT 20
+    ''', (f'%{q}%', f'%{q}%')).fetchall()
+    results = [
+        {
+            'fastag_id': row[0],
+            'name': row[1],
+            'vehicle_number': row[2]
+        }
+        for row in rows
+    ]
+    return jsonify({'results': results})
