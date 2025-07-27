@@ -2188,20 +2188,28 @@ function createTodayActivityMiniChart(hourlyData) {
     const ctx = document.getElementById('todayActivityMiniChart');
     if (!ctx) return;
     
+    // Convert array format to object format for easier handling
+    const processedData = hourlyData.map(row => ({
+        hour: row[0],
+        total: row[1],
+        granted: row[2],
+        denied: row[3]
+    }));
+    
     // Prepare data for mini chart
-    const labels = hourlyData.map(item => item.hour);
-    const grantedData = hourlyData.map(item => item.granted);
-    const deniedData = hourlyData.map(item => item.denied);
+    const labels = processedData.map(item => item.hour);
+    const grantedData = processedData.map(item => item.granted);
+    const deniedData = processedData.map(item => item.denied);
     
     // Find peak hour
-    const totalData = hourlyData.map(item => item.granted + item.denied);
+    const totalData = processedData.map(item => item.granted + item.denied);
     const maxIndex = totalData.indexOf(Math.max(...totalData));
     const peakHour = labels[maxIndex];
     
     // Calculate current hour activity
     const now = new Date();
     const currentHour = now.getHours();
-    const currentHourData = hourlyData.find(item => parseInt(item.hour) === currentHour);
+    const currentHourData = processedData.find(item => parseInt(item.hour) === currentHour);
     const currentActivity = currentHourData ? (currentHourData.granted + currentHourData.denied) : 0;
     
     // Calculate average
@@ -2242,7 +2250,7 @@ function createTodayActivityMiniChart(hourlyData) {
                             return `${context[0].label}:00`;
                         },
                         label: function(context) {
-                            const hourData = hourlyData[context.dataIndex];
+                            const hourData = processedData[context.dataIndex];
                             return [
                                 `Total: ${context.parsed.y} events`,
                                 `Granted: ${hourData.granted}`,
@@ -2282,13 +2290,21 @@ function createTodayActivityMiniChart(hourlyData) {
 }
 
 function updateActivitySummary(hourlyData) {
-    const totalEvents = hourlyData.reduce((sum, item) => sum + item.granted + item.denied, 0);
+    // Convert array format to object format for easier handling
+    const processedData = hourlyData.map(row => ({
+        hour: row[0],
+        total: row[1],
+        granted: row[2],
+        denied: row[3]
+    }));
+    
+    const totalEvents = processedData.reduce((sum, item) => sum + item.granted + item.denied, 0);
     const currentHour = new Date().getHours();
-    const currentHourData = hourlyData.find(item => parseInt(item.hour) === currentHour);
+    const currentHourData = processedData.find(item => parseInt(item.hour) === currentHour);
     const currentActivity = currentHourData ? (currentHourData.granted + currentHourData.denied) : 0;
     
-    const maxEvents = Math.max(...hourlyData.map(item => item.granted + item.denied));
-    const peakHour = hourlyData.find(item => (item.granted + item.denied) === maxEvents);
+    const maxEvents = Math.max(...processedData.map(item => item.granted + item.denied));
+    const peakHour = processedData.find(item => (item.granted + item.denied) === maxEvents);
     
     const summary = `Peak: ${peakHour.hour}:00 | Current: ${currentActivity} | Total: ${totalEvents}`;
     document.getElementById('activity-summary').textContent = summary;
