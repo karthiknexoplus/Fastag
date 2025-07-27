@@ -524,26 +524,31 @@
         </div>
     </div>
 
-    <!-- Tables Row -->
+    <!-- Activity Feeds Row -->
     <div class="row">
-        <div class="col-xl-4 mb-4">
+        <!-- Recent Activity - Most Important (Full Width) -->
+        <div class="col-xl-12 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-trophy text-primary me-2"></i>
-                    Top Granted Tags
+                    <i class="fas fa-history text-primary me-2"></i>
+                    Recent Activity (All Events)
                 </h5>
-                <div id="top-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="recent-activity" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Specific Activity Feeds Row -->
+    <div class="row">
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-id-card text-primary me-2"></i>
-                    Recent Granted Tags
+                    <i class="fas fa-sign-in-alt text-success me-2"></i>
+                    Recent Entries
                 </h5>
-                <div id="recent-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="recent-entries-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
@@ -562,22 +567,25 @@
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-times-circle text-danger me-2"></i>
-                    Most Denied Tags Today
+                    <i class="fas fa-id-card text-primary me-2"></i>
+                    Recent Granted Tags
                 </h5>
-                <div id="most-denied-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="recent-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Analytics Feeds Row -->
+    <div class="row">
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-sign-in-alt text-success me-2"></i>
-                    Recent Entries
+                    <i class="fas fa-trophy text-primary me-2"></i>
+                    Top Granted Tags
                 </h5>
-                <div id="recent-entries-feed" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="top-granted-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
@@ -585,10 +593,21 @@
         <div class="col-xl-4 mb-4">
             <div class="chart-container feed-equal-height">
                 <h5 class="mb-3 text-dark fw-bold">
-                    <i class="fas fa-history text-primary me-2"></i>
-                    Recent Activity
+                    <i class="fas fa-times-circle text-danger me-2"></i>
+                    Most Denied Tags Today
                 </h5>
-                <div id="recent-activity" class="flex-grow-1" style="overflow-y: auto;">
+                <div id="most-denied-tags-feed" class="flex-grow-1" style="overflow-y: auto;">
+                    <div class="text-center text-muted">Loading...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 mb-4">
+            <div class="chart-container feed-equal-height">
+                <h5 class="mb-3 text-dark fw-bold">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Denied FASTag Activity
+                </h5>
+                <div id="denied-fastag-activity-feed" class="flex-grow-1" style="overflow-y: auto;">
                     <div class="text-center text-muted">Loading...</div>
                 </div>
             </div>
