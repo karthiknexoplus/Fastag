@@ -587,7 +587,7 @@
             <button class="feature-btn" onclick="openWatchlistFromIcon()"><span class="icon"><i class="fas fa-eye"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
             <button class="feature-btn" onclick="showVehicleFinderModal()"><span class="icon"><i class="fas fa-car"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span></button>
+            <button class="feature-btn" onclick="showBankFinderModal()"><span class="icon"><i class="fas fa-university"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-receipt"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
@@ -670,6 +670,39 @@
             </form>
             <div id="vehicleResults" style="margin-top:1rem;display:none;">
                 <div class="modal-records" id="vehicleResultsContent"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Bank Finder Modal -->
+    <div id="bankFinderModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 500px;">
+            <span class="close-modal" onclick="closeBankFinderModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-university"></i></span>
+                <span class="modal-title">Bank Finder</span>
+            </div>
+            <div class="modal-desc">Find bank information by vehicle number or tag ID</div>
+            <form id="bankSearchForm" onsubmit="searchBank(event)">
+                <div class="mb-3">
+                    <label class="form-label">Search Type</label>
+                    <select class="form-control" id="bankSearchType" onchange="updateBankHelpText()">
+                        <option value="VRN">Vehicle Number</option>
+                        <option value="TagID">Tag ID</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Search Value</label>
+                    <input type="text" class="form-control" id="bankSearchValue" placeholder="Enter VRN or TagID" required>
+                    <div class="form-text" id="bankHelpText">Format: TN66AT2938 (VRN) or 24-character TagID</div>
+                </div>
+                <div id="bankSearchError" style="color:#dc3545;font-size:0.9em;margin-bottom:0.5em;display:none;"></div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="button" onclick="closeBankFinderModal()">Cancel</button>
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Search</button>
+                </div>
+            </form>
+            <div id="bankResults" style="margin-top:1rem;display:none;">
+                <div class="modal-records" id="bankResultsContent"></div>
             </div>
         </div>
     </div>
@@ -1664,6 +1697,144 @@
 
     function hideVehicleError() {
         document.getElementById('vehicleSearchError').style.display = 'none';
+    }
+
+    function showBankFinderModal() {
+        document.getElementById('bankFinderModal').style.display = 'flex';
+        document.getElementById('bankResults').style.display = 'none';
+        document.getElementById('bankSearchError').style.display = 'none';
+        document.getElementById('bankSearchForm').reset();
+        updateBankHelpText();
+    }
+
+    function closeBankFinderModal() {
+        document.getElementById('bankFinderModal').style.display = 'none';
+    }
+
+    function updateBankHelpText() {
+        const searchType = document.getElementById('bankSearchType').value;
+        const helpText = document.getElementById('bankHelpText');
+        const placeholder = document.getElementById('bankSearchValue');
+        
+        if (searchType === 'VRN') {
+            helpText.textContent = 'Format: TN66AT2938 (Vehicle Registration Number)';
+            placeholder.placeholder = 'Enter VRN (e.g., TN66AT2938)';
+        } else {
+            helpText.textContent = 'Format: 24-character TagID (hexadecimal)';
+            placeholder.placeholder = 'Enter 24-character TagID';
+        }
+    }
+
+    function searchBank(event) {
+        event.preventDefault();
+        const searchType = document.getElementById('bankSearchType').value;
+        const searchValue = document.getElementById('bankSearchValue').value.trim().toUpperCase();
+        
+        if (!searchValue) {
+            showBankError('Please enter a search value.');
+            return;
+        }
+        
+        // Validate format based on search type
+        if (searchType === 'VRN') {
+            const vrnPattern = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{4}$/;
+            if (!vrnPattern.test(searchValue)) {
+                showBankError('Please enter a valid vehicle registration number (e.g., TN66AT2938).');
+                return;
+            }
+        } else if (searchType === 'TagID') {
+            const tagIdPattern = /^[A-F0-9]{24}$/;
+            if (!tagIdPattern.test(searchValue)) {
+                showBankError('Please enter a valid 24-character TagID (hexadecimal).');
+                return;
+            }
+        }
+        
+        // Show loading
+        hideBankError();
+        document.getElementById('bankResultsContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:1rem;">Searching...</div>';
+        document.getElementById('bankResults').style.display = 'block';
+        
+        // Make API call
+        fetch(`/api/bank/${searchType}/${encodeURIComponent(searchValue)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showBankError('Unable to fetch bank information. Please try again later.');
+                    document.getElementById('bankResults').style.display = 'none';
+                    return;
+                }
+                
+                if (data.ErrorMessage !== 'NONE' || !data.npcitagDetails || data.npcitagDetails.length === 0) {
+                    showBankError('No bank information found for this search value.');
+                    document.getElementById('bankResults').style.display = 'none';
+                    return;
+                }
+                
+                displayBankResults(data.npcitagDetails);
+            })
+            .catch(error => {
+                showBankError('Unable to fetch bank information. Please try again later.');
+                document.getElementById('bankResults').style.display = 'none';
+                console.error('Error:', error);
+            });
+    }
+
+    function displayBankResults(tags) {
+        const resultsContent = document.getElementById('bankResultsContent');
+        let html = '';
+        
+        tags.forEach((tag, index) => {
+            html += `
+                <div style="background:#f8f9fa;border-radius:8px;padding:1rem;margin-bottom:0.5rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <span style="font-weight:600;color:#666;">Bank Name</span>
+                        <span style="font-weight:700;color:#764ba2;font-size:1.1rem;">${tag.BankId || 'N/A'}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <span style="font-weight:600;color:#666;">Vehicle Registration</span>
+                        <span style="font-weight:600;color:#333;">${tag.VRN || 'N/A'}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <span style="font-weight:600;color:#666;">Tag ID</span>
+                        <span style="font-family:monospace;font-weight:600;color:#333;">${tag.TagID || 'N/A'}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <span style="font-weight:600;color:#666;">Tag Status</span>
+                        <span style="background:${tag.TagStatus === 'A' ? 'linear-gradient(135deg,#28a745 0%,#20c997 100%)' : 'linear-gradient(135deg,#dc3545 0%,#fd7e14 100%)'};color:white;padding:0.3rem 0.8rem;border-radius:15px;font-size:0.8rem;font-weight:600;">${tag.TagStatus === 'A' ? 'ACTIVE' : 'INACTIVE'}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <span style="font-weight:600;color:#666;">Issue Date</span>
+                        <span style="font-weight:600;color:#333;">${tag.IssueDate || 'N/A'}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <span style="font-weight:600;color:#666;">Vehicle Class</span>
+                        <span style="background:linear-gradient(135deg,#764ba2 0%,#667eea 100%);color:white;padding:0.3rem 0.8rem;border-radius:15px;font-size:0.8rem;font-weight:600;">${tag.VehicleClass || 'N/A'}</span>
+                    </div>
+            `;
+            
+            if (tag.TID) {
+                html += `
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid #e9ecef;">
+                        <span style="font-weight:600;color:#666;">TID</span>
+                        <span style="font-family:monospace;font-weight:600;color:#333;">${tag.TID}</span>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+        });
+        
+        resultsContent.innerHTML = html;
+    }
+
+    function showBankError(message) {
+        document.getElementById('bankSearchError').textContent = message;
+        document.getElementById('bankSearchError').style.display = 'block';
+    }
+
+    function hideBankError() {
+        document.getElementById('bankSearchError').style.display = 'none';
     }
     function closeAddKycUserModal() {
         document.getElementById('addKycUserModal').style.display = 'none';
