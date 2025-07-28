@@ -1812,4 +1812,24 @@
     }
     function editLocation(id) {
         // For simplicity, open the add form prefilled for editing
-        fetch(`
+        fetch(`/api/locations/${id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.location) {
+                    openAddLocationForm();
+                    document.getElementById('locationName').value = data.location.name;
+                    document.getElementById('locationAddress').value = data.location.address;
+                    // On submit, update instead of add
+                    document.getElementById('addLocationForm').onsubmit = function(e) {
+                        e.preventDefault();
+                        submitEditLocation(id);
+                    };
+                } else {
+                    alert(data.error || 'Failed to load location');
+                }
+            })
+            .catch(() => alert('Failed to load location'));
+    }
+    </script>
+</body>
+</html>
