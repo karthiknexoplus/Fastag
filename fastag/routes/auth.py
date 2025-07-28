@@ -366,7 +366,7 @@ def get_the_app():
 def pwa_login():
     if request.method == 'POST':
         # TODO: Add authentication logic here
-        return redirect('/pwa-dashboard/')
+        return redirect('/pwa-dashboard')
     return render_template('pwa_login.html') 
 
 @auth_bp.route('/pwa-dashboard')
