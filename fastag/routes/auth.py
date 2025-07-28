@@ -364,6 +364,11 @@ def get_the_app():
 
 @auth_bp.route('/pwa-login', methods=['GET', 'POST'])
 def pwa_login():
-    # For now, just render the custom PWA login page on GET
-    # You can add authentication logic here if needed
+    if request.method == 'POST':
+        # TODO: Add authentication logic here
+        return redirect(url_for('auth.pwa_dashboard'))
     return render_template('pwa_login.html') 
+
+@auth_bp.route('/pwa-dashboard')
+def pwa_dashboard():
+    return render_template('pwa_dashboard.html') 

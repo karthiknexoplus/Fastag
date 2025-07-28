@@ -2,7 +2,7 @@
   "name": "FASTag Parking Management",
   "short_name": "FASTag",
   "description": "FASTag Parking Management System - Monitor RFID readers, manage lanes, and track vehicle access",
-  "start_url": "/",
+  "start_url": "/onboarding",
   "display": "standalone",
   "background_color": "#f4f6fb",
   "theme_color": "#764ba2",
