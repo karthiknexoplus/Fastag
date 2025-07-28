@@ -115,7 +115,7 @@ def signup():
 @auth_bp.route('/pwa-onboarding')
 def pwa_onboarding():
     """PWA onboarding screen for mobile users"""
-    return render_template('pwa_onboarding.html')
+    return render_template('pwa_loading.html')
 
 @auth_bp.route('/pwa-dashboard')
 def pwa_dashboard():
@@ -136,7 +136,7 @@ def pwa_login():
     is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
     
     if is_mobile:
-        return render_template('pwa_login.html')
+        return render_template('pwa_login_figma.html')
     else:
         return redirect(url_for('auth.login'))
 

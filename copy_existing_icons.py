@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Copy existing logo.png to create all required PWA icons
-This ensures the PWA icons match the main application logo exactly.
+Copy customer.png to create all required PWA icons
+This ensures the PWA icons match the customer logo exactly.
 """
 
 import os
@@ -9,8 +9,8 @@ import shutil
 from pathlib import Path
 
 def main():
-    # Source logo file
-    source_logo = "fastag/static/logo.png"
+    # Source logo file - using customer.png
+    source_logo = "fastag/static/customer.png"
     
     # Target directory for icons
     icons_dir = "fastag/static/icons"
@@ -23,9 +23,9 @@ def main():
         16, 32, 72, 96, 128, 144, 152, 192, 384, 512
     ]
     
-    print("Creating PWA icons from existing logo...")
+    print("Creating PWA icons from customer.png...")
     
-    # Copy logo.png to create all required icon sizes
+    # Copy customer.png to create all required icon sizes
     for size in icon_sizes:
         target_file = f"{icons_dir}/icon-{size}x{size}.png"
         
@@ -47,7 +47,7 @@ def main():
         print(f"Created: {filename}")
     
     print("\n✅ All PWA icons created successfully!")
-    print("📱 Icons now match your main logo exactly")
+    print("📱 Icons now use customer.png logo")
     print(f"📁 Icons saved in: {icons_dir}")
 
 if __name__ == "__main__":
