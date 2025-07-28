@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Dashboard</title>
+    <meta name="theme-color" content="#f7f7fa">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: #f7f7fa;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .dashboard-container {
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+            padding-top: 1.2rem;
+            padding-bottom: 5.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.7rem;
+        }
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 22px;
+            height: 22px;
+            object-fit: cover;
+        }
+        .greeting {
+            font-size: 0.97rem;
+            font-weight: 500;
+            color: #222;
+            margin-left: 0.7rem;
+            flex: 1;
+        }
+        .notif-bell {
+            font-size: 1rem;
+            color: #764ba2;
+            background: #fff;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.10);
+            position: relative;
+        }
+        .notif-bell .badge {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            background: #ffe082;
+            color: #764ba2;
+            font-size: 0.5rem;
+            border-radius: 50%;
+            padding: 1px 3px;
+            font-weight: 600;
+        }
+        .feature-scroll {
+            display: flex;
+            gap: 0.6rem;
+            overflow-x: auto;
+            padding: 0.7rem 0 0.5rem 0.2rem;
+            margin-bottom: 0.7rem;
+            scrollbar-width: none;
+        }
+        .feature-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .feature-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 54px;
+            min-height: 54px;
+            max-width: 54px;
+            max-height: 54px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fff 60%, #f3e9ff 100%);
+            box-shadow: 0 2px 8px rgba(80,80,160,0.08);
+            border: none;
+            outline: none;
+            transition: box-shadow 0.18s, transform 0.12s, background 0.18s;
+            cursor: pointer;
+            margin-bottom: 0.1rem;
+        }
+        .feature-btn:active, .feature-btn:focus {
+            box-shadow: 0 4px 12px rgba(118,75,162,0.10);
+            background: linear-gradient(135deg, #f3e9ff 60%, #fff 100%);
+            transform: translateY(2px) scale(0.98);
+        }
+        .feature-btn .icon {
+            font-size: 1.1rem;
+            color: #764ba2;
+            margin-bottom: 0.1rem;
+        }
+        .feature-btn .label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #222;
+            letter-spacing: 0.01em;
+            text-align: center;
+        }
+        .feature-slider {
+            width: 100%;
+            margin-bottom: 1.1rem;
+        }
+        .feature-slider .carousel-inner {
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.06);
+        }
+        .feature-slider .carousel-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.8rem;
+            min-height: 56px;
+            padding: 0.7rem 1.1rem;
+        }
+        .feature-slider .icon {
+            font-size: 1.2rem;
+            color: #764ba2;
+        }
+        .feature-slider .desc {
+            font-size: 0.93rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.7rem;
+            width: 100%;
+            margin-bottom: 2.2rem;
+        }
+        .analytics-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 0.7rem 0.7rem 0.6rem 0.7rem;
+            min-height: 70px;
+            text-align: left;
+            transition: box-shadow 0.18s, transform 0.12s, background 0.18s;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        .analytics-card:active, .analytics-card:focus {
+            box-shadow: 0 4px 12px rgba(118,75,162,0.10);
+            background: #f3e9ff;
+            transform: translateY(2px) scale(0.98);
+        }
+        .analytics-card .icon {
+            font-size: 1.1rem;
+            color: #764ba2;
+            margin-bottom: 0.2rem;
+        }
+        .analytics-card .label {
+            font-size: 0.81rem;
+            font-weight: 500;
+            color: #222;
+            margin-bottom: 0.1rem;
+        }
+        .analytics-card .value {
+            font-size: 1.13rem;
+            font-weight: 700;
+            color: #764ba2;
+        }
+        .fab {
+            position: fixed;
+            right: 1.2rem;
+            bottom: 2.2rem;
+            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 54px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            box-shadow: 0 6px 18px rgba(118,75,162,0.13);
+            z-index: 1003;
+            transition: background 0.18s, color 0.18s, transform 0.12s;
+        }
+        .fab:active, .fab:focus {
+            background: linear-gradient(90deg, #ffe082 0%, #764ba2 100%);
+            color: #764ba2;
+            transform: translateY(2px) scale(0.98);
+        }
+        .bottom-nav {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            width: 100vw;
+            background: #fff;
+            box-shadow: 0 -2px 16px rgba(80,80,160,0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0.3rem 0 0.1rem 0;
+            z-index: 1003;
+        }
+        .bottom-nav-btn {
+            background: none;
+            border: none;
+            outline: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #764ba2;
+            font-size: 1.05rem;
+            font-weight: 600;
+            transition: color 0.18s;
+        }
+        .bottom-nav-btn.active, .bottom-nav-btn:focus {
+            color: #ffe082;
+        }
+        .bottom-nav-btn span {
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-top: 0.1em;
+        }
+        @media (max-width: 600px) {
+            .dashboard-container { padding-top: 0.7rem; max-width: 98vw; padding-bottom: 3.2rem; }
+            .feature-scroll { gap: 0.4rem; padding-left: 0.1rem; }
+            .analytics-grid { gap: 0.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="top-bar">
+            <div class="avatar"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Avatar"></div>
+            <div class="greeting">Hi, Karthik!</div>
+            <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
+        </div>
+        <div class="feature-scroll">
+            <button class="feature-btn" onclick="location.href='/pwa/locations'"><span class="icon"><i class="fas fa-map-marker-alt"></i></span><span class="label">Locations</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/lanes'"><span class="icon"><i class="fas fa-road"></i></span><span class="label">Lanes</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon"><i class="fas fa-id-card"></i></span><span class="label">KYC Users</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span><span class="label">Watchlist</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span><span class="label">Analytics</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-car"></i></span><span class="label">Vehicle Finder</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span><span class="label">Bank Finder</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span><span class="label">FASTag Balance</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-receipt"></i></span><span class="label">Challan</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span><span class="label">Fuel Price</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon"><i class="fas fa-sliders-h"></i></span><span class="label">Reader Settings</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/open-barrier'"><span class="icon"><i class="fas fa-unlock-alt"></i></span><span class="label">Open Barrier</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/demographics'"><span class="icon"><i class="fas fa-chart-pie"></i></span><span class="label">Demographics</span></button>
+        </div>
+        <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3500">
+            <div class="carousel-inner">
+                <div class="carousel-item active"><span class="icon"><i class="fas fa-bolt"></i></span><span class="desc">Lightning Fast & Secure</span></div>
+                <div class="carousel-item"><span class="icon"><i class="fas fa-sliders-h"></i></span><span class="desc">Adjust Reader Settings</span></div>
+                <div class="carousel-item"><span class="icon"><i class="fas fa-unlock-alt"></i></span><span class="desc">Open Barrier Remotely</span></div>
+                <div class="carousel-item"><span class="icon"><i class="fas fa-chart-pie"></i></span><span class="desc">Know Vehicle Demographics</span></div>
+                <div class="carousel-item"><span class="icon"><i class="fas fa-map-marked-alt"></i></span><span class="desc">All Locations, One App</span></div>
+            </div>
+        </div>
+        <div class="analytics-grid">
+            <div class="analytics-card"><span class="icon"><i class="fas fa-users"></i></span><span class="label">Current Occupancy</span><span class="value" id="card-occupancy">--</span></div>
+            <div class="analytics-card"><span class="icon"><i class="fas fa-check-circle"></i></span><span class="label">Today's Granted</span><span class="value" id="card-granted">--</span></div>
+            <div class="analytics-card"><span class="icon"><i class="fas fa-times-circle"></i></span><span class="label">Denied Today</span><span class="value" id="card-denied">--</span></div>
+            <div class="analytics-card"><span class="icon"><i class="fas fa-chart-line"></i></span><span class="label">Activity Trend</span><span class="value" id="card-trend">--</span></div>
+            <div class="analytics-card"><span class="icon"><i class="fas fa-car"></i></span><span class="label">Unique Vehicles</span><span class="value" id="card-unique">--</span></div>
+            <div class="analytics-card"><span class="icon"><i class="fas fa-gas-pump"></i></span><span class="label">Top Fuel</span><span class="value" id="card-fuel">--</span></div>
+        </div>
+    </div>
+    <button class="fab" onclick="alert('Scan QR coming soon!')" title="Scan QR"><i class="fas fa-qrcode"></i></button>
+    <nav class="bottom-nav">
+        <button class="bottom-nav-btn active"><i class="fas fa-home"></i><span>Home</span></button>
+        <button class="bottom-nav-btn"><i class="fas fa-chart-line"></i><span>Analytics</span></button>
+        <button class="bottom-nav-btn"><i class="fas fa-car"></i><span>Vehicles</span></button>
+        <button class="bottom-nav-btn"><i class="fas fa-user"></i><span>Profile</span></button>
+    </nav>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
