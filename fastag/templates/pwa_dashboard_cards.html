@@ -562,6 +562,70 @@
             .analytics-grid { gap: 0.7rem; }
             .fab-center { width: 48px; height: 48px; font-size: 1.5rem; bottom: 1.2rem; }
         }
+        .feature-grid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0.5em 0 1em 0;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-auto-rows: 60px;
+            gap: 0.5em;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+        .feature-grid-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 1.2em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            border: none;
+            padding: 0.3em 0.1em;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            min-width: 0;
+            min-height: 0;
+        }
+        .feature-grid-btn .icon {
+            font-size: 1.5em;
+            margin-bottom: 0.1em;
+        }
+        .feature-grid-btn span.label {
+            font-size: 0.8em;
+            color: #444;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.1;
+            max-width: 60px;
+            word-break: break-word;
+        }
+        .feature-grid-arrows {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0.2em 0 0.1em 0;
+            gap: 1.5em;
+        }
+        .feature-grid-arrow-btn {
+            background: none;
+            border: none;
+            font-size: 1.7em;
+            color: #764ba2;
+            cursor: pointer;
+            padding: 0.1em 0.3em;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .feature-grid-arrow-btn:active {
+            background: #f3e5f5;
+        }
     </style>
 </head>
 <body>
@@ -580,20 +644,12 @@
             {% endif %}
         </div>
         <div class="feature-desc">All your FASTag Parking features at a glance</div>
-        <div class="feature-scroll">
-            <button class="feature-btn" onclick="openLocationsModal()"><span class="icon"><i class="fas fa-map-marker-alt"></i></span></button>
-            <button class="feature-btn" onclick="openLanesModal()"><span class="icon"><i class="fas fa-road"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon"><i class="fas fa-id-card"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-car"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-receipt"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/open-barrier'"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/demographics'"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
+        <div class="feature-grid-container">
+            <div class="feature-grid-arrows">
+                <button class="feature-grid-arrow-btn" id="featureGridPrev" onclick="featureGridPrevPage()"><i class="fas fa-chevron-left"></i></button>
+                <button class="feature-grid-arrow-btn" id="featureGridNext" onclick="featureGridNextPage()"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="feature-grid" id="featureGrid"></div>
         </div>
         <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3500">
             <div class="carousel-inner">
@@ -1939,6 +1995,58 @@
     });
     // CSS: Ensure .feature-scroll is always horizontally scrollable by user
     // ... existing code ...
+
+    // --- Feature Grid Pagination Logic ---
+    const featureGridIcons = [
+        { icon: 'fa-map-marker-alt', label: 'Locations', onclick: 'openLocationsModal()' },
+        { icon: 'fa-road', label: 'Lanes', onclick: 'openLanesModal()' },
+        { icon: 'fa-id-card', label: 'KYC Users', onclick: "location.href='/pwa/kyc-users'" },
+        { icon: 'fa-eye', label: 'Watchlist', onclick: "location.href='/pwa/watchlist'" },
+        { icon: 'fa-search', label: 'Vehicle Finder', onclick: "location.href='/pwa/vehicle-finder'" },
+        { icon: 'fa-university', label: 'Bank Finder', onclick: "location.href='/pwa/bank-finder'" },
+        { icon: 'fa-wallet', label: 'FASTag Balance', onclick: "location.href='/pwa/fastag-balance'" },
+        { icon: 'fa-file-invoice', label: 'Challan', onclick: "location.href='/pwa/challan'" },
+        { icon: 'fa-gas-pump', label: 'Fuel Price', onclick: "location.href='/pwa/fuel-price'" },
+        { icon: 'fa-cogs', label: 'Reader Settings', onclick: "location.href='/pwa/reader-settings'" },
+        { icon: 'fa-door-open', label: 'Open Barrier', onclick: "location.href='/pwa/open-barrier'" },
+        { icon: 'fa-chart-pie', label: 'Demographics', onclick: "location.href='/pwa/demographics'" }
+    ];
+    const featureGridPerPage = 5;
+    let featureGridPage = 0;
+    function renderFeatureGrid() {
+        const grid = document.getElementById('featureGrid');
+        grid.innerHTML = '';
+        const start = featureGridPage * featureGridPerPage;
+        const end = start + featureGridPerPage;
+        const pageIcons = featureGridIcons.slice(start, end);
+        // 2 or 3 rows depending on count
+        let rows = 2;
+        if (featureGridIcons.length > 10) rows = 3;
+        grid.style.gridTemplateRows = `repeat(${rows}, 60px)`;
+        pageIcons.forEach(f => {
+            const btn = document.createElement('button');
+            btn.className = 'feature-grid-btn';
+            btn.innerHTML = `<span class="icon"><i class="fas ${f.icon}"></i></span><span class="label">${f.label}</span>`;
+            btn.setAttribute('onclick', f.onclick);
+            grid.appendChild(btn);
+        });
+        // Hide prev/next if at ends
+        document.getElementById('featureGridPrev').style.visibility = featureGridPage === 0 ? 'hidden' : 'visible';
+        document.getElementById('featureGridNext').style.visibility = (end >= featureGridIcons.length) ? 'hidden' : 'visible';
+    }
+    function featureGridPrevPage() {
+        if (featureGridPage > 0) {
+            featureGridPage--;
+            renderFeatureGrid();
+        }
+    }
+    function featureGridNextPage() {
+        if ((featureGridPage + 1) * featureGridPerPage < featureGridIcons.length) {
+            featureGridPage++;
+            renderFeatureGrid();
+        }
+    }
+    window.addEventListener('DOMContentLoaded', renderFeatureGrid);
     </script>
 </body>
 </html> 
