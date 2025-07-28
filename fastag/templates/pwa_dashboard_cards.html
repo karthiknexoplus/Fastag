@@ -1099,10 +1099,13 @@
     <script>
     // Auto-scroll the feature icon row slowly and smoothly
     const featureScroll = document.querySelector('.feature-scroll');
+    let featureScrollInterval = null;
+    let featureScrollPaused = false;
     if (featureScroll) {
         let scrollAmount = 0;
         let direction = 1;
-        setInterval(() => {
+        featureScrollInterval = setInterval(() => {
+            if (featureScrollPaused) return;
             if (featureScroll.scrollWidth - featureScroll.clientWidth > 0) {
                 scrollAmount += direction * 1.2;
                 if (scrollAmount >= featureScroll.scrollWidth - featureScroll.clientWidth) {
@@ -1113,6 +1116,31 @@
                 featureScroll.scrollTo({ left: scrollAmount, behavior: 'smooth' });
             }
         }, 40);
+        // Stop auto-scroll on any feature icon click
+        document.querySelectorAll('.feature-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                featureScrollPaused = true;
+                if (featureScrollInterval) {
+                    clearInterval(featureScrollInterval);
+                    featureScrollInterval = null;
+                }
+            });
+        });
+        // Also stop on manual scroll (user interaction)
+        featureScroll.addEventListener('mousedown', () => {
+            featureScrollPaused = true;
+            if (featureScrollInterval) {
+                clearInterval(featureScrollInterval);
+                featureScrollInterval = null;
+            }
+        });
+        featureScroll.addEventListener('touchstart', () => {
+            featureScrollPaused = true;
+            if (featureScrollInterval) {
+                clearInterval(featureScrollInterval);
+                featureScrollInterval = null;
+            }
+        });
     }
 
     // Load analytics data
