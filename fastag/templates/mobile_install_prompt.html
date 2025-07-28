@@ -519,7 +519,8 @@
         // Override base template's beforeinstallprompt handler
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('🎉 Mobile install prompt: beforeinstallprompt event fired!');
-            alert('Install prompt available!'); // Test alert
+            console.log('Event details:', e);
+            alert('🎉 Install prompt available! PWA criteria met!'); // Test alert
             e.preventDefault();
             e.stopPropagation(); // Prevent base template from handling it
             
@@ -531,7 +532,13 @@
             
             console.log('Install button should now be visible');
             console.log('Install button display:', installButton.style.display);
+            console.log('Deferred prompt set:', deferredPrompt);
         });
+        
+        // Also listen for the event on the window object
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('🎉 Window beforeinstallprompt event fired!');
+        }, true); // Use capture phase
         
         // Simple install function (like the working test page)
         function triggerInstall() {
@@ -646,8 +653,22 @@
                 console.log('❌ No install prompt available - showing manual instructions');
                 alert('No install prompt available. Showing manual instructions.');
                 installInstructions.style.display = 'block';
+            } else {
+                console.log('✅ Deferred prompt available - install button should work');
+                alert('✅ Deferred prompt is available! Install button should work now.');
             }
         }, 2000);
+        
+        // Additional check after 10 seconds to see if event fires later
+        setTimeout(() => {
+            console.log('⏰ 10-second final check');
+            console.log('Deferred prompt still available:', deferredPrompt);
+            
+            if (!deferredPrompt) {
+                console.log('❌ Still no deferred prompt after 10 seconds');
+                alert('❌ Install prompt never fired. This might be due to:\n1. Browser policy\n2. User has already dismissed install prompt\n3. App already installed in another way');
+            }
+        }, 10000);
         
         // Additional diagnostic after 5 seconds
         setTimeout(() => {
