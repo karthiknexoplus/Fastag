@@ -2189,6 +2189,45 @@
     function openWatchlistFromIcon() {
       openWatchlistModal();
     }
+    // Watchlist KYC User Autocomplete
+    const kycSearchInput = document.getElementById('addWatchlistKycSearch');
+    const kycSuggestions = document.getElementById('addWatchlistKycSuggestions');
+    const kycFastagInput = document.getElementById('addWatchlistKycFastag');
+    let kycSearchTimer = null;
+    if (kycSearchInput) {
+      kycSearchInput.addEventListener('input', function() {
+        const q = this.value.trim();
+        kycSuggestions.innerHTML = '';
+        kycFastagInput.value = '';
+        if (q.length < 2) return;
+        clearTimeout(kycSearchTimer);
+        kycSearchTimer = setTimeout(() => {
+          fetch(`/analytics/api/search-kyc-users?q=${encodeURIComponent(q)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (!data.results.length) {
+                kycSuggestions.innerHTML = '<div class="list-group-item text-muted">No matches found</div>';
+                return;
+              }
+              kycSuggestions.innerHTML = data.results.map(u =>
+                `<button type="button" class="list-group-item list-group-item-action" data-id="${u.fastag_id}" data-name="${u.name}" data-veh="${u.vehicle_number}">
+                    ${u.fastag_id} | ${u.name} | ${u.vehicle_number}
+                </button>`
+              ).join('');
+            });
+        }, 200);
+      });
+      kycSuggestions.addEventListener('click', function(e) {
+        if (e.target && e.target.matches('button[data-id]')) {
+          kycFastagInput.value = e.target.getAttribute('data-id');
+          kycSearchInput.value = `${e.target.getAttribute('data-name')} | ${e.target.getAttribute('data-veh')}`;
+          kycSuggestions.innerHTML = '';
+        }
+      });
+      kycSearchInput.addEventListener('blur', function() {
+        setTimeout(() => { kycSuggestions.innerHTML = ''; }, 200);
+      });
+    }
     </script>
     <!-- Watchlist Modal -->
     <div id="watchlistModal" class="modal-custom" style="display:none;">
@@ -2231,9 +2270,11 @@
           <span class="modal-title" id="addWatchlistModalTitle">Add to Watchlist</span>
         </div>
         <form id="addWatchlistForm" onsubmit="submitAddWatchlist(event)">
-          <div class="mb-2" id="addWatchlistKycRow" style="display:none;">
-            <label class="form-label">FASTag ID (KYC User)</label>
-            <input type="text" class="form-control" id="addWatchlistKycFastag" required>
+          <div class="mb-2" id="addWatchlistKycRow" style="display:none;position:relative;">
+            <label class="form-label">Search KYC User (name or vehicle number)</label>
+            <input type="text" class="form-control" id="addWatchlistKycSearch" autocomplete="off" placeholder="Type name or vehicle number...">
+            <div id="addWatchlistKycSuggestions" class="list-group position-absolute w-100" style="z-index: 1051;"></div>
+            <input type="hidden" id="addWatchlistKycFastag" required>
           </div>
           <div class="mb-2" id="addWatchlistNonuserRow" style="display:none;">
             <label class="form-label">FASTag ID (Non-User)</label>
