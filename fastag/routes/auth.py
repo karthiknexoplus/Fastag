@@ -202,6 +202,11 @@ def api_audit_log():
 def watchlist():
     return render_template('watchlist.html')
 
+@auth_bp.route('/onboarding')
+def onboarding():
+    """Serve the onboarding slider page before login."""
+    return render_template('onboarding.html')
+
 @auth_bp.route('/debug/env')
 def debug_env():
     import os
