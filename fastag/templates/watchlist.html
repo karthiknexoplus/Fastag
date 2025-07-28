@@ -280,6 +280,14 @@ document.getElementById('add-kyc-watchlist-form').onsubmit = function(e) {
     e.preventDefault();
     const fastag_id = document.getElementById('kycUserSelect').value;
     const reason = document.getElementById('kycReasonInput').value;
+    
+    console.log('Form submission - fastag_id:', fastag_id, 'reason:', reason);
+    
+    if (!fastag_id) {
+        alert('Please select a KYC user from the search suggestions first.');
+        return;
+    }
+    
     fetch('/api/watchlist/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -349,10 +357,18 @@ kycUserSearch.addEventListener('input', function() {
 
 kycUserSuggestions.addEventListener('click', function(e) {
     if (e.target && e.target.matches('button[data-id]')) {
-        kycUserSelect.value = e.target.getAttribute('data-id');
-        kycUserSearch.value = `${e.target.getAttribute('data-name')} | ${e.target.getAttribute('data-veh')}`;
+        const fastag_id = e.target.getAttribute('data-id');
+        const name = e.target.getAttribute('data-name');
+        const vehicle = e.target.getAttribute('data-veh');
+        
+        console.log('User selected:', { fastag_id, name, vehicle });
+        
+        kycUserSelect.value = fastag_id;
+        kycUserSearch.value = `${name} | ${vehicle}`;
         kycUserSuggestions.innerHTML = '';
         kycUserSuggestions.style.display = 'none';
+        
+        console.log('kycUserSelect value set to:', kycUserSelect.value);
     }
 });
 
