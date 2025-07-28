@@ -39,11 +39,21 @@
                 applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
               }).then(function(subscription) {
                 document.getElementById('status').innerText = 'Subscribed! ' + JSON.stringify(subscription);
+                fetch('/api/save-subscription', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(subscription)
+                });
               }).catch(function(err) {
                 document.getElementById('status').innerText = 'Subscription error: ' + err.message;
               });
             } else {
               document.getElementById('status').innerText = 'Already subscribed!';
+              fetch('/api/save-subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sub)
+              });
             }
           });
         });
