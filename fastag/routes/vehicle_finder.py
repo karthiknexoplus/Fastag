@@ -63,4 +63,9 @@ def vehicle_api(reg_no):
         
         return jsonify(response.json())
     except Exception as e:
-        return jsonify({'error': str(e)}), 400 
+        return jsonify({'error': str(e)}), 400
+
+@vehicle_finder_bp.route('/pwa/vehicle-finder')
+def pwa_vehicle_finder():
+    """PWA version of vehicle finder"""
+    return render_template('pwa_vehicle_finder.html') 
