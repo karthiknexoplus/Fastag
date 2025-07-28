@@ -8,6 +8,9 @@ Since you already have HTTPS set up with Tailscale on your Raspberry Pi, here's 
 ```bash
 # Copy existing logo to create PWA icons (no dependencies required)
 python3 copy_existing_icons.py
+
+# OR if you want SVG icons (requires json module):
+# python3 create_simple_pwa_icons.py
 ```
 
 This will create all the required PWA icons in `fastag/static/icons/` directory.
@@ -94,6 +97,14 @@ curl https://your-tailscale-url/static/manifest.json
 
 # Check if service worker is accessible
 curl https://your-tailscale-url/static/sw.js
+```
+
+### If you get JSON import errors:
+```bash
+# Use the simpler approach that doesn't require JSON:
+python3 copy_existing_icons.py
+
+# This will copy your existing logo.png to create all PWA icons
 ```
 
 ## 📊 Monitor PWA Performance

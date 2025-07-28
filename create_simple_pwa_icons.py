@@ -5,6 +5,7 @@ This creates basic colored icons for PWA functionality
 """
 
 import os
+import json
 import base64
 from pathlib import Path
 
@@ -142,11 +143,8 @@ def main():
     print("🚀 Creating Simple PWA Icons (No Pillow Required)")
     print("=" * 50)
     
-    try:
-        import json
-    except ImportError:
-        print("❌ JSON module not available")
-        return
+    # Import json at the top level
+    import json
     
     create_icon_files()
     create_screenshots()
