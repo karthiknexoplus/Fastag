@@ -76,15 +76,20 @@
             width: 100%;
         }
         .carousel-item {
-            min-height: 260px;
-            height: 260px;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 260px;
+            height: 260px;
             text-align: center;
             word-break: break-word;
             padding: 0 1.2rem;
+        }
+        .carousel-item.active,
+        .carousel-item-next,
+        .carousel-item-prev {
+            display: flex;
         }
         .carousel-item .icon {
             font-size: 2.5rem;
