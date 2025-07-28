@@ -13,8 +13,23 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/home')
 def home():
     if 'user' not in session:
-        return redirect(url_for('auth.login'))
-    return redirect(url_for('locations.locations'))
+        # Check if this is a PWA request
+        user_agent = request.headers.get('User-Agent', '').lower()
+        is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
+        
+        if is_mobile:
+            return redirect(url_for('auth.pwa_onboarding'))
+        else:
+            return redirect(url_for('auth.login'))
+    
+    # If user is logged in, check if it's a mobile request
+    user_agent = request.headers.get('User-Agent', '').lower()
+    is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
+    
+    if is_mobile:
+        return redirect(url_for('auth.pwa_dashboard'))
+    else:
+        return redirect(url_for('locations.locations'))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -96,6 +111,34 @@ def signup():
         return redirect(url_for('auth.login'))
     
     return render_template('signup.html')
+
+@auth_bp.route('/pwa-onboarding')
+def pwa_onboarding():
+    """PWA onboarding screen for mobile users"""
+    return render_template('pwa_onboarding.html')
+
+@auth_bp.route('/pwa-dashboard')
+def pwa_dashboard():
+    """PWA-specific dashboard for mobile users"""
+    if 'user' not in session:
+        return redirect(url_for('auth.pwa_onboarding'))
+    return render_template('pwa_dashboard.html')
+
+@auth_bp.route('/pwa-login')
+def pwa_login():
+    """PWA-specific login page"""
+    # Check if user is already logged in
+    if 'user' in session:
+        return redirect(url_for('auth.home'))
+    
+    # Check if this is a PWA request
+    user_agent = request.headers.get('User-Agent', '').lower()
+    is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
+    
+    if is_mobile:
+        return render_template('pwa_onboarding.html')
+    else:
+        return redirect(url_for('auth.login'))
 
 @auth_bp.route('/logout')
 def logout():
