@@ -471,18 +471,54 @@
             console.log('HTTPS:', window.location.protocol === 'https:');
             console.log('Standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
             console.log('User agent:', navigator.userAgent);
+            console.log('Manifest URL:', "{{ url_for('static', filename='manifest.json') }}");
             
             // Check if service worker is registered
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
                     console.log('Service workers:', registrations.length);
+                    registrations.forEach((registration, index) => {
+                        console.log(`SW ${index}:`, registration.scope);
+                    });
                 });
+            }
+        }
+        
+        // Simple install function
+        function triggerInstall() {
+            console.log('🚀 Install triggered!');
+            console.log('Deferred prompt:', deferredPrompt);
+            
+            if (deferredPrompt) {
+                console.log('📱 Showing native install prompt...');
+                deferredPrompt.prompt();
+                
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    console.log('User choice:', choiceResult.outcome);
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('✅ User accepted the install prompt');
+                        // Redirect to the app
+                        window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
+                    } else {
+                        console.log('❌ User dismissed the install prompt');
+                        // Show manual instructions
+                        installInstructions.style.display = 'block';
+                        installInstructions.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                console.log('⚠️ No deferred prompt available');
+                // Show manual instructions
+                installInstructions.style.display = 'block';
+                installInstructions.scrollIntoView({ behavior: 'smooth' });
             }
         }
         
         // Listen for the beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('🎉 beforeinstallprompt event fired!');
+            console.log('Event:', e);
             
             // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
@@ -498,35 +534,12 @@
         });
         
         // Add click event to install button
-        installButton.addEventListener('click', () => {
-            console.log('🚀 Install button clicked!');
-            
-            if (deferredPrompt) {
-                // Show the install prompt
-                deferredPrompt.prompt();
-                
-                // Wait for the user to respond to the prompt
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('✅ User accepted the install prompt');
-                        // Redirect to the app
-                        window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
-                    } else {
-                        console.log('❌ User dismissed the install prompt');
-                        // Show manual instructions
-                        installInstructions.style.display = 'block';
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                console.log('⚠️ No deferred prompt available, showing manual instructions');
-                installInstructions.style.display = 'block';
-            }
-        });
+        installButton.addEventListener('click', triggerInstall);
         
         // Listen for successful installation
         window.addEventListener('appinstalled', (evt) => {
             console.log('🎉 App was installed successfully!');
+            console.log('Install event:', evt);
             // Redirect to the app
             window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
         });
@@ -539,10 +552,7 @@
         
         function manualInstall() {
             console.log('📱 Manual install button clicked');
-            // Show manual instructions
-            installInstructions.style.display = 'block';
-            // Scroll to instructions
-            installInstructions.scrollIntoView({ behavior: 'smooth' });
+            triggerInstall();
         }
         
         // Check if already installed
@@ -565,14 +575,23 @@
             });
         });
         
-        // Fallback: Show install button after 2 seconds if no prompt
+        // Fallback: Show install button after 3 seconds if no prompt
         setTimeout(() => {
+            console.log('⏰ Checking fallback after 3 seconds...');
+            console.log('Deferred prompt:', deferredPrompt);
+            console.log('Install button display:', installButton.style.display);
+            
             if (!deferredPrompt && installButton.style.display === 'none') {
                 console.log('⏰ Fallback: Showing install button after timeout');
                 installButton.style.display = 'block';
                 installInstructions.style.display = 'none';
             }
-        }, 2000);
+        }, 3000);
+        
+        // Additional debugging
+        console.log('📱 Mobile install prompt page loaded');
+        console.log('Install button element:', installButton);
+        console.log('Install instructions element:', installInstructions);
     </script>
 </body>
 </html> 

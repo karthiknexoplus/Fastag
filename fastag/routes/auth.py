@@ -144,6 +144,11 @@ def pwa_dashboard_debug():
         'login_method': user_data.get('login_method', 'unknown') if isinstance(user_data, dict) else 'not_dict'
     }
 
+@auth_bp.route('/pwa-test')
+def pwa_test():
+    """PWA installation test page"""
+    return render_template('pwa_test.html')
+
 @auth_bp.route('/pwa-dashboard')
 def pwa_dashboard():
     """PWA-specific dashboard for mobile users"""
