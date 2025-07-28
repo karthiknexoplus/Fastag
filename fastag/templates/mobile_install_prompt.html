@@ -465,6 +465,28 @@
         let installButton = document.getElementById('installButton');
         let installInstructions = document.getElementById('installInstructions');
         
+        // Disable base template's install button on this page
+        window.addEventListener('load', function() {
+            const baseInstallBtn = document.getElementById('install-btn');
+            if (baseInstallBtn) {
+                baseInstallBtn.remove();
+                console.log('🗑️ Removed base template install button');
+            }
+        });
+        
+        // Override base template's beforeinstallprompt handler
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('🎉 Mobile install prompt: beforeinstallprompt event fired!');
+            e.preventDefault();
+            e.stopPropagation(); // Prevent base template from handling it
+            
+            deferredPrompt = e;
+            
+            // Show the install button
+            installButton.style.display = 'block';
+            installInstructions.style.display = 'none';
+        });
+        
         // Simple install function (like the working test page)
         function triggerInstall() {
             console.log('🚀 Install triggered!');
@@ -487,17 +509,6 @@
                 installInstructions.style.display = 'block';
             }
         }
-        
-        // Listen for beforeinstallprompt (simple like test page)
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('🎉 beforeinstallprompt event fired!');
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Show the install button
-            installButton.style.display = 'block';
-            installInstructions.style.display = 'none';
-        });
         
         // Listen for successful installation
         window.addEventListener('appinstalled', (evt) => {
