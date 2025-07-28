@@ -645,6 +645,24 @@
                 alert('App is already installed! This prevents new install prompts.');
             }
             
+            // Check browser compatibility
+            const isChrome = /Chrome/.test(navigator.userAgent);
+            const isEdge = /Edg/.test(navigator.userAgent);
+            const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+            
+            console.log('Browser compatibility:');
+            console.log('- Chrome:', isChrome);
+            console.log('- Edge:', isEdge);
+            console.log('- Safari:', isSafari);
+            
+            if (!isChrome && !isEdge && !isSafari) {
+                alert('PWA install is not supported in this browser. Try Chrome, Edge, or Safari.');
+            }
+            
+            // Check if user has interacted with the site
+            console.log('User interaction required for PWA install');
+            alert('PWA install requires user interaction. Please interact with the page first.');
+            
             // Check if manifest is loading
             fetch("{{ url_for('static', filename='manifest.json') }}")
                 .then(response => {
