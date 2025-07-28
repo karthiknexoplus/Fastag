@@ -425,12 +425,16 @@
                 </div>
             </div>
             
-            <button class="install-button" id="installButton" style="display: none;" onclick="triggerInstall()">
+            <button class="install-button" id="installButton" style="display: none;" onclick="alert('Button clicked!'); triggerInstall();">
                 <i class="fas fa-download me-2"></i>Install App
             </button>
             
             <button class="install-button" id="manualInstallButton" onclick="manualInstall()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
                 <i class="fas fa-mobile-alt me-2"></i>Install Manually
+            </button>
+            
+            <button class="install-button" id="testButton" onclick="alert('Test button works!');" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); margin-top: 10px;">
+                <i class="fas fa-test me-2"></i>Test Button
             </button>
             
             <button class="continue-web" onclick="continueToWeb()">
@@ -461,9 +465,16 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Test if JavaScript is loading
+        alert('JavaScript loaded!');
+        console.log('📱 Mobile install prompt JavaScript loaded');
+        
         let deferredPrompt;
         let installButton = document.getElementById('installButton');
         let installInstructions = document.getElementById('installInstructions');
+        
+        console.log('Install button element:', installButton);
+        console.log('Install instructions element:', installInstructions);
         
         // Disable base template's install button on this page
         window.addEventListener('load', function() {
