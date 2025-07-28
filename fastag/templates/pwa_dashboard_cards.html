@@ -581,8 +581,8 @@
         </div>
         <div class="feature-desc">All your FASTag Parking features at a glance</div>
         <div class="feature-scroll">
-            <button class="feature-btn" onclick="location.href='/pwa/locations'"><span class="icon"><i class="fas fa-map-marker-alt"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/lanes'"><span class="icon"><i class="fas fa-road"></i></span></button>
+            <button class="feature-btn" onclick="openLocationsModal()"><span class="icon"><i class="fas fa-map-marker-alt"></i></span></button>
+            <button class="feature-btn" onclick="openLanesModal()"><span class="icon"><i class="fas fa-road"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon"><i class="fas fa-id-card"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
@@ -783,6 +783,70 @@
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeKycUsersListModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Locations Modal -->
+    <div id="locationsModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closeLocationsModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-map-marker-alt"></i></span>
+                <span class="modal-title">Locations</span>
+            </div>
+            <div class="modal-desc" id="locationsTotal">All locations.</div>
+            <div class="modal-records" id="locationsRecords" style="overflow-x:auto;max-height:45vh;overflow-y:auto;"></div>
+            <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:0.5em;">
+                <button class="input-icon-btn" style="font-size:1.3rem;color:#764ba2;background:none;border:none;outline:none;cursor:pointer;" onclick="toggleLocationsSearch()" title="Search"><i class="fas fa-search"></i></button>
+                <button class="input-icon-btn" style="font-size:1.3rem;color:#28a745;background:none;border:none;outline:none;cursor:pointer;margin-left:0.7em;" onclick="showAddLocationForm()" title="Add Location"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="locationsSearchBox" style="display:none;margin-bottom:0.5em;">
+                <input type="text" id="locationsSearchInput" class="form-control" placeholder="Search by name or address..." oninput="filterLocationsList()">
+            </div>
+            <div id="addLocationFormBox" style="display:none;margin-bottom:0.5em;">
+                <form id="addLocationForm" onsubmit="submitAddLocation(event)">
+                    <input type="text" class="form-control mb-1" id="locationName" placeholder="Location Name" required>
+                    <input type="text" class="form-control mb-1" id="locationAddress" placeholder="Address" required>
+                    <div style="display:flex;justify-content:flex-end;gap:0.5em;">
+                        <button class="modal-close-btn" type="button" onclick="hideAddLocationForm()">Cancel</button>
+                        <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Add</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeLocationsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Lanes Modal -->
+    <div id="lanesModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closeLanesModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-road"></i></span>
+                <span class="modal-title">Lanes</span>
+            </div>
+            <div class="modal-desc" id="lanesTotal">All lanes.</div>
+            <div class="modal-records" id="lanesRecords" style="overflow-x:auto;max-height:45vh;overflow-y:auto;"></div>
+            <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:0.5em;">
+                <button class="input-icon-btn" style="font-size:1.3rem;color:#764ba2;background:none;border:none;outline:none;cursor:pointer;" onclick="toggleLanesSearch()" title="Search"><i class="fas fa-search"></i></button>
+                <button class="input-icon-btn" style="font-size:1.3rem;color:#28a745;background:none;border:none;outline:none;cursor:pointer;margin-left:0.7em;" onclick="showAddLaneForm()" title="Add Lane"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="lanesSearchBox" style="display:none;margin-bottom:0.5em;">
+                <input type="text" id="lanesSearchInput" class="form-control" placeholder="Search by name..." oninput="filterLanesList()">
+            </div>
+            <div id="addLaneFormBox" style="display:none;margin-bottom:0.5em;">
+                <form id="addLaneForm" onsubmit="submitAddLane(event)">
+                    <input type="text" class="form-control mb-1" id="laneName" placeholder="Lane Name" required>
+                    <input type="number" class="form-control mb-1" id="laneLocationId" placeholder="Location ID" required>
+                    <div style="display:flex;justify-content:flex-end;gap:0.5em;">
+                        <button class="modal-close-btn" type="button" onclick="hideAddLaneForm()">Cancel</button>
+                        <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Add</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeLanesModal()">Close</button>
             </div>
         </div>
     </div>
@@ -1576,6 +1640,264 @@
             }
         })
         .catch(() => showKycUserError('Failed to update user'));
+    }
+    // Locations Modal logic
+    function openLocationsModal() {
+        document.getElementById('locationsModal').style.display = 'flex';
+        loadLocationsList();
+    }
+    function closeLocationsModal() {
+        document.getElementById('locationsModal').style.display = 'none';
+    }
+    function loadLocationsList() {
+        document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        fetch('/api/locations')
+            .then(r => r.json())
+            .then(data => {
+                let locations = data.locations || [];
+                window._locationsList = locations;
+                document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${locations.length}</b>`;
+                renderLocationsList(locations);
+            })
+            .catch(() => {
+                document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load locations.</div>';
+            });
+    }
+    function renderLocationsList(locations) {
+        let tableHtml = '<table style="min-width:500px;"><tr>' +
+            '<th>Name</th><th>Address</th><th>Site ID</th><th>Edit</th><th>Delete</th></tr>' +
+            locations.map(l => `<tr>` +
+                `<td>${l.name}</td>` +
+                `<td style=\"max-width:180px;word-break:break-word;white-space:pre-line;\">${l.address}</td>` +
+                `<td>${l.site_id}</td>` +
+                `<td><button class=\"input-icon-btn kyc-edit-btn\" title=\"Edit\" onclick=\"editLocation(${l.id})\"><i class=\"fas fa-edit\"></i></button></td>` +
+                `<td><button class=\"input-icon-btn kyc-delete-btn\" title=\"Delete\" onclick=\"deleteLocation(${l.id})\"><i class=\"fas fa-trash\"></i></button></td>` +
+            `</tr>`).join('') + '</table>';
+        document.getElementById('locationsRecords').innerHTML = tableHtml;
+    }
+    function toggleLocationsSearch() {
+        const box = document.getElementById('locationsSearchBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block') {
+            document.getElementById('locationsSearchInput').focus();
+        } else {
+            filterLocationsList('');
+        }
+    }
+    function filterLocationsList() {
+        const val = document.getElementById('locationsSearchInput').value.trim().toLowerCase();
+        const locations = window._locationsList || [];
+        if (!val) {
+            renderLocationsList(locations);
+            document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${locations.length}</b>`;
+            return;
+        }
+        const filtered = locations.filter(l =>
+            (l.name && l.name.toLowerCase().includes(val)) ||
+            (l.address && l.address.toLowerCase().includes(val))
+        );
+        renderLocationsList(filtered);
+        document.getElementById('locationsTotal').innerHTML = `Search results: <b>${filtered.length}</b> / ${locations.length}`;
+    }
+    function showAddLocationForm() {
+        document.getElementById('addLocationFormBox').style.display = 'block';
+    }
+    function hideAddLocationForm() {
+        document.getElementById('addLocationFormBox').style.display = 'none';
+    }
+    function submitAddLocation(e) {
+        e.preventDefault();
+        const name = document.getElementById('locationName').value.trim();
+        const address = document.getElementById('locationAddress').value.trim();
+        fetch('/api/locations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, address })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                hideAddLocationForm();
+                loadLocationsList();
+            } else {
+                alert(data.error || 'Failed to add location');
+            }
+        })
+        .catch(() => alert('Failed to add location'));
+    }
+    function editLocation(id) {
+        // For simplicity, open the add form prefilled for editing
+        fetch(`/api/locations`)
+            .then(r => r.json())
+            .then(data => {
+                const loc = (data.locations || []).find(l => l.id === id);
+                if (loc) {
+                    showAddLocationForm();
+                    document.getElementById('locationName').value = loc.name;
+                    document.getElementById('locationAddress').value = loc.address;
+                    document.getElementById('addLocationForm').onsubmit = function(e) {
+                        e.preventDefault();
+                        submitEditLocation(id);
+                    };
+                }
+            });
+    }
+    function submitEditLocation(id) {
+        const name = document.getElementById('locationName').value.trim();
+        const address = document.getElementById('locationAddress').value.trim();
+        fetch(`/api/locations/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, address })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                hideAddLocationForm();
+                loadLocationsList();
+            } else {
+                alert(data.error || 'Failed to update location');
+            }
+        })
+        .catch(() => alert('Failed to update location'));
+    }
+    function deleteLocation(id) {
+        if (!confirm('Delete this location?')) return;
+        fetch(`/api/locations/${id}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) loadLocationsList();
+                else alert(data.error || 'Failed to delete location');
+            })
+            .catch(() => alert('Failed to delete location'));
+    }
+    // Lanes Modal logic
+    function openLanesModal() {
+        document.getElementById('lanesModal').style.display = 'flex';
+        loadLanesList();
+    }
+    function closeLanesModal() {
+        document.getElementById('lanesModal').style.display = 'none';
+    }
+    function loadLanesList() {
+        document.getElementById('lanesRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        fetch('/api/lanes')
+            .then(r => r.json())
+            .then(data => {
+                let lanes = data.lanes || [];
+                window._lanesList = lanes;
+                document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${lanes.length}</b>`;
+                renderLanesList(lanes);
+            })
+            .catch(() => {
+                document.getElementById('lanesRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load lanes.</div>';
+            });
+    }
+    function renderLanesList(lanes) {
+        let tableHtml = '<table style="min-width:500px;"><tr>' +
+            '<th>Name</th><th>Location ID</th><th>Edit</th><th>Delete</th></tr>' +
+            lanes.map(l => `<tr>` +
+                `<td>${l.lane_name}</td>` +
+                `<td>${l.location_id}</td>` +
+                `<td><button class=\"input-icon-btn kyc-edit-btn\" title=\"Edit\" onclick=\"editLane(${l.id})\"><i class=\"fas fa-edit\"></i></button></td>` +
+                `<td><button class=\"input-icon-btn kyc-delete-btn\" title=\"Delete\" onclick=\"deleteLane(${l.id})\"><i class=\"fas fa-trash\"></i></button></td>` +
+            `</tr>`).join('') + '</table>';
+        document.getElementById('lanesRecords').innerHTML = tableHtml;
+    }
+    function toggleLanesSearch() {
+        const box = document.getElementById('lanesSearchBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block') {
+            document.getElementById('lanesSearchInput').focus();
+        } else {
+            filterLanesList('');
+        }
+    }
+    function filterLanesList() {
+        const val = document.getElementById('lanesSearchInput').value.trim().toLowerCase();
+        const lanes = window._lanesList || [];
+        if (!val) {
+            renderLanesList(lanes);
+            document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${lanes.length}</b>`;
+            return;
+        }
+        const filtered = lanes.filter(l =>
+            (l.lane_name && l.lane_name.toLowerCase().includes(val))
+        );
+        renderLanesList(filtered);
+        document.getElementById('lanesTotal').innerHTML = `Search results: <b>${filtered.length}</b> / ${lanes.length}`;
+    }
+    function showAddLaneForm() {
+        document.getElementById('addLaneFormBox').style.display = 'block';
+    }
+    function hideAddLaneForm() {
+        document.getElementById('addLaneFormBox').style.display = 'none';
+    }
+    function submitAddLane(e) {
+        e.preventDefault();
+        const lane_name = document.getElementById('laneName').value.trim();
+        const location_id = document.getElementById('laneLocationId').value.trim();
+        fetch('/api/lanes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lane_name, location_id })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                hideAddLaneForm();
+                loadLanesList();
+            } else {
+                alert(data.error || 'Failed to add lane');
+            }
+        })
+        .catch(() => alert('Failed to add lane'));
+    }
+    function editLane(id) {
+        // For simplicity, open the add form prefilled for editing
+        fetch(`/api/lanes`)
+            .then(r => r.json())
+            .then(data => {
+                const lane = (data.lanes || []).find(l => l.id === id);
+                if (lane) {
+                    showAddLaneForm();
+                    document.getElementById('laneName').value = lane.lane_name;
+                    document.getElementById('laneLocationId').value = lane.location_id;
+                    document.getElementById('addLaneForm').onsubmit = function(e) {
+                        e.preventDefault();
+                        submitEditLane(id);
+                    };
+                }
+            });
+    }
+    function submitEditLane(id) {
+        const lane_name = document.getElementById('laneName').value.trim();
+        const location_id = document.getElementById('laneLocationId').value.trim();
+        fetch(`/api/lanes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lane_name, location_id })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                hideAddLaneForm();
+                loadLanesList();
+            } else {
+                alert(data.error || 'Failed to update lane');
+            }
+        })
+        .catch(() => alert('Failed to update lane'));
+    }
+    function deleteLane(id) {
+        if (!confirm('Delete this lane?')) return;
+        fetch(`/api/lanes/${id}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) loadLanesList();
+                else alert(data.error || 'Failed to delete lane');
+            })
+            .catch(() => alert('Failed to delete lane'));
     }
     </script>
 </body>
