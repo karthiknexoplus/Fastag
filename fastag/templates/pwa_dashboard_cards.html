@@ -673,6 +673,19 @@
         transition: background 0.18s;
     }
     .modal-logout-btn:hover { background: linear-gradient(90deg, #c82333 0%, #ff5252 100%); }
+    .modal-records .reader-type {
+        min-width: 80px;
+        color: #555;
+        font-size: 0.75rem;
+        text-transform: capitalize;
+        font-weight: 600;
+    }
+    .modal-records .reader-type.entry {
+        color: #28a745;
+    }
+    .modal-records .reader-type.exit {
+        color: #dc3545;
+    }
     @media (max-width: 600px) {
         .modal-custom { padding: 0.5rem; }
         .modal-content-custom { 
@@ -864,9 +877,9 @@
                             `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.entry_time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'granted' && data.records && data.records.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Time</th></tr>' +
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Type</th><th>Time</th></tr>' +
                         data.records.slice(0,20).map(r => 
-                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.time}</td></tr>`
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="reader-type ${r.reader_type}">${r.reader_type}</td><td class="time">${r.time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'denied' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Reason</th><th>Time</th></tr>' +
