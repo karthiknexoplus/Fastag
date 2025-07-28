@@ -71,13 +71,15 @@ def check_icons():
     missing_icons = []
     
     for size in required_sizes:
-        icon_path = icons_dir / f"icon-{size}x{size}.png"
-        if not icon_path.exists():
+        # Check for both PNG and SVG icons
+        png_path = icons_dir / f"icon-{size}x{size}.png"
+        svg_path = icons_dir / f"icon-{size}x{size}.svg"
+        if not png_path.exists() and not svg_path.exists():
             missing_icons.append(f"{size}x{size}")
     
     if missing_icons:
         print(f"❌ Missing icons: {missing_icons}")
-        print("   Run: python3 generate_pwa_icons.py")
+        print("   Run: python3 create_simple_pwa_icons.py")
         return False
     
     print("✅ All required icons found")

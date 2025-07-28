@@ -4,21 +4,10 @@ Since you already have HTTPS set up with Tailscale on your Raspberry Pi, here's 
 
 ## 🚀 Quick Setup (After Git Pull)
 
-### 1. Install Dependencies
+### 1. Generate PWA Icons (Simplest Approach)
 ```bash
-# Activate your virtual environment (if you have one)
-source venv/bin/activate
-
-# Install Pillow for icon generation
-pip install Pillow
-
-# Or if you don't have a virtual environment
-pip3 install Pillow
-```
-
-### 2. Generate PWA Icons
-```bash
-python3 generate_pwa_icons.py
+# Copy existing logo to create PWA icons (no dependencies required)
+python3 copy_existing_icons.py
 ```
 
 This will create all the required PWA icons in `fastag/static/icons/` directory.
@@ -79,7 +68,7 @@ Edit `fastag/static/manifest.json`:
 
 ### Update Icons
 1. Replace `fastag/static/logo.png` with your logo
-2. Run: `python3 generate_pwa_icons.py`
+2. Run: `python3 copy_existing_icons.py`
 3. Icons will be regenerated
 
 ## 🔧 Troubleshooting
@@ -150,8 +139,8 @@ Since you're using Tailscale:
 ## 📞 Quick Commands Reference
 
 ```bash
-# Generate PWA assets
-python3 generate_pwa_icons.py
+# Generate PWA assets (no dependencies required)
+python3 copy_existing_icons.py
 
 # Start development server
 python3 wsgi.py
