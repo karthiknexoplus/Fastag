@@ -3243,3 +3243,62 @@ def search_kyc_users():
         for row in rows
     ]
     return jsonify({'results': results})
+
+@analytics_bp.route('/api/current-occupancy-records')
+def api_current_occupancy_records():
+    db = get_db()
+    rows = db.execute('''
+        SELECT al1.tag_id, MAX(al1.timestamp) as entry_time
+        FROM access_logs al1
+        WHERE al1.access_result = 'granted' AND al1.timestamp >= datetime('now', '-24 hours')
+        GROUP BY al1.tag_id
+        ORDER BY entry_time DESC
+        LIMIT 5
+    ''').fetchall()
+    records = [
+        {'vehicle': row[0], 'entry_time': row[1]} for row in rows
+    ]
+    return jsonify({'records': records})
+
+@analytics_bp.route('/api/today-granted-records')
+def api_today_granted_records():
+    db = get_db()
+    rows = db.execute('''
+        SELECT tag_id, timestamp FROM access_logs
+        WHERE access_result = 'granted' AND DATE(timestamp) = DATE('now')
+        ORDER BY timestamp DESC
+        LIMIT 5
+    ''').fetchall()
+    records = [
+        {'vehicle': row[0], 'time': row[1]} for row in rows
+    ]
+    return jsonify({'records': records})
+
+@analytics_bp.route('/api/denied-today-records')
+def api_denied_today_records():
+    db = get_db()
+    rows = db.execute('''
+        SELECT tag_id, timestamp FROM access_logs
+        WHERE access_result = 'denied' AND DATE(timestamp) = DATE('now')
+        ORDER BY timestamp DESC
+        LIMIT 5
+    ''').fetchall()
+    records = [
+        {'vehicle': row[0], 'time': row[1]} for row in rows
+    ]
+    return jsonify({'records': records})
+
+@analytics_bp.route('/api/unique-vehicles-today-records')
+def api_unique_vehicles_today_records():
+    db = get_db()
+    rows = db.execute('''
+        SELECT tag_id, MIN(timestamp) as first_seen FROM access_logs
+        WHERE DATE(timestamp) = DATE('now')
+        GROUP BY tag_id
+        ORDER BY first_seen DESC
+        LIMIT 5
+    ''').fetchall()
+    records = [
+        {'vehicle': row[0], 'first_seen': row[1]} for row in rows
+    ]
+    return jsonify({'records': records})
