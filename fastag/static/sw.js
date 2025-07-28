@@ -1,6 +1,6 @@
-const CACHE_NAME = 'fastag-v1.0.0';
-const STATIC_CACHE = 'fastag-static-v1.0.0';
-const DYNAMIC_CACHE = 'fastag-dynamic-v1.0.0';
+const CACHE_NAME = 'fastag-v1.0.1';
+const STATIC_CACHE = 'fastag-static-v1.0.1';
+const DYNAMIC_CACHE = 'fastag-dynamic-v1.0.1';
 
 // Resources to cache immediately
 const STATIC_RESOURCES = [
@@ -22,6 +22,13 @@ const API_CACHE_PATTERNS = [
   '/lanes',
   '/readers',
   '/kyc-users'
+];
+
+// API endpoints to NOT cache (always fetch fresh)
+const NO_CACHE_PATTERNS = [
+  '/analytics/api/search-kyc-users',
+  '/api/watchlist/',
+  '/watchlist'
 ];
 
 // Install event - cache static resources
@@ -75,6 +82,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Handle API requests that should not be cached
+  if (isNoCacheRequest(url.pathname)) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   // Handle API requests
   if (isApiRequest(url.pathname)) {
     event.respondWith(handleApiRequest(request));
@@ -96,6 +109,10 @@ self.addEventListener('fetch', event => {
 
 function isApiRequest(pathname) {
   return API_CACHE_PATTERNS.some(pattern => pathname.includes(pattern));
+}
+
+function isNoCacheRequest(pathname) {
+  return NO_CACHE_PATTERNS.some(pattern => pathname.includes(pattern));
 }
 
 function isStaticResource(pathname) {

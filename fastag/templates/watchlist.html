@@ -306,11 +306,21 @@ kycUserSearch.addEventListener('input', function() {
     const q = this.value.trim();
     kycUserSuggestions.innerHTML = '';
     kycUserSelect.value = '';
-    if (q.length < 2) return;
+    
+    if (q.length < 2) {
+        kycUserSuggestions.style.display = 'none';
+        return;
+    }
+    
     clearTimeout(kycUserTimer);
     kycUserTimer = setTimeout(() => {
         console.log('Searching for:', q);
-        fetch(`/analytics/api/search-kyc-users?q=${encodeURIComponent(q)}`)
+        fetch(`/analytics/api/search-kyc-users?q=${encodeURIComponent(q)}&_t=${Date.now()}`, {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        })
             .then(res => {
                 console.log('Response status:', res.status);
                 return res.json();
@@ -319,17 +329,20 @@ kycUserSearch.addEventListener('input', function() {
                 console.log('Search results:', data);
                 if (!data.results.length) {
                     kycUserSuggestions.innerHTML = '<div class="list-group-item text-muted">No matches found</div>';
+                    kycUserSuggestions.style.display = 'block';
                     return;
                 }
                 kycUserSuggestions.innerHTML = data.results.map(u =>
                     `<button type="button" class="list-group-item list-group-item-action" data-id="${u.fastag_id}" data-name="${u.name}" data-veh="${u.vehicle_number}">
-                        ${u.fastag_id} | ${u.name} | ${u.vehicle_number}
+                        <strong>${u.name}</strong> | ${u.vehicle_number} | ${u.fastag_id}
                     </button>`
                 ).join('');
+                kycUserSuggestions.style.display = 'block';
             })
             .catch(error => {
                 console.error('Search error:', error);
                 kycUserSuggestions.innerHTML = '<div class="list-group-item text-danger">Error loading suggestions</div>';
+                kycUserSuggestions.style.display = 'block';
             });
     }, 200);
 });
@@ -339,6 +352,7 @@ kycUserSuggestions.addEventListener('click', function(e) {
         kycUserSelect.value = e.target.getAttribute('data-id');
         kycUserSearch.value = `${e.target.getAttribute('data-name')} | ${e.target.getAttribute('data-veh')}`;
         kycUserSuggestions.innerHTML = '';
+        kycUserSuggestions.style.display = 'none';
     }
 });
 

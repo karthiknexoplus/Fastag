@@ -215,6 +215,11 @@ def debug_env():
         "GOOGLE_CLIENT_SECRET": os.environ.get("GOOGLE_CLIENT_SECRET")
     }
 
+@auth_bp.route('/clear-cache')
+def clear_cache():
+    """Page to clear PWA cache"""
+    return send_file('clear_pwa_cache.html')
+
 @auth_bp.route('/api/watchlist/list')
 def api_watchlist_list():
     db = get_db()
