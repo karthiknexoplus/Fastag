@@ -586,7 +586,7 @@
             <button class="feature-btn" onclick="openKycUsersListModal()"><span class="icon"><i class="fas fa-id-card"></i></span></button>
             <button class="feature-btn" onclick="openWatchlistFromIcon()"><span class="icon"><i class="fas fa-eye"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-car"></i></span></button>
+            <button class="feature-btn" onclick="showVehicleFinderModal()"><span class="icon"><i class="fas fa-car"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-receipt"></i></span></button>
@@ -644,6 +644,32 @@
                 <span class="icon"><i class="fas fa-microchip"></i></span>
                 <span class="label">Controller Status</span>
                 <span class="value">Tap to View</span>
+            </div>
+        </div>
+    </div>
+    <!-- Vehicle Finder Modal -->
+    <div id="vehicleFinderModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 450px;">
+            <span class="close-modal" onclick="closeVehicleFinderModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-car"></i></span>
+                <span class="modal-title">Vehicle Finder</span>
+            </div>
+            <div class="modal-desc">Find vehicle information by registration number</div>
+            <form id="vehicleSearchForm" onsubmit="searchVehicle(event)">
+                <div class="mb-3">
+                    <label class="form-label">Vehicle Registration Number</label>
+                    <input type="text" class="form-control" id="vehicleRegNo" placeholder="e.g., KA03KD1578" required>
+                    <div class="form-text">Format: KA03KD1578</div>
+                </div>
+                <div id="vehicleSearchError" style="color:#dc3545;font-size:0.9em;margin-bottom:0.5em;display:none;"></div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="button" onclick="closeVehicleFinderModal()">Cancel</button>
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Search</button>
+                </div>
+            </form>
+            <div id="vehicleResults" style="margin-top:1rem;display:none;">
+                <div class="modal-records" id="vehicleResultsContent"></div>
             </div>
         </div>
     </div>
@@ -1519,6 +1545,125 @@
         document.getElementById('addKycUserModal').style.display = 'flex';
         document.getElementById('addKycUserForm').reset();
         document.getElementById('kycUserError').style.display = 'none';
+    }
+
+    function showVehicleFinderModal() {
+        document.getElementById('vehicleFinderModal').style.display = 'flex';
+        document.getElementById('vehicleResults').style.display = 'none';
+        document.getElementById('vehicleSearchError').style.display = 'none';
+        document.getElementById('vehicleSearchForm').reset();
+    }
+
+    function closeVehicleFinderModal() {
+        document.getElementById('vehicleFinderModal').style.display = 'none';
+    }
+
+    function searchVehicle(event) {
+        event.preventDefault();
+        const regNo = document.getElementById('vehicleRegNo').value.trim().toUpperCase();
+        
+        if (!regNo) {
+            showVehicleError('Please enter a vehicle registration number.');
+            return;
+        }
+        
+        // Validate format
+        const regNoPattern = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{4}$/;
+        if (!regNoPattern.test(regNo)) {
+            showVehicleError('Please enter a valid vehicle registration number (e.g., KA03KD1578).');
+            return;
+        }
+        
+        // Show loading
+        hideVehicleError();
+        document.getElementById('vehicleResultsContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:1rem;">Searching...</div>';
+        document.getElementById('vehicleResults').style.display = 'block';
+        
+        // Make API call
+        fetch(`/api/vehicle/${regNo}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showVehicleError('Vehicle information not found for this registration number.');
+                    document.getElementById('vehicleResults').style.display = 'none';
+                    return;
+                }
+                
+                if (!data.registration_number) {
+                    showVehicleError('Vehicle information not found for this registration number.');
+                    document.getElementById('vehicleResults').style.display = 'none';
+                    return;
+                }
+                
+                displayVehicleResults(data);
+            })
+            .catch(error => {
+                showVehicleError('Unable to fetch vehicle information. Please try again later.');
+                document.getElementById('vehicleResults').style.display = 'none';
+                console.error('Error:', error);
+            });
+    }
+
+    function displayVehicleResults(data) {
+        const resultsContent = document.getElementById('vehicleResultsContent');
+        
+        let html = `
+            <div style="background:#f8f9fa;border-radius:8px;padding:1rem;margin-bottom:0.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Registration Number</span>
+                    <span style="font-weight:700;color:#764ba2;font-size:1.1rem;">${data.registration_number}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Owner Name</span>
+                    <span style="font-weight:600;color:#333;">${data.owner_name || 'N/A'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Vehicle Type</span>
+                    <span style="background:linear-gradient(135deg,#764ba2 0%,#667eea 100%);color:white;padding:0.3rem 0.8rem;border-radius:15px;font-size:0.8rem;font-weight:600;">${(data.vehicle_type_v2 || '').replace('_', ' ').toUpperCase()}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Make</span>
+                    <span style="font-weight:600;color:#333;">${data.db_make_name || 'N/A'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Model</span>
+                    <span style="font-weight:600;color:#333;">${data.db_model_name || 'N/A'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:600;color:#666;">Fuel Type</span>
+                    <span style="background:linear-gradient(135deg,#28a745 0%,#20c997 100%);color:white;padding:0.3rem 0.8rem;border-radius:15px;font-size:0.8rem;font-weight:600;">${data.fuel_type || 'N/A'}</span>
+                </div>
+        `;
+        
+        if (data.model_name) {
+            html += `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid #e9ecef;">
+                    <span style="font-weight:600;color:#666;">Full Model Name</span>
+                    <span style="font-weight:600;color:#333;">${data.model_name}</span>
+                </div>
+            `;
+        }
+        
+        if (data.previous_policy_expiry_detail) {
+            html += `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Policy Expiry</span>
+                    <span style="font-weight:600;color:#333;">${data.previous_policy_expiry_detail.substring(0, 10)}</span>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        resultsContent.innerHTML = html;
+    }
+
+    function showVehicleError(message) {
+        document.getElementById('vehicleSearchError').textContent = message;
+        document.getElementById('vehicleSearchError').style.display = 'block';
+    }
+
+    function hideVehicleError() {
+        document.getElementById('vehicleSearchError').style.display = 'none';
     }
     function closeAddKycUserModal() {
         document.getElementById('addKycUserModal').style.display = 'none';
