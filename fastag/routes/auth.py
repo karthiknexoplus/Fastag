@@ -117,12 +117,26 @@ def pwa_onboarding():
     """PWA onboarding screen for mobile users"""
     return render_template('pwa_loading.html')
 
+@auth_bp.route('/pwa-dashboard-debug')
+def pwa_dashboard_debug():
+    """Debug route for PWA dashboard"""
+    if 'user' not in session:
+        return "No user in session", 400
+    
+    user_data = session.get('user', {})
+    return {
+        'user_exists': 'user' in session,
+        'user_data': user_data,
+        'user_type': type(user_data).__name__,
+        'login_method': user_data.get('login_method', 'unknown') if isinstance(user_data, dict) else 'not_dict'
+    }
+
 @auth_bp.route('/pwa-dashboard')
 def pwa_dashboard():
     """PWA-specific dashboard for mobile users"""
     if 'user' not in session:
         return redirect(url_for('auth.pwa_onboarding'))
-    return render_template('pwa_dashboard.html')
+    return render_template('pwa_dashboard_simple.html')
 
 @auth_bp.route('/pwa-login')
 def pwa_login():
