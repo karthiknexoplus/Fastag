@@ -589,12 +589,54 @@
         
         // Simple fallback: Show install button after 2 seconds
         setTimeout(() => {
-            if (!deferredPrompt && installButton.style.display === 'none') {
-                console.log('⏰ Fallback: Showing install button');
-                installButton.style.display = 'block';
-                installInstructions.style.display = 'none';
+            console.log('⏰ 2-second timeout check');
+            console.log('Deferred prompt:', deferredPrompt);
+            console.log('Install button display:', installButton.style.display);
+            
+            if (!deferredPrompt) {
+                console.log('❌ No install prompt available - showing manual instructions');
+                alert('No install prompt available. Showing manual instructions.');
+                installInstructions.style.display = 'block';
             }
         }, 2000);
+        
+        // Additional diagnostic after 5 seconds
+        setTimeout(() => {
+            console.log('🔍 5-second diagnostic check');
+            console.log('HTTPS:', window.location.protocol === 'https:');
+            console.log('Standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
+            console.log('User agent:', navigator.userAgent);
+            console.log('Service worker support:', 'serviceWorker' in navigator);
+            
+            // Check if service worker is registered
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    console.log('Service workers registered:', registrations.length);
+                    if (registrations.length === 0) {
+                        alert('No service worker registered. This may prevent PWA install.');
+                    }
+                });
+            }
+            
+            // Check if manifest is loading
+            fetch("{{ url_for('static', filename='manifest.json') }}")
+                .then(response => {
+                    if (response.ok) {
+                        console.log('✅ Manifest loaded successfully');
+                        return response.json();
+                    } else {
+                        throw new Error('Manifest not found');
+                    }
+                })
+                .then(manifest => {
+                    console.log('Manifest name:', manifest.name);
+                    console.log('Manifest start_url:', manifest.start_url);
+                })
+                .catch(error => {
+                    console.error('❌ Manifest error:', error.message);
+                    alert('Manifest not found. This prevents PWA install.');
+                });
+        }, 5000);
     </script>
 </body>
 </html> 
