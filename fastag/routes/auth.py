@@ -361,3 +361,9 @@ def api_watchlist_activity_ist(watchlist_id):
 def get_the_app():
     """Serve the sleek PWA landing page for mobile users."""
     return render_template('pwa_landing.html') 
+
+@auth_bp.route('/pwa-login', methods=['GET', 'POST'])
+def pwa_login():
+    # For now, just render the custom PWA login page on GET
+    # You can add authentication logic here if needed
+    return render_template('pwa_login.html') 
