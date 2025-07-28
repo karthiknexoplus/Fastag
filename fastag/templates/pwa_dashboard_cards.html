@@ -773,8 +773,14 @@
                 <span class="modal-icon"><i class="fas fa-users"></i></span>
                 <span class="modal-title">KYC Users</span>
             </div>
-            <div class="modal-desc">All registered KYC users. Edit or delete as needed.</div>
-            <div class="modal-records" id="kycUsersListRecords" style="overflow-x:auto;max-height:55vh;overflow-y:auto;"></div>
+            <div class="modal-desc" id="kycUsersListTotal">All registered KYC users.</div>
+            <div class="modal-records" id="kycUsersListRecords" style="overflow-x:auto;max-height:45vh;overflow-y:auto;"></div>
+            <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:0.5em;">
+                <button class="input-icon-btn" style="font-size:1.3rem;color:#764ba2;background:none;border:none;outline:none;cursor:pointer;" onclick="toggleKycUserSearch()" title="Search"><i class="fas fa-search"></i></button>
+            </div>
+            <div id="kycUserSearchBox" style="display:none;margin-bottom:0.5em;">
+                <input type="text" id="kycUserSearchInput" class="form-control" placeholder="Search by name or vehicle number..." oninput="filterKycUsersList()">
+            </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeKycUsersListModal()">Close</button>
             </div>
@@ -1467,22 +1473,51 @@
             .then(r => r.json())
             .then(data => {
                 let users = data.users || [];
-                let tableHtml = '<table style="min-width:700px;"><tr>' +
-                    '<th>Name</th><th>FASTag ID</th><th>Vehicle Number</th><th>Contact</th><th>Address</th><th>Edit</th><th>Delete</th></tr>' +
-                    users.map(u => `<tr>` +
-                        `<td>${u.name}</td>` +
-                        `<td>${u.fastag_id}</td>` +
-                        `<td>${u.vehicle_number}</td>` +
-                        `<td>${u.contact_number}</td>` +
-                        `<td class="kyc-address-cell">${u.address}</td>` +
-                        `<td><button class="input-icon-btn kyc-edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
-                        `<td><button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
-                    `</tr>`).join('') + '</table>';
-                document.getElementById('kycUsersListRecords').innerHTML = tableHtml;
+                window._kycUsersList = users;
+                document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${users.length}</b>`;
+                renderKycUsersList(users);
             })
             .catch(() => {
                 document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load users.</div>';
             });
+    }
+    function renderKycUsersList(users) {
+        let tableHtml = '<table style="min-width:700px;"><tr>' +
+            '<th>Name</th><th>FASTag ID</th><th>Vehicle Number</th><th>Contact</th><th>Address</th><th>Edit</th><th>Delete</th></tr>' +
+            users.map(u => `<tr>` +
+                `<td>${u.name}</td>` +
+                `<td>${u.fastag_id}</td>` +
+                `<td>${u.vehicle_number}</td>` +
+                `<td>${u.contact_number}</td>` +
+                `<td class="kyc-address-cell">${u.address}</td>` +
+                `<td><button class="input-icon-btn kyc-edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
+                `<td><button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
+            `</tr>`).join('') + '</table>';
+        document.getElementById('kycUsersListRecords').innerHTML = tableHtml;
+    }
+    function toggleKycUserSearch() {
+        const box = document.getElementById('kycUserSearchBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block') {
+            document.getElementById('kycUserSearchInput').focus();
+        } else {
+            filterKycUsersList('');
+        }
+    }
+    function filterKycUsersList() {
+        const val = document.getElementById('kycUserSearchInput').value.trim().toLowerCase();
+        const users = window._kycUsersList || [];
+        if (!val) {
+            renderKycUsersList(users);
+            document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${users.length}</b>`;
+            return;
+        }
+        const filtered = users.filter(u =>
+            (u.name && u.name.toLowerCase().includes(val)) ||
+            (u.vehicle_number && u.vehicle_number.toLowerCase().includes(val))
+        );
+        renderKycUsersList(filtered);
+        document.getElementById('kycUsersListTotal').innerHTML = `Search results: <b>${filtered.length}</b> / ${users.length}`;
     }
     function deleteKycUser(id) {
         if (!confirm('Delete this user?')) return;
