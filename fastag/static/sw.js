@@ -194,24 +194,4 @@ async function doBackgroundSync() {
   // Implement background sync logic here
   // For example, sync offline form submissions
   console.log('Performing background sync...');
-}
-
-// Push notifications (if needed in the future)
-self.addEventListener('push', function(event) {
-  const data = event.data.json();
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon,
-      data: { url: data.url }
-    })
-  );
-});
-
-// Handle notification clicks
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
-  );
-}); 
+} 

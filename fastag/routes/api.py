@@ -4,7 +4,6 @@ import logging
 import ctypes
 import time
 import sqlite3
-from pywebpush import webpush, WebPushException
 import json
 
 # Configure logging
@@ -15,9 +14,6 @@ api = Blueprint('api', __name__)
 
 # Dummy mapping for demonstration; replace with your actual mapping
 RFID_IPS = {1: '192.168.1.101', 2: '192.168.1.102'}
-
-VAPID_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgvgoSeVYd9f+Km2sH\n+yyXmy6E4fVt6epRWZU/VUawOryhRANCAAQYSSanFL+/Po6ruIY10qxGMIPbhWNw\npAezGu9hSACIHoeo1J+cpgYlEk6iwCnNMhLOZPzDItOMYuKU7RUf1K9E\n-----END PRIVATE KEY-----"""
-VAPID_CLAIMS = {"sub": "mailto:your@email.com"}
 
 class RFIDDevice:
     def __init__(self, ip):
@@ -529,43 +525,3 @@ def relay_control_all(action):
     except Exception as e:
         logger.error(f"Error in /api/relay/all/{action}: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500 
-
-# Save push subscription
-@api.route('/api/save-subscription', methods=['POST'])
-def save_subscription():
-    user_id = 'testuser'  # Replace with session.get('user_id') in production
-    sub = request.get_json()
-    print("DEBUG: Received subscription:", sub)  # Debug print
-    db = sqlite3.connect('instance/fastag.db')
-    db.execute('CREATE TABLE IF NOT EXISTS push_subscriptions (user_id TEXT PRIMARY KEY, endpoint TEXT, p256dh TEXT, auth TEXT)')
-    db.execute('REPLACE INTO push_subscriptions (user_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)',
-               (user_id, sub['endpoint'], sub['keys']['p256dh'], sub['keys']['auth']))
-    db.commit()
-    db.close()
-    return jsonify({'success': True})
-
-# Send push notification
-@api.route('/api/send-push', methods=['POST'])
-def send_push():
-    user_id = request.json.get('user_id') or 'testuser'
-    payload = request.json.get('payload', {})
-    db = sqlite3.connect('instance/yourdb.sqlite')
-    cur = db.execute('SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id=?', (user_id,))
-    row = cur.fetchone()
-    db.close()
-    if not row:
-        return jsonify({'success': False, 'error': 'No subscription'}), 404
-    subscription_info = {
-        'endpoint': row[0],
-        'keys': {'p256dh': row[1], 'auth': row[2]}
-    }
-    try:
-        webpush(
-            subscription_info=subscription_info,
-            data=json.dumps(payload),
-            vapid_private_key=VAPID_PRIVATE_KEY,
-            vapid_claims=VAPID_CLAIMS
-        )
-        return jsonify({'success': True})
-    except WebPushException as ex:
-        return jsonify({'success': False, 'error': str(ex)}), 500 
