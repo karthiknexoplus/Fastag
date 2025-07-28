@@ -1924,14 +1924,21 @@
         }
     }
     // Start auto-scroll on load
-    window.addEventListener('DOMContentLoaded', startFeatureScroll);
-    // Stop auto-scroll when any feature icon is clicked
-    document.querySelectorAll('.feature-btn').forEach(btn => {
-        btn.addEventListener('click', stopFeatureScroll);
+    window.addEventListener('DOMContentLoaded', () => {
+        startFeatureScroll();
+        // Add all user interaction events to stop auto-scroll
+        const scrollDiv = document.querySelector('.feature-scroll');
+        if (scrollDiv) {
+            ['mousedown','touchstart','wheel','pointerdown','scroll'].forEach(evt => {
+                scrollDiv.addEventListener(evt, stopFeatureScroll, { passive: true });
+            });
+        }
+        document.querySelectorAll('.feature-btn').forEach(btn => {
+            btn.addEventListener('click', stopFeatureScroll);
+        });
     });
-    // Also stop on manual scroll (user interaction)
-    document.querySelector('.feature-scroll').addEventListener('mousedown', stopFeatureScroll);
-    document.querySelector('.feature-scroll').addEventListener('touchstart', stopFeatureScroll);
+    // CSS: Ensure .feature-scroll is always horizontally scrollable by user
+    // ... existing code ...
     </script>
 </body>
 </html> 
