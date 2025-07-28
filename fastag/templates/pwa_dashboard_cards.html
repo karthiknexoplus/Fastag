@@ -1939,6 +1939,7 @@
     }
 
     function subscribeForPushNotifications() {
+      alert('Step 1: Start');
       const vapidPublicKey = "BBhJJqcUv78-jqu4hjXSrEYwg9uFY3CkB7Ma72FIAIgeh6jUn5ymBiUSTqLAKc0yEs5k_MMi04xi4pTtFR_Ur0Q";
       function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -1949,39 +1950,54 @@
         return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
       }
       if ('serviceWorker' in navigator && 'PushManager' in window) {
+        alert('Step 2: Service worker and PushManager available');
         navigator.serviceWorker.ready.then(function(reg) {
+          alert('Step 3: Service worker ready');
           reg.pushManager.getSubscription().then(function(sub) {
+            alert('Step 4: Got subscription object');
             if (!sub) {
+              alert('Step 5: Not subscribed, subscribing now');
               reg.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
               }).then(function(subscription) {
+                alert('Step 6: Subscribed, sending to backend');
                 fetch('/api/save-subscription', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(subscription)
                 }).then(() => {
+                  alert('Step 7: Subscription sent to backend!');
                   showPushStatusMsg('Push notifications enabled!');
                   document.getElementById('enablePushContainer').style.display = 'none';
                 }).catch(() => {
+                  alert('Step 8: Failed to save subscription.');
                   showPushStatusMsg('Failed to save subscription.');
                 });
               }).catch(function(err) {
+                alert('Step 9: Permission denied or error: ' + err.message);
                 showPushStatusMsg('Permission denied or error: ' + err.message);
               });
             } else {
+              alert('Step 10: Already subscribed, sending to backend');
               fetch('/api/save-subscription', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(sub)
               }).then(() => {
+                alert('Step 11: Existing subscription sent to backend!');
                 showPushStatusMsg('Push notifications already enabled.');
                 document.getElementById('enablePushContainer').style.display = 'none';
               });
             }
+          }).catch(function(err) {
+            alert('Step 12: Error getting subscription: ' + err.message);
           });
+        }).catch(function(err) {
+          alert('Step 13: Service worker not ready: ' + err.message);
         });
       } else {
+        alert('Step 14: Push notifications not supported in this browser.');
         showPushStatusMsg('Push notifications not supported in this browser.');
       }
     }
