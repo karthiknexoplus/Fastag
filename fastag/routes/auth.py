@@ -22,6 +22,8 @@ def login():
         username = request.form['username']
         password = request.form['password']
         db = get_db()
+        
+        # First try regular user login
         user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         if user and check_password_hash(user['password'], password):
             session['user'] = {'username': username, 'login_method': 'local'}
@@ -29,6 +31,29 @@ def login():
             log_user_login(username, 'local')
             log_user_action(username, 'login', 'Local login')
             return redirect(url_for('auth.home'))
+        
+        # If not found in users table, check KYC users table
+        # Clean contact number (remove spaces, dashes, etc.)
+        contact_number = ''.join(filter(str.isdigit, username))
+        
+        if len(contact_number) == 10:  # Valid contact number format
+            kyc_user = db.execute('SELECT * FROM kyc_users WHERE contact_number = ?', (contact_number,)).fetchone()
+            if kyc_user and password == contact_number:  # Password is the contact number itself
+                session['user'] = {
+                    'username': f"kyc_{contact_number}",
+                    'login_method': 'kyc',
+                    'kyc_user_id': kyc_user['id'],
+                    'kyc_user_name': kyc_user['name'],
+                    'kyc_user_contact': kyc_user['contact_number'],
+                    'kyc_user_vehicle': kyc_user['vehicle_number'],
+                    'kyc_user_fastag': kyc_user['fastag_id']
+                }
+                logging.info(f"KYC user logged in: {contact_number} ({kyc_user['name']})")
+                log_user_login(f"kyc_{contact_number}", 'kyc')
+                log_user_action(f"kyc_{contact_number}", 'login', f'KYC login - {kyc_user["name"]}')
+                flash(f'Welcome back, {kyc_user["name"]}!', 'success')
+                return redirect(url_for('auth.home'))
+        
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
