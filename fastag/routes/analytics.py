@@ -3269,7 +3269,7 @@ def api_current_occupancy_records():
             'entry_time': row[1],
             'vehicle_number': row[2] or 'N/A',
             'owner_name': row[3] or 'Unknown',
-            'lane_name': row[4],
+            'lane_name': row[4] or 'Unknown',
             'access_result': row[5]
         } for row in rows
     ]
@@ -3330,7 +3330,7 @@ def api_denied_today_records():
             'time': row[1],
             'vehicle_number': row[2] or 'N/A',
             'owner_name': row[3] or 'Unknown',
-            'lane_name': row[4],
+            'lane_name': row[4] or 'Unknown',
             'access_result': row[5],
             'reason': row[6] or 'Unknown'
         } for row in rows
