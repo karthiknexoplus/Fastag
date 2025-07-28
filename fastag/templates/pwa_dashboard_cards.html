@@ -60,6 +60,15 @@
             color: #222;
             text-align: center;
         }
+        .vehicle-info {
+            font-size: 1.01rem;
+            font-weight: 500;
+            color: #764ba2;
+            text-align: center;
+            margin-top: 0.1rem;
+            margin-bottom: 0.2rem;
+            letter-spacing: 0.01em;
+        }
         .notif-bell {
             font-size: 1.3rem;
             color: #764ba2;
@@ -316,9 +325,12 @@
         <div class="header">
             <div class="avatar"><img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="Avatar"></div>
             <div class="greeting-row">
-                <div class="greeting">Hi, Karthik!</div>
+                <div class="greeting">Hi, {{ name }}!</div>
                 <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
             </div>
+            {% if vehicle %}
+            <div class="vehicle-info">Vehicle: {{ vehicle }}</div>
+            {% endif %}
         </div>
         <div class="feature-desc">All your FASTag Parking features at a glance</div>
         <div class="feature-scroll">

@@ -365,10 +365,30 @@ def get_the_app():
 @auth_bp.route('/pwa-login', methods=['GET', 'POST'])
 def pwa_login():
     if request.method == 'POST':
-        # TODO: Add authentication logic here
-        return redirect('/pwa-dashboard')
-    return render_template('pwa_login.html') 
+        username = request.form['username']
+        password = request.form['password']
+        db = get_db()
+        contact_number = ''.join(filter(str.isdigit, username))
+        if len(contact_number) == 10:
+            kyc_user = db.execute('SELECT * FROM kyc_users WHERE contact_number = ?', (contact_number,)).fetchone()
+            if kyc_user and password == contact_number:
+                session['user'] = {
+                    'username': f"kyc_{contact_number}",
+                    'login_method': 'kyc',
+                    'kyc_user_id': kyc_user['id'],
+                    'kyc_user_name': kyc_user['name'],
+                    'kyc_user_contact': kyc_user['contact_number'],
+                    'kyc_user_vehicle': kyc_user['vehicle_number'],
+                    'kyc_user_fastag': kyc_user['fastag_id']
+                }
+                return redirect('/pwa-dashboard')
+        # fallback: show login page with error
+        flash('Invalid username or password', 'danger')
+    return render_template('pwa_login.html')
 
 @auth_bp.route('/pwa-dashboard')
 def pwa_dashboard():
-    return render_template('pwa_dashboard_cards.html') 
+    user = session.get('user', {})
+    name = user.get('kyc_user_name', 'Karthik')
+    vehicle = user.get('kyc_user_vehicle', None)
+    return render_template('pwa_dashboard_cards.html', name=name, vehicle=vehicle) 
