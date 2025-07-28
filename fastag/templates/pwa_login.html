@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background: #fff;
+            background: #f7f7fa;
             min-height: 100vh;
             margin: 0;
             padding: 0;
@@ -28,9 +28,17 @@
             flex-direction: column;
             align-items: center;
         }
-        .app-logo {
+        .brand-bar {
             width: 48px;
-            height: 48px;
+            height: 5px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
+            margin-bottom: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        .app-logo {
+            width: 44px;
+            height: 44px;
             margin-bottom: 1.2rem;
         }
         .app-logo img {
@@ -39,52 +47,75 @@
             object-fit: contain;
         }
         .login-title {
-            font-size: 1.25rem;
+            font-size: 1.22rem;
             font-weight: 700;
             color: #764ba2;
             margin-bottom: 2.2rem;
             letter-spacing: 0.01em;
             text-align: center;
         }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group .input-icon {
+            position: absolute;
+            left: 1em;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #bdbdbd;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
         .form-control {
-            border: 1.5px solid #764ba2;
-            border-radius: 10px;
+            border: none;
+            border-bottom: 2px solid #d1c4e9;
+            border-radius: 0;
             font-size: 1.08rem;
-            padding: 0.85em 1em;
-            margin-bottom: 1.1rem;
-            background: #fff;
+            padding: 0.85em 1em 0.85em 2.5em;
+            background: transparent;
             color: #222;
             box-shadow: none;
             transition: border-color 0.18s;
         }
         .form-control:focus {
-            border-color: #ffe082;
+            border-color: #764ba2;
             outline: none;
             box-shadow: none;
         }
-        .login-btn {
+        .form-control:focus ~ .underline {
+            width: 100%;
+            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
+        }
+        .underline {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 2px;
+            width: 0;
             background: #764ba2;
+            transition: width 0.3s cubic-bezier(.4,0,.2,1), background 0.3s;
+        }
+        .login-btn {
+            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
             color: #fff;
             border: none;
-            border-radius: 10px;
+            border-radius: 24px;
             font-weight: 700;
             font-size: 1.13rem;
-            padding: 0.85em 0;
+            padding: 0.95em 0;
             width: 100%;
+            margin-top: 0.7rem;
             margin-bottom: 1.1rem;
-            transition: background 0.18s, color 0.18s;
+            box-shadow: 0 6px 18px rgba(118,75,162,0.10);
+            transition: background 0.18s, color 0.18s, transform 0.12s;
+            position: relative;
+            z-index: 1;
         }
         .login-btn:active, .login-btn:focus {
-            background: #ffe082;
+            background: linear-gradient(90deg, #ffe082 0%, #764ba2 100%);
             color: #764ba2;
-        }
-        .signup-link {
-            color: #764ba2;
-            font-size: 1.01rem;
-            text-decoration: underline;
-            text-align: center;
-            display: block;
-            margin-top: 0.5rem;
+            transform: translateY(2px) scale(0.98);
         }
         @media (max-width: 600px) {
             .login-container { padding-top: 3vh; max-width: 98vw; }
@@ -93,17 +124,42 @@
 </head>
 <body>
     <div class="login-container">
+        <div class="brand-bar"></div>
         <div class="app-logo">
             <img src="/static/customer.png" alt="FASTag App Logo">
         </div>
         <div class="login-title">Sign in to FASTag PWA</div>
         <form method="POST" action="/pwa-login" autocomplete="on" style="width:100%;">
-            <input type="text" class="form-control" id="username" name="username" placeholder="Username" required autocomplete="username">
-            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required autocomplete="current-password">
+            <div class="input-group">
+                <span class="input-icon"><i class="fas fa-user"></i></span>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required autocomplete="username">
+                <span class="underline"></span>
+            </div>
+            <div class="input-group">
+                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required autocomplete="current-password">
+                <span class="underline"></span>
+            </div>
             <button type="submit" class="login-btn">Login</button>
         </form>
-        <a href="/signup" class="signup-link">Don't have an account? Sign up</a>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Animate underline on focus
+    document.querySelectorAll('.form-control').forEach(function(input) {
+        input.addEventListener('focus', function() {
+            this.parentNode.querySelector('.underline').style.width = '100%';
+        });
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentNode.querySelector('.underline').style.width = '0';
+            }
+        });
+        // If already filled (e.g. browser autofill), show underline
+        if (input.value) {
+            input.parentNode.querySelector('.underline').style.width = '100%';
+        }
+    });
+    </script>
 </body>
 </html> 
