@@ -9,39 +9,142 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background: #f7f7fa;
             min-height: 100vh;
             margin: 0;
             padding: 0;
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: linear-gradient(120deg, #764ba2 0%, #ffe082 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(48px);
+            opacity: 0.18;
+            z-index: 0;
+            animation: floatBlob 16s ease-in-out infinite alternate;
+        }
+        .bg-blob1 { width: 420px; height: 420px; left: -120px; top: -120px; background: #ffe082; animation-delay: 0s; }
+        .bg-blob2 { width: 320px; height: 320px; right: -100px; top: 30vh; background: #764ba2; animation-delay: 2s; }
+        .bg-blob3 { width: 220px; height: 220px; left: 60vw; bottom: -80px; background: #667eea; animation-delay: 4s; }
+        @keyframes floatBlob {
+            0% { transform: scale(1) translateY(0); }
+            100% { transform: scale(1.12) translateY(-30px); }
         }
         .dashboard-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 480px;
             margin: 0 auto;
-            padding-top: 7vh;
+            padding-top: 2.5rem;
+            padding-bottom: 5.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .top-bar {
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.2rem;
         }
-        .brand-bar {
-            width: 48px;
-            height: 5px;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
-            margin-bottom: 2.2rem;
-            margin-top: 0.5rem;
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
-        .welcome {
-            font-size: 1.18rem;
+        .avatar img {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+        }
+        .greeting {
+            font-size: 1.13rem;
             font-weight: 700;
+            color: #222;
+            margin-left: 1rem;
+            flex: 1;
+        }
+        .notif-bell {
+            font-size: 1.35rem;
             color: #764ba2;
-            margin-bottom: 2.2rem;
-            letter-spacing: 0.01em;
-            text-align: center;
+            background: #fff;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.10);
+            position: relative;
+        }
+        .notif-bell .badge {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            background: #ffe082;
+            color: #764ba2;
+            font-size: 0.7rem;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-weight: 700;
+        }
+        .search-bar {
+            width: 100%;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.08);
+            display: flex;
+            align-items: center;
+            padding: 0.7em 1em;
+            margin-bottom: 2.1rem;
+        }
+        .search-bar i {
+            color: #bdbdbd;
+            font-size: 1.1rem;
+            margin-right: 0.7em;
+        }
+        .search-bar input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 1.05rem;
+            width: 100%;
+            color: #222;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 1.1rem;
+            margin-bottom: 2.1rem;
+            overflow-x: auto;
+            padding-bottom: 0.2rem;
+        }
+        .quick-action {
+            background: linear-gradient(90deg, #ffe082 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 0.7em 1.2em;
+            font-weight: 700;
+            font-size: 1.01rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            box-shadow: 0 2px 8px rgba(118,75,162,0.10);
+            border: none;
+            outline: none;
+            transition: background 0.18s, color 0.18s, transform 0.12s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .quick-action:active, .quick-action:focus {
+            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
+            color: #764ba2;
+            transform: translateY(2px) scale(0.98);
         }
         .menu-grid {
             display: grid;
@@ -51,7 +154,7 @@
             margin-bottom: 2.5rem;
         }
         .menu-card {
-            background: #fff;
+            background: linear-gradient(120deg, #fff 60%, #f3e9ff 100%);
             border-radius: 18px;
             box-shadow: 0 2px 12px rgba(80,80,160,0.08);
             display: flex;
@@ -68,7 +171,7 @@
         }
         .menu-card:active, .menu-card:focus {
             box-shadow: 0 6px 18px rgba(118,75,162,0.13);
-            background: #f3e9ff;
+            background: linear-gradient(120deg, #f3e9ff 60%, #fff 100%);
             transform: translateY(2px) scale(0.98);
         }
         .menu-card .icon {
@@ -82,34 +185,63 @@
             color: #222;
             letter-spacing: 0.01em;
         }
-        .logout-btn {
-            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
-            color: #fff;
-            border: none;
-            border-radius: 18px;
-            font-weight: 700;
-            font-size: 1.08rem;
-            padding: 0.8em 0;
-            width: 100%;
-            margin-top: 0.5rem;
-            box-shadow: 0 4px 12px rgba(118,75,162,0.10);
-            transition: background 0.18s, color 0.18s, transform 0.12s;
+        .bottom-nav {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            width: 100vw;
+            background: #fff;
+            box-shadow: 0 -2px 16px rgba(80,80,160,0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0.5rem 0 0.2rem 0;
+            z-index: 1003;
         }
-        .logout-btn:active, .logout-btn:focus {
-            background: linear-gradient(90deg, #ffe082 0%, #764ba2 100%);
+        .bottom-nav-btn {
+            background: none;
+            border: none;
+            outline: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             color: #764ba2;
-            transform: translateY(2px) scale(0.98);
+            font-size: 1.35rem;
+            font-weight: 700;
+            transition: color 0.18s;
+        }
+        .bottom-nav-btn.active, .bottom-nav-btn:focus {
+            color: #ffe082;
+        }
+        .bottom-nav-btn span {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.1em;
         }
         @media (max-width: 600px) {
-            .dashboard-container { padding-top: 3vh; max-width: 98vw; }
+            .dashboard-container { padding-top: 1.2rem; max-width: 98vw; padding-bottom: 5.5rem; }
             .menu-grid { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
         }
     </style>
 </head>
 <body>
+    <div class="bg-blob bg-blob1"></div>
+    <div class="bg-blob bg-blob2"></div>
+    <div class="bg-blob bg-blob3"></div>
     <div class="dashboard-container">
-        <div class="brand-bar"></div>
-        <div class="welcome">Welcome to FASTag Parking!</div>
+        <div class="top-bar">
+            <div class="avatar"><img src="/static/customer.png" alt="Avatar"></div>
+            <div class="greeting">Welcome, Karthik!</div>
+            <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
+        </div>
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Find vehicle, user, ..." />
+        </div>
+        <div class="quick-actions">
+            <button class="quick-action"><i class="fas fa-plus"></i> Add Vehicle</button>
+            <button class="quick-action"><i class="fas fa-unlock-alt"></i> Open Barrier</button>
+            <button class="quick-action"><i class="fas fa-sliders-h"></i> Reader Settings</button>
+        </div>
         <div class="menu-grid">
             <a href="/locations" class="menu-card">
                 <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
@@ -164,10 +296,16 @@
                 <div class="label">Demographics</div>
             </a>
         </div>
-        <form method="POST" action="/logout" style="width:100%;">
-            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
-        </form>
     </div>
+    <nav class="bottom-nav">
+        <button class="bottom-nav-btn active"><i class="fas fa-home"></i><span>Home</span></button>
+        <button class="bottom-nav-btn"><i class="fas fa-search"></i><span>Search</span></button>
+        <button class="bottom-nav-btn"><i class="fas fa-plus-circle"></i><span>Add</span></button>
+        <button class="bottom-nav-btn"><i class="fas fa-user"></i><span>Profile</span></button>
+        <form method="POST" action="/logout" style="display:inline;">
+            <button class="bottom-nav-btn" style="background:none;"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+        </form>
+    </nav>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 
