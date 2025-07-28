@@ -31,7 +31,7 @@ def home():
         is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
         
         if is_mobile:
-            return redirect(url_for('auth.pwa_onboarding'))
+            return render_template('mobile_install_prompt.html')
         else:
             return redirect(url_for('auth.login'))
     
