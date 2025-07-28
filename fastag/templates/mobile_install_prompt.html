@@ -425,7 +425,7 @@
                 </div>
             </div>
             
-            <button class="install-button" id="installButton" style="display: none;" onclick="alert('Button clicked!'); triggerInstall();">
+            <button class="install-button" id="installButton" style="display: block;" onclick="alert('Install button clicked!'); triggerInstall();">
                 <i class="fas fa-download me-2"></i>Install App
             </button>
             
@@ -476,6 +476,15 @@
         console.log('Install button element:', installButton);
         console.log('Install instructions element:', installInstructions);
         
+        // Test if button is found
+        if (installButton) {
+            console.log('✅ Install button found');
+            console.log('Button display style:', installButton.style.display);
+            console.log('Button onclick:', installButton.onclick);
+        } else {
+            console.log('❌ Install button not found');
+        }
+        
         // Disable base template's install button on this page
         window.addEventListener('load', function() {
             const baseInstallBtn = document.getElementById('install-btn');
@@ -488,6 +497,7 @@
         // Override base template's beforeinstallprompt handler
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('🎉 Mobile install prompt: beforeinstallprompt event fired!');
+            alert('Install prompt available!'); // Test alert
             e.preventDefault();
             e.stopPropagation(); // Prevent base template from handling it
             
@@ -496,6 +506,9 @@
             // Show the install button
             installButton.style.display = 'block';
             installInstructions.style.display = 'none';
+            
+            console.log('Install button should now be visible');
+            console.log('Install button display:', installButton.style.display);
         });
         
         // Simple install function (like the working test page)
