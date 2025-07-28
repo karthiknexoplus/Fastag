@@ -425,7 +425,7 @@
                 </div>
             </div>
             
-            <button class="install-button" id="installButton" style="display: block;" onclick="alert('Install button clicked!'); triggerInstall();">
+            <button class="install-button" id="installButton" style="display: block;" onclick="alert('Install button clicked!'); console.log('Install button clicked!'); triggerInstall();">
                 <i class="fas fa-download me-2"></i>Install App
             </button>
             
@@ -561,13 +561,17 @@
                 console.log('✅ Deferred prompt available');
                 try {
                     console.log('Showing native install prompt...');
+                    alert('About to show native install prompt...');
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
                         console.log('User choice result:', choiceResult);
                         if (choiceResult.outcome === 'accepted') {
                             console.log('✅ User accepted install prompt');
-                            alert('Installation accepted! Redirecting...');
-                            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
+                            alert('🎉 Installation accepted! App will be installed on your home screen.');
+                            // Wait a moment for installation to complete
+                            setTimeout(() => {
+                                window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
+                            }, 2000);
                         } else {
                             console.log('❌ User dismissed install prompt');
                             alert('Installation dismissed. Showing manual instructions.');
