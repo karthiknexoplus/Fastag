@@ -134,58 +134,43 @@
         }
         .feature-scroll {
             display: flex;
-            gap: 1.1rem;
+            flex-direction: row;
             overflow-x: auto;
-            padding: 0.7rem 0 1.2rem 0.2rem;
-            margin-bottom: 1.2rem;
-            scrollbar-width: none;
-        }
-        .feature-scroll::-webkit-scrollbar {
-            display: none;
+            gap: 0.5em;
+            padding: 0.5em 0.2em 0.5em 0.2em;
+            scrollbar-width: thin;
+            scrollbar-color: #b39ddb #f3e5f5;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 0.5em;
         }
         .feature-btn {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-width: 74px;
-            min-height: 74px;
-            max-width: 74px;
-            max-height: 74px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #fff 60%, #f3e9ff 100%);
-            box-shadow: 0 2px 8px rgba(80,80,160,0.08);
+            background: #fff;
+            border-radius: 1.2em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
             border: none;
-            outline: none;
-            transition: box-shadow 0.18s, transform 0.12s, background 0.18s;
+            padding: 0.3em 0.1em;
+            font-size: 1.2em;
             cursor: pointer;
-            margin-bottom: 0.1rem;
-        }
-        .feature-btn:active, .feature-btn:focus {
-            box-shadow: 0 4px 12px rgba(118,75,162,0.10);
-            background: linear-gradient(135deg, #f3e9ff 60%, #fff 100%);
-            transform: translateY(2px) scale(0.98);
+            transition: box-shadow 0.2s;
+            min-width: 60px;
+            min-height: 60px;
         }
         .feature-btn .icon {
-            font-size: 1.45rem;
-            background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            color: #764ba2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 1.5em;
+            margin-bottom: 0.1em;
         }
-        .feature-btn .label {
-            font-size: 0.93rem;
-            font-weight: 600;
-            color: #222;
-            letter-spacing: 0.01em;
+        .feature-btn span.label {
+            font-size: 0.8em;
+            color: #444;
+            font-weight: 500;
             text-align: center;
-            white-space: normal;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            line-height: 1.1;
+            max-width: 60px;
+            word-break: break-word;
         }
         .feature-slider {
             width: 100%;
@@ -644,12 +629,19 @@
             {% endif %}
         </div>
         <div class="feature-desc">All your FASTag Parking features at a glance</div>
-        <div class="feature-grid-container">
-            <div class="feature-grid-arrows">
-                <button class="feature-grid-arrow-btn" id="featureGridPrev" onclick="featureGridPrevPage()"><i class="fas fa-chevron-left"></i></button>
-                <button class="feature-grid-arrow-btn" id="featureGridNext" onclick="featureGridNextPage()"><i class="fas fa-chevron-right"></i></button>
-            </div>
-            <div class="feature-grid" id="featureGrid"></div>
+        <div class="feature-scroll">
+            <button class="feature-btn" onclick="openLocationsModal()"><span class="icon"><i class="fas fa-map-marker-alt"></i></span><span class="label">Locations</span></button>
+            <button class="feature-btn" onclick="openLanesModal()"><span class="icon"><i class="fas fa-road"></i></span><span class="label">Lanes</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon"><i class="fas fa-id-card"></i></span><span class="label">KYC Users</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span><span class="label">Watchlist</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-search"></i></span><span class="label">Vehicle Finder</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span><span class="label">Bank Finder</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span><span class="label">FASTag Balance</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-file-invoice"></i></span><span class="label">Challan</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span><span class="label">Fuel Price</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon"><i class="fas fa-cogs"></i></span><span class="label">Reader Settings</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/open-barrier'"><span class="icon"><i class="fas fa-door-open"></i></span><span class="label">Open Barrier</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/demographics'"><span class="icon"><i class="fas fa-chart-pie"></i></span><span class="label">Demographics</span></button>
         </div>
         <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3500">
             <div class="carousel-inner">
