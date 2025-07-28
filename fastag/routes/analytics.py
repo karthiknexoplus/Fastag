@@ -3247,6 +3247,7 @@ def search_kyc_users():
 @analytics_bp.route('/api/current-occupancy-records')
 def api_current_occupancy_records():
     db = get_db()
+    ist_tz = pytz.timezone('Asia/Kolkata')
     rows = db.execute('''
         SELECT 
             al1.tag_id,
@@ -3263,10 +3264,17 @@ def api_current_occupancy_records():
         ORDER BY al1.timestamp DESC
         LIMIT 100
     ''').fetchall()
+    def to_ist(ts):
+        if not ts: return ''
+        try:
+            utc_time = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
+            return utc_time.astimezone(ist_tz).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            return ts
     records = [
         {
             'vehicle': row[0],
-            'entry_time': row[1],
+            'entry_time': to_ist(row[1]),
             'vehicle_number': row[2] or 'N/A',
             'owner_name': row[3] or 'Unknown',
             'lane_name': row[4] or 'Unknown',
@@ -3278,6 +3286,7 @@ def api_current_occupancy_records():
 @analytics_bp.route('/api/today-granted-records')
 def api_today_granted_records():
     db = get_db()
+    ist_tz = pytz.timezone('Asia/Kolkata')
     rows = db.execute('''
         SELECT 
             al.tag_id,
@@ -3293,10 +3302,17 @@ def api_today_granted_records():
         ORDER BY al.timestamp DESC
         LIMIT 50
     ''').fetchall()
+    def to_ist(ts):
+        if not ts: return ''
+        try:
+            utc_time = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
+            return utc_time.astimezone(ist_tz).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            return ts
     records = [
         {
             'vehicle': row[0],
-            'time': row[1],
+            'time': to_ist(row[1]),
             'vehicle_number': row[2] or 'N/A',
             'owner_name': row[3] or 'Unknown',
             'reader_type': row[4]
@@ -3307,6 +3323,7 @@ def api_today_granted_records():
 @analytics_bp.route('/api/denied-today-records')
 def api_denied_today_records():
     db = get_db()
+    ist_tz = pytz.timezone('Asia/Kolkata')
     rows = db.execute('''
         SELECT 
             al.tag_id,
@@ -3324,10 +3341,17 @@ def api_denied_today_records():
         ORDER BY al.timestamp DESC
         LIMIT 50
     ''').fetchall()
+    def to_ist(ts):
+        if not ts: return ''
+        try:
+            utc_time = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
+            return utc_time.astimezone(ist_tz).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            return ts
     records = [
         {
             'vehicle': row[0],
-            'time': row[1],
+            'time': to_ist(row[1]),
             'vehicle_number': row[2] or 'N/A',
             'owner_name': row[3] or 'Unknown',
             'lane_name': row[4] or 'Unknown',
@@ -3340,6 +3364,7 @@ def api_denied_today_records():
 @analytics_bp.route('/api/unique-vehicles-today-records')
 def api_unique_vehicles_today_records():
     db = get_db()
+    ist_tz = pytz.timezone('Asia/Kolkata')
     rows = db.execute('''
         SELECT 
             al.tag_id,
@@ -3355,10 +3380,17 @@ def api_unique_vehicles_today_records():
         ORDER BY first_seen DESC
         LIMIT 50
     ''').fetchall()
+    def to_ist(ts):
+        if not ts: return ''
+        try:
+            utc_time = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
+            return utc_time.astimezone(ist_tz).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            return ts
     records = [
         {
             'vehicle': row[0],
-            'first_seen': row[1],
+            'first_seen': to_ist(row[1]),
             'vehicle_number': row[2] or 'N/A',
             'owner_name': row[3] or 'Unknown',
             'total_events': row[4]
