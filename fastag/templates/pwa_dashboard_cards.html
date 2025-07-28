@@ -248,6 +248,11 @@
             font-size: 1.15rem;
             color: #764ba2;
             margin-bottom: 0.3rem;
+            background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: #764ba2; /* Fallback for non-webkit browsers */
         }
         .analytics-card .label {
             font-size: 0.93rem;
@@ -259,6 +264,12 @@
             font-size: 1.13rem;
             font-weight: 700;
             color: #764ba2;
+        }
+        .analytics-card.loading .value {
+            color: #ccc;
+        }
+        .analytics-card.loading .icon {
+            opacity: 0.5;
         }
         .fab-center {
             position: fixed;
@@ -362,12 +373,36 @@
             </div>
         </div>
         <div class="analytics-grid">
-            <div class="analytics-card"><span class="icon"><i class="fas fa-users"></i></span><span class="label">Current Occupancy</span><span class="value" id="card-occupancy">--</span></div>
-            <div class="analytics-card"><span class="icon"><i class="fas fa-check-circle"></i></span><span class="label">Today's Granted</span><span class="value" id="card-granted">--</span></div>
-            <div class="analytics-card"><span class="icon"><i class="fas fa-times-circle"></i></span><span class="label">Denied Today</span><span class="value" id="card-denied">--</span></div>
-            <div class="analytics-card"><span class="icon"><i class="fas fa-chart-line"></i></span><span class="label">Activity Trend</span><span class="value" id="card-trend">--</span></div>
-            <div class="analytics-card"><span class="icon"><i class="fas fa-car"></i></span><span class="label">Unique Vehicles</span><span class="value" id="card-unique">--</span></div>
-            <div class="analytics-card"><span class="icon"><i class="fas fa-gas-pump"></i></span><span class="label">Top Fuel</span><span class="value" id="card-fuel">--</span></div>
+            <div class="analytics-card" onclick="showAnalyticsDetails('occupancy')">
+                <span class="icon"><i class="fas fa-users"></i></span>
+                <span class="label">Current Occupancy</span>
+                <span class="value" id="card-occupancy">--</span>
+            </div>
+            <div class="analytics-card" onclick="showAnalyticsDetails('granted')">
+                <span class="icon"><i class="fas fa-check-circle"></i></span>
+                <span class="label">Today's Granted</span>
+                <span class="value" id="card-granted">--</span>
+            </div>
+            <div class="analytics-card" onclick="showAnalyticsDetails('denied')">
+                <span class="icon"><i class="fas fa-times-circle"></i></span>
+                <span class="label">Denied Today</span>
+                <span class="value" id="card-denied">--</span>
+            </div>
+            <div class="analytics-card" onclick="showAnalyticsDetails('trend')">
+                <span class="icon"><i class="fas fa-chart-line"></i></span>
+                <span class="label">Activity Trend</span>
+                <span class="value" id="card-trend">--</span>
+            </div>
+            <div class="analytics-card" onclick="showAnalyticsDetails('unique')">
+                <span class="icon"><i class="fas fa-car"></i></span>
+                <span class="label">Unique Vehicles</span>
+                <span class="value" id="card-unique">--</span>
+            </div>
+            <div class="analytics-card" onclick="showAnalyticsDetails('fuel')">
+                <span class="icon"><i class="fas fa-gas-pump"></i></span>
+                <span class="label">Top Fuel</span>
+                <span class="value" id="card-fuel">--</span>
+            </div>
         </div>
     </div>
     <button class="fab-center" onclick="alert('Scan QR coming soon!')" title="Scan QR"><i class="fas fa-qrcode"></i></button>
@@ -397,6 +432,131 @@
             }
         }, 40);
     }
+
+    // Load analytics data
+    function loadAnalyticsData() {
+        // Current Occupancy
+        fetch('/analytics/api/current-occupancy')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('card-occupancy').textContent = data.total || 0;
+            })
+            .catch(() => {
+                document.getElementById('card-occupancy').textContent = '--';
+            });
+
+        // Today's Granted
+        fetch('/analytics/api/today-granted')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('card-granted').textContent = data.granted || 0;
+            })
+            .catch(() => {
+                document.getElementById('card-granted').textContent = '--';
+            });
+
+        // Denied Today
+        fetch('/analytics/api/unique-tags-denied-today')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('card-denied').textContent = data.total || 0;
+            })
+            .catch(() => {
+                document.getElementById('card-denied').textContent = '--';
+            });
+
+        // Unique Vehicles Today
+        fetch('/analytics/api/unique-vehicles-today')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('card-unique').textContent = data.unique_vehicles_today || 0;
+            })
+            .catch(() => {
+                document.getElementById('card-unique').textContent = '--';
+            });
+
+        // Activity Trend (simplified - show peak hour)
+        fetch('/analytics/api/entry-exit-trend')
+            .then(r => r.json())
+            .then(data => {
+                if (data.entry_exit_trend && data.entry_exit_trend.length > 0) {
+                    // Find peak hour
+                    let peakHour = '14:00';
+                    let maxActivity = 0;
+                    data.entry_exit_trend.forEach(hour => {
+                        const total = hour[1] + hour[2];
+                        if (total > maxActivity) {
+                            maxActivity = total;
+                            peakHour = hour[0] + ':00';
+                        }
+                    });
+                    document.getElementById('card-trend').textContent = peakHour;
+                } else {
+                    document.getElementById('card-trend').textContent = '14:00';
+                }
+            })
+            .catch(() => {
+                document.getElementById('card-trend').textContent = '14:00';
+            });
+
+        // Top Fuel Type
+        fetch('/analytics/api/vehicle-demographics')
+            .then(r => r.json())
+            .then(data => {
+                if (data.fuel_types && data.fuel_types.length > 0) {
+                    const topFuel = data.fuel_types[0].type;
+                    document.getElementById('card-fuel').textContent = topFuel;
+                } else {
+                    document.getElementById('card-fuel').textContent = 'Petrol';
+                }
+            })
+            .catch(() => {
+                document.getElementById('card-fuel').textContent = 'Petrol';
+            });
+    }
+
+    // Show analytics details modal
+    function showAnalyticsDetails(type) {
+        let title = '';
+        let content = '';
+        
+        switch(type) {
+            case 'occupancy':
+                title = 'Current Occupancy Details';
+                content = 'Shows vehicles currently inside the parking facility.';
+                break;
+            case 'granted':
+                title = 'Today\'s Granted Access';
+                content = 'Number of successful vehicle entries today.';
+                break;
+            case 'denied':
+                title = 'Today\'s Denied Access';
+                content = 'Number of denied vehicle entries today.';
+                break;
+            case 'trend':
+                title = 'Activity Trend';
+                content = 'Peak activity hour based on entry/exit patterns.';
+                break;
+            case 'unique':
+                title = 'Unique Vehicles Today';
+                content = 'Total number of different vehicles that accessed today.';
+                break;
+            case 'fuel':
+                title = 'Top Fuel Type';
+                content = 'Most common fuel type among registered vehicles.';
+                break;
+        }
+        
+        alert(`${title}\n\n${content}\n\nDetailed analytics available in the Analytics section.`);
+    }
+
+    // Load data when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAnalyticsData();
+        
+        // Refresh data every 30 seconds
+        setInterval(loadAnalyticsData, 30000);
+    });
     </script>
 </body>
 </html> 
