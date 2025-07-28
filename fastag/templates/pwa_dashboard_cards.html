@@ -588,7 +588,7 @@
             <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
             <button class="feature-btn" onclick="showVehicleFinderModal()"><span class="icon"><i class="fas fa-car"></i></span></button>
             <button class="feature-btn" onclick="showBankFinderModal()"><span class="icon"><i class="fas fa-university"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span></button>
+            <button class="feature-btn" onclick="showFastagBalanceModal()"><span class="icon"><i class="fas fa-wallet"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-receipt"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
@@ -703,6 +703,62 @@
             </form>
             <div id="bankResults" style="margin-top:1rem;display:none;">
                 <div class="modal-records" id="bankResultsContent"></div>
+            </div>
+        </div>
+    </div>
+    <!-- FASTag Balance Modal -->
+    <div id="fastagBalanceModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 500px;">
+            <span class="close-modal" onclick="closeFastagBalanceModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-wallet"></i></span>
+                <span class="modal-title">FASTag Balance</span>
+            </div>
+            <div class="modal-desc">Check FASTag balance by vehicle number and bank</div>
+            <form id="fastagBalanceForm" onsubmit="checkFastagBalance(event)">
+                <div class="mb-3">
+                    <label class="form-label">Vehicle Registration Number</label>
+                    <input type="text" class="form-control" id="fastagRegNo" placeholder="e.g., KA04MJ6369" required>
+                    <div class="form-text">Format: KA04MJ6369</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Select Bank</label>
+                    <select class="form-control" id="fastagBankSelect" required>
+                        <option value="">Choose a bank...</option>
+                        <option value="Airtel Payments Bank">Airtel Payments Bank</option>
+                        <option value="Axis Bank">Axis Bank</option>
+                        <option value="HDFC Bank">HDFC Bank</option>
+                        <option value="ICICI Bank">ICICI Bank</option>
+                        <option value="IDFC FIRST Bank">IDFC FIRST Bank</option>
+                        <option value="SBI">SBI</option>
+                        <option value="AU Small Finance Bank">AU Small Finance Bank</option>
+                        <option value="Bandhan Bank">Bandhan Bank</option>
+                        <option value="Bank of Baroda">Bank of Baroda</option>
+                        <option value="Bank of Maharashtra">Bank of Maharashtra</option>
+                        <option value="Canara Bank">Canara Bank</option>
+                        <option value="Equitas Small Finance Bank">Equitas Small Finance Bank</option>
+                        <option value="Federal Bank">Federal Bank</option>
+                        <option value="IDBI Bank">IDBI Bank</option>
+                        <option value="Indian Bank">Indian Bank</option>
+                        <option value="IndusInd Bank">IndusInd Bank</option>
+                        <option value="IOB">IOB</option>
+                        <option value="Jammu and Kashmir Bank">Jammu and Kashmir Bank</option>
+                        <option value="Karnataka Bank">Karnataka Bank</option>
+                        <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                        <option value="Livquick Technology">Livquick Technology</option>
+                        <option value="South Indian Bank">South Indian Bank</option>
+                        <option value="UCO Bank">UCO Bank</option>
+                        <option value="Union Bank of India">Union Bank of India</option>
+                    </select>
+                </div>
+                <div id="fastagBalanceError" style="color:#dc3545;font-size:0.9em;margin-bottom:0.5em;display:none;"></div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="button" onclick="closeFastagBalanceModal()">Cancel</button>
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Check Balance</button>
+                </div>
+            </form>
+            <div id="fastagBalanceResults" style="margin-top:1rem;display:none;">
+                <div class="modal-records" id="fastagBalanceResultsContent"></div>
             </div>
         </div>
     </div>
@@ -1835,6 +1891,133 @@
 
     function hideBankError() {
         document.getElementById('bankSearchError').style.display = 'none';
+    }
+
+    function showFastagBalanceModal() {
+        document.getElementById('fastagBalanceModal').style.display = 'flex';
+        document.getElementById('fastagBalanceResults').style.display = 'none';
+        document.getElementById('fastagBalanceError').style.display = 'none';
+        document.getElementById('fastagBalanceForm').reset();
+    }
+
+    function closeFastagBalanceModal() {
+        document.getElementById('fastagBalanceModal').style.display = 'none';
+    }
+
+    function checkFastagBalance(event) {
+        event.preventDefault();
+        const regNo = document.getElementById('fastagRegNo').value.trim().toUpperCase();
+        const selectedBank = document.getElementById('fastagBankSelect').value;
+        
+        if (!regNo) {
+            showFastagBalanceError('Please enter a vehicle registration number.');
+            return;
+        }
+        
+        if (!selectedBank) {
+            showFastagBalanceError('Please select a bank.');
+            return;
+        }
+        
+        // Validate VRN format
+        const vrnPattern = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{4}$/;
+        if (!vrnPattern.test(regNo)) {
+            showFastagBalanceError('Please enter a valid vehicle registration number (e.g., KA04MJ6369).');
+            return;
+        }
+        
+        // Show loading
+        hideFastagBalanceError();
+        document.getElementById('fastagBalanceResultsContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:1rem;">Checking balance...</div>';
+        document.getElementById('fastagBalanceResults').style.display = 'block';
+        
+        // Make API call
+        const formData = new FormData();
+        formData.append('reg_no', regNo);
+        formData.append('selected_bank', selectedBank);
+        
+        fetch('/fastag_balance', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Parse the HTML response to extract data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Check for error
+            const errorElement = doc.querySelector('.alert-danger');
+            if (errorElement) {
+                const errorText = errorElement.textContent.trim();
+                showFastagBalanceError(errorText);
+                document.getElementById('fastagBalanceResults').style.display = 'none';
+                return;
+            }
+            
+            // Check for success
+            const fastagResult = doc.querySelector('.fastag-result');
+            if (fastagResult) {
+                displayFastagBalanceResults(fastagResult.innerHTML);
+            } else {
+                showFastagBalanceError('No FASTag information found for this vehicle and bank combination.');
+                document.getElementById('fastagBalanceResults').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            showFastagBalanceError('Unable to check FASTag balance. Please try again later.');
+            document.getElementById('fastagBalanceResults').style.display = 'none';
+            console.error('Error:', error);
+        });
+    }
+
+    function displayFastagBalanceResults(htmlContent) {
+        const resultsContent = document.getElementById('fastagBalanceResultsContent');
+        
+        // Create a temporary div to parse the HTML content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        
+        // Extract balance information
+        const balanceElement = tempDiv.querySelector('.badge');
+        const accountIdElement = tempDiv.querySelector('.text-muted');
+        const categoryElement = tempDiv.querySelector('.badge[style*="background: #4b2e83"]');
+        const bankNameElement = tempDiv.querySelector('.card-body .text-muted');
+        
+        let html = `
+            <div style="background:#f8f9fa;border-radius:8px;padding:1rem;margin-bottom:0.5rem;">
+                <div style="text-align:center;margin-bottom:1rem;">
+                    <span style="font-weight:700;color:#764ba2;font-size:1.2rem;">FASTag Balance Information</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Current Balance</span>
+                    <span style="font-weight:700;color:#28a745;font-size:1.3rem;">₹${balanceElement ? balanceElement.textContent.replace('₹', '') : 'N/A'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Account ID</span>
+                    <span style="font-weight:600;color:#333;">${accountIdElement ? accountIdElement.textContent : 'N/A'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;color:#666;">Category</span>
+                    <span style="background:linear-gradient(135deg,#4b2e83 0%,#764ba2 100%);color:white;padding:0.3rem 0.8rem;border-radius:15px;font-size:0.8rem;font-weight:600;">${categoryElement ? categoryElement.textContent : 'N/A'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:600;color:#666;">Bank Name</span>
+                    <span style="font-weight:600;color:#333;">${bankNameElement ? bankNameElement.textContent : 'N/A'}</span>
+                </div>
+            </div>
+        `;
+        
+        resultsContent.innerHTML = html;
+    }
+
+    function showFastagBalanceError(message) {
+        document.getElementById('fastagBalanceError').textContent = message;
+        document.getElementById('fastagBalanceError').style.display = 'block';
+    }
+
+    function hideFastagBalanceError() {
+        document.getElementById('fastagBalanceError').style.display = 'none';
     }
     function closeAddKycUserModal() {
         document.getElementById('addKycUserModal').style.display = 'none';
