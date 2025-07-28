@@ -3248,15 +3248,30 @@ def search_kyc_users():
 def api_current_occupancy_records():
     db = get_db()
     rows = db.execute('''
-        SELECT al1.tag_id, MAX(al1.timestamp) as entry_time
+        SELECT 
+            al1.tag_id,
+            al1.timestamp as entry_time,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            l.lane_name,
+            al1.access_result
         FROM access_logs al1
+        LEFT JOIN kyc_users ku ON al1.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al1.tag_id = tvc.tag_id
+        JOIN lanes l ON al1.lane_id = l.id
         WHERE al1.access_result = 'granted' AND al1.timestamp >= datetime('now', '-24 hours')
-        GROUP BY al1.tag_id
-        ORDER BY entry_time DESC
-        LIMIT 5
+        ORDER BY al1.timestamp DESC
+        LIMIT 100
     ''').fetchall()
     records = [
-        {'vehicle': row[0], 'entry_time': row[1]} for row in rows
+        {
+            'vehicle': row[0],
+            'entry_time': row[1],
+            'vehicle_number': row[2] or 'N/A',
+            'owner_name': row[3] or 'Unknown',
+            'lane_name': row[4],
+            'access_result': row[5]
+        } for row in rows
     ]
     return jsonify({'records': records})
 
@@ -3264,13 +3279,30 @@ def api_current_occupancy_records():
 def api_today_granted_records():
     db = get_db()
     rows = db.execute('''
-        SELECT tag_id, timestamp FROM access_logs
-        WHERE access_result = 'granted' AND DATE(timestamp) = DATE('now')
-        ORDER BY timestamp DESC
-        LIMIT 5
+        SELECT 
+            al.tag_id,
+            al.timestamp,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            l.lane_name,
+            al.access_result
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        WHERE al.access_result = 'granted' AND DATE(al.timestamp) = DATE('now')
+        ORDER BY al.timestamp DESC
+        LIMIT 50
     ''').fetchall()
     records = [
-        {'vehicle': row[0], 'time': row[1]} for row in rows
+        {
+            'vehicle': row[0],
+            'time': row[1],
+            'vehicle_number': row[2] or 'N/A',
+            'owner_name': row[3] or 'Unknown',
+            'lane_name': row[4],
+            'access_result': row[5]
+        } for row in rows
     ]
     return jsonify({'records': records})
 
@@ -3278,13 +3310,32 @@ def api_today_granted_records():
 def api_denied_today_records():
     db = get_db()
     rows = db.execute('''
-        SELECT tag_id, timestamp FROM access_logs
-        WHERE access_result = 'denied' AND DATE(timestamp) = DATE('now')
-        ORDER BY timestamp DESC
-        LIMIT 5
+        SELECT 
+            al.tag_id,
+            al.timestamp,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            l.lane_name,
+            al.access_result,
+            al.reason
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        WHERE al.access_result = 'denied' AND DATE(al.timestamp) = DATE('now')
+        ORDER BY al.timestamp DESC
+        LIMIT 50
     ''').fetchall()
     records = [
-        {'vehicle': row[0], 'time': row[1]} for row in rows
+        {
+            'vehicle': row[0],
+            'time': row[1],
+            'vehicle_number': row[2] or 'N/A',
+            'owner_name': row[3] or 'Unknown',
+            'lane_name': row[4],
+            'access_result': row[5],
+            'reason': row[6] or 'Unknown'
+        } for row in rows
     ]
     return jsonify({'records': records})
 
@@ -3292,13 +3343,27 @@ def api_denied_today_records():
 def api_unique_vehicles_today_records():
     db = get_db()
     rows = db.execute('''
-        SELECT tag_id, MIN(timestamp) as first_seen FROM access_logs
-        WHERE DATE(timestamp) = DATE('now')
-        GROUP BY tag_id
+        SELECT 
+            al.tag_id,
+            MIN(al.timestamp) as first_seen,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            COUNT(*) as total_events
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        WHERE DATE(al.timestamp) = DATE('now')
+        GROUP BY al.tag_id, ku.vehicle_number, tvc.vehicle_number, ku.name, tvc.owner_name
         ORDER BY first_seen DESC
-        LIMIT 5
+        LIMIT 50
     ''').fetchall()
     records = [
-        {'vehicle': row[0], 'first_seen': row[1]} for row in rows
+        {
+            'vehicle': row[0],
+            'first_seen': row[1],
+            'vehicle_number': row[2] or 'N/A',
+            'owner_name': row[3] or 'Unknown',
+            'total_events': row[4]
+        } for row in rows
     ]
     return jsonify({'records': records})

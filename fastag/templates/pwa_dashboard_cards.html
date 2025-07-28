@@ -497,21 +497,39 @@
     .modal-records table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.98rem;
+        font-size: 0.85rem;
         margin-bottom: 0.2rem;
     }
     .modal-records th, .modal-records td {
-        padding: 0.38rem 0.2rem;
+        padding: 0.28rem 0.15rem;
         text-align: left;
         border-bottom: 1px solid #f0e6ff;
+        font-size: 0.8rem;
     }
     .modal-records th {
         color: #764ba2;
         font-weight: 700;
         background: #f7f7fa;
+        font-size: 0.75rem;
     }
     .modal-records tr:last-child td {
         border-bottom: none;
+    }
+    .modal-records .vehicle-number {
+        font-weight: 600;
+        color: #764ba2;
+    }
+    .modal-records .owner-name {
+        color: #666;
+        font-size: 0.75rem;
+    }
+    .modal-records .lane-name {
+        color: #888;
+        font-size: 0.7rem;
+    }
+    .modal-records .time {
+        color: #555;
+        font-size: 0.75rem;
     }
     .modal-footer-custom {
         display: flex;
@@ -694,20 +712,28 @@
             .then(data => {
                 // Render table/list based on type
                 if(type === 'occupancy' && data.records && data.records.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Entry Time</th></tr>' +
-                        data.records.slice(0,5).map(r => `<tr><td>${r.vehicle}</td><td>${r.entry_time}</td></tr>`).join('') + '</table>';
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Entry Time</th></tr>' +
+                        data.records.slice(0,20).map(r => 
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.entry_time}</td></tr>`
+                        ).join('') + '</table>';
                 } else if(type === 'granted' && data.records && data.records.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Time</th></tr>' +
-                        data.records.slice(0,5).map(r => `<tr><td>${r.vehicle}</td><td>${r.time}</td></tr>`).join('') + '</table>';
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Time</th></tr>' +
+                        data.records.slice(0,20).map(r => 
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.time}</td></tr>`
+                        ).join('') + '</table>';
                 } else if(type === 'denied' && data.records && data.records.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Time</th></tr>' +
-                        data.records.slice(0,5).map(r => `<tr><td>${r.vehicle}</td><td>${r.time}</td></tr>`).join('') + '</table>';
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Reason</th><th>Time</th></tr>' +
+                        data.records.slice(0,20).map(r => 
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.reason}</td><td class="time">${r.time}</td></tr>`
+                        ).join('') + '</table>';
                 } else if(type === 'trend' && data.entry_exit_trend && data.entry_exit_trend.length) {
                     tableHtml = '<table><tr><th>Hour</th><th>Entries</th><th>Exits</th></tr>' +
                         data.entry_exit_trend.slice(0,6).map(r => `<tr><td>${r[0]}:00</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('') + '</table>';
                 } else if(type === 'unique' && data.records && data.records.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>First Seen</th></tr>' +
-                        data.records.slice(0,5).map(r => `<tr><td>${r.vehicle}</td><td>${r.first_seen}</td></tr>`).join('') + '</table>';
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Events</th><th>First Seen</th></tr>' +
+                        data.records.slice(0,20).map(r => 
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td>${r.total_events}</td><td class="time">${r.first_seen}</td></tr>`
+                        ).join('') + '</table>';
                 } else if(type === 'fuel' && data.fuel_types && data.fuel_types.length) {
                     tableHtml = '<table><tr><th>Type</th><th>Count</th><th>%</th></tr>' +
                         data.fuel_types.map(r => `<tr><td>${r.type}</td><td>${r.count}</td><td>${r.percentage}</td></tr>`).join('') + '</table>';
