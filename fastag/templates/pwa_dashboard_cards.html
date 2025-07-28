@@ -651,7 +651,7 @@
     <nav class="bottom-nav">
         <button class="bottom-nav-btn active"><i class="fas fa-home"></i><span>Home</span></button>
         <button class="bottom-nav-btn"><i class="fas fa-chart-line"></i><span>Analytics</span></button>
-        <button class="bottom-nav-btn" style="opacity:0;pointer-events:none;"><i class="fas fa-circle"></i><span></span></button>
+        <button class="bottom-nav-btn" onclick="openAddKycUserModal()"><i class="fas fa-qrcode"></i><span>Scan/Add</span></button>
         <button class="bottom-nav-btn"><i class="fas fa-car"></i><span>Vehicles</span></button>
         <button class="bottom-nav-btn"><i class="fas fa-user"></i><span>Profile</span></button>
     </nav>
@@ -724,6 +724,46 @@
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeControllerStatusModal()">Close</button>
             </div>
+        </div>
+    </div>
+    <!-- QR Code Add KYC User Modal -->
+    <div id="addKycUserModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 420px;">
+            <span class="close-modal" onclick="closeAddKycUserModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-user-plus"></i></span>
+                <span class="modal-title">Add KYC User</span>
+            </div>
+            <div class="modal-desc">Enter user details or scan QR to autofill.</div>
+            <form id="addKycUserForm" onsubmit="submitAddKycUser(event)">
+                <div class="mb-2">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="kycName" name="name" required autocomplete="off">
+                </div>
+                <div class="mb-2" style="position:relative;">
+                    <label class="form-label">FASTag ID</label>
+                    <input type="text" class="form-control" id="kycFastagId" name="fastag_id" required autocomplete="off" style="padding-right:2.2rem;">
+                    <span class="input-icon-btn" style="position:absolute;top:2.1rem;right:0.7rem;cursor:pointer;color:#764ba2;" onclick="lookupVehicleByFastag()" title="Get Vehicle Number from FASTag ID"><i class="fas fa-search"></i></span>
+                </div>
+                <div class="mb-2" style="position:relative;">
+                    <label class="form-label">Vehicle Number</label>
+                    <input type="text" class="form-control" id="kycVehicleNumber" name="vehicle_number" required autocomplete="off" style="padding-right:2.2rem;">
+                    <span class="input-icon-btn" style="position:absolute;top:2.1rem;right:0.7rem;cursor:pointer;color:#764ba2;" onclick="lookupFastagByVehicle()" title="Get FASTag ID from Vehicle Number"><i class="fas fa-search"></i></span>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" class="form-control" id="kycContactNumber" name="contact_number" required autocomplete="off">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-control" id="kycAddress" name="address" rows="2" required></textarea>
+                </div>
+                <div id="kycUserError" style="color:#dc3545;font-size:0.97em;margin-bottom:0.5em;display:none;"></div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="button" onclick="closeAddKycUserModal()">Cancel</button>
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Add User</button>
+                </div>
+            </form>
         </div>
     </div>
     <style>
@@ -966,6 +1006,7 @@
         }
         .modal-records th { font-size: 0.65rem; }
     }
+    .input-icon-btn { font-size: 1.1rem; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -1321,6 +1362,74 @@
     }
     function closeControllerStatusModal() {
         document.getElementById('controllerStatusModal').style.display = 'none';
+    }
+
+    function openAddKycUserModal() {
+        document.getElementById('addKycUserModal').style.display = 'flex';
+        document.getElementById('addKycUserForm').reset();
+        document.getElementById('kycUserError').style.display = 'none';
+    }
+    function closeAddKycUserModal() {
+        document.getElementById('addKycUserModal').style.display = 'none';
+    }
+    function lookupVehicleByFastag() {
+        const fastagId = document.getElementById('kycFastagId').value.trim();
+        if (!fastagId) return;
+        fetch(`/api/kyc/fetch-vehicle/${encodeURIComponent(fastagId)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.vehicle_number) {
+                    document.getElementById('kycVehicleNumber').value = data.vehicle_number;
+                } else {
+                    showKycUserError(data.error || 'Vehicle not found for this FASTag ID');
+                }
+            })
+            .catch(() => showKycUserError('Failed to fetch vehicle number'));
+    }
+    function lookupFastagByVehicle() {
+        const vehicleNumber = document.getElementById('kycVehicleNumber').value.trim();
+        if (!vehicleNumber) return;
+        fetch(`/api/kyc/fetch-fastag/${encodeURIComponent(vehicleNumber)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.tags && data.tags.length > 0) {
+                    document.getElementById('kycFastagId').value = data.tags[0].tag_id;
+                } else {
+                    showKycUserError(data.error || 'FASTag not found for this vehicle number');
+                }
+            })
+            .catch(() => showKycUserError('Failed to fetch FASTag ID'));
+    }
+    function showKycUserError(msg) {
+        const el = document.getElementById('kycUserError');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+    function submitAddKycUser(e) {
+        e.preventDefault();
+        document.getElementById('kycUserError').style.display = 'none';
+        const form = document.getElementById('addKycUserForm');
+        const data = {
+            name: form.name.value.trim(),
+            fastag_id: form.fastag_id.value.trim(),
+            vehicle_number: form.vehicle_number.value.trim(),
+            contact_number: form.contact_number.value.trim(),
+            address: form.address.value.trim()
+        };
+        fetch('/api/kyc_users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                closeAddKycUserModal();
+            } else {
+                showKycUserError(data.error || 'Failed to add user');
+            }
+        })
+        .catch(() => showKycUserError('Failed to add user'));
     }
     </script>
 </body>
