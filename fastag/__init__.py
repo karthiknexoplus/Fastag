@@ -214,4 +214,31 @@ def create_app():
             'APP_TITLE': os.environ.get('APP_TITLE', 'FASTag Parking'),
             'get_greeting': get_greeting,
         }
+    
+    # Root route for mobile detection
+    @app.route('/')
+    def root():
+        from flask import request, render_template, redirect, url_for, session
+        from fastag.routes.auth import auth_bp
+        
+        # Check if user is logged in
+        if 'user' in session:
+            # If user is logged in, check if it's a mobile request
+            user_agent = request.headers.get('User-Agent', '').lower()
+            is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
+            
+            if is_mobile:
+                return redirect(url_for('auth.pwa_dashboard'))
+            else:
+                return redirect(url_for('locations.locations'))
+        
+        # If not logged in, check if it's a mobile request
+        user_agent = request.headers.get('User-Agent', '').lower()
+        is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
+        
+        if is_mobile:
+            return render_template('mobile_install_prompt.html')
+        else:
+            return redirect(url_for('auth.login'))
+    
     return app 
