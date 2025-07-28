@@ -611,6 +611,43 @@
         .feature-grid-arrow-btn:active {
             background: #f3e5f5;
         }
+        .feature-fixed-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 0.7em;
+            margin: 0.7em 0 0.7em 0;
+        }
+        .feature-fixed-btn {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            padding: 0;
+            position: relative;
+        }
+        .feature-fixed-btn:active {
+            box-shadow: 0 4px 12px rgba(118,75,162,0.10);
+        }
+        .feature-fixed-btn .icon-gradient {
+            font-size: 1.7em;
+            background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: #764ba2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -629,19 +666,19 @@
             {% endif %}
         </div>
         <div class="feature-desc">All your FASTag Parking features at a glance</div>
-        <div class="feature-scroll">
-            <button class="feature-btn" onclick="openLocationsModal()"><span class="icon"><i class="fas fa-map-marker-alt"></i></span><span class="label">Locations</span></button>
-            <button class="feature-btn" onclick="openLanesModal()"><span class="icon"><i class="fas fa-road"></i></span><span class="label">Lanes</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon"><i class="fas fa-id-card"></i></span><span class="label">KYC Users</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span><span class="label">Watchlist</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-search"></i></span><span class="label">Vehicle Finder</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span><span class="label">Bank Finder</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span><span class="label">FASTag Balance</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-file-invoice"></i></span><span class="label">Challan</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span><span class="label">Fuel Price</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon"><i class="fas fa-cogs"></i></span><span class="label">Reader Settings</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/open-barrier'"><span class="icon"><i class="fas fa-door-open"></i></span><span class="label">Open Barrier</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/demographics'"><span class="icon"><i class="fas fa-chart-pie"></i></span><span class="label">Demographics</span></button>
+        <div class="feature-fixed-row">
+            <button class="feature-fixed-btn" onclick="openLocationsModal()"><span class="icon-gradient"><i class="fas fa-map-marker-alt"></i></span></button>
+            <button class="feature-fixed-btn" onclick="openLanesModal()"><span class="icon-gradient"><i class="fas fa-road"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon-gradient"><i class="fas fa-id-card"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/watchlist'"><span class="icon-gradient"><i class="fas fa-eye"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon-gradient"><i class="fas fa-search"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon-gradient"><i class="fas fa-university'></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon-gradient"><i class="fas fa-wallet"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/challan'"><span class="icon-gradient"><i class="fas fa-file-invoice"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon-gradient"><i class="fas fa-gas-pump"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon-gradient"><i class="fas fa-cogs"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/open-barrier'"><span class="icon-gradient"><i class="fas fa-door-open"></i></span></button>
+            <button class="feature-fixed-btn" onclick="location.href='/pwa/demographics'"><span class="icon-gradient"><i class="fas fa-chart-pie"></i></span></button>
         </div>
         <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3500">
             <div class="carousel-inner">
@@ -1775,270 +1812,4 @@
     }
     function editLocation(id) {
         // For simplicity, open the add form prefilled for editing
-        fetch(`/api/locations`)
-            .then(r => r.json())
-            .then(data => {
-                const loc = (data.locations || []).find(l => l.id === id);
-                if (loc) {
-                    showAddLocationForm();
-                    document.getElementById('locationName').value = loc.name;
-                    document.getElementById('locationAddress').value = loc.address;
-                    document.getElementById('addLocationForm').onsubmit = function(e) {
-                        e.preventDefault();
-                        submitEditLocation(id);
-                    };
-                }
-            });
-    }
-    function submitEditLocation(id) {
-        const name = document.getElementById('locationName').value.trim();
-        const address = document.getElementById('locationAddress').value.trim();
-        fetch(`/api/locations/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, address })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                hideAddLocationForm();
-                loadLocationsList();
-            } else {
-                alert(data.error || 'Failed to update location');
-            }
-        })
-        .catch(() => alert('Failed to update location'));
-    }
-    function deleteLocation(id) {
-        if (!confirm('Delete this location?')) return;
-        fetch(`/api/locations/${id}`, { method: 'DELETE' })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) loadLocationsList();
-                else alert(data.error || 'Failed to delete location');
-            })
-            .catch(() => alert('Failed to delete location'));
-    }
-    // Lanes Modal logic
-    function openLanesModal() {
-        document.getElementById('lanesModal').style.display = 'flex';
-        loadLanesList();
-    }
-    function closeLanesModal() {
-        document.getElementById('lanesModal').style.display = 'none';
-    }
-    function loadLanesList() {
-        document.getElementById('lanesRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
-        fetch('/api/lanes')
-            .then(r => r.json())
-            .then(data => {
-                let lanes = data.lanes || [];
-                window._lanesList = lanes;
-                document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${lanes.length}</b>`;
-                renderLanesList(lanes);
-            })
-            .catch(() => {
-                document.getElementById('lanesRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load lanes.</div>';
-            });
-    }
-    function renderLanesList(lanes) {
-        let tableHtml = '<table style="min-width:500px;"><tr>' +
-            '<th>Name</th><th>Location ID</th><th>Edit</th><th>Delete</th></tr>' +
-            lanes.map(l => `<tr>` +
-                `<td>${l.lane_name}</td>` +
-                `<td>${l.location_id}</td>` +
-                `<td><button class=\"input-icon-btn kyc-edit-btn\" title=\"Edit\" onclick=\"editLane(${l.id})\"><i class=\"fas fa-edit\"></i></button></td>` +
-                `<td><button class=\"input-icon-btn kyc-delete-btn\" title=\"Delete\" onclick=\"deleteLane(${l.id})\"><i class=\"fas fa-trash\"></i></button></td>` +
-            `</tr>`).join('') + '</table>';
-        document.getElementById('lanesRecords').innerHTML = tableHtml;
-    }
-    function toggleLanesSearch() {
-        const box = document.getElementById('lanesSearchBox');
-        box.style.display = box.style.display === 'none' ? 'block' : 'none';
-        if (box.style.display === 'block') {
-            document.getElementById('lanesSearchInput').focus();
-        } else {
-            filterLanesList('');
-        }
-    }
-    function filterLanesList() {
-        const val = document.getElementById('lanesSearchInput').value.trim().toLowerCase();
-        const lanes = window._lanesList || [];
-        if (!val) {
-            renderLanesList(lanes);
-            document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${lanes.length}</b>`;
-            return;
-        }
-        const filtered = lanes.filter(l =>
-            (l.lane_name && l.lane_name.toLowerCase().includes(val))
-        );
-        renderLanesList(filtered);
-        document.getElementById('lanesTotal').innerHTML = `Search results: <b>${filtered.length}</b> / ${lanes.length}`;
-    }
-    function showAddLaneForm() {
-        document.getElementById('addLaneFormBox').style.display = 'block';
-    }
-    function hideAddLaneForm() {
-        document.getElementById('addLaneFormBox').style.display = 'none';
-    }
-    function submitAddLane(e) {
-        e.preventDefault();
-        const lane_name = document.getElementById('laneName').value.trim();
-        const location_id = document.getElementById('laneLocationId').value.trim();
-        fetch('/api/lanes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lane_name, location_id })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                hideAddLaneForm();
-                loadLanesList();
-            } else {
-                alert(data.error || 'Failed to add lane');
-            }
-        })
-        .catch(() => alert('Failed to add lane'));
-    }
-    function editLane(id) {
-        // For simplicity, open the add form prefilled for editing
-        fetch(`/api/lanes`)
-            .then(r => r.json())
-            .then(data => {
-                const lane = (data.lanes || []).find(l => l.id === id);
-                if (lane) {
-                    showAddLaneForm();
-                    document.getElementById('laneName').value = lane.lane_name;
-                    document.getElementById('laneLocationId').value = lane.location_id;
-                    document.getElementById('addLaneForm').onsubmit = function(e) {
-                        e.preventDefault();
-                        submitEditLane(id);
-                    };
-                }
-            });
-    }
-    function submitEditLane(id) {
-        const lane_name = document.getElementById('laneName').value.trim();
-        const location_id = document.getElementById('laneLocationId').value.trim();
-        fetch(`/api/lanes/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lane_name, location_id })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                hideAddLaneForm();
-                loadLanesList();
-            } else {
-                alert(data.error || 'Failed to update lane');
-            }
-        })
-        .catch(() => alert('Failed to update lane'));
-    }
-    function deleteLane(id) {
-        if (!confirm('Delete this lane?')) return;
-        fetch(`/api/lanes/${id}`, { method: 'DELETE' })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) loadLanesList();
-                else alert(data.error || 'Failed to delete lane');
-            })
-            .catch(() => alert('Failed to delete lane'));
-    }
-
-    // --- Feature Scroll Auto-Scroll Logic ---
-    let featureScrollInterval = null;
-    let featureScrollPaused = false;
-    function startFeatureScroll() {
-        if (featureScrollInterval) return;
-        const scrollDiv = document.querySelector('.feature-scroll');
-        if (!scrollDiv) return;
-        featureScrollInterval = setInterval(() => {
-            if (featureScrollPaused) return;
-            scrollDiv.scrollLeft += 2;
-            // Loop back if at end
-            if (scrollDiv.scrollLeft + scrollDiv.clientWidth >= scrollDiv.scrollWidth - 2) {
-                scrollDiv.scrollLeft = 0;
-            }
-        }, 30);
-    }
-    function stopFeatureScroll() {
-        featureScrollPaused = true;
-        if (featureScrollInterval) {
-            clearInterval(featureScrollInterval);
-            featureScrollInterval = null;
-        }
-    }
-    // Start auto-scroll on load
-    window.addEventListener('DOMContentLoaded', () => {
-        startFeatureScroll();
-        // Add all user interaction events to stop auto-scroll
-        const scrollDiv = document.querySelector('.feature-scroll');
-        if (scrollDiv) {
-            ['mousedown','touchstart','wheel','pointerdown','scroll'].forEach(evt => {
-                scrollDiv.addEventListener(evt, stopFeatureScroll, { passive: true });
-            });
-        }
-        document.querySelectorAll('.feature-btn').forEach(btn => {
-            btn.addEventListener('click', stopFeatureScroll);
-        });
-    });
-    // CSS: Ensure .feature-scroll is always horizontally scrollable by user
-    // ... existing code ...
-
-    // --- Feature Grid Pagination Logic ---
-    const featureGridIcons = [
-        { icon: 'fa-map-marker-alt', label: 'Locations', onclick: 'openLocationsModal()' },
-        { icon: 'fa-road', label: 'Lanes', onclick: 'openLanesModal()' },
-        { icon: 'fa-id-card', label: 'KYC Users', onclick: "location.href='/pwa/kyc-users'" },
-        { icon: 'fa-eye', label: 'Watchlist', onclick: "location.href='/pwa/watchlist'" },
-        { icon: 'fa-search', label: 'Vehicle Finder', onclick: "location.href='/pwa/vehicle-finder'" },
-        { icon: 'fa-university', label: 'Bank Finder', onclick: "location.href='/pwa/bank-finder'" },
-        { icon: 'fa-wallet', label: 'FASTag Balance', onclick: "location.href='/pwa/fastag-balance'" },
-        { icon: 'fa-file-invoice', label: 'Challan', onclick: "location.href='/pwa/challan'" },
-        { icon: 'fa-gas-pump', label: 'Fuel Price', onclick: "location.href='/pwa/fuel-price'" },
-        { icon: 'fa-cogs', label: 'Reader Settings', onclick: "location.href='/pwa/reader-settings'" },
-        { icon: 'fa-door-open', label: 'Open Barrier', onclick: "location.href='/pwa/open-barrier'" },
-        { icon: 'fa-chart-pie', label: 'Demographics', onclick: "location.href='/pwa/demographics'" }
-    ];
-    const featureGridPerPage = 5;
-    let featureGridPage = 0;
-    function renderFeatureGrid() {
-        const grid = document.getElementById('featureGrid');
-        grid.innerHTML = '';
-        const start = featureGridPage * featureGridPerPage;
-        const end = start + featureGridPerPage;
-        const pageIcons = featureGridIcons.slice(start, end);
-        // 2 or 3 rows depending on count
-        let rows = 2;
-        if (featureGridIcons.length > 10) rows = 3;
-        grid.style.gridTemplateRows = `repeat(${rows}, 60px)`;
-        pageIcons.forEach(f => {
-            const btn = document.createElement('button');
-            btn.className = 'feature-grid-btn';
-            btn.innerHTML = `<span class="icon"><i class="fas ${f.icon}"></i></span><span class="label">${f.label}</span>`;
-            btn.setAttribute('onclick', f.onclick);
-            grid.appendChild(btn);
-        });
-        // Hide prev/next if at ends
-        document.getElementById('featureGridPrev').style.visibility = featureGridPage === 0 ? 'hidden' : 'visible';
-        document.getElementById('featureGridNext').style.visibility = (end >= featureGridIcons.length) ? 'hidden' : 'visible';
-    }
-    function featureGridPrevPage() {
-        if (featureGridPage > 0) {
-            featureGridPage--;
-            renderFeatureGrid();
-        }
-    }
-    function featureGridNextPage() {
-        if ((featureGridPage + 1) * featureGridPerPage < featureGridIcons.length) {
-            featureGridPage++;
-            renderFeatureGrid();
-        }
-    }
-    window.addEventListener('DOMContentLoaded', renderFeatureGrid);
-    </script>
-</body>
-</html> 
+        fetch(`
