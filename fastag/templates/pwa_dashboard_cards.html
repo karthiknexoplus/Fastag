@@ -511,11 +511,12 @@
         margin-bottom: 0.7rem;
         flex: 1;
         overflow-y: auto;
-        overflow-x: hidden;
+        overflow-x: auto;
         max-height: 60vh;
     }
     .modal-records::-webkit-scrollbar {
         width: 6px;
+        height: 6px;
     }
     .modal-records::-webkit-scrollbar-track {
         background: #f1f1f1;
@@ -530,6 +531,7 @@
     }
     .modal-records table {
         width: 100%;
+        min-width: 600px;
         border-collapse: collapse;
         font-size: 0.85rem;
         margin-bottom: 0.2rem;
@@ -540,6 +542,7 @@
         border-bottom: 1px solid #f0e6ff;
         font-size: 0.8rem;
         white-space: nowrap;
+        min-width: 80px;
     }
     .modal-records th {
         color: #764ba2;
@@ -554,20 +557,35 @@
         border-bottom: none;
     }
     .modal-records .vehicle-number {
+        min-width: 120px;
         font-weight: 600;
         color: #764ba2;
     }
     .modal-records .owner-name {
+        min-width: 100px;
         color: #666;
         font-size: 0.75rem;
     }
     .modal-records .lane-name {
+        min-width: 80px;
         color: #888;
         font-size: 0.7rem;
     }
     .modal-records .time {
+        min-width: 140px;
         color: #555;
         font-size: 0.75rem;
+    }
+    .modal-records .reason {
+        min-width: 100px;
+        color: #555;
+        font-size: 0.75rem;
+    }
+    .modal-records .total-events {
+        min-width: 60px;
+        text-align: center;
+        color: #764ba2;
+        font-weight: 600;
     }
     .modal-footer-custom {
         display: flex;
@@ -785,7 +803,7 @@
                 } else if(type === 'denied' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Reason</th><th>Time</th></tr>' +
                         data.records.slice(0,20).map(r => 
-                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.reason}</td><td class="time">${r.time}</td></tr>`
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="reason">${r.reason}</td><td class="time">${r.time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'trend' && data.entry_exit_trend && data.entry_exit_trend.length) {
                     tableHtml = '<table><tr><th>Hour</th><th>Entries</th><th>Exits</th></tr>' +
@@ -793,7 +811,7 @@
                 } else if(type === 'unique' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Events</th><th>First Seen</th></tr>' +
                         data.records.slice(0,20).map(r => 
-                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td>${r.total_events}</td><td class="time">${r.first_seen}</td></tr>`
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="total-events">${r.total_events}</td><td class="time">${r.first_seen}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'fuel' && data.fuel_types && data.fuel_types.length) {
                     tableHtml = '<table><tr><th>Type</th><th>Count</th><th>%</th></tr>' +
