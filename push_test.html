@@ -39,20 +39,30 @@
                 applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
               }).then(function(subscription) {
                 document.getElementById('status').innerText = 'Subscribed! ' + JSON.stringify(subscription);
+                alert('About to send subscription to backend');
                 fetch('/api/save-subscription', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(subscription)
+                }).then(() => {
+                  alert('Subscription sent to backend!');
+                }).catch(err => {
+                  alert('Fetch error: ' + err);
                 });
               }).catch(function(err) {
                 document.getElementById('status').innerText = 'Subscription error: ' + err.message;
               });
             } else {
               document.getElementById('status').innerText = 'Already subscribed!';
+              alert('About to send existing subscription to backend');
               fetch('/api/save-subscription', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(sub)
+              }).then(() => {
+                alert('Existing subscription sent to backend!');
+              }).catch(err => {
+                alert('Fetch error: ' + err);
               });
             }
           });
