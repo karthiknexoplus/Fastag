@@ -15,6 +15,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            letter-spacing: 0.01em;
         }
         .container {
             flex: 1;
@@ -22,66 +24,128 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+            padding-top: 2.5rem;
+            padding-bottom: 2.5rem;
         }
         .app-logo {
-            width: 96px;
-            height: 96px;
-            border-radius: 20px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-            margin-bottom: 1.5rem;
-            background: #fff;
+            width: 100px;
+            height: 100px;
+            border-radius: 24px;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.13);
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.95);
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: popin 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        @keyframes popin {
+            0% { transform: scale(0.7); opacity: 0; }
+            80% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .app-logo img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+        }
+        h1 {
+            font-size: 2.3rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.7rem;
+            background: linear-gradient(90deg, #ffe082 30%, #fffde4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .tagline {
+            font-size: 1.18rem;
+            color: #ffe082;
+            font-weight: 500;
+            margin-bottom: 2.2rem;
+            letter-spacing: 0.01em;
         }
         .feature-list {
             margin: 2rem 0 2.5rem 0;
             padding: 0;
             list-style: none;
+            max-width: 340px;
         }
         .feature-list li {
-            margin-bottom: 1.2rem;
-            font-size: 1.15rem;
+            margin-bottom: 1.15rem;
+            font-size: 1.13rem;
             display: flex;
             align-items: center;
+            background: rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 0.7em 1.1em;
+            box-shadow: 0 2px 8px rgba(118,75,162,0.07);
+            transition: background 0.2s;
+        }
+        .feature-list li:hover {
+            background: rgba(255,255,255,0.16);
         }
         .feature-list i {
             color: #ffe082;
             margin-right: 0.8rem;
             font-size: 1.3rem;
+            flex-shrink: 0;
         }
         .install-btn {
-            background: #ffe082;
+            background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%);
             color: #764ba2;
             border: none;
-            padding: 14px 32px;
-            border-radius: 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            box-shadow: 0 4px 16px rgba(255,224,130,0.18);
-            transition: background 0.2s, color 0.2s;
+            padding: 16px 38px;
+            border-radius: 32px;
+            font-size: 1.22rem;
+            font-weight: 700;
+            box-shadow: 0 6px 24px rgba(255,224,130,0.18);
+            transition: background 0.18s, color 0.18s, transform 0.12s;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            animation: popin 0.7s 0.2s cubic-bezier(.68,-0.55,.27,1.55);
         }
         .install-btn:active, .install-btn:focus {
             background: #ffd54f;
             color: #4b2e83;
+            transform: scale(0.97);
         }
         .already-installed {
             margin-top: 2rem;
             color: #b2ff59;
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1.13rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            background: rgba(255,255,255,0.09);
+            border-radius: 16px;
+            padding: 0.7em 1.2em;
+            display: inline-block;
         }
         .footer {
-            color: #eee;
-            font-size: 0.95rem;
+            color: #ffe082;
+            font-size: 1.08rem;
             text-align: center;
             margin-top: auto;
-            padding-bottom: 1.2rem;
+            padding-bottom: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            text-shadow: 0 2px 8px rgba(118,75,162,0.13);
+        }
+        .footer .onebee {
+            color: #fff;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            font-size: 1.13em;
+            text-shadow: 0 2px 8px rgba(118,75,162,0.18);
+        }
+        @media (max-width: 600px) {
+            .container { padding-top: 1.2rem; padding-bottom: 1.2rem; }
+            h1 { font-size: 1.45rem; }
+            .feature-list { max-width: 98vw; }
         }
     </style>
 </head>
@@ -90,8 +154,8 @@
         <div class="app-logo">
             <img src="/static/customer.png" alt="FASTag App Logo" width="72" height="72">
         </div>
-        <h1 class="fw-bold mb-2" style="font-size:2.1rem;">Get FASTag Parking App</h1>
-        <p class="mb-4" style="font-size:1.15rem; color:#ffe082;">Seamless parking management, right on your phone!</p>
+        <h1 class="fw-bold mb-2">Get FASTag Parking App</h1>
+        <p class="tagline">Seamless parking management, right on your phone!</p>
         <ul class="feature-list">
             <li><i class="fas fa-car"></i> Real-time vehicle access & tracking</li>
             <li><i class="fas fa-map-marker-alt"></i> Manage multiple parking locations</li>
@@ -109,7 +173,7 @@
         </div>
     </div>
     <div class="footer">
-        Powered by FASTag Parking Management &mdash; Enjoy hassle-free parking!
+        Powered by <span class="onebee">Onebee Technology Pvt Ltd</span> &mdash; Enjoy hassle-free parking!
     </div>
     <script>
     // Detect if running as PWA
