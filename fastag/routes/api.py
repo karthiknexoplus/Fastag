@@ -535,7 +535,8 @@ def relay_control_all(action):
 def save_subscription():
     user_id = 'testuser'  # Replace with session.get('user_id') in production
     sub = request.get_json()
-    db = sqlite3.connect('instance/yourdb.sqlite')
+    print("DEBUG: Received subscription:", sub)  # Debug print
+    db = sqlite3.connect('instance/fastag.db')
     db.execute('CREATE TABLE IF NOT EXISTS push_subscriptions (user_id TEXT PRIMARY KEY, endpoint TEXT, p256dh TEXT, auth TEXT)')
     db.execute('REPLACE INTO push_subscriptions (user_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)',
                (user_id, sub['endpoint'], sub['keys']['p256dh'], sub['keys']['auth']))
