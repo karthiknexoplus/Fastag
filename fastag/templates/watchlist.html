@@ -314,6 +314,7 @@ kycUserSearch.addEventListener('input', function() {
     const q = this.value.trim();
     kycUserSuggestions.innerHTML = '';
     kycUserSelect.value = '';
+    this.style.backgroundColor = ''; // Clear selection indicator
     
     if (q.length < 2) {
         kycUserSuggestions.style.display = 'none';
@@ -365,6 +366,7 @@ kycUserSuggestions.addEventListener('click', function(e) {
         
         kycUserSelect.value = fastag_id;
         kycUserSearch.value = `${name} | ${vehicle}`;
+        kycUserSearch.style.backgroundColor = '#e8f5e8'; // Light green background to indicate selection
         kycUserSuggestions.innerHTML = '';
         kycUserSuggestions.style.display = 'none';
         
