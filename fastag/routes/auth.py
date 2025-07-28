@@ -128,7 +128,7 @@ def signup():
 @auth_bp.route('/pwa-onboarding')
 def pwa_onboarding():
     """PWA onboarding screen for mobile users"""
-    return render_template('pwa_loading.html')
+    return render_template('pwa_onboarding_screens.html')
 
 @auth_bp.route('/pwa-dashboard-debug')
 def pwa_dashboard_debug():

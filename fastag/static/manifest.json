@@ -1,5 +1,5 @@
 {
-  "name": "FASTag Parking Management",
+  "name": "FASTag Parking",
   "short_name": "FASTag",
   "description": "FASTag Parking Management System - Monitor RFID readers, manage lanes, and track vehicle access",
   "start_url": "/pwa-onboarding",
