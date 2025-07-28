@@ -425,7 +425,7 @@
                 </div>
             </div>
             
-            <button class="install-button" id="installButton" style="display: none;">
+            <button class="install-button" id="installButton" style="display: none;" onclick="triggerInstall()">
                 <i class="fas fa-download me-2"></i>Install App
             </button>
             
@@ -490,22 +490,32 @@
         // Simple install function (like the working test page)
         function triggerInstall() {
             console.log('🚀 Install triggered!');
+            console.log('Install button visible:', installButton.style.display);
+            console.log('Deferred prompt:', deferredPrompt);
+            console.log('Install instructions visible:', installInstructions.style.display);
             
             if (deferredPrompt) {
                 console.log('✅ Deferred prompt available');
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('✅ User accepted install prompt');
-                        window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
-                    } else {
-                        console.log('❌ User dismissed install prompt');
-                        installInstructions.style.display = 'block';
-                    }
-                    deferredPrompt = null;
-                });
+                try {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        console.log('User choice result:', choiceResult);
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('✅ User accepted install prompt');
+                            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
+                        } else {
+                            console.log('❌ User dismissed install prompt');
+                            installInstructions.style.display = 'block';
+                        }
+                        deferredPrompt = null;
+                    });
+                } catch (error) {
+                    console.error('Error showing install prompt:', error);
+                    installInstructions.style.display = 'block';
+                }
             } else {
                 console.log('❌ No deferred prompt available');
+                console.log('Showing manual instructions');
                 installInstructions.style.display = 'block';
             }
         }
@@ -517,7 +527,18 @@
         });
         
         // Add click event to install button
-        installButton.addEventListener('click', triggerInstall);
+        installButton.addEventListener('click', function(e) {
+            console.log('🔘 Install button clicked!');
+            console.log('Event:', e);
+            console.log('Button element:', this);
+            triggerInstall();
+        });
+        
+        // Also add a direct onclick for backup
+        installButton.onclick = function(e) {
+            console.log('🔘 Install button onclick triggered!');
+            triggerInstall();
+        };
         
         function continueToWeb() {
             window.location.href = "{{ url_for('auth.login') }}";
