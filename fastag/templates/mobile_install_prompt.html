@@ -492,6 +492,24 @@
                 baseInstallBtn.remove();
                 console.log('🗑️ Removed base template install button');
             }
+            
+            // Manually register service worker if not already registered
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    if (registrations.length === 0) {
+                        console.log('🔧 Manually registering service worker...');
+                        navigator.serviceWorker.register('/static/sw.js')
+                            .then(registration => {
+                                console.log('✅ Service worker registered manually:', registration.scope);
+                            })
+                            .catch(error => {
+                                console.error('❌ Manual service worker registration failed:', error);
+                            });
+                    } else {
+                        console.log('✅ Service worker already registered');
+                    }
+                });
+            }
         });
         
         // Override base template's beforeinstallprompt handler
@@ -614,8 +632,17 @@
                     console.log('Service workers registered:', registrations.length);
                     if (registrations.length === 0) {
                         alert('No service worker registered. This may prevent PWA install.');
+                    } else {
+                        console.log('Service worker scope:', registrations[0].scope);
+                        console.log('Service worker state:', registrations[0].active ? 'active' : 'inactive');
                     }
                 });
+            }
+            
+            // Check if already installed
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            if (isStandalone) {
+                alert('App is already installed! This prevents new install prompts.');
             }
             
             // Check if manifest is loading
