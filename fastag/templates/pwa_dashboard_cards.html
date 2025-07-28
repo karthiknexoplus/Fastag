@@ -500,6 +500,41 @@
             background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
             color: #c471f5;
         }
+        .analytics-card .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.2rem;
+            height: 2.2rem;
+        }
+        .analytics-card .icon-gradient {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 50%;
+        }
+        .analytics-card.recent-entries .icon-gradient {
+            background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%);
+        }
+        .analytics-card.recent-exits .icon-gradient {
+            background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
+        }
+        .analytics-card.denied-fastag .icon-gradient {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+        }
+        .analytics-card.most-denied .icon-gradient {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+        }
+        .analytics-card .icon-gradient i {
+            color: transparent;
+            background: inherit;
+            -webkit-background-clip: text;
+            background-clip: text;
+            font-size: 1.45rem;
+            display: inline-block;
+        }
         @media (max-width: 600px) {
             .dashboard-container { padding-top: 1.1rem; max-width: 98vw; padding-bottom: 3.2rem; }
             .feature-scroll { gap: 0.7rem; padding-left: 0.1rem; }
@@ -580,22 +615,22 @@
                 <span class="value" id="card-fuel">--</span>
             </div>
             <div class="analytics-card recent-entries" onclick="showRecentEntriesModal()">
-                <span class="icon"><i class="fas fa-arrow-down"></i></span>
+                <span class="icon"><span class="icon-gradient"><i class="fas fa-arrow-down"></i></span></span>
                 <span class="label">Recent Entries</span>
                 <span class="value">Tap to View</span>
             </div>
             <div class="analytics-card recent-exits" onclick="showRecentExitsModal()">
-                <span class="icon"><i class="fas fa-arrow-up"></i></span>
+                <span class="icon"><span class="icon-gradient"><i class="fas fa-arrow-up"></i></span></span>
                 <span class="label">Recent Exits</span>
                 <span class="value">Tap to View</span>
             </div>
             <div class="analytics-card denied-fastag" onclick="showDeniedFastagModal()">
-                <span class="icon"><i class="fas fa-ban"></i></span>
+                <span class="icon"><span class="icon-gradient"><i class="fas fa-ban"></i></span></span>
                 <span class="label">Denied FASTag Activity</span>
                 <span class="value">Tap to View</span>
             </div>
             <div class="analytics-card most-denied" onclick="showMostDeniedModal()">
-                <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
+                <span class="icon"><span class="icon-gradient"><i class="fas fa-exclamation-circle"></i></span></span>
                 <span class="label">Most Denied Tags Today</span>
                 <span class="value">Tap to View</span>
             </div>
