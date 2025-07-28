@@ -616,26 +616,6 @@
                 <span class="label">Top Fuel</span>
                 <span class="value" id="card-fuel">--</span>
             </div>
-            <div class="analytics-card recent-entries" onclick="showRecentEntriesModal()">
-                <span class="icon"><i class="fas fa-arrow-down"></i></span>
-                <span class="label">Recent Entries</span>
-                <span class="value">Tap to View</span>
-            </div>
-            <div class="analytics-card recent-exits" onclick="showRecentExitsModal()">
-                <span class="icon"><i class="fas fa-arrow-up"></i></span>
-                <span class="label">Recent Exits</span>
-                <span class="value">Tap to View</span>
-            </div>
-            <div class="analytics-card denied-fastag" onclick="showDeniedFastagModal()">
-                <span class="icon"><i class="fas fa-ban"></i></span>
-                <span class="label">Denied FASTag Activity</span>
-                <span class="value">Tap to View</span>
-            </div>
-            <div class="analytics-card most-denied" onclick="showMostDeniedModal()">
-                <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
-                <span class="label">Most Denied Tags Today</span>
-                <span class="value">Tap to View</span>
-            </div>
             <div class="barrier-card" onclick="showBarrierModal()">
                 <span class="icon" style="background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #764ba2; display: flex; align-items: center; justify-content: center;"><i class="fas fa-door-open"></i></span>
                 <span class="label">Barrier Control</span>
@@ -704,62 +684,6 @@
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeBarrierModal()">Close</button>
-            </div>
-        </div>
-    </div>
-    <!-- Recent Entries Modal -->
-    <div id="recentEntriesModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 420px;">
-            <div class="modal-header-custom">
-                <span class="modal-icon"><i class="fas fa-sign-in-alt"></i></span>
-                <span class="modal-title">Recent Entries</span>
-            </div>
-            <div class="modal-desc">Latest 100 vehicle entries today.</div>
-            <div class="modal-records" id="recentEntriesRecords"></div>
-            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" onclick="closeRecentEntriesModal()">Close</button>
-            </div>
-        </div>
-    </div>
-    <!-- Recent Exits Modal -->
-    <div id="recentExitsModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 420px;">
-            <div class="modal-header-custom">
-                <span class="modal-icon"><i class="fas fa-sign-out-alt"></i></span>
-                <span class="modal-title">Recent Exits</span>
-            </div>
-            <div class="modal-desc">Latest 100 vehicle exits today.</div>
-            <div class="modal-records" id="recentExitsRecords"></div>
-            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" onclick="closeRecentExitsModal()">Close</button>
-            </div>
-        </div>
-    </div>
-    <!-- Denied FASTag Activity Modal -->
-    <div id="deniedFastagModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 420px;">
-            <div class="modal-header-custom">
-                <span class="modal-icon"><i class="fas fa-ban"></i></span>
-                <span class="modal-title">Denied FASTag Activity</span>
-            </div>
-            <div class="modal-desc">Latest 100 denied FASTag events (last 2 days).</div>
-            <div class="modal-records" id="deniedFastagRecords"></div>
-            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" onclick="closeDeniedFastagModal()">Close</button>
-            </div>
-        </div>
-    </div>
-    <!-- Most Denied Tags Modal -->
-    <div id="mostDeniedModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 420px;">
-            <div class="modal-header-custom">
-                <span class="modal-icon"><i class="fas fa-exclamation-triangle"></i></span>
-                <span class="modal-title">Most Denied Tags Today</span>
-            </div>
-            <div class="modal-desc">Top tags denied most frequently today.</div>
-            <div class="modal-records" id="mostDeniedRecords"></div>
-            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" onclick="closeMostDeniedModal()">Close</button>
             </div>
         </div>
     </div>
@@ -1336,82 +1260,6 @@
             .catch(error => {
                 alert('Error getting relay status');
             });
-    }
-    // Recent Entries Modal
-    function showRecentEntriesModal() {
-        document.getElementById('recentEntriesModal').style.display = 'flex';
-        document.getElementById('recentEntriesRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
-        fetch('/api/recent-entries')
-            .then(r => r.json())
-            .then(data => {
-                let rows = data.recent_entries || [];
-                let tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Name</th><th>Lane</th><th>Model</th></tr>' +
-                    rows.map(r => `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td>${r.model_name}</td></tr>`).join('') + '</table>';
-                document.getElementById('recentEntriesRecords').innerHTML = tableHtml;
-            })
-            .catch(() => {
-                document.getElementById('recentEntriesRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load records.</div>';
-            });
-    }
-    function closeRecentEntriesModal() {
-        document.getElementById('recentEntriesModal').style.display = 'none';
-    }
-    // Recent Exits Modal
-    function showRecentExitsModal() {
-        document.getElementById('recentExitsModal').style.display = 'flex';
-        document.getElementById('recentExitsRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
-        fetch('/api/recent-exits')
-            .then(r => r.json())
-            .then(data => {
-                let rows = data.recent_exits || [];
-                let tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Name</th><th>Lane</th><th>Model</th></tr>' +
-                    rows.map(r => `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td>${r.model_name}</td></tr>`).join('') + '</table>';
-                document.getElementById('recentExitsRecords').innerHTML = tableHtml;
-            })
-            .catch(() => {
-                document.getElementById('recentExitsRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load records.</div>';
-            });
-    }
-    function closeRecentExitsModal() {
-        document.getElementById('recentExitsModal').style.display = 'none';
-    }
-    // Denied FASTag Activity Modal
-    function showDeniedFastagModal() {
-        document.getElementById('deniedFastagModal').style.display = 'flex';
-        document.getElementById('deniedFastagRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
-        fetch('/api/denied-fastag-activity-feed')
-            .then(r => r.json())
-            .then(data => {
-                let rows = data.results || [];
-                let tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Name</th><th>Model</th><th>Reason</th></tr>' +
-                    rows.map(r => `<tr><td class="time">${r.timestamp}</td><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td>${r.model_name}</td><td class="reason">${r.reason}</td></tr>`).join('') + '</table>';
-                document.getElementById('deniedFastagRecords').innerHTML = tableHtml;
-            })
-            .catch(() => {
-                document.getElementById('deniedFastagRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load records.</div>';
-            });
-    }
-    function closeDeniedFastagModal() {
-        document.getElementById('deniedFastagModal').style.display = 'none';
-    }
-    // Most Denied Tags Modal
-    function showMostDeniedModal() {
-        document.getElementById('mostDeniedModal').style.display = 'flex';
-        document.getElementById('mostDeniedRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
-        fetch('/api/most-denied-tags')
-            .then(r => r.json())
-            .then(data => {
-                let rows = data.most_denied_tags || [];
-                let tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Model</th><th>Denied Count</th><th>Last Denied</th></tr>' +
-                    rows.map(r => `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td>${r.model_name}</td><td class="total-events">${r.denied_count}</td><td class="time">${r.last_denied_time}</td></tr>`).join('') + '</table>';
-                document.getElementById('mostDeniedRecords').innerHTML = tableHtml;
-            })
-            .catch(() => {
-                document.getElementById('mostDeniedRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load records.</div>';
-            });
-    }
-    function closeMostDeniedModal() {
-        document.getElementById('mostDeniedModal').style.display = 'none';
     }
     </script>
 </body>
