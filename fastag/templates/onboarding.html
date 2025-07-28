@@ -38,9 +38,9 @@
             margin-top: 0.5rem;
         }
         .skip-btn {
-            position: absolute;
-            top: 0.7rem;
-            right: 0.7rem;
+            position: fixed;
+            top: 2.2rem;
+            right: 1.2rem;
             background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
             color: #fff;
             border: none;
@@ -50,7 +50,7 @@
             padding: 0.5em 1.3em;
             box-shadow: 0 4px 12px rgba(118,75,162,0.10);
             transition: background 0.18s, color 0.18s, transform 0.12s;
-            z-index: 10;
+            z-index: 1002;
         }
         .skip-btn:active, .skip-btn:focus {
             background: linear-gradient(90deg, #ffe082 0%, #764ba2 100%);
@@ -61,6 +61,8 @@
             width: 100%;
             max-width: 340px;
             margin: 0 auto;
+            padding-top: 3.5rem;
+            overflow: hidden;
         }
         .carousel-inner {
             border-radius: 18px;
@@ -73,6 +75,8 @@
             align-items: center;
             justify-content: center;
             padding: 2.2rem 1.2rem 2.2rem 1.2rem;
+            text-align: center;
+            word-break: break-word;
         }
         .carousel-item .icon {
             font-size: 2.5rem;
@@ -85,57 +89,61 @@
             margin-bottom: 0.5rem;
             color: #222;
             text-align: center;
+            word-break: break-word;
         }
         .carousel-item .desc {
             font-size: 1.05rem;
             color: #555;
             text-align: center;
+            word-break: break-word;
         }
         .carousel-control-prev, .carousel-control-next {
             filter: invert(0.5);
+            z-index: 1001;
         }
         @media (max-width: 600px) {
             .onboarding-container { padding-top: 3vh; max-width: 98vw; }
             .carousel { max-width: 98vw; }
+            .skip-btn { top: 1.2rem; right: 0.7rem; }
         }
     </style>
 </head>
 <body>
     <div class="onboarding-container position-relative">
         <div class="brand-bar"></div>
-        <button class="skip-btn" onclick="window.location.href='/pwa-login'">Skip</button>
-        <div id="featureCarousel" class="carousel slide mb-4" data-bs-ride="carousel" data-bs-interval="2500" style="width:100%;">
-          <div class="carousel-inner">
-            <div class="carousel-item active">
-              <div class="icon"><i class="fas fa-door-open"></i></div>
-              <div class="headline">No More Waiting</div>
-              <div class="desc">Glide through entrances and exits with instant FASTag scanning.</div>
-            </div>
-            <div class="carousel-item">
-              <div class="icon"><i class="fas fa-mobile-alt"></i></div>
-              <div class="headline">Manage Vehicles Anywhere</div>
-              <div class="desc">Add, track, and control your vehicles right from the app.</div>
-            </div>
-            <div class="carousel-item">
-              <div class="icon"><i class="fas fa-bolt"></i></div>
-              <div class="headline">Lightning Fast & Secure</div>
-              <div class="desc">Enjoy blazing fast, secure access and real-time notifications.</div>
-            </div>
-            <div class="carousel-item">
-              <div class="icon"><i class="fas fa-map-marked-alt"></i></div>
-              <div class="headline">All Locations, One App</div>
-              <div class="desc">Monitor and manage multiple parking locations effortlessly.</div>
-            </div>
-          </div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#featureCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#featureCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-          </button>
+    </div>
+    <button class="skip-btn" onclick="window.location.href='/pwa-login'">Skip</button>
+    <div id="featureCarousel" class="carousel slide mb-4" data-bs-ride="carousel" data-bs-interval="2500" style="width:100%;">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="icon"><i class="fas fa-door-open"></i></div>
+          <div class="headline">No More Waiting</div>
+          <div class="desc">Glide through entrances and exits with instant FASTag scanning.</div>
         </div>
+        <div class="carousel-item">
+          <div class="icon"><i class="fas fa-mobile-alt"></i></div>
+          <div class="headline">Manage Vehicles Anywhere</div>
+          <div class="desc">Add, track, and control your vehicles right from the app.</div>
+        </div>
+        <div class="carousel-item">
+          <div class="icon"><i class="fas fa-bolt"></i></div>
+          <div class="headline">Lightning Fast & Secure</div>
+          <div class="desc">Enjoy blazing fast, secure access and real-time notifications.</div>
+        </div>
+        <div class="carousel-item">
+          <div class="icon"><i class="fas fa-map-marked-alt"></i></div>
+          <div class="headline">All Locations, One App</div>
+          <div class="desc">Monitor and manage multiple parking locations effortlessly.</div>
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#featureCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#featureCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
