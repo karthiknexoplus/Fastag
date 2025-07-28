@@ -1899,6 +1899,39 @@
             })
             .catch(() => alert('Failed to delete lane'));
     }
+
+    // --- Feature Scroll Auto-Scroll Logic ---
+    let featureScrollInterval = null;
+    let featureScrollPaused = false;
+    function startFeatureScroll() {
+        if (featureScrollInterval) return;
+        const scrollDiv = document.querySelector('.feature-scroll');
+        if (!scrollDiv) return;
+        featureScrollInterval = setInterval(() => {
+            if (featureScrollPaused) return;
+            scrollDiv.scrollLeft += 2;
+            // Loop back if at end
+            if (scrollDiv.scrollLeft + scrollDiv.clientWidth >= scrollDiv.scrollWidth - 2) {
+                scrollDiv.scrollLeft = 0;
+            }
+        }, 30);
+    }
+    function stopFeatureScroll() {
+        featureScrollPaused = true;
+        if (featureScrollInterval) {
+            clearInterval(featureScrollInterval);
+            featureScrollInterval = null;
+        }
+    }
+    // Start auto-scroll on load
+    window.addEventListener('DOMContentLoaded', startFeatureScroll);
+    // Stop auto-scroll when any feature icon is clicked
+    document.querySelectorAll('.feature-btn').forEach(btn => {
+        btn.addEventListener('click', stopFeatureScroll);
+    });
+    // Also stop on manual scroll (user interaction)
+    document.querySelector('.feature-scroll').addEventListener('mousedown', stopFeatureScroll);
+    document.querySelector('.feature-scroll').addEventListener('touchstart', stopFeatureScroll);
     </script>
 </body>
 </html> 
