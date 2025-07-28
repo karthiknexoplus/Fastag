@@ -584,7 +584,7 @@
             <button class="feature-btn" onclick="openLocationsModal()"><span class="icon"><i class="fas fa-map-marker-alt"></i></span></button>
             <button class="feature-btn" onclick="openLanesModal()"><span class="icon"><i class="fas fa-road"></i></span></button>
             <button class="feature-btn" onclick="openKycUsersListModal()"><span class="icon"><i class="fas fa-id-card"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span></button>
+            <button class="feature-btn" onclick="openWatchlistFromIcon()"><span class="icon"><i class="fas fa-eye"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-car"></i></span></button>
             <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span></button>
@@ -2051,6 +2051,144 @@
         };
       }
     });
+
+    // Watchlist Modal
+    function openWatchlistModal() {
+      document.getElementById('watchlistModal').style.display = 'flex';
+      loadWatchlistData();
+    }
+    function closeWatchlistModal() {
+      document.getElementById('watchlistModal').style.display = 'none';
+    }
+    function loadWatchlistData() {
+      document.getElementById('watchlistKycTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;">Loading...</td></tr>';
+      document.getElementById('watchlistNonuserTbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;">Loading...</td></tr>';
+      fetch('/api/watchlist/list')
+        .then(res => res.json())
+        .then(data => renderWatchlistTables(data.results));
+    }
+    function renderWatchlistTables(data) {
+      const kyc = data.filter(u => u.type === 'Registered');
+      const nonuser = data.filter(u => u.type === 'Non-User');
+      // KYC Table
+      const kycTbody = document.getElementById('watchlistKycTbody');
+      if (!kyc.length) {
+        kycTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;">No registered KYC users on the watchlist.</td></tr>';
+      } else {
+        kycTbody.innerHTML = kyc.map(user => `
+          <tr data-id="${user.id}">
+            <td>${user.name || '<span style=\'color:#aaa;\'>-</span>'}</td>
+            <td>${user.fastag_id}</td>
+            <td>${user.vehicle_number || '<span style=\'color:#aaa;\'>-</span>'}</td>
+            <td>${user.contact_number || '<span style=\'color:#aaa;\'>-</span>'}</td>
+            <td>${user.address || '<span style=\'color:#aaa;\'>-</span>'}</td>
+            <td>${user.reason || '<span style=\'color:#aaa;\'>-</span>'}</td>
+            <td>${toIST(user.added_at)}</td>
+            <td>
+              <button class="input-icon-btn kyc-edit-btn" title="Edit Reason" onclick="openEditWatchlistReasonModal(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')"><i class="fas fa-edit"></i></button>
+              <button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteWatchlistUser(${user.id})"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+        `).join('');
+      }
+      // Non-User Table
+      const nonuserTbody = document.getElementById('watchlistNonuserTbody');
+      if (!nonuser.length) {
+        nonuserTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;">No non-user vehicles on the watchlist.</td></tr>';
+      } else {
+        nonuserTbody.innerHTML = nonuser.map(user => `
+          <tr data-id="${user.id}">
+            <td>${user.fastag_id}</td>
+            <td>${user.reason || '<span style=\'color:#aaa;\'>-</span>'}</td>
+            <td>${toIST(user.added_at)}</td>
+            <td>
+              <button class="input-icon-btn kyc-edit-btn" title="Edit Reason" onclick="openEditWatchlistReasonModal(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')"><i class="fas fa-edit"></i></button>
+              <button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteWatchlistUser(${user.id})"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+    function showAddWatchlistModal(type) {
+      document.getElementById('addWatchlistModal').style.display = 'flex';
+      document.getElementById('addWatchlistKycRow').style.display = type === 'kyc' ? 'block' : 'none';
+      document.getElementById('addWatchlistNonuserRow').style.display = type === 'nonuser' ? 'block' : 'none';
+      document.getElementById('addWatchlistModalTitle').textContent = type === 'kyc' ? 'Add KYC User to Watchlist' : 'Add Non-User to Watchlist';
+    }
+    function closeAddWatchlistModal() {
+      document.getElementById('addWatchlistModal').style.display = 'none';
+    }
+    function submitAddWatchlist(e) {
+      e.preventDefault();
+      const isKyc = document.getElementById('addWatchlistKycRow').style.display === 'block';
+      const fastag_id = isKyc ? document.getElementById('addWatchlistKycFastag').value : document.getElementById('addWatchlistNonuserFastag').value;
+      const reason = document.getElementById('addWatchlistReason').value;
+      fetch('/api/watchlist/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(isKyc ? { fastag_id, reason } : { fastag_id, reason })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          closeAddWatchlistModal();
+          loadWatchlistData();
+        } else {
+          alert('Failed to add to watchlist: ' + (data.error || 'Unknown error'));
+        }
+      });
+    }
+    function openEditWatchlistReasonModal(id, reason) {
+      document.getElementById('editWatchlistReasonModal').style.display = 'flex';
+      document.getElementById('editWatchlistReasonId').value = id;
+      document.getElementById('editWatchlistReasonInput').value = reason;
+    }
+    function closeEditWatchlistReasonModal() {
+      document.getElementById('editWatchlistReasonModal').style.display = 'none';
+    }
+    function submitEditWatchlistReason(e) {
+      e.preventDefault();
+      const id = document.getElementById('editWatchlistReasonId').value;
+      const reason = document.getElementById('editWatchlistReasonInput').value;
+      fetch(`/api/watchlist/edit/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          closeEditWatchlistReasonModal();
+          loadWatchlistData();
+        } else {
+          alert('Failed to update reason.');
+        }
+      });
+    }
+    function deleteWatchlistUser(id) {
+      if (!confirm('Delete this user/vehicle from the watchlist?')) return;
+      fetch(`/api/watchlist/delete/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) loadWatchlistData();
+          else alert('Failed to delete.');
+        });
+    }
+    function toIST(utcString) {
+      if (!utcString) return '-';
+      let utcDate;
+      if (utcString.includes('T')) {
+        utcDate = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z');
+      } else {
+        utcDate = new Date(utcString.replace(' ', 'T') + 'Z');
+      }
+      if (isNaN(utcDate.getTime())) return utcString;
+      return utcDate.toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(',', '');
+    }
+    // Eye icon click handler
+    function openWatchlistFromIcon() {
+      openWatchlistModal();
+    }
     </script>
 </body>
 </html> 
