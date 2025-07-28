@@ -351,3 +351,8 @@ def api_watchlist_activity_ist(watchlist_id):
             'fuel_type': row[9],
         })
     return jsonify({'results': results}) 
+
+@auth_bp.route('/get-the-app')
+def get_the_app():
+    """Serve the sleek PWA landing page for mobile users."""
+    return render_template('pwa_landing.html') 

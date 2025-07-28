@@ -385,5 +385,28 @@
       </div>
     </div>
     {% block scripts %}{% endblock %}
+    <script>
+    // Auto-redirect mobile users to PWA landing page if not installed, only on home/login
+    (function() {
+        // Only run on home or login endpoints
+        var isHomeOrLogin = (
+            window.location.pathname === '/' ||
+            window.location.pathname === '/home' ||
+            window.location.pathname === '/login'
+        );
+        function isMobile() {
+            return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+        }
+        function isInStandaloneMode() {
+            return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone === true);
+        }
+        if (isHomeOrLogin && isMobile() && !isInStandaloneMode()) {
+            // Avoid redirect loop
+            if (!window.location.pathname.startsWith('/get-the-app')) {
+                window.location.replace('/get-the-app');
+            }
+        }
+    })();
+    </script>
 </body>
 </html> 
