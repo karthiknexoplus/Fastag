@@ -2085,6 +2085,7 @@
             <td>${user.reason || '<span style=\'color:#aaa;\'>-</span>'}</td>
             <td>${toIST(user.added_at)}</td>
             <td>
+              <button class="input-icon-btn kyc-edit-btn" title="View History" onclick="openWatchlistActivityModal(${user.id})"><i class="fas fa-history"></i></button>
               <button class="input-icon-btn kyc-edit-btn" title="Edit Reason" onclick="openEditWatchlistReasonModal(${user.id}, '${user.reason ? user.reason.replace(/'/g, '\\&#39;') : ''}')"><i class="fas fa-edit"></i></button>
               <button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteWatchlistUser(${user.id})"><i class="fas fa-trash"></i></button>
             </td>
@@ -2228,6 +2229,38 @@
         setTimeout(() => { kycSuggestions.innerHTML = ''; }, 200);
       });
     }
+    // Activity History Modal for Watchlist
+    function openWatchlistActivityModal(id) {
+      document.getElementById('watchlistActivityModal').style.display = 'flex';
+      const content = document.getElementById('watchlistActivityContent');
+      content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+      fetch(`/api/watchlist/activity/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.results || !data.results.length) {
+            content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No activity found for this user/vehicle.</div>';
+            return;
+          }
+          const rows = data.results.map(log => `
+            <tr>
+              <td>${toIST(log.timestamp)}</td>
+              <td>${log.lane_name || log.lane_id}</td>
+              <td>${log.lane_type ? log.lane_type.charAt(0).toUpperCase() + log.lane_type.slice(1) : '-'}</td>
+              <td>${log.access_result}</td>
+              <td>${log.reason || '-'}</td>
+            </tr>
+          `).join('');
+          content.innerHTML = `
+            <table style="width:100%;min-width:400px;font-size:0.9em;">
+              <thead><tr><th>Timestamp (IST)</th><th>Lane</th><th>Type</th><th>Result</th><th>Reason</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+        });
+    }
+    function closeWatchlistActivityModal() {
+      document.getElementById('watchlistActivityModal').style.display = 'none';
+    }
     </script>
     <!-- Watchlist Modal -->
     <div id="watchlistModal" class="modal-custom" style="display:none;">
@@ -2310,6 +2343,21 @@
             <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Save</button>
           </div>
         </form>
+      </div>
+    </div>
+    <!-- Activity History Modal for Watchlist -->
+    <div id="watchlistActivityModal" class="modal-custom" style="display:none;">
+      <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+        <span class="close-modal" onclick="closeWatchlistActivityModal()">&times;</span>
+        <div class="modal-header-custom">
+          <span class="modal-icon"><i class="fas fa-history"></i></span>
+          <span class="modal-title">Activity History</span>
+        </div>
+        <div class="modal-desc">Recent access activity for this user/vehicle.</div>
+        <div class="modal-records" id="watchlistActivityContent" style="min-height:80px;max-height:50vh;overflow:auto;"></div>
+        <div class="modal-footer-custom" style="justify-content: flex-end;">
+          <button class="modal-close-btn" onclick="closeWatchlistActivityModal()">Close</button>
+        </div>
       </div>
     </div>
 </body>
