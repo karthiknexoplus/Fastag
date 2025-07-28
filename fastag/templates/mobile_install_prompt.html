@@ -465,105 +465,61 @@
         let installButton = document.getElementById('installButton');
         let installInstructions = document.getElementById('installInstructions');
         
-        // Debug function to check PWA status
-        function checkPWAStatus() {
-            console.log('🔍 Checking PWA status...');
-            console.log('HTTPS:', window.location.protocol === 'https:');
-            console.log('Standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
-            console.log('User agent:', navigator.userAgent);
-            console.log('Manifest URL:', "{{ url_for('static', filename='manifest.json') }}");
-            
-            // Check if service worker is registered
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    console.log('Service workers:', registrations.length);
-                    registrations.forEach((registration, index) => {
-                        console.log(`SW ${index}:`, registration.scope);
-                    });
-                });
-            }
-        }
-        
-        // Simple install function
+        // Simple install function (like the working test page)
         function triggerInstall() {
             console.log('🚀 Install triggered!');
-            console.log('Deferred prompt:', deferredPrompt);
             
             if (deferredPrompt) {
-                console.log('📱 Showing native install prompt...');
+                console.log('✅ Deferred prompt available');
                 deferredPrompt.prompt();
-                
                 deferredPrompt.userChoice.then((choiceResult) => {
-                    console.log('User choice:', choiceResult.outcome);
                     if (choiceResult.outcome === 'accepted') {
-                        console.log('✅ User accepted the install prompt');
-                        // Redirect to the app
+                        console.log('✅ User accepted install prompt');
                         window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
                     } else {
-                        console.log('❌ User dismissed the install prompt');
-                        // Show manual instructions
+                        console.log('❌ User dismissed install prompt');
                         installInstructions.style.display = 'block';
-                        installInstructions.scrollIntoView({ behavior: 'smooth' });
                     }
                     deferredPrompt = null;
                 });
             } else {
-                console.log('⚠️ No deferred prompt available');
-                // Show manual instructions
+                console.log('❌ No deferred prompt available');
                 installInstructions.style.display = 'block';
-                installInstructions.scrollIntoView({ behavior: 'smooth' });
             }
         }
         
-        // Listen for the beforeinstallprompt event
+        // Listen for beforeinstallprompt (simple like test page)
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('🎉 beforeinstallprompt event fired!');
-            console.log('Event:', e);
-            
-            // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
-            
-            // Stash the event so it can be triggered later
             deferredPrompt = e;
             
             // Show the install button
             installButton.style.display = 'block';
             installInstructions.style.display = 'none';
-            
-            console.log('✅ Install button should now be visible');
+        });
+        
+        // Listen for successful installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('🎉 App installed successfully!');
+            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
         });
         
         // Add click event to install button
         installButton.addEventListener('click', triggerInstall);
         
-        // Listen for successful installation
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('🎉 App was installed successfully!');
-            console.log('Install event:', evt);
-            // Redirect to the app
-            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
-        });
-        
         function continueToWeb() {
-            console.log('🌐 Continuing to web version');
-            // Redirect to the regular web login
             window.location.href = "{{ url_for('auth.login') }}";
         }
         
         function manualInstall() {
-            console.log('📱 Manual install button clicked');
             triggerInstall();
         }
         
         // Check if already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            console.log('📱 App already installed, redirecting to onboarding');
-            // Already installed, redirect to app
             window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
         }
-        
-        // Check PWA status on load
-        checkPWAStatus();
         
         // Add touch feedback
         document.querySelectorAll('button').forEach(btn => {
@@ -575,23 +531,14 @@
             });
         });
         
-        // Fallback: Show install button after 3 seconds if no prompt
+        // Simple fallback: Show install button after 2 seconds
         setTimeout(() => {
-            console.log('⏰ Checking fallback after 3 seconds...');
-            console.log('Deferred prompt:', deferredPrompt);
-            console.log('Install button display:', installButton.style.display);
-            
             if (!deferredPrompt && installButton.style.display === 'none') {
-                console.log('⏰ Fallback: Showing install button after timeout');
+                console.log('⏰ Fallback: Showing install button');
                 installButton.style.display = 'block';
                 installInstructions.style.display = 'none';
             }
-        }, 3000);
-        
-        // Additional debugging
-        console.log('📱 Mobile install prompt page loaded');
-        console.log('Install button element:', installButton);
-        console.log('Install instructions element:', installInstructions);
+        }, 2000);
     </script>
 </body>
 </html> 
