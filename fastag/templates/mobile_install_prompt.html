@@ -425,20 +425,8 @@
                 </div>
             </div>
             
-            <button class="install-button" id="installButton" style="display: block;" onclick="alert('Install button clicked!'); console.log('Install button clicked!'); triggerInstall();">
+            <button class="install-button" id="installButton" style="display: block;" onclick="triggerInstall();">
                 <i class="fas fa-download me-2"></i>Install App
-            </button>
-            
-            <button class="install-button" id="forceInstallButton" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); margin-top: 10px;" onclick="alert('Force install clicked!'); forceInstall();">
-                <i class="fas fa-rocket me-2"></i>Force Install (Test)
-            </button>
-            
-            <button class="install-button" id="manualInstallButton" onclick="manualInstall()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-                <i class="fas fa-mobile-alt me-2"></i>Install Manually
-            </button>
-            
-            <button class="install-button" id="testButton" onclick="alert('Test button works!');" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); margin-top: 10px;">
-                <i class="fas fa-test me-2"></i>Test Button
             </button>
             
             <button class="continue-web" onclick="continueToWeb()">
@@ -473,21 +461,7 @@
         let installButton = document.getElementById('installButton');
         let installInstructions = document.getElementById('installInstructions');
         
-        // Test if JavaScript is loading
-        alert('JavaScript loaded!');
         console.log('📱 Mobile install prompt JavaScript loaded');
-        
-        console.log('Install button element:', installButton);
-        console.log('Install instructions element:', installInstructions);
-        
-        // Test if button is found
-        if (installButton) {
-            console.log('✅ Install button found');
-            console.log('Button display style:', installButton.style.display);
-            console.log('Button onclick:', installButton.onclick);
-        } else {
-            console.log('❌ Install button not found');
-        }
         
         // Disable base template's install button on this page
         window.addEventListener('load', function() {
@@ -501,8 +475,6 @@
         // Override base template's beforeinstallprompt handler
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('🎉 Mobile install prompt: beforeinstallprompt event fired!');
-            console.log('Event details:', e);
-            alert('🎉 Install prompt available! PWA criteria met!'); // Test alert
             e.preventDefault();
             e.stopPropagation(); // Prevent base template from handling it
             
@@ -511,80 +483,53 @@
             // Show the install button
             installButton.style.display = 'block';
             installInstructions.style.display = 'none';
-            
-            console.log('Install button should now be visible');
-            console.log('Install button display:', installButton.style.display);
-            console.log('Deferred prompt set:', deferredPrompt);
         });
         
-        // Also listen for the event on the window object (capture phase)
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('🎉 Window beforeinstallprompt event fired!');
-        }, true);
-        
-        // Simple install function (like the working test page)
+        // Simple install function
         function triggerInstall() {
             console.log('🚀 Install triggered!');
-            console.log('Install button visible:', installButton.style.display);
-            console.log('Deferred prompt:', deferredPrompt);
-            console.log('Install instructions visible:', installInstructions.style.display);
             
             // Check if we're in standalone mode (already installed)
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            console.log('Standalone mode:', isStandalone);
             
             if (isStandalone) {
-                alert('App is already installed! Redirecting to app...');
                 window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
                 return;
             }
             
             if (deferredPrompt) {
-                console.log('✅ Deferred prompt available');
                 try {
-                    console.log('Showing native install prompt...');
-                    alert('About to show native install prompt...');
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
-                        console.log('User choice result:', choiceResult);
                         if (choiceResult.outcome === 'accepted') {
                             console.log('✅ User accepted install prompt');
-                            alert('🎉 Installation accepted! App will be installed on your home screen.');
                             // Wait a moment for installation to complete
                             setTimeout(() => {
                                 window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
                             }, 2000);
                         } else {
                             console.log('❌ User dismissed install prompt');
-                            alert('Installation dismissed. Showing manual instructions.');
                             installInstructions.style.display = 'block';
                         }
                         deferredPrompt = null;
                     });
                 } catch (error) {
                     console.error('Error showing install prompt:', error);
-                    alert('Error showing install prompt: ' + error.message);
                     installInstructions.style.display = 'block';
                 }
             } else {
                 console.log('❌ No deferred prompt available');
-                console.log('Showing manual instructions');
-                alert('No install prompt available. This usually means:\n1. App is already installed\n2. Browser doesn\'t support PWA\n3. PWA criteria not met');
                 installInstructions.style.display = 'block';
             }
         }
         
         // Add click event to install button
         installButton.addEventListener('click', function(e) {
-            console.log('🔘 Install button clicked!');
-            console.log('Event:', e);
-            console.log('Button element:', this);
             triggerInstall();
         });
         
         // Also add a direct onclick for backup
         installButton.onclick = function(e) {
-            console.log('🔘 Install button onclick triggered!');
             triggerInstall();
         };
         
@@ -598,59 +543,7 @@
             window.location.href = "{{ url_for('auth.login') }}";
         }
         
-        function manualInstall() {
-            triggerInstall();
-        }
-        
-        function forceInstall() {
-            alert('Force install function called!');
-            console.log('🔧 Force install triggered');
-            console.log('Current URL:', window.location.href);
-            console.log('Protocol:', window.location.protocol);
-            console.log('User agent:', navigator.userAgent);
-            
-            // Try to redirect to onboarding directly
-            alert('Redirecting to onboarding...');
-            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
-        }
-        
-        function showDirectInstallOption() {
-            // Creates a modal with "Install Now" and "Cancel" buttons
-            // This modal appears when beforeinstallprompt doesn't fire
-        }
-        
-        function directInstall() {
-            alert('🚀 Direct install initiated!');
-            console.log('Direct install triggered');
-            
-            // Try to trigger PWA installation
-            try {
-                // Check if we can trigger installation programmatically
-                if (window.navigator && window.navigator.serviceWorker) {
-                    console.log('Attempting programmatic PWA install...');
-                    
-                    // Try to trigger the beforeinstallprompt event manually
-                    const installEvent = new Event('beforeinstallprompt');
-                    window.dispatchEvent(installEvent);
-                    
-                    // If that doesn't work, try to show manual install instructions
-                    setTimeout(() => {
-                        if (!deferredPrompt) {
-                            console.log('Manual install required');
-                            showManualInstallInstructions();
-                        }
-                    }, 1000);
-                }
-                
-            } catch (error) {
-                console.error('Direct install error:', error);
-                showManualInstallInstructions();
-            }
-        }
-        
-        function showManualInstallInstructions() {
-            // Creates a modal with step-by-step manual install instructions for Android and iOS
-        }
+
         
         // Check if already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -667,158 +560,12 @@
             });
         });
         
-        // Simple fallback: Show install button after 2 seconds
+        // Show manual instructions if no install prompt after 3 seconds
         setTimeout(() => {
-            console.log('⏰ 2-second timeout check');
-            console.log('Deferred prompt:', deferredPrompt);
-            console.log('Install button display:', installButton.style.display);
-            
             if (!deferredPrompt) {
-                console.log('❌ No install prompt available - showing manual instructions');
-                alert('No install prompt available. Showing manual instructions.');
                 installInstructions.style.display = 'block';
-                
-                // Show a direct install option
-                showDirectInstallOption();
-            } else {
-                console.log('✅ Deferred prompt available - install button should work');
-                alert('✅ Deferred prompt is available! Install button should work now.');
             }
-        }, 2000);
-        
-        // Additional check after 10 seconds to see if event fires later
-        setTimeout(() => {
-            console.log('⏰ 10-second final check');
-            console.log('Deferred prompt still available:', deferredPrompt);
-            
-            if (!deferredPrompt) {
-                console.log('❌ Still no deferred prompt after 10 seconds');
-                alert('❌ Install prompt never fired. This might be due to:\n1. Browser policy\n2. User has already dismissed install prompt\n3. App already installed in another way');
-            }
-        }, 10000);
-        
-        // Comprehensive PWA diagnostic after 5 seconds
-        setTimeout(() => {
-            console.log('🔍 5-second diagnostic check');
-            
-            // Create a comprehensive diagnostic report
-            let diagnosticReport = 'PWA Diagnostic Report:\n\n';
-            
-            // Check HTTPS
-            const isHttps = window.location.protocol === 'https:';
-            diagnosticReport += `🔒 HTTPS: ${isHttps ? '✅ Enabled' : '❌ Disabled'}\n`;
-            console.log('HTTPS:', isHttps);
-            
-            // Check standalone mode
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            diagnosticReport += `📱 Standalone: ${isStandalone ? '✅ Installed' : '❌ Not installed'}\n`;
-            console.log('Standalone mode:', isStandalone);
-            
-            // Check browser compatibility
-            const isChrome = /Chrome/.test(navigator.userAgent);
-            const isEdge = /Edg/.test(navigator.userAgent);
-            const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-            const isSupportedBrowser = isChrome || isEdge || isSafari;
-            diagnosticReport += `🌐 Browser: ${isSupportedBrowser ? '✅ Supported' : '❌ Not supported'}\n`;
-            console.log('Browser compatibility:', isSupportedBrowser);
-            
-            // Check service worker support
-            const hasServiceWorker = 'serviceWorker' in navigator;
-            diagnosticReport += `🔧 Service Worker Support: ${hasServiceWorker ? '✅ Available' : '❌ Not available'}\n`;
-            console.log('Service worker support:', hasServiceWorker);
-            
-            // Check service worker registration
-            if (hasServiceWorker) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    const hasRegisteredSW = registrations.length > 0;
-                    diagnosticReport += `📋 Service Worker Registered: ${hasRegisteredSW ? '✅ Yes' : '❌ No'}\n`;
-                    console.log('Service workers registered:', registrations.length);
-                    
-                    if (hasRegisteredSW) {
-                        console.log('Service worker scope:', registrations[0].scope);
-                        console.log('Service worker state:', registrations[0].active ? 'active' : 'inactive');
-                    } else {
-                        alert('No service worker registered. This may prevent PWA install.');
-                    }
-                    
-                    // Check manifest
-                    fetch("{{ url_for('static', filename='manifest.json') }}")
-                        .then(response => {
-                            const hasManifest = response.ok;
-                            diagnosticReport += `📄 Manifest: ${hasManifest ? '✅ Found' : '❌ Not found'}\n`;
-                            console.log('Manifest found:', hasManifest);
-                            
-                            if (hasManifest) {
-                                return response.json();
-                            } else {
-                                throw new Error('Manifest not found');
-                            }
-                        })
-                        .then(manifest => {
-                            console.log('Manifest name:', manifest.name);
-                            console.log('Manifest start_url:', manifest.start_url);
-                            diagnosticReport += `📱 App Name: ${manifest.name}\n`;
-                            diagnosticReport += `🎯 Start URL: ${manifest.start_url}\n`;
-                            
-                            // Check for required manifest fields
-                            const hasName = manifest.name && manifest.name.length > 0;
-                            const hasShortName = manifest.short_name && manifest.short_name.length > 0;
-                            const hasStartUrl = manifest.start_url && manifest.start_url.length > 0;
-                            const hasDisplay = manifest.display && ['standalone', 'fullscreen', 'minimal-ui'].includes(manifest.display);
-                            const hasIcons = manifest.icons && manifest.icons.length > 0;
-                            
-                            diagnosticReport += `📝 Name: ${hasName ? '✅ Present' : '❌ Missing'}\n`;
-                            diagnosticReport += `📝 Short Name: ${hasShortName ? '✅ Present' : '❌ Missing'}\n`;
-                            diagnosticReport += `🎯 Start URL: ${hasStartUrl ? '✅ Present' : '❌ Missing'}\n`;
-                            diagnosticReport += `📱 Display: ${hasDisplay ? '✅ Present' : '❌ Missing'}\n`;
-                            diagnosticReport += `🖼️ Icons: ${hasIcons ? '✅ Present' : '❌ Missing'}\n`;
-                            
-                            // Check icon sizes
-                            if (hasIcons) {
-                                const iconSizes = manifest.icons.map(icon => icon.sizes).filter(Boolean);
-                                const has192Icon = iconSizes.some(size => size.includes('192'));
-                                const has512Icon = iconSizes.some(size => size.includes('512'));
-                                diagnosticReport += `🖼️ 192px Icon: ${has192Icon ? '✅ Present' : '❌ Missing'}\n`;
-                                diagnosticReport += `🖼️ 512px Icon: ${has512Icon ? '✅ Present' : '❌ Missing'}\n`;
-                            }
-                            
-                            // Check if all criteria are met
-                            const allCriteriaMet = isHttps && hasServiceWorker && hasRegisteredSW && hasManifest && 
-                                                 hasName && hasShortName && hasStartUrl && hasDisplay && hasIcons;
-                            
-                            diagnosticReport += `\n🎯 ALL CRITERIA MET: ${allCriteriaMet ? '✅ YES' : '❌ NO'}\n`;
-                            
-                            if (!allCriteriaMet) {
-                                diagnosticReport += `\n❌ Missing criteria:\n`;
-                                if (!isHttps) diagnosticReport += `- HTTPS not enabled\n`;
-                                if (!hasServiceWorker) diagnosticReport += `- Service worker not supported\n`;
-                                if (!hasRegisteredSW) diagnosticReport += `- Service worker not registered\n`;
-                                if (!hasManifest) diagnosticReport += `- Manifest not found\n`;
-                                if (!hasName) diagnosticReport += `- App name missing\n`;
-                                if (!hasShortName) diagnosticReport += `- Short name missing\n`;
-                                if (!hasStartUrl) diagnosticReport += `- Start URL missing\n`;
-                                if (!hasDisplay) diagnosticReport += `- Display mode missing\n`;
-                                if (!hasIcons) diagnosticReport += `- Icons missing\n`;
-                            }
-                            
-                            // Show final diagnostic report
-                            console.log('Final diagnostic report:', diagnosticReport);
-                            alert(diagnosticReport);
-                        })
-                        .catch(error => {
-                            console.error('❌ Manifest error:', error.message);
-                            diagnosticReport += `📄 Manifest: ❌ Error - ${error.message}\n`;
-                            console.log('Final diagnostic report:', diagnosticReport);
-                            alert(diagnosticReport);
-                        });
-                });
-            } else {
-                diagnosticReport += `📋 Service Worker Registered: ❌ N/A\n`;
-                diagnosticReport += `📄 Manifest: ❌ N/A\n`;
-                console.log('Final diagnostic report:', diagnosticReport);
-                alert(diagnosticReport);
-            }
-        }, 5000);
+        }, 3000);
     </script>
 </body>
 </html> 
