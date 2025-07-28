@@ -136,7 +136,7 @@ def pwa_login():
     is_mobile = 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent
     
     if is_mobile:
-        return render_template('pwa_onboarding.html')
+        return render_template('pwa_login.html')
     else:
         return redirect(url_for('auth.login'))
 
