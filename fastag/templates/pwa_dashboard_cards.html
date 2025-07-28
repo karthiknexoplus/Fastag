@@ -282,6 +282,31 @@
             background-clip: text;
             color: #764ba2; /* Fallback for non-webkit browsers */
         }
+        .analytics-card .icon i {
+            font-size: 1.45rem;
+            background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: #764ba2;
+            display: inline-block;
+        }
+        .analytics-card.recent-entries .icon i {
+            background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%);
+            color: #42e695;
+        }
+        .analytics-card.recent-exits .icon i {
+            background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
+            color: #ff512f;
+        }
+        .analytics-card.denied-fastag .icon i {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: #f7971e;
+        }
+        .analytics-card.most-denied .icon i {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+            color: #c471f5;
+        }
         .analytics-card .label {
             font-size: 0.93rem;
             font-weight: 600;
@@ -292,6 +317,7 @@
             font-size: 1.13rem;
             font-weight: 700;
             color: #764ba2;
+            display: inline-block;
         }
         .analytics-card.loading .value {
             color: #ccc;
