@@ -79,10 +79,10 @@
           </div>
           <div class="modal-body">
             <form id="add-kyc-watchlist-form">
-              <div class="mb-3">
+              <div class="mb-3 position-relative">
                 <label for="kycUserSearch" class="form-label">Search KYC User (by name or vehicle number)</label>
                 <input type="text" class="form-control" id="kycUserSearch" placeholder="Type name or vehicle number..." autocomplete="off" required>
-                <div id="kycUserSuggestions" class="list-group position-absolute w-100" style="z-index: 1051;"></div>
+                <div id="kycUserSuggestions" class="list-group position-absolute w-100" style="z-index: 1051; top: 100%; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 0.375rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
                 <input type="hidden" id="kycUserSelect" required>
               </div>
               <div class="mb-3">
@@ -309,9 +309,14 @@ kycUserSearch.addEventListener('input', function() {
     if (q.length < 2) return;
     clearTimeout(kycUserTimer);
     kycUserTimer = setTimeout(() => {
+        console.log('Searching for:', q);
         fetch(`/analytics/api/search-kyc-users?q=${encodeURIComponent(q)}`)
-            .then(res => res.json())
+            .then(res => {
+                console.log('Response status:', res.status);
+                return res.json();
+            })
             .then(data => {
+                console.log('Search results:', data);
                 if (!data.results.length) {
                     kycUserSuggestions.innerHTML = '<div class="list-group-item text-muted">No matches found</div>';
                     return;
@@ -321,6 +326,10 @@ kycUserSearch.addEventListener('input', function() {
                         ${u.fastag_id} | ${u.name} | ${u.vehicle_number}
                     </button>`
                 ).join('');
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                kycUserSuggestions.innerHTML = '<div class="list-group-item text-danger">Error loading suggestions</div>';
             });
     }, 200);
 });
