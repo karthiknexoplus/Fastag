@@ -2190,5 +2190,86 @@
       openWatchlistModal();
     }
     </script>
+    <!-- Watchlist Modal -->
+    <div id="watchlistModal" class="modal-custom" style="display:none;">
+      <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+        <span class="close-modal" onclick="closeWatchlistModal()">&times;</span>
+        <div class="modal-header-custom">
+          <span class="modal-icon"><i class="fas fa-eye"></i></span>
+          <span class="modal-title">Watchlist</span>
+        </div>
+        <div class="modal-desc">Registered KYC Users and Non-User Vehicles on the watchlist.</div>
+        <div style="display:flex;gap:1em;margin-bottom:0.7em;">
+          <button class="modal-close-btn" onclick="showAddWatchlistModal('kyc')"><i class="fas fa-user-plus"></i> Add KYC User</button>
+          <button class="modal-close-btn" onclick="showAddWatchlistModal('nonuser')"><i class="fas fa-car"></i> Add Non-User</button>
+        </div>
+        <div style="overflow-x:auto;max-height:30vh;overflow-y:auto;margin-bottom:0.7em;">
+          <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Registered KYC Users</div>
+          <table style="min-width:700px;font-size:0.93em;">
+            <thead><tr><th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody id="watchlistKycTbody"><tr><td colspan="8" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+        <div style="overflow-x:auto;max-height:30vh;overflow-y:auto;">
+          <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Non-User Vehicles</div>
+          <table style="min-width:500px;font-size:0.93em;">
+            <thead><tr><th>FASTag ID</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody id="watchlistNonuserTbody"><tr><td colspan="4" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="modal-footer-custom" style="justify-content: flex-end;">
+          <button class="modal-close-btn" onclick="closeWatchlistModal()">Close</button>
+        </div>
+      </div>
+    </div>
+    <!-- Add/Edit Watchlist Modal (reused for both types) -->
+    <div id="addWatchlistModal" class="modal-custom" style="display:none;">
+      <div class="modal-content-custom" style="max-width: 350px;">
+        <span class="close-modal" onclick="closeAddWatchlistModal()">&times;</span>
+        <div class="modal-header-custom">
+          <span class="modal-icon"><i class="fas fa-user-plus"></i></span>
+          <span class="modal-title" id="addWatchlistModalTitle">Add to Watchlist</span>
+        </div>
+        <form id="addWatchlistForm" onsubmit="submitAddWatchlist(event)">
+          <div class="mb-2" id="addWatchlistKycRow" style="display:none;">
+            <label class="form-label">FASTag ID (KYC User)</label>
+            <input type="text" class="form-control" id="addWatchlistKycFastag" required>
+          </div>
+          <div class="mb-2" id="addWatchlistNonuserRow" style="display:none;">
+            <label class="form-label">FASTag ID (Non-User)</label>
+            <input type="text" class="form-control" id="addWatchlistNonuserFastag" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Reason</label>
+            <input type="text" class="form-control" id="addWatchlistReason">
+          </div>
+          <div class="modal-footer-custom" style="justify-content: flex-end;">
+            <button class="modal-close-btn" type="button" onclick="closeAddWatchlistModal()">Cancel</button>
+            <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Edit Reason Modal -->
+    <div id="editWatchlistReasonModal" class="modal-custom" style="display:none;">
+      <div class="modal-content-custom" style="max-width: 350px;">
+        <span class="close-modal" onclick="closeEditWatchlistReasonModal()">&times;</span>
+        <div class="modal-header-custom">
+          <span class="modal-icon"><i class="fas fa-edit"></i></span>
+          <span class="modal-title">Edit Reason</span>
+        </div>
+        <form id="editWatchlistReasonForm" onsubmit="submitEditWatchlistReason(event)">
+          <input type="hidden" id="editWatchlistReasonId">
+          <div class="mb-2">
+            <label class="form-label">Reason</label>
+            <input type="text" class="form-control" id="editWatchlistReasonInput" required>
+          </div>
+          <div class="modal-footer-custom" style="justify-content: flex-end;">
+            <button class="modal-close-btn" type="button" onclick="closeEditWatchlistReasonModal()">Cancel</button>
+            <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
 </body>
 </html> 
