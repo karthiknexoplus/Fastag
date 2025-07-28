@@ -188,6 +188,20 @@ def create_app():
     @app.context_processor
     def inject_system_info():
         import os
+        from datetime import datetime
+        
+        def get_greeting():
+            """Get greeting based on time of day"""
+            hour = datetime.now().hour
+            if 5 <= hour < 12:
+                return "Morning"
+            elif 12 <= hour < 17:
+                return "Afternoon"
+            elif 17 <= hour < 21:
+                return "Evening"
+            else:
+                return "Night"
+        
         return {
             'system_info': Markup(get_rpi_system_info()),
             'config': app.config,
@@ -198,5 +212,6 @@ def create_app():
             'LOGO_FILENAME': os.environ.get('LOGO_FILENAME', 'customer.png'),
             'FAVICON_FILENAME': os.environ.get('FAVICON_FILENAME', 'customer.ico'),
             'APP_TITLE': os.environ.get('APP_TITLE', 'FASTag Parking'),
+            'get_greeting': get_greeting,
         }
     return app 
