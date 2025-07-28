@@ -84,6 +84,17 @@
             padding: 2px 5px;
             font-weight: 700;
         }
+        .feature-desc {
+            width: 100%;
+            text-align: center;
+            font-size: 1.13rem;
+            font-weight: 700;
+            margin-bottom: 0.7rem;
+            background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         .feature-scroll {
             display: flex;
             gap: 1.1rem;
@@ -97,7 +108,6 @@
         }
         .feature-btn {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-width: 74px;
@@ -121,7 +131,6 @@
         .feature-btn .icon {
             font-size: 1.45rem;
             color: #764ba2;
-            margin-bottom: 0.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -311,20 +320,21 @@
                 <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
             </div>
         </div>
+        <div class="feature-desc">All your FASTag Parking features at a glance</div>
         <div class="feature-scroll">
-            <button class="feature-btn" onclick="location.href='/pwa/locations'"><span class="icon"><i class="fas fa-map-marker-alt"></i></span><span class="label">Locations</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/lanes'"><span class="icon"><i class="fas fa-road"></i></span><span class="label">Lanes</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon"><i class="fas fa-id-card"></i></span><span class="label">KYC Users</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span><span class="label">Watchlist</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span><span class="label">Analytics</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-car"></i></span><span class="label">Vehicle Finder</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span><span class="label">Bank Finder</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span><span class="label">FASTag Balance</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-receipt"></i></span><span class="label">Challan</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span><span class="label">Fuel Price</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon"><i class="fas fa-sliders-h"></i></span><span class="label">Reader Settings</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/open-barrier'"><span class="icon"><i class="fas fa-unlock-alt"></i></span><span class="label">Open Barrier</span></button>
-            <button class="feature-btn" onclick="location.href='/pwa/demographics'"><span class="icon"><i class="fas fa-chart-pie"></i></span><span class="label">Demographics</span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/locations'"><span class="icon"><i class="fas fa-map-marker-alt"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/lanes'"><span class="icon"><i class="fas fa-road"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/kyc-users'"><span class="icon"><i class="fas fa-id-card"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/watchlist'"><span class="icon"><i class="fas fa-eye"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/analytics'"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/vehicle-finder'"><span class="icon"><i class="fas fa-car"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/bank-finder'"><span class="icon"><i class="fas fa-university"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/fastag-balance'"><span class="icon"><i class="fas fa-wallet"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/challan'"><span class="icon"><i class="fas fa-receipt"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/fuel-price'"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/reader-settings'"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/open-barrier'"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
+            <button class="feature-btn" onclick="location.href='/pwa/demographics'"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
         </div>
         <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3500">
             <div class="carousel-inner">
