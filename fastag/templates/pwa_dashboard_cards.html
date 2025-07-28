@@ -60,14 +60,10 @@
             color: #222;
             text-align: center;
         }
-        .vehicle-info {
-            font-size: 1.13rem;
-            font-weight: 700;
-            color: #764ba2;
-            text-align: center;
-            margin-top: 0.1rem;
-            margin-bottom: 0.2rem;
-            letter-spacing: 0.01em;
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .notif-bell {
             font-size: 1.3rem;
@@ -81,6 +77,38 @@
             justify-content: center;
             box-shadow: 0 2px 8px rgba(80,80,160,0.10);
             position: relative;
+        }
+        .logout-btn {
+            font-size: 1.2rem;
+            color: #764ba2;
+            background: #fff;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.10);
+            border: none;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .logout-btn:hover {
+            background: #f3e9ff;
+            transform: scale(1.05);
+        }
+        .logout-btn:active {
+            transform: scale(0.95);
+        }
+        .vehicle-info {
+            font-size: 1.13rem;
+            font-weight: 700;
+            color: #764ba2;
+            text-align: center;
+            margin-top: 0.1rem;
+            margin-bottom: 0.2rem;
+            letter-spacing: 0.01em;
         }
         .notif-bell .badge {
             position: absolute;
@@ -341,7 +369,10 @@
             <div class="avatar"><img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="Avatar"></div>
             <div class="greeting-row">
                 <div class="greeting">Hi, {{ name }}!</div>
-                <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
+                <div class="header-actions">
+                    <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
+                    <button class="logout-btn" onclick="showLogoutModal()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
             </div>
             {% if vehicle %}
             <div class="vehicle-info">{{ vehicle }}</div>
@@ -424,6 +455,19 @@
             <div class="modal-records" id="modalRecords"></div>
             <div class="modal-footer-custom">
                 <button class="modal-close-btn" onclick="closeAnalyticsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    <div id="logoutModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 350px;">
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-sign-out-alt"></i></span>
+                <span class="modal-title">Logout</span>
+            </div>
+            <div class="modal-desc">Are you sure you want to logout from the PWA?</div>
+            <div class="modal-footer-custom" style="justify-content: space-between; gap: 0.5rem;">
+                <button class="modal-cancel-btn" onclick="closeLogoutModal()">Cancel</button>
+                <button class="modal-logout-btn" onclick="confirmLogout()">Logout</button>
             </div>
         </div>
     </div>
@@ -605,6 +649,30 @@
         transition: background 0.18s, color 0.18s;
     }
     .modal-close-btn:hover { background: linear-gradient(90deg, #ffe082 0%, #764ba2 100%); color: #764ba2; }
+    .modal-cancel-btn {
+        background: #f0f0f0;
+        color: #666;
+        border: none;
+        border-radius: 12px;
+        padding: 0.5rem 1.2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.18s;
+    }
+    .modal-cancel-btn:hover { background: #e0e0e0; }
+    .modal-logout-btn {
+        background: linear-gradient(90deg, #dc3545 0%, #ff6b6b 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 0.5rem 1.2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.18s;
+    }
+    .modal-logout-btn:hover { background: linear-gradient(90deg, #c82333 0%, #ff5252 100%); }
     @media (max-width: 600px) {
         .modal-custom { padding: 0.5rem; }
         .modal-content-custom { 
@@ -835,6 +903,57 @@
         
         // Refresh data every 30 seconds
         setInterval(loadAnalyticsData, 30000);
+    });
+
+    // Handle back button to prevent accidental logout
+    let backButtonPressed = false;
+    
+    window.addEventListener('popstate', function(event) {
+        if (!backButtonPressed) {
+            backButtonPressed = true;
+            // Push current state to prevent immediate logout
+            history.pushState(null, null, window.location.href);
+            
+            // Show logout confirmation
+            setTimeout(() => {
+                showLogoutModal();
+                backButtonPressed = false;
+            }, 100);
+        }
+    });
+    
+    // Prevent back button on page load
+    history.pushState(null, null, window.location.href);
+    
+    // Logout modal functions
+    function showLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+    
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    
+    function confirmLogout() {
+        // Clear session and redirect to login
+        fetch('/pwa-logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(() => {
+            window.location.href = '/pwa-login';
+        }).catch(() => {
+            // Fallback logout
+            window.location.href = '/pwa-login';
+        });
+    }
+    
+    // Close logout modal when clicking outside
+    document.getElementById('logoutModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeLogoutModal();
+        }
     });
     </script>
 </body>

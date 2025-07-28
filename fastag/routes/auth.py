@@ -392,3 +392,9 @@ def pwa_dashboard():
     name = user.get('kyc_user_name', 'Karthik')
     vehicle = user.get('kyc_user_vehicle', None)
     return render_template('pwa_dashboard_cards.html', name=name, vehicle=vehicle) 
+
+@auth_bp.route('/pwa-logout', methods=['POST'])
+def pwa_logout():
+    """Logout from PWA and redirect to PWA login"""
+    session.clear()
+    return jsonify({'success': True, 'redirect': '/pwa-login'}) 
