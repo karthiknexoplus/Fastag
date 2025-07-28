@@ -3331,12 +3331,12 @@ def api_denied_today_records():
             COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
             COALESCE(ku.name, tvc.owner_name) as owner_name,
             l.lane_name,
-            al.access_result,
-            al.reason
+            COALESCE(r.type, 'entry') as reader_type
         FROM access_logs al
         LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
         LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
         JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
         WHERE al.access_result = 'denied' AND DATE(al.timestamp) = DATE('now')
         ORDER BY al.timestamp DESC
         LIMIT 50
@@ -3355,8 +3355,7 @@ def api_denied_today_records():
             'vehicle_number': row[2] or 'N/A',
             'owner_name': row[3] or 'Unknown',
             'lane_name': row[4] or 'Unknown',
-            'access_result': row[5],
-            'reason': row[6] or 'Unknown'
+            'reader_type': row[5]
         } for row in rows
     ]
     return jsonify({'records': records})
