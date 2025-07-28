@@ -1021,6 +1021,9 @@
         .modal-records th { font-size: 0.65rem; }
     }
     .input-icon-btn { font-size: 1.1rem; }
+    .kyc-address-cell { max-width: 180px; word-break: break-word; white-space: pre-line; }
+    .kyc-edit-btn i { color: #764ba2; }
+    .kyc-delete-btn i { color: #dc3545; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -1471,9 +1474,9 @@
                         `<td>${u.fastag_id}</td>` +
                         `<td>${u.vehicle_number}</td>` +
                         `<td>${u.contact_number}</td>` +
-                        `<td>${u.address}</td>` +
-                        `<td><button class="input-icon-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
-                        `<td><button class="input-icon-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
+                        `<td class="kyc-address-cell">${u.address}</td>` +
+                        `<td><button class="input-icon-btn kyc-edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
+                        `<td><button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
                     `</tr>`).join('') + '</table>';
                 document.getElementById('kycUsersListRecords').innerHTML = tableHtml;
             })
