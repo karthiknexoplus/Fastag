@@ -652,66 +652,80 @@
         // Additional diagnostic after 5 seconds
         setTimeout(() => {
             console.log('🔍 5-second diagnostic check');
-            console.log('HTTPS:', window.location.protocol === 'https:');
-            console.log('Standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
-            console.log('User agent:', navigator.userAgent);
-            console.log('Service worker support:', 'serviceWorker' in navigator);
             
-            // Check if service worker is registered
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    console.log('Service workers registered:', registrations.length);
-                    if (registrations.length === 0) {
-                        alert('No service worker registered. This may prevent PWA install.');
-                    } else {
-                        console.log('Service worker scope:', registrations[0].scope);
-                        console.log('Service worker state:', registrations[0].active ? 'active' : 'inactive');
-                    }
-                });
-            }
+            // Create a comprehensive diagnostic report
+            let diagnosticReport = 'PWA Diagnostic Report:\n\n';
             
-            // Check if already installed
+            // Check HTTPS
+            const isHttps = window.location.protocol === 'https:';
+            diagnosticReport += `🔒 HTTPS: ${isHttps ? '✅ Enabled' : '❌ Disabled'}\n`;
+            console.log('HTTPS:', isHttps);
+            
+            // Check standalone mode
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            if (isStandalone) {
-                alert('App is already installed! This prevents new install prompts.');
-            }
+            diagnosticReport += `📱 Standalone: ${isStandalone ? '✅ Installed' : '❌ Not installed'}\n`;
+            console.log('Standalone mode:', isStandalone);
             
             // Check browser compatibility
             const isChrome = /Chrome/.test(navigator.userAgent);
             const isEdge = /Edg/.test(navigator.userAgent);
             const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+            const isSupportedBrowser = isChrome || isEdge || isSafari;
+            diagnosticReport += `🌐 Browser: ${isSupportedBrowser ? '✅ Supported' : '❌ Not supported'}\n`;
+            console.log('Browser compatibility:', isSupportedBrowser);
             
-            console.log('Browser compatibility:');
-            console.log('- Chrome:', isChrome);
-            console.log('- Edge:', isEdge);
-            console.log('- Safari:', isSafari);
+            // Check service worker support
+            const hasServiceWorker = 'serviceWorker' in navigator;
+            diagnosticReport += `🔧 Service Worker Support: ${hasServiceWorker ? '✅ Available' : '❌ Not available'}\n`;
+            console.log('Service worker support:', hasServiceWorker);
             
-            if (!isChrome && !isEdge && !isSafari) {
-                alert('PWA install is not supported in this browser. Try Chrome, Edge, or Safari.');
-            }
-            
-            // Check if user has interacted with the site
-            console.log('User interaction required for PWA install');
-            alert('PWA install requires user interaction. Please interact with the page first.');
-            
-            // Check if manifest is loading
-            fetch("{{ url_for('static', filename='manifest.json') }}")
-                .then(response => {
-                    if (response.ok) {
-                        console.log('✅ Manifest loaded successfully');
-                        return response.json();
-                    } else {
-                        throw new Error('Manifest not found');
+            // Check service worker registration
+            if (hasServiceWorker) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    const hasRegisteredSW = registrations.length > 0;
+                    diagnosticReport += `📋 Service Worker Registered: ${hasRegisteredSW ? '✅ Yes' : '❌ No'}\n`;
+                    console.log('Service workers registered:', registrations.length);
+                    
+                    if (hasRegisteredSW) {
+                        console.log('Service worker scope:', registrations[0].scope);
+                        console.log('Service worker state:', registrations[0].active ? 'active' : 'inactive');
                     }
-                })
-                .then(manifest => {
-                    console.log('Manifest name:', manifest.name);
-                    console.log('Manifest start_url:', manifest.start_url);
-                })
-                .catch(error => {
-                    console.error('❌ Manifest error:', error.message);
-                    alert('Manifest not found. This prevents PWA install.');
+                    
+                    // Check manifest
+                    fetch("{{ url_for('static', filename='manifest.json') }}")
+                        .then(response => {
+                            const hasManifest = response.ok;
+                            diagnosticReport += `📄 Manifest: ${hasManifest ? '✅ Found' : '❌ Not found'}\n`;
+                            console.log('Manifest found:', hasManifest);
+                            
+                            if (hasManifest) {
+                                return response.json();
+                            } else {
+                                throw new Error('Manifest not found');
+                            }
+                        })
+                        .then(manifest => {
+                            console.log('Manifest name:', manifest.name);
+                            console.log('Manifest start_url:', manifest.start_url);
+                            diagnosticReport += `📱 App Name: ${manifest.name}\n`;
+                            diagnosticReport += `🎯 Start URL: ${manifest.start_url}\n`;
+                        })
+                        .catch(error => {
+                            console.error('❌ Manifest error:', error.message);
+                            diagnosticReport += `📄 Manifest: ❌ Error - ${error.message}\n`;
+                        })
+                        .finally(() => {
+                            // Show final diagnostic report
+                            console.log('Final diagnostic report:', diagnosticReport);
+                            alert(diagnosticReport);
+                        });
                 });
+            } else {
+                diagnosticReport += `📋 Service Worker Registered: ❌ N/A\n`;
+                diagnosticReport += `📄 Manifest: ❌ N/A\n`;
+                console.log('Final diagnostic report:', diagnosticReport);
+                alert(diagnosticReport);
+            }
         }, 5000);
     </script>
 </body>
