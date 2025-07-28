@@ -6,8 +6,21 @@ import io
 import csv
 from flask import jsonify, request
 import sqlite3
+from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__)
+
+def get_greeting():
+    """Get greeting based on time of day"""
+    hour = datetime.now().hour
+    if 5 <= hour < 12:
+        return "Morning"
+    elif 12 <= hour < 17:
+        return "Afternoon"
+    elif 17 <= hour < 21:
+        return "Evening"
+    else:
+        return "Night"
 
 @auth_bp.route('/')
 @auth_bp.route('/home')
@@ -136,7 +149,7 @@ def pwa_dashboard():
     """PWA-specific dashboard for mobile users"""
     if 'user' not in session:
         return redirect(url_for('auth.pwa_onboarding'))
-    return render_template('pwa_dashboard_simple.html')
+    return render_template('pwa_dashboard_modern.html')
 
 @auth_bp.route('/pwa-login')
 def pwa_login():

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ APP_TITLE }} - Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename=FAVICON_FILENAME) }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .user-info h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .user-info small {
+            opacity: 0.8;
+            font-size: 0.8rem;
+        }
+        
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 12px;
+            width: 45px;
+            height: 45px;
+            color: white;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 1.5rem 1rem;
+        }
+        
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .welcome-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+        
+        .kyc-user-card {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+        }
+        
+        .kyc-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .kyc-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .kyc-info h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .kyc-info p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .kyc-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .kyc-detail {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        
+        .kyc-detail-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 0.3rem;
+        }
+        
+        .kyc-detail-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .quick-actions {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .action-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 18px;
+            padding: 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .action-card:hover::before {
+            left: 100%;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .action-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 1rem;
+            z-index: 1000;
+        }
+        
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 12px;
+            min-width: 60px;
+        }
+        
+        .nav-item.active {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .nav-item:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .nav-icon {
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 2001;
+            padding: 2rem 1.5rem;
+        }
+        
+        .menu-panel.open {
+            transform: translateX(0);
+        }
+        
+        .menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .menu-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close-menu {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            text-decoration: none;
+            color: #333;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+        
+        .menu-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+        
+        .pwa-indicator {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 1001;
+        }
+        
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 1rem 0.8rem;
+            }
+            
+            .welcome-title {
+                font-size: 1.3rem;
+            }
+            
+            .action-grid {
+                gap: 0.8rem;
+            }
+            
+            .action-card {
+                padding: 1.2rem;
+            }
+            
+            .action-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pwa-indicator">
+        <i class="fas fa-mobile-alt me-1"></i>PWA
+    </div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="user-section">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <h6>{{ session.user.username }}</h6>
+                        <small>Welcome back!</small>
+                    </div>
+                </div>
+                <button class="menu-btn" onclick="toggleMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <div class="welcome-title">Good {{ get_greeting() }}!</div>
+                <div class="welcome-subtitle">Ready to manage your parking system?</div>
+            </div>
+            
+            <!-- KYC User Info (if KYC user) -->
+            {% if session.user.login_method == 'kyc' %}
+            <div class="kyc-user-card">
+                <div class="kyc-card-header">
+                    <div class="kyc-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="kyc-info">
+                        <h6>{{ session.user.kyc_user_name }}</h6>
+                        <p>KYC User</p>
+                    </div>
+                </div>
+                <div class="kyc-details">
+                    <div class="kyc-detail">
+                        <div class="kyc-detail-label">Contact</div>
+                        <div class="kyc-detail-value">{{ session.user.kyc_user_contact }}</div>
+                    </div>
+                    <div class="kyc-detail">
+                        <div class="kyc-detail-label">Vehicle</div>
+                        <div class="kyc-detail-value">{{ session.user.kyc_user_vehicle }}</div>
+                    </div>
+                    <div class="kyc-detail">
+                        <div class="kyc-detail-label">FASTag ID</div>
+                        <div class="kyc-detail-value">{{ session.user.kyc_user_fastag }}</div>
+                    </div>
+                    <div class="kyc-detail">
+                        <div class="kyc-detail-label">Status</div>
+                        <div class="kyc-detail-value">Active</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="section-title">
+                    <i class="fas fa-th-large"></i>
+                    Quick Actions
+                </div>
+                <div class="action-grid">
+                    <a href="{{ url_for('locations.locations') }}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="action-title">Locations</div>
+                        <div class="action-desc">View parking locations</div>
+                    </a>
+                    
+                    <a href="{{ url_for('lanes.lanes') }}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-road"></i>
+                        </div>
+                        <div class="action-title">Lanes</div>
+                        <div class="action-desc">Manage parking lanes</div>
+                    </a>
+                    
+                    <a href="{{ url_for('readers.readers', lane_id=1) }}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-rss"></i>
+                        </div>
+                        <div class="action-title">Readers</div>
+                        <div class="action-desc">Monitor RFID readers</div>
+                    </a>
+                    
+                    <a href="{{ url_for('analytics.dashboard') }}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="action-title">Analytics</div>
+                        <div class="action-desc">View reports & data</div>
+                    </a>
+                    
+                    <a href="{{ url_for('vehicle_finder.find_vehicle') }}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="action-title">Find Vehicle</div>
+                        <div class="action-desc">Search vehicle info</div>
+                    </a>
+                    
+                    <a href="{{ url_for('fastag_balance.fastag_balance') }}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="action-title">FASTag Balance</div>
+                        <div class="action-desc">Check balance</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-items">
+                <a href="{{ url_for('auth.pwa_dashboard') }}" class="nav-item active">
+                    <div class="nav-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="nav-label">Home</div>
+                </a>
+                
+                <a href="{{ url_for('kyc_users.kyc_users') }}" class="nav-item">
+                    <div class="nav-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="nav-label">KYC Users</div>
+                </a>
+                
+                <a href="{{ url_for('locations.locations') }}" class="nav-item">
+                    <div class="nav-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="nav-label">Locations</div>
+                </a>
+                
+                <a href="{{ url_for('lanes.lanes') }}" class="nav-item">
+                    <div class="nav-icon">
+                        <i class="fas fa-road"></i>
+                    </div>
+                    <div class="nav-label">Lanes</div>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+    
+    <!-- Menu Panel -->
+    <div class="menu-panel" id="menuPanel">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-menu" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <a href="{{ url_for('auth.pwa_dashboard') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <div>Dashboard</div>
+        </a>
+        
+        <a href="{{ url_for('kyc_users.kyc_users') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>KYC Users</div>
+        </a>
+        
+        <a href="{{ url_for('locations.locations') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div>Locations</div>
+        </a>
+        
+        <a href="{{ url_for('lanes.lanes') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-road"></i>
+            </div>
+            <div>Lanes</div>
+        </a>
+        
+        <a href="{{ url_for('readers.readers', lane_id=1) }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-rss"></i>
+            </div>
+            <div>Readers</div>
+        </a>
+        
+        <a href="{{ url_for('analytics.dashboard') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div>Analytics</div>
+        </a>
+        
+        <a href="{{ url_for('vehicle_finder.find_vehicle') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-car"></i>
+            </div>
+            <div>Find Vehicle</div>
+        </a>
+        
+        <a href="{{ url_for('fastag_balance.fastag_balance') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div>FASTag Balance</div>
+        </a>
+        
+        <hr style="margin: 1.5rem 0; border-color: rgba(0,0,0,0.1);">
+        
+        <a href="{{ url_for('auth.logout') }}" class="menu-item">
+            <div class="menu-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <div>Logout</div>
+        </a>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Menu functionality
+        function toggleMenu() {
+            const overlay = document.getElementById('menuOverlay');
+            const panel = document.getElementById('menuPanel');
+            
+            overlay.style.display = 'block';
+            panel.classList.add('open');
+        }
+        
+        function closeMenu() {
+            const overlay = document.getElementById('menuOverlay');
+            const panel = document.getElementById('menuPanel');
+            
+            overlay.style.display = 'none';
+            panel.classList.remove('open');
+        }
+        
+        // Check if running as PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.querySelector('.pwa-indicator').style.display = 'block';
+        } else {
+            document.querySelector('.pwa-indicator').style.display = 'none';
+        }
+        
+        // Add touch feedback
+        document.querySelectorAll('.action-card').forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            card.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Bottom nav active state
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html> 
