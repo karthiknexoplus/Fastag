@@ -158,6 +158,8 @@ def create_app():
     from fastag.routes.fastag_balance import fastag_balance_bp
     from fastag.routes.google_auth import google_auth_bp, init_oauth
     from fastag.routes.challan import challan_bp
+    from fastag.routes.offline import offline_bp
+    from fastag.routes.health import health_bp
     
     # Initialize OAuth
     init_oauth(app)
@@ -176,6 +178,8 @@ def create_app():
     app.register_blueprint(fastag_balance_bp)
     app.register_blueprint(google_auth_bp, url_prefix='/google')
     app.register_blueprint(challan_bp)
+    app.register_blueprint(offline_bp)
+    app.register_blueprint(health_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
     # Register Jinja filters for FASTag and vehicle masking

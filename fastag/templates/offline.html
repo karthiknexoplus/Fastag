@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - FASTag Parking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .offline-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .offline-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(118, 75, 162, 0.15);
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .offline-icon {
+            font-size: 4rem;
+            color: #764ba2;
+            margin-bottom: 1.5rem;
+        }
+        .offline-title {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .offline-message {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .retry-btn {
+            background: #764ba2;
+            border: none;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .retry-btn:hover {
+            background: #4b2e83;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.3);
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .status-indicator i {
+            margin-right: 0.5rem;
+        }
+        .features-list {
+            text-align: left;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        .features-list h5 {
+            color: #764ba2;
+            margin-bottom: 1rem;
+        }
+        .features-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .features-list li {
+            padding: 0.5rem 0;
+            color: #555;
+        }
+        .features-list li i {
+            color: #764ba2;
+            margin-right: 0.5rem;
+            width: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-card">
+            <div class="status-indicator">
+                <i class="fas fa-wifi-slash"></i>
+                You're currently offline
+            </div>
+            
+            <div class="offline-icon">
+                <i class="fas fa-signal-slash"></i>
+            </div>
+            
+            <h1 class="offline-title">No Internet Connection</h1>
+            
+            <p class="offline-message">
+                It looks like you've lost your internet connection. 
+                Don't worry - some features of FASTag Parking are still available offline.
+            </p>
+            
+            <button class="retry-btn" onclick="retryConnection()">
+                <i class="fas fa-sync-alt me-2"></i>
+                Try Again
+            </button>
+            
+            <div class="features-list">
+                <h5><i class="fas fa-info-circle"></i> What's Available Offline</h5>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> View cached dashboard data</li>
+                    <li><i class="fas fa-check-circle"></i> Access previously loaded pages</li>
+                    <li><i class="fas fa-check-circle"></i> View stored vehicle information</li>
+                    <li><i class="fas fa-check-circle"></i> Read cached reports</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function retryConnection() {
+            const btn = document.querySelector('.retry-btn');
+            const icon = btn.querySelector('i');
+            
+            // Show loading state
+            btn.disabled = true;
+            icon.className = 'fas fa-spinner fa-spin me-2';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking Connection...';
+            
+            // Test connection
+            fetch('/api/health', { 
+                method: 'GET',
+                cache: 'no-cache'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Connection restored, reload the page
+                    window.location.reload();
+                } else {
+                    throw new Error('Server not responding');
+                }
+            })
+            .catch(error => {
+                console.log('Still offline:', error);
+                // Reset button state
+                btn.disabled = false;
+                icon.className = 'fas fa-sync-alt me-2';
+                btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Try Again';
+                
+                // Show error message
+                showOfflineMessage();
+            });
+        }
+        
+        function showOfflineMessage() {
+            const message = document.createElement('div');
+            message.className = 'alert alert-warning mt-3';
+            message.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Still offline. Please check your internet connection.';
+            document.querySelector('.offline-card').appendChild(message);
+            
+            // Remove message after 3 seconds
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.remove();
+                }
+            }, 3000);
+        }
+        
+        // Check for connection restoration
+        window.addEventListener('online', function() {
+            console.log('Connection restored');
+            window.location.reload();
+        });
+        
+        // Check connection status periodically
+        setInterval(() => {
+            if (navigator.onLine) {
+                fetch('/api/health', { 
+                    method: 'GET',
+                    cache: 'no-cache'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    }
+                })
+                .catch(() => {
+                    // Still offline, do nothing
+                });
+            }
+        }, 10000); // Check every 10 seconds
+    </script>
+</body>
+</html> 

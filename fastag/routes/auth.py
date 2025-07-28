@@ -270,3 +270,59 @@ def api_watchlist_activity(watchlist_id):
     ''', (fastag_id,)).fetchall()
     results = [dict(row) for row in logs]
     return jsonify({'results': results}) 
+
+@auth_bp.route('/api/watchlist/activity_ist/<int:watchlist_id>')
+def api_watchlist_activity_ist(watchlist_id):
+    import pytz
+    from datetime import datetime
+    db = get_db()
+    entry = db.execute('SELECT fastag_id FROM watchlist_users WHERE id = ?', (watchlist_id,)).fetchone()
+    if not entry:
+        return jsonify({'success': False, 'error': 'Not found'}), 404
+    fastag_id = entry['fastag_id']
+    logs = db.execute('''
+        SELECT 
+            al.timestamp, 
+            al.lane_id, 
+            l.lane_name,
+            r.type as lane_type,
+            al.access_result, 
+            al.reason,
+            COALESCE(ku.vehicle_number, tvc.vehicle_number) as vehicle_number,
+            COALESCE(ku.name, tvc.owner_name) as owner_name,
+            tvc.model_name,
+            tvc.fuel_type
+        FROM access_logs al
+        LEFT JOIN kyc_users ku ON al.tag_id = ku.fastag_id
+        LEFT JOIN tag_vehicle_cache tvc ON al.tag_id = tvc.tag_id
+        JOIN lanes l ON al.lane_id = l.id
+        JOIN readers r ON al.reader_id = r.id
+        WHERE al.tag_id = ?
+        ORDER BY al.timestamp DESC
+        LIMIT 50
+    ''', (fastag_id,)).fetchall()
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    results = []
+    for row in logs:
+        timestamp_str = row[0]
+        # Parse as UTC and convert to IST
+        try:
+            utc_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = utc_time.replace(tzinfo=pytz.UTC)
+            ist_time = utc_time.astimezone(ist_tz)
+            ist_time_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            ist_time_str = timestamp_str
+        results.append({
+            'timestamp_ist': ist_time_str,
+            'lane_id': row[1],
+            'lane_name': row[2],
+            'lane_type': row[3],
+            'access_result': row[4],
+            'reason': row[5],
+            'vehicle_number': row[6],
+            'owner_name': row[7],
+            'model_name': row[8],
+            'fuel_type': row[9],
+        })
+    return jsonify({'results': results}) 
