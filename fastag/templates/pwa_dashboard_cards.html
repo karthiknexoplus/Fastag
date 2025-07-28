@@ -95,18 +95,18 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-width: 38px;
-            min-height: 38px;
-            max-width: 38px;
-            max-height: 38px;
+            min-width: 54px;
+            min-height: 54px;
+            max-width: 54px;
+            max-height: 54px;
             border-radius: 50%;
             background: linear-gradient(135deg, #fff 60%, #f3e9ff 100%);
-            box-shadow: 0 1px 4px rgba(80,80,160,0.08);
+            box-shadow: 0 2px 8px rgba(80,80,160,0.08);
             border: none;
             outline: none;
             transition: box-shadow 0.18s, transform 0.12s, background 0.18s;
             cursor: pointer;
-            margin-bottom: 0.05rem;
+            margin-bottom: 0.1rem;
         }
         .feature-btn:active, .feature-btn:focus {
             box-shadow: 0 2px 8px rgba(118,75,162,0.10);
@@ -114,20 +114,21 @@
             transform: translateY(1px) scale(0.97);
         }
         .feature-btn .icon {
-            font-size: 0.85rem;
+            font-size: 1.15rem;
             color: #764ba2;
-            margin-bottom: 0.05rem;
+            margin-bottom: 0.1rem;
         }
         .feature-btn .label {
-            font-size: 0.62rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #222;
             letter-spacing: 0.01em;
             text-align: center;
+            white-space: normal;
         }
         .feature-slider {
             width: 100%;
-            margin-bottom: 0.7rem;
+            margin-bottom: 1.2rem;
         }
         .feature-slider .carousel-inner {
             border-radius: 10px;
@@ -135,21 +136,30 @@
             box-shadow: 0 1px 4px rgba(80,80,160,0.06);
         }
         .feature-slider .carousel-item {
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: flex-start;
             gap: 0.5rem;
             min-height: 38px;
             padding: 0.4rem 0.7rem;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        .feature-slider .carousel-item.active,
+        .feature-slider .carousel-item-next,
+        .feature-slider .carousel-item-prev {
+            display: flex;
         }
         .feature-slider .icon {
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             color: #764ba2;
         }
         .feature-slider .desc {
-            font-size: 0.75rem;
+            font-size: 0.93rem;
             color: #333;
             font-weight: 500;
+            white-space: normal;
+            word-break: break-word;
         }
         .analytics-grid {
             display: grid;
@@ -157,6 +167,7 @@
             gap: 0.3rem;
             width: 100%;
             margin-bottom: 1.2rem;
+            margin-top: 0.7rem;
         }
         .analytics-card {
             background: #fff;
