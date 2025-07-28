@@ -429,6 +429,10 @@
                 <i class="fas fa-download me-2"></i>Install App
             </button>
             
+            <button class="install-button" id="forceInstallButton" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); margin-top: 10px;" onclick="alert('Force install clicked!'); forceInstall();">
+                <i class="fas fa-rocket me-2"></i>Force Install (Test)
+            </button>
+            
             <button class="install-button" id="manualInstallButton" onclick="manualInstall()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
                 <i class="fas fa-mobile-alt me-2"></i>Install Manually
             </button>
@@ -536,28 +540,43 @@
             console.log('Deferred prompt:', deferredPrompt);
             console.log('Install instructions visible:', installInstructions.style.display);
             
+            // Check if we're in standalone mode (already installed)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            console.log('Standalone mode:', isStandalone);
+            
+            if (isStandalone) {
+                alert('App is already installed! Redirecting to app...');
+                window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
+                return;
+            }
+            
             if (deferredPrompt) {
                 console.log('✅ Deferred prompt available');
                 try {
+                    console.log('Showing native install prompt...');
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
                         console.log('User choice result:', choiceResult);
                         if (choiceResult.outcome === 'accepted') {
                             console.log('✅ User accepted install prompt');
+                            alert('Installation accepted! Redirecting...');
                             window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
                         } else {
                             console.log('❌ User dismissed install prompt');
+                            alert('Installation dismissed. Showing manual instructions.');
                             installInstructions.style.display = 'block';
                         }
                         deferredPrompt = null;
                     });
                 } catch (error) {
                     console.error('Error showing install prompt:', error);
+                    alert('Error showing install prompt: ' + error.message);
                     installInstructions.style.display = 'block';
                 }
             } else {
                 console.log('❌ No deferred prompt available');
                 console.log('Showing manual instructions');
+                alert('No install prompt available. This usually means:\n1. App is already installed\n2. Browser doesn\'t support PWA\n3. PWA criteria not met');
                 installInstructions.style.display = 'block';
             }
         }
@@ -588,6 +607,18 @@
         
         function manualInstall() {
             triggerInstall();
+        }
+        
+        function forceInstall() {
+            alert('Force install function called!');
+            console.log('🔧 Force install triggered');
+            console.log('Current URL:', window.location.href);
+            console.log('Protocol:', window.location.protocol);
+            console.log('User agent:', navigator.userAgent);
+            
+            // Try to redirect to onboarding directly
+            alert('Redirecting to onboarding...');
+            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
         }
         
         // Check if already installed
