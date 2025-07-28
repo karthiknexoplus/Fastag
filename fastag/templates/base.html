@@ -408,5 +408,17 @@
         }
     })();
     </script>
+    <script>
+    (function() {
+        function isInStandaloneMode() {
+            return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone === true);
+        }
+        if (isInStandaloneMode() &&
+            !window.location.pathname.startsWith('/onboarding') &&
+            !window.location.pathname.startsWith('/login')) {
+            window.location.replace('/onboarding');
+        }
+    })();
+    </script>
 </body>
 </html> 
