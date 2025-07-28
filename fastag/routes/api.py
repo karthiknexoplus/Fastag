@@ -312,13 +312,19 @@ def barrier_control():
         if not relays_to_activate:
             return jsonify({"success": False, "error": "No valid relay numbers provided"}), 400
 
-    # Activate the relays
-    for relay_num in relays_to_activate:
-        relay_controller.turn_on(relay_num)
-    import time
-    time.sleep(2)  # Keep relays on for 2 seconds
-    for relay_num in relays_to_activate:
-        relay_controller.turn_off(relay_num)
+    # Control the relays based on action
+    if action == 'open':
+        # Activate the relays (turn on, wait, turn off)
+        for relay_num in relays_to_activate:
+            relay_controller.turn_on(relay_num)
+        import time
+        time.sleep(2)  # Keep relays on for 2 seconds
+        for relay_num in relays_to_activate:
+            relay_controller.turn_off(relay_num)
+    elif action == 'close':
+        # For close action, just ensure relays are off
+        for relay_num in relays_to_activate:
+            relay_controller.turn_off(relay_num)
 
     return jsonify({"success": True, "activated": relays_to_activate}), 200 
 

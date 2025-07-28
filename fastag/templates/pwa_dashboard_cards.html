@@ -689,6 +689,14 @@
                 <span class="modal-title">Barrier Control</span>
             </div>
             <div class="modal-desc">Control all 3 barrier relays below. Tap to toggle ON (auto-OFF after a few seconds).</div>
+            <div class="barrier-control-actions" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; justify-content: center;">
+                <button class="barrier-action-btn" onclick="openAllBarriers()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;">
+                    <i class="fas fa-unlock-alt"></i> Open All
+                </button>
+                <button class="barrier-action-btn" onclick="closeAllBarriers()" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;">
+                    <i class="fas fa-lock"></i> Close All
+                </button>
+            </div>
             <div class="barrier-relay-group">
                 <div class="barrier-relay-item">
                     <span id="relay1-dot" class="barrier-relay-dot unknown" title="Unknown"></span>
@@ -1477,6 +1485,64 @@
     }
     function closeControllerStatusModal() {
         document.getElementById('controllerStatusModal').style.display = 'none';
+    }
+
+    function openAllBarriers() {
+        fetch('/api/barrier-control', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'open',
+                relay_numbers: [1, 2, 3]
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Update all relay status to ON
+                for (let i = 1; i <= 3; i++) {
+                    setRelayIconPWA(i, 'ON');
+                }
+                setTimeout(refreshRelayStatusPWA, 2500); // Auto-refresh after 2.5s
+                alert('All barriers opened successfully!');
+            } else {
+                alert('Failed to open all barriers: ' + (result.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error opening all barriers: ' + error);
+        });
+    }
+
+    function closeAllBarriers() {
+        fetch('/api/barrier-control', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'close',
+                relay_numbers: [1, 2, 3]
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Update all relay status to OFF
+                for (let i = 1; i <= 3; i++) {
+                    setRelayIconPWA(i, 'OFF');
+                }
+                setTimeout(refreshRelayStatusPWA, 2500); // Auto-refresh after 2.5s
+                alert('All barriers closed successfully!');
+            } else {
+                alert('Failed to close all barriers: ' + (result.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error closing all barriers: ' + error);
+        });
     }
 
     function openAddKycUserModal() {
