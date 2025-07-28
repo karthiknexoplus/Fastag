@@ -537,6 +537,12 @@
             font-size: 1.45rem;
             display: inline-block;
         }
+        .analytics-card.controller-status .icon i {
+            color: #764ba2;
+        }
+        .analytics-card.controller-status .value {
+            color: #764ba2;
+        }
         @media (max-width: 600px) {
             .dashboard-container { padding-top: 1.1rem; max-width: 98vw; padding-bottom: 3.2rem; }
             .feature-scroll { gap: 0.7rem; padding-left: 0.1rem; }
@@ -619,7 +625,12 @@
             <div class="barrier-card" onclick="showBarrierModal()">
                 <span class="icon" style="background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #764ba2; display: flex; align-items: center; justify-content: center;"><i class="fas fa-door-open"></i></span>
                 <span class="label">Barrier Control</span>
-                <span class="value" style="font-size:0.98rem;color:#764ba2;font-weight:600;">Tap to Control</span>
+                <span class="value">Tap to Control</span>
+            </div>
+            <div class="analytics-card controller-status" onclick="showControllerStatusModal()">
+                <span class="icon"><i class="fas fa-microchip"></i></span>
+                <span class="label">Controller Status</span>
+                <span class="value">Tap to View</span>
             </div>
         </div>
     </div>
@@ -684,6 +695,19 @@
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeBarrierModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    <div id="controllerStatusModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 420px;">
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-microchip"></i></span>
+                <span class="modal-title">Controller Status</span>
+            </div>
+            <div class="modal-desc">Live controller health and system info.</div>
+            <div class="modal-records" id="controllerStatusRecords"></div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeControllerStatusModal()">Close</button>
             </div>
         </div>
     </div>
@@ -1260,6 +1284,30 @@
             .catch(error => {
                 alert('Error getting relay status');
             });
+    }
+
+    function showControllerStatusModal() {
+        document.getElementById('controllerStatusModal').style.display = 'flex';
+        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        fetch('/api/status')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success || !data.info) {
+                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load status.</div>';
+                    return;
+                }
+                let info = data.info;
+                let tableHtml = '<table>' +
+                    Object.entries(info).map(([k, v]) => `<tr><th style="color:#764ba2;font-weight:600;">${k}</th><td>${v}</td></tr>`).join('') +
+                    '</table>';
+                document.getElementById('controllerStatusRecords').innerHTML = tableHtml;
+            })
+            .catch(() => {
+                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load status.</div>';
+            });
+    }
+    function closeControllerStatusModal() {
+        document.getElementById('controllerStatusModal').style.display = 'none';
     }
     </script>
 </body>
