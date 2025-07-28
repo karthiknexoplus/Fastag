@@ -765,6 +765,21 @@
             </form>
         </div>
     </div>
+    <!-- KYC Users List Modal -->
+    <div id="kycUsersListModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closeKycUsersListModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-users"></i></span>
+                <span class="modal-title">KYC Users</span>
+            </div>
+            <div class="modal-desc">All registered KYC users. Edit or delete as needed.</div>
+            <div class="modal-records" id="kycUsersListRecords" style="overflow-x:auto;max-height:55vh;overflow-y:auto;"></div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeKycUsersListModal()">Close</button>
+            </div>
+        </div>
+    </div>
     <style>
     .modal-custom {
         position: fixed;
@@ -1429,6 +1444,100 @@
             }
         })
         .catch(() => showKycUserError('Failed to add user'));
+    }
+    // Vehicles button opens KYC Users List
+    document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+        if (btn.innerText.trim() === 'Vehicles') {
+            btn.onclick = openKycUsersListModal;
+        }
+    });
+    function openKycUsersListModal() {
+        document.getElementById('kycUsersListModal').style.display = 'flex';
+        loadKycUsersList();
+    }
+    function closeKycUsersListModal() {
+        document.getElementById('kycUsersListModal').style.display = 'none';
+    }
+    function loadKycUsersList() {
+        document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        fetch('/api/kyc_users')
+            .then(r => r.json())
+            .then(data => {
+                let users = data.users || [];
+                let tableHtml = '<table style="min-width:700px;"><tr>' +
+                    '<th>Name</th><th>FASTag ID</th><th>Vehicle Number</th><th>Contact</th><th>Address</th><th>Edit</th><th>Delete</th></tr>' +
+                    users.map(u => `<tr>` +
+                        `<td>${u.name}</td>` +
+                        `<td>${u.fastag_id}</td>` +
+                        `<td>${u.vehicle_number}</td>` +
+                        `<td>${u.contact_number}</td>` +
+                        `<td>${u.address}</td>` +
+                        `<td><button class="input-icon-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
+                        `<td><button class="input-icon-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
+                    `</tr>`).join('') + '</table>';
+                document.getElementById('kycUsersListRecords').innerHTML = tableHtml;
+            })
+            .catch(() => {
+                document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load users.</div>';
+            });
+    }
+    function deleteKycUser(id) {
+        if (!confirm('Delete this user?')) return;
+        fetch(`/api/kyc_users/${id}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) loadKycUsersList();
+                else alert(data.error || 'Failed to delete user');
+            })
+            .catch(() => alert('Failed to delete user'));
+    }
+    function editKycUser(id) {
+        // For simplicity, open the add modal prefilled for editing
+        fetch(`/api/kyc_users/${id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.user) {
+                    openAddKycUserModal();
+                    document.getElementById('kycName').value = data.user.name;
+                    document.getElementById('kycFastagId').value = data.user.fastag_id;
+                    document.getElementById('kycVehicleNumber').value = data.user.vehicle_number;
+                    document.getElementById('kycContactNumber').value = data.user.contact_number;
+                    document.getElementById('kycAddress').value = data.user.address;
+                    // On submit, update instead of add
+                    document.getElementById('addKycUserForm').onsubmit = function(e) {
+                        e.preventDefault();
+                        submitEditKycUser(id);
+                    };
+                } else {
+                    alert(data.error || 'Failed to load user');
+                }
+            })
+            .catch(() => alert('Failed to load user'));
+    }
+    function submitEditKycUser(id) {
+        const form = document.getElementById('addKycUserForm');
+        const data = {
+            name: form.name.value.trim(),
+            fastag_id: form.fastag_id.value.trim(),
+            vehicle_number: form.vehicle_number.value.trim(),
+            contact_number: form.contact_number.value.trim(),
+            address: form.address.value.trim()
+        };
+        fetch(`/api/kyc_users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                closeAddKycUserModal();
+                loadKycUsersList();
+            } else {
+                showKycUserError(data.error || 'Failed to update user');
+            }
+        })
+        .catch(() => showKycUserError('Failed to update user'));
     }
     </script>
 </body>
