@@ -545,7 +545,7 @@
         
 
         
-        // Check if already installed
+        // If running as a PWA (standalone), redirect to onboarding immediately
         if (window.matchMedia('(display-mode: standalone)').matches) {
             window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
         }
