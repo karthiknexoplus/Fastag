@@ -1,6 +1,6 @@
-from .bank_api import bank_api
-from .bank_callbacks import bank_callbacks
+from .auth import auth_bp
+from .pwa_dashboard import pwa_dashboard_bp
 
 def register_blueprints(app):
-    app.register_blueprint(bank_api)
-    app.register_blueprint(bank_callbacks) 
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(pwa_dashboard_bp, url_prefix='/pwa-dashboard')
