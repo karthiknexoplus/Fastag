@@ -469,13 +469,13 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Test if JavaScript is loading
-        alert('JavaScript loaded!');
-        console.log('📱 Mobile install prompt JavaScript loaded');
-        
         let deferredPrompt;
         let installButton = document.getElementById('installButton');
         let installInstructions = document.getElementById('installInstructions');
+        
+        // Test if JavaScript is loading
+        alert('JavaScript loaded!');
+        console.log('📱 Mobile install prompt JavaScript loaded');
         
         console.log('Install button element:', installButton);
         console.log('Install instructions element:', installInstructions);
@@ -495,24 +495,6 @@
             if (baseInstallBtn) {
                 baseInstallBtn.remove();
                 console.log('🗑️ Removed base template install button');
-            }
-            
-            // Manually register service worker if not already registered
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    if (registrations.length === 0) {
-                        console.log('🔧 Manually registering service worker...');
-                        navigator.serviceWorker.register('/static/sw.js')
-                            .then(registration => {
-                                console.log('✅ Service worker registered manually:', registration.scope);
-                            })
-                            .catch(error => {
-                                console.error('❌ Manual service worker registration failed:', error);
-                            });
-                    } else {
-                        console.log('✅ Service worker already registered');
-                    }
-                });
             }
         });
         
@@ -535,10 +517,10 @@
             console.log('Deferred prompt set:', deferredPrompt);
         });
         
-        // Also listen for the event on the window object
+        // Also listen for the event on the window object (capture phase)
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('🎉 Window beforeinstallprompt event fired!');
-        }, true); // Use capture phase
+        }, true);
         
         // Simple install function (like the working test page)
         function triggerInstall() {
@@ -592,12 +574,6 @@
             }
         }
         
-        // Listen for successful installation
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('🎉 App installed successfully!');
-            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
-        });
-        
         // Add click event to install button
         installButton.addEventListener('click', function(e) {
             console.log('🔘 Install button clicked!');
@@ -611,6 +587,12 @@
             console.log('🔘 Install button onclick triggered!');
             triggerInstall();
         };
+        
+        // Listen for successful installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('🎉 App installed successfully!');
+            window.location.href = "{{ url_for('auth.pwa_onboarding') }}";
+        });
         
         function continueToWeb() {
             window.location.href = "{{ url_for('auth.login') }}";
@@ -633,52 +615,8 @@
         }
         
         function showDirectInstallOption() {
-            // Create a direct install button that bypasses beforeinstallprompt
-            const directInstallBtn = document.createElement('div');
-            directInstallBtn.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: white;
-                    padding: 20px;
-                    border-radius: 15px;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                    z-index: 10000;
-                    text-align: center;
-                    max-width: 300px;
-                ">
-                    <h4 style="color: #764ba2; margin-bottom: 15px;">📱 Install FASTag Parking</h4>
-                    <p style="margin-bottom: 20px; color: #666;">
-                        Since the automatic install prompt didn't appear, you can install manually:
-                    </p>
-                    <button onclick="directInstall()" style="
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        color: white;
-                        border: none;
-                        padding: 12px 24px;
-                        border-radius: 25px;
-                        font-weight: 600;
-                        margin: 5px;
-                        cursor: pointer;
-                    ">
-                        🚀 Install Now
-                    </button>
-                    <button onclick="this.parentElement.remove()" style="
-                        background: #f8f9fa;
-                        color: #666;
-                        border: 1px solid #ddd;
-                        padding: 12px 24px;
-                        border-radius: 25px;
-                        margin: 5px;
-                        cursor: pointer;
-                    ">
-                        Cancel
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(directInstallBtn);
+            // Creates a modal with "Install Now" and "Cancel" buttons
+            // This modal appears when beforeinstallprompt doesn't fire
         }
         
         function directInstall() {
@@ -711,75 +649,7 @@
         }
         
         function showManualInstallInstructions() {
-            // Create a modal with manual install instructions
-            const manualInstallModal = document.createElement('div');
-            manualInstallModal.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.8);
-                    z-index: 10000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                ">
-                    <div style="
-                        background: white;
-                        padding: 25px;
-                        border-radius: 20px;
-                        max-width: 350px;
-                        margin: 20px;
-                        text-align: center;
-                    ">
-                        <h3 style="color: #764ba2; margin-bottom: 20px;">📱 Manual Installation</h3>
-                        <p style="margin-bottom: 20px; color: #666; line-height: 1.5;">
-                            To install FASTag Parking as an app:
-                        </p>
-                        <div style="text-align: left; margin-bottom: 20px;">
-                            <p style="margin: 10px 0; font-weight: 600;">📱 Android (Chrome):</p>
-                            <ol style="margin: 10px 0; padding-left: 20px; color: #666;">
-                                <li>Tap the menu button (⋮)</li>
-                                <li>Select "Add to Home Screen"</li>
-                                <li>Tap "Add" to confirm</li>
-                            </ol>
-                            
-                            <p style="margin: 10px 0; font-weight: 600;">🍎 iOS (Safari):</p>
-                            <ol style="margin: 10px 0; padding-left: 20px; color: #666;">
-                                <li>Tap the Share button (□↑)</li>
-                                <li>Select "Add to Home Screen"</li>
-                                <li>Tap "Add" to confirm</li>
-                            </ol>
-                        </div>
-                        <button onclick="this.parentElement.parentElement.remove(); window.location.href='{{ url_for('auth.pwa_onboarding') }}'" style="
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            color: white;
-                            border: none;
-                            padding: 12px 24px;
-                            border-radius: 25px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            margin: 5px;
-                        ">
-                            ✅ Got it! Continue to App
-                        </button>
-                        <button onclick="this.parentElement.parentElement.remove()" style="
-                            background: #f8f9fa;
-                            color: #666;
-                            border: 1px solid #ddd;
-                            padding: 12px 24px;
-                            border-radius: 25px;
-                            cursor: pointer;
-                            margin: 5px;
-                        ">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(manualInstallModal);
+            // Creates a modal with step-by-step manual install instructions for Android and iOS
         }
         
         // Check if already installed
@@ -827,7 +697,7 @@
             }
         }, 10000);
         
-        // Additional diagnostic after 5 seconds
+        // Comprehensive PWA diagnostic after 5 seconds
         setTimeout(() => {
             console.log('🔍 5-second diagnostic check');
             
@@ -867,6 +737,8 @@
                     if (hasRegisteredSW) {
                         console.log('Service worker scope:', registrations[0].scope);
                         console.log('Service worker state:', registrations[0].active ? 'active' : 'inactive');
+                    } else {
+                        alert('No service worker registered. This may prevent PWA install.');
                     }
                     
                     // Check manifest
@@ -887,13 +759,55 @@
                             console.log('Manifest start_url:', manifest.start_url);
                             diagnosticReport += `📱 App Name: ${manifest.name}\n`;
                             diagnosticReport += `🎯 Start URL: ${manifest.start_url}\n`;
+                            
+                            // Check for required manifest fields
+                            const hasName = manifest.name && manifest.name.length > 0;
+                            const hasShortName = manifest.short_name && manifest.short_name.length > 0;
+                            const hasStartUrl = manifest.start_url && manifest.start_url.length > 0;
+                            const hasDisplay = manifest.display && ['standalone', 'fullscreen', 'minimal-ui'].includes(manifest.display);
+                            const hasIcons = manifest.icons && manifest.icons.length > 0;
+                            
+                            diagnosticReport += `📝 Name: ${hasName ? '✅ Present' : '❌ Missing'}\n`;
+                            diagnosticReport += `📝 Short Name: ${hasShortName ? '✅ Present' : '❌ Missing'}\n`;
+                            diagnosticReport += `🎯 Start URL: ${hasStartUrl ? '✅ Present' : '❌ Missing'}\n`;
+                            diagnosticReport += `📱 Display: ${hasDisplay ? '✅ Present' : '❌ Missing'}\n`;
+                            diagnosticReport += `🖼️ Icons: ${hasIcons ? '✅ Present' : '❌ Missing'}\n`;
+                            
+                            // Check icon sizes
+                            if (hasIcons) {
+                                const iconSizes = manifest.icons.map(icon => icon.sizes).filter(Boolean);
+                                const has192Icon = iconSizes.some(size => size.includes('192'));
+                                const has512Icon = iconSizes.some(size => size.includes('512'));
+                                diagnosticReport += `🖼️ 192px Icon: ${has192Icon ? '✅ Present' : '❌ Missing'}\n`;
+                                diagnosticReport += `🖼️ 512px Icon: ${has512Icon ? '✅ Present' : '❌ Missing'}\n`;
+                            }
+                            
+                            // Check if all criteria are met
+                            const allCriteriaMet = isHttps && hasServiceWorker && hasRegisteredSW && hasManifest && 
+                                                 hasName && hasShortName && hasStartUrl && hasDisplay && hasIcons;
+                            
+                            diagnosticReport += `\n🎯 ALL CRITERIA MET: ${allCriteriaMet ? '✅ YES' : '❌ NO'}\n`;
+                            
+                            if (!allCriteriaMet) {
+                                diagnosticReport += `\n❌ Missing criteria:\n`;
+                                if (!isHttps) diagnosticReport += `- HTTPS not enabled\n`;
+                                if (!hasServiceWorker) diagnosticReport += `- Service worker not supported\n`;
+                                if (!hasRegisteredSW) diagnosticReport += `- Service worker not registered\n`;
+                                if (!hasManifest) diagnosticReport += `- Manifest not found\n`;
+                                if (!hasName) diagnosticReport += `- App name missing\n`;
+                                if (!hasShortName) diagnosticReport += `- Short name missing\n`;
+                                if (!hasStartUrl) diagnosticReport += `- Start URL missing\n`;
+                                if (!hasDisplay) diagnosticReport += `- Display mode missing\n`;
+                                if (!hasIcons) diagnosticReport += `- Icons missing\n`;
+                            }
+                            
+                            // Show final diagnostic report
+                            console.log('Final diagnostic report:', diagnosticReport);
+                            alert(diagnosticReport);
                         })
                         .catch(error => {
                             console.error('❌ Manifest error:', error.message);
                             diagnosticReport += `📄 Manifest: ❌ Error - ${error.message}\n`;
-                        })
-                        .finally(() => {
-                            // Show final diagnostic report
                             console.log('Final diagnostic report:', diagnosticReport);
                             alert(diagnosticReport);
                         });
