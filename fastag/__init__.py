@@ -241,6 +241,14 @@ def create_app():
         else:
             return redirect(url_for('auth.login'))
     
+    # PWA start route - when PWA is launched from home screen
+    @app.route('/pwa-start')
+    def pwa_start():
+        from flask import session, redirect, url_for
+        if 'user' in session:
+            return redirect(url_for('auth.pwa_dashboard'))
+        else:
+            return redirect(url_for('auth.pwa_onboarding'))
 
     
     return app 

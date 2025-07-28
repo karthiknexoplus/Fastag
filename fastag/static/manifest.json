@@ -2,7 +2,7 @@
   "name": "FASTag Parking Management",
   "short_name": "FASTag",
   "description": "Smart Parking Management System",
-  "start_url": "/pwa-onboarding",
+  "start_url": "/pwa-start",
   "display": "standalone",
   "background_color": "#764ba2",
   "theme_color": "#764ba2",
