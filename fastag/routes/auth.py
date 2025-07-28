@@ -371,4 +371,4 @@ def pwa_login():
 
 @auth_bp.route('/pwa-dashboard')
 def pwa_dashboard():
-    return render_template('pwa_dashboard.html') 
+    return render_template('pwa_dashboard_cards.html') 
