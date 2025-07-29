@@ -42,12 +42,12 @@ for token in tokens:
         "message": {
             "token": token,
             "notification": {
-                "title": "FASTag Test Notification",
-                "body": "This is a test push notification from your FASTag PWA!"
+                "title": "🚗 Onebee Parking Update",
+                "body": "Dear Onebee User,\n\nExperience our world-class parking management system at your esteemed premises! ✨\n\nStay tuned for more updates from Onebee.\n\nBest Regards,\nTeam Onebee 🅿️🚦"
             },
             "webpush": {
                 "fcm_options": {
-                    "link": "https://your-pwa-url/"
+                    "link": "https://www.onebee.in/"
                 }
             }
         }
