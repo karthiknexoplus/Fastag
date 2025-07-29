@@ -2521,8 +2521,12 @@
     }
     
     function createHourlyActivityChart(data) {
+        console.log('Creating hourly activity chart with data:', data);
         const canvas = document.getElementById('hourlyActivityChart');
-        if (!canvas) return;
+        if (!canvas) {
+            console.error('Canvas element not found!');
+            return;
+        }
         
         const ctx = canvas.getContext('2d');
         
