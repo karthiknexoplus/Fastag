@@ -5805,8 +5805,6 @@
           throw new Error('Failed to save FCM token: ' + response.status);
         }
         showPushSuccessModal()
-        document.getElementById('enablePushBtn').textContent = 'Push Enabled ✓';
-        document.getElementById('enablePushBtn').style.background = '#28a745';
       } catch (error) {
         alert('Error enabling push notifications: ' + error.message);
       }
