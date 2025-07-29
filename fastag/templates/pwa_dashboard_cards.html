@@ -2439,8 +2439,14 @@
 
     // Analytics Modal Functions
     function showAnalyticsModal() {
+        alert('Analytics modal function called!');
         console.log('Opening analytics modal...');
-        document.getElementById('analyticsModal').style.display = 'flex';
+        const modal = document.getElementById('analyticsModal');
+        if (!modal) {
+            alert('Modal not found!');
+            return;
+        }
+        modal.style.display = 'flex';
         loadHourlyActivity();
     }
     
