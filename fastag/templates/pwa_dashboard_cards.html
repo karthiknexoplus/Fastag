@@ -767,7 +767,7 @@
     <nav class="bottom-nav">
         <button class="bottom-nav-btn active"><i class="fas fa-home"></i><span>Home</span></button>
         <button class="bottom-nav-btn" onclick="showAnalyticsModal()"><i class="fas fa-chart-line"></i><span>Analytics</span></button>
-        <button class="bottom-nav-btn"><i class="fas fa-car"></i><span>Vehicles</span></button>
+        <button class="bottom-nav-btn"><i class="fas fa-car"></i><span>Users</span></button>
         <button class="bottom-nav-btn"><i class="fas fa-user"></i><span>Profile</span></button>
     </nav>
 
@@ -4075,6 +4075,9 @@
             .catch(() => alert('Failed to delete user'));
     }
     function editKycUser(id) {
+        // Close the KYC users list modal first
+        closeKycUsersListModal();
+        
         // For simplicity, open the add modal prefilled for editing
         fetch(`/api/kyc_users/${id}`)
             .then(r => r.json())
