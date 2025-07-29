@@ -1,6 +1,6 @@
-const CACHE_NAME = 'fastag-v1.0.1';
-const STATIC_CACHE = 'fastag-static-v1.0.1';
-const DYNAMIC_CACHE = 'fastag-dynamic-v1.0.1';
+const CACHE_NAME = 'onebee-v1.0.1';
+const STATIC_CACHE = 'onebee-static-v1.0.1';
+const DYNAMIC_CACHE = 'onebee-dynamic-v1.0.1';
 
 // Resources to cache immediately
 const STATIC_RESOURCES = [

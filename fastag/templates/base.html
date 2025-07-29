@@ -6,11 +6,11 @@
     <title>{% block title %}{{ APP_TITLE }}{% endblock %}</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="description" content="FASTag Parking Management System - Monitor RFID readers, manage lanes, and track vehicle access">
+    <meta name="description" content="Onebee Parking Management System - Monitor RFID readers, manage lanes, and track vehicle access">
     <meta name="theme-color" content="#764ba2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="FASTag">
+    <meta name="apple-mobile-web-app-title" content="Onebee">
     <meta name="msapplication-TileColor" content="#764ba2">
     <meta name="msapplication-tap-highlight" content="no">
     
@@ -282,7 +282,7 @@
                     newWorker.addEventListener('statechange', function() {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                             // New version available
-                            if (confirm('A new version of FASTag is available. Would you like to update?')) {
+                            if (confirm('A new version of Onebee is available. Would you like to update?')) {
                                 newWorker.postMessage({type: 'SKIP_WAITING'});
                                 window.location.reload();
                             }

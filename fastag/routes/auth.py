@@ -374,6 +374,8 @@ def pwa_login():
         password = request.form['password']
         db = get_db()
         contact_number = ''.join(filter(str.isdigit, username))
+        
+        # Check if user exists and password is correct
         if len(contact_number) == 10:
             kyc_user = db.execute('SELECT * FROM kyc_users WHERE contact_number = ?', (contact_number,)).fetchone()
             if kyc_user and password == contact_number:
@@ -387,8 +389,19 @@ def pwa_login():
                     'kyc_user_fastag': kyc_user['fastag_id']
                 }
                 return redirect('/pwa-dashboard')
-        # fallback: show login page with error
-        flash('Invalid username or password', 'danger')
+            elif kyc_user:
+                # User exists but wrong password
+                error_msg = 'Incorrect password. Please try again.'
+            else:
+                # User doesn't exist
+                error_msg = 'User not found. Please check your contact number.'
+        else:
+            # Invalid contact number format
+            error_msg = 'Please enter a valid 10-digit contact number.'
+        
+        # Redirect back with error message
+        return redirect(f'/pwa-login?error={error_msg}')
+    
     return render_template('pwa_login.html')
 
 @auth_bp.route('/pwa-dashboard')
