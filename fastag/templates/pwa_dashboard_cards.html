@@ -1702,20 +1702,18 @@
         })
             .then(response => response.text())
             .then(html => {
-                // Extract the readers data from the response
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const readersContainer = doc.getElementById('readers-container');
+                // The response is the partial template content directly
+                container.innerHTML = html;
                 
-                if (readersContainer) {
-                    container.innerHTML = readersContainer.innerHTML;
-                    // Initialize all readers after loading
-                    const readers = container.querySelectorAll('.reader-card');
+                // Initialize all readers after loading
+                const readers = container.querySelectorAll('.reader-card');
+                if (readers.length > 0) {
                     readers.forEach(reader => {
                         const readerId = reader.getAttribute('data-reader-id');
                         getReaderPower(readerId);
                     });
                 } else {
+                    // No readers found in the response
                     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-broadcast-tower" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i><div>No readers configured</div></div>';
                 }
             })
