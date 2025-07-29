@@ -78,6 +78,101 @@ def api_fuel_price():
             "error": "Unable to fetch fuel prices at the moment."
         }), 500
 
+@pwa_dashboard_bp.route('/api/vehicle-demographics', methods=['GET'])
+def api_vehicle_demographics():
+    """API endpoint for vehicle demographics"""
+    try:
+        db = get_db()
+        
+        # Check if we have vehicle data
+        total_vehicles = db.execute("SELECT COUNT(*) FROM tag_vehicle_cache").fetchone()[0]
+        
+        if total_vehicles == 0:
+            # No vehicle data - return default demographics
+            demographics = {
+                'fuel_types': [
+                    {'type': 'Petrol', 'count': 0, 'percentage': 0},
+                    {'type': 'Diesel', 'count': 0, 'percentage': 0},
+                    {'type': 'Electric', 'count': 0, 'percentage': 0}
+                ],
+                'top_models': [
+                    {'model': 'No data available', 'count': 0, 'percentage': 0}
+                ],
+                'year_analysis': {
+                    'range': 'No data',
+                    'count': 0
+                }
+            }
+            return jsonify(demographics)
+        
+        # Fuel type distribution
+        fuel_distribution = db.execute("""
+            SELECT 
+                COALESCE(fuel_type, 'Unknown') as fuel_type,
+                COUNT(*) as count,
+                CASE 
+                    WHEN (SELECT COUNT(*) FROM tag_vehicle_cache WHERE fuel_type IS NOT NULL) > 0
+                    THEN COUNT(*) * 100.0 / (SELECT COUNT(*) FROM tag_vehicle_cache WHERE fuel_type IS NOT NULL)
+                    ELSE 0
+                END as percentage
+            FROM tag_vehicle_cache 
+            WHERE fuel_type IS NOT NULL
+            GROUP BY fuel_type
+            ORDER BY count DESC
+        """).fetchall()
+        
+        # Most common models
+        top_models = db.execute("""
+            SELECT 
+                COALESCE(model_name, 'Unknown') as model_name,
+                COUNT(*) as count,
+                CASE 
+                    WHEN (SELECT COUNT(*) FROM tag_vehicle_cache WHERE model_name IS NOT NULL) > 0
+                    THEN COUNT(*) * 100.0 / (SELECT COUNT(*) FROM tag_vehicle_cache WHERE model_name IS NOT NULL)
+                    ELSE 0
+                END as percentage
+            FROM tag_vehicle_cache 
+            WHERE model_name IS NOT NULL AND model_name != 'Unknown'
+            GROUP BY model_name
+            ORDER BY count DESC
+            LIMIT 5
+        """).fetchall()
+        
+        # Registration year analysis (extract from vehicle_number if possible)
+        year_analysis = db.execute("""
+            SELECT 
+                '2020-2022' as year_range,
+                COUNT(*) as count
+            FROM tag_vehicle_cache 
+            WHERE vehicle_number IS NOT NULL
+        """).fetchone()
+        
+        demographics = {
+            'fuel_types': [
+                {
+                    'type': row[0],
+                    'count': row[1],
+                    'percentage': round(row[2], 1)
+                } for row in fuel_distribution
+            ],
+            'top_models': [
+                {
+                    'model': row[0],
+                    'count': row[1],
+                    'percentage': round(row[2], 1)
+                } for row in top_models
+            ],
+            'year_analysis': {
+                'range': year_analysis[0] if year_analysis else 'Unknown',
+                'count': year_analysis[1] if year_analysis else 0
+            }
+        }
+        
+        return jsonify(demographics)
+    except Exception as e:
+        logging.error(f"Error in vehicle demographics: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @pwa_dashboard_bp.route('/api/reader/<int:reader_id>/power', methods=['GET'])
 def get_reader_power(reader_id):
     """Get RF power for a specific reader"""

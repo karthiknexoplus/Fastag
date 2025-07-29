@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#f7f7fa">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         body {
             min-height: 100vh;
@@ -593,7 +594,7 @@
             <button class="feature-btn" onclick="showFuelPriceModal()"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
             <button class="feature-btn" onclick="showReaderSettingsModal()"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
             <button class="feature-btn" onclick="showBarrierModal()"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
-            <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
+            <button class="feature-btn" onclick="showVehicleDemographicsModal()"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
         </div>
         <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3500">
             <div class="carousel-inner">
@@ -1009,6 +1010,23 @@
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeFuelPriceModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Vehicle Demographics Modal -->
+    <div id="vehicleDemographicsModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closeVehicleDemographicsModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-chart-pie"></i></span>
+                <span class="modal-title">Vehicle Demographics</span>
+            </div>
+            <div class="modal-desc">Vehicle type distribution and demographics analysis</div>
+            <div id="demographicsContainer" class="modal-records" style="overflow-x:auto;max-height:45vh;overflow-y:auto;">
+                <!-- Demographics data will be loaded here -->
+            </div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeVehicleDemographicsModal()">Close</button>
             </div>
         </div>
     </div>
@@ -1475,6 +1493,68 @@
     .fuel-price-search select:focus {
         outline: none;
         border-color: #764ba2;
+    }
+    
+    /* Vehicle Demographics Modal Styles */
+    .demographics-chart-container {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 12px rgba(80,80,160,0.10);
+    }
+    .demographics-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .demo-stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e8e8e8;
+        text-align: center;
+        transition: transform 0.18s;
+    }
+    .demo-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(118,75,162,0.13);
+    }
+    .demo-stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.8rem;
+        color: white;
+        font-size: 1.3rem;
+    }
+    .demo-stat-label {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+    }
+    .demo-stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+    }
+    .demo-stat-percentage {
+        font-size: 0.9rem;
+        color: #764ba2;
+        font-weight: 600;
+        margin-top: 0.2rem;
+    }
+    .demographics-chart {
+        width: 100%;
+        height: 200px;
+        margin-bottom: 1rem;
     }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -2095,6 +2175,169 @@
     document.getElementById('fuelPriceModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeFuelPriceModal();
+        }
+    });
+
+    // Vehicle Demographics modal functions
+    function showVehicleDemographicsModal() {
+        document.getElementById('vehicleDemographicsModal').style.display = 'flex';
+        loadVehicleDemographics();
+    }
+    
+    function closeVehicleDemographicsModal() {
+        document.getElementById('vehicleDemographicsModal').style.display = 'none';
+    }
+    
+    function loadVehicleDemographics() {
+        const container = document.getElementById('demographicsContainer');
+        
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading demographics...</div>';
+        
+        fetch('/pwa-dashboard/api/vehicle-demographics')
+            .then(response => response.json())
+            .then(data => {
+                if (data.fuel_types && data.top_models) {
+                    displayVehicleDemographics(data);
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-chart-pie" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i><div>No demographics data available</div></div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching demographics:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading demographics</div></div>';
+            });
+    }
+    
+    function displayVehicleDemographics(data) {
+        const container = document.getElementById('demographicsContainer');
+        
+        let html = '';
+        
+        // Chart container
+        html += '<div class="demographics-chart-container">';
+        html += '<div style="font-weight: 600; color: #333; margin-bottom: 1rem; font-size: 1.1rem;">Fuel Type Distribution</div>';
+        html += '<div class="demographics-chart">';
+        html += '<canvas id="demographicsChart"></canvas>';
+        html += '</div>';
+        html += '</div>';
+        
+        // Stats grid
+        html += '<div class="demographics-stats-grid">';
+        
+        // Top fuel type
+        const topFuel = data.fuel_types[0] || { type: 'Unknown', percentage: 0 };
+        html += `
+            <div class="demo-stat-card">
+                <div class="demo-stat-icon">
+                    <i class="fas fa-gas-pump"></i>
+                </div>
+                <div class="demo-stat-label">Top Fuel Type</div>
+                <div class="demo-stat-value">${topFuel.type}</div>
+                <div class="demo-stat-percentage">${topFuel.percentage}%</div>
+            </div>
+        `;
+        
+        // Top model
+        const topModel = data.top_models[0] || { model: 'Unknown', percentage: 0 };
+        html += `
+            <div class="demo-stat-card">
+                <div class="demo-stat-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div class="demo-stat-label">Top Model</div>
+                <div class="demo-stat-value">${topModel.model}</div>
+                <div class="demo-stat-percentage">${topModel.percentage}%</div>
+            </div>
+        `;
+        
+        // Year range
+        const yearAnalysis = data.year_analysis || { range: 'Unknown', count: 0 };
+        html += `
+            <div class="demo-stat-card">
+                <div class="demo-stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="demo-stat-label">Year Range</div>
+                <div class="demo-stat-value">${yearAnalysis.range}</div>
+                <div class="demo-stat-percentage">${yearAnalysis.count} vehicles</div>
+            </div>
+        `;
+        
+        // Total vehicles
+        const totalVehicles = data.fuel_types.reduce((sum, fuel) => sum + fuel.count, 0);
+        html += `
+            <div class="demo-stat-card">
+                <div class="demo-stat-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="demo-stat-label">Total Vehicles</div>
+                <div class="demo-stat-value">${totalVehicles}</div>
+                <div class="demo-stat-percentage">in database</div>
+            </div>
+        `;
+        
+        html += '</div>';
+        
+        container.innerHTML = html;
+        
+        // Create the chart after the HTML is inserted
+        createDemographicsChart(data.fuel_types);
+    }
+    
+    function createDemographicsChart(fuelTypes) {
+        const canvas = document.getElementById('demographicsChart');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        // Prepare chart data
+        const labels = fuelTypes.map(f => f.type);
+        const values = fuelTypes.map(f => f.percentage);
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderWidth: 2,
+                    borderColor: '#FFFFFF'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 8,
+                            usePointStyle: true,
+                            font: { size: 10 },
+                            boxWidth: 8
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.parsed}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Close vehicle demographics modal when clicking outside
+    document.getElementById('vehicleDemographicsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeVehicleDemographicsModal();
         }
     });
 
