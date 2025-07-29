@@ -1053,7 +1053,7 @@
     
     <!-- Analytics Details Modal -->
     <div id="analyticsDetailsModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+        <div class="modal-content-custom analytics-details-modal" style="max-width: 95vw; min-width: 320px; max-height: 85vh;">
             <span class="close-modal" onclick="closeAnalyticsDetailsModal()">&times;</span>
             <div class="modal-header-custom">
                 <span class="modal-icon" id="detailsModalIcon"><i class="fas fa-chart-line"></i></span>
@@ -1882,6 +1882,120 @@
         font-weight: 600;
         font-size: 0.8rem;
         color: #333;
+    }
+    
+    /* Analytics Details Modal Styles */
+    .analytics-details-modal {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .analytics-details-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: auto;
+        padding: 0.5rem 0;
+        max-height: 60vh;
+    }
+    
+    .analytics-details-content table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.75rem;
+        min-width: 600px;
+    }
+    
+    .analytics-details-content th {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+        padding: 0.5rem 0.3rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.7rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .analytics-details-content td {
+        padding: 0.4rem 0.3rem;
+        border-bottom: 1px solid #eee;
+        font-size: 0.7rem;
+        vertical-align: middle;
+    }
+    
+    .analytics-details-content tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    
+    .analytics-details-content tr:hover {
+        background-color: #e9ecef;
+    }
+    
+    .analytics-details-content .vehicle-number {
+        font-weight: 600;
+        color: #764ba2;
+        font-size: 0.7rem;
+    }
+    
+    .analytics-details-content .owner-name {
+        color: #495057;
+        font-size: 0.7rem;
+    }
+    
+    .analytics-details-content .lane-name {
+        color: #6c757d;
+        font-size: 0.7rem;
+    }
+    
+    .analytics-details-content .time {
+        color: #6c757d;
+        font-size: 0.65rem;
+    }
+    
+    .analytics-details-content .reader-type {
+        font-weight: 600;
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+    
+    .analytics-details-content .reader-type.entry {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .analytics-details-content .reader-type.exit {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .analytics-details-content .total-events {
+        font-weight: 600;
+        color: #764ba2;
+        font-size: 0.7rem;
+    }
+    
+    /* Scrollbar styling */
+    .analytics-details-content::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .analytics-details-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .analytics-details-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        border-radius: 3px;
+    }
+    
+    .analytics-details-content::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     .analytics-chart-container {
         background: #fff;
