@@ -2541,15 +2541,18 @@
     }
     
     function loadAnalyticsSlide(slideIndex) {
+        alert('loadAnalyticsSlide called with index: ' + slideIndex);
         try {
             const container = document.getElementById('analyticsContent');
             if (!container) {
                 console.error('Analytics content container not found!');
+                alert('Container not found!');
                 return;
             }
             
             const slideName = analyticsSlides[slideIndex];
             console.log('Loading analytics slide:', slideIndex, slideName);
+            alert('Slide name: ' + slideName);
             
             // Update navigation
             const currentSlideEl = document.getElementById('currentSlide');
