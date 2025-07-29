@@ -2504,11 +2504,13 @@
     ];
 
     function showAnalyticsModal() {
+        alert('Analytics modal function called!');
         console.log('Opening analytics modal...');
         try {
             const modal = document.getElementById('analyticsModal');
             if (!modal) {
                 console.error('Analytics modal not found!');
+                alert('Modal not found!');
                 return;
             }
             modal.style.display = 'flex';
@@ -2516,6 +2518,7 @@
             loadAnalyticsSlide(0);
         } catch (error) {
             console.error('Error opening analytics modal:', error);
+            alert('Error: ' + error.message);
         }
     }
     
