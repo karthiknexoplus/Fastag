@@ -2504,6 +2504,7 @@
     ];
 
     function showAnalyticsModal() {
+        console.log('Opening analytics modal...');
         document.getElementById('analyticsModal').style.display = 'flex';
         currentAnalyticsSlide = 0;
         loadAnalyticsSlide(0);
@@ -2531,6 +2532,8 @@
         const container = document.getElementById('analyticsContent');
         const slideName = analyticsSlides[slideIndex];
         
+        console.log('Loading analytics slide:', slideIndex, slideName);
+        
         // Update navigation
         document.getElementById('currentSlide').textContent = slideIndex + 1;
         document.getElementById('totalSlides').textContent = analyticsSlides.length;
@@ -2543,7 +2546,8 @@
         // Load specific slide content
         switch(slideName) {
             case 'vehicle-demographics':
-                loadVehicleDemographicsSlide(container);
+                // Temporary test - show static content
+                container.innerHTML = '<div class="analytics-chart-container"><div class="analytics-chart-title"><i class="fas fa-chart-pie"></i>Vehicle Demographics</div><div style="text-align: center; padding: 2rem; color: #666;">Analytics modal is working! This is slide 1 of 7.</div></div>';
                 break;
             case 'fastag-vs-nonfastag':
                 loadFastagVsNonfastagSlide(container);
@@ -2567,9 +2571,14 @@
     }
     
     function loadVehicleDemographicsSlide(container) {
+        console.log('Loading vehicle demographics...');
         fetch('/pwa-dashboard/api/vehicle-demographics')
-            .then(response => response.json())
+            .then(response => {
+                console.log('Vehicle demographics response:', response);
+                return response.json();
+            })
             .then(data => {
+                console.log('Vehicle demographics data:', data);
                 let html = '<div class="analytics-chart-container">';
                 html += '<div class="analytics-chart-title"><i class="fas fa-chart-pie"></i>Vehicle Demographics</div>';
                 html += '<div class="analytics-chart"><canvas id="demographicsChart"></canvas></div>';
@@ -2616,14 +2625,19 @@
             })
             .catch(error => {
                 console.error('Error loading demographics:', error);
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading demographics</div></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading demographics: ' + error.message + '</div></div>';
             });
     }
     
     function loadFastagVsNonfastagSlide(container) {
+        console.log('Loading FASTag vs Non-FASTag data...');
         fetch('/analytics/api/fastag-vs-nonfastag')
-            .then(response => response.json())
+            .then(response => {
+                console.log('FASTag response:', response);
+                return response.json();
+            })
             .then(data => {
+                console.log('FASTag data:', data);
                 let html = '<div class="analytics-chart-container">';
                 html += '<div class="analytics-chart-title"><i class="fas fa-chart-pie"></i>FASTag vs Non-FASTag (Today)</div>';
                 html += '<div class="analytics-chart"><canvas id="fastagPieChart"></canvas></div>';
@@ -2667,7 +2681,7 @@
             })
             .catch(error => {
                 console.error('Error loading FASTag data:', error);
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading FASTag data</div></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading FASTag data: ' + error.message + '</div></div>';
             });
     }
     
