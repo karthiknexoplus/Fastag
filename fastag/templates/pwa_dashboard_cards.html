@@ -2442,11 +2442,8 @@
 
     // Analytics Modal Functions
     function showAnalyticsModal() {
-        alert('Analytics modal function called!');
-        console.log('Opening analytics modal...');
         const modal = document.getElementById('analyticsModal');
         if (!modal) {
-            alert('Modal not found!');
             return;
         }
         modal.style.display = 'flex';
@@ -2458,29 +2455,20 @@
     }
     
     function loadHourlyActivity() {
-        console.log('Loading hourly activity...');
         const container = document.getElementById('analyticsContent');
         
         if (!container) {
-            console.error('Analytics content container not found!');
             return;
         }
         
         // Show loading
         container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading hourly activity...</div>';
         
-        console.log('Fetching from /analytics/api/hourly-activity...');
         fetch('/analytics/api/hourly-activity')
-            .then(response => {
-                console.log('Response received:', response);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Data received:', data);
-                alert('Data received: ' + JSON.stringify(data).substring(0, 100) + '...');
                 let html = '<div class="analytics-chart-container">';
                 html += '<div class="analytics-chart-title"><i class="fas fa-clock"></i>Hourly Activity (Last 24 Hours)</div>';
-                html += '<div style="text-align: center; padding: 1rem; color: #666;">Data loaded successfully! Chart will appear below.</div>';
                 html += '<div class="analytics-chart"><canvas id="hourlyActivityChart"></canvas></div>';
                 html += '<div class="analytics-stats-grid">';
                 
@@ -2519,55 +2507,28 @@
                 }
                 
                 html += '</div></div>';
-                console.log('Setting container HTML:', html.substring(0, 200) + '...');
                 container.innerHTML = html;
-                alert('HTML set in container');
-                
-                // Test if content is visible
-                setTimeout(() => {
-                    const testDiv = document.createElement('div');
-                    testDiv.style.cssText = 'background: red; color: white; padding: 10px; margin: 10px; text-align: center; z-index: 9999; position: relative;';
-                    testDiv.textContent = 'TEST CONTENT - If you see this, the container is working!';
-                    container.appendChild(testDiv);
-                    
-                    // Debug modal structure
-                    console.log('Container display:', window.getComputedStyle(container).display);
-                    console.log('Container visibility:', window.getComputedStyle(container).visibility);
-                    console.log('Container opacity:', window.getComputedStyle(container).opacity);
-                    console.log('Container height:', window.getComputedStyle(container).height);
-                    
-                    alert('Test content added - do you see red text? Check console for CSS values.');
-                }, 1000);
                 
                 // Create line chart
                 createHourlyActivityChart(data);
             })
             .catch(error => {
-                console.error('Error loading hourly activity data:', error);
-                alert('Error: ' + error.message);
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading hourly activity data: ' + error.message + '</div></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading hourly activity data</div></div>';
             });
     }
     
     function createHourlyActivityChart(data) {
-        console.log('Creating hourly activity chart with data:', data);
         const canvas = document.getElementById('hourlyActivityChart');
         if (!canvas) {
-            console.error('Canvas element not found!');
             return;
         }
         
         const ctx = canvas.getContext('2d');
         
         if (data.hourly_data && data.hourly_data.length > 0) {
-            console.log('Processing hourly data:', data.hourly_data);
             const labels = data.hourly_data.map(item => item[0] + ':00');
             const grantedData = data.hourly_data.map(item => item[2]);
             const deniedData = data.hourly_data.map(item => item[3]);
-            
-            console.log('Chart labels:', labels);
-            console.log('Granted data:', grantedData);
-            console.log('Denied data:', deniedData);
             
             new Chart(ctx, {
                 type: 'line',
