@@ -5694,96 +5694,75 @@
       </div>
     </div>
     <!-- Push Notification Enable Button -->
-    <button id="enablePushBtn" style="position:fixed;top:1rem;right:1rem;z-index:3000;background:#764ba2;color:#fff;padding:0.5rem 1rem;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(80,80,160,0.10);font-weight:600;">Enable Push Notifications</button>
+    <button id="enablePushBtn" title="Enable Push Notifications" style="position:fixed;top:1.2rem;right:1.2rem;z-index:3000;background:linear-gradient(135deg,#764ba2 0%,#ffe082 100%);color:#fff;padding:0.6rem 0.7rem;border:none;border-radius:50%;box-shadow:0 2px 8px rgba(80,80,160,0.10);font-size:1.3rem;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="fas fa-bell"></i></button>
+
+    <!-- Push Notification Success Modal -->
+    <div id="pushSuccessModal" class="modal-custom" style="display:none;z-index:4000;">
+      <div class="modal-content-custom" style="max-width: 320px; text-align: center;">
+        <span class="close-modal" onclick="closePushSuccessModal()">&times;</span>
+        <div class="modal-header-custom" style="justify-content: center;">
+          <span class="modal-icon"><i class="fas fa-bell"></i></span>
+          <span class="modal-title">Push Enabled!</span>
+        </div>
+        <div class="modal-desc">Push notifications are now enabled for this device.</div>
+        <div class="modal-footer-custom" style="justify-content: center;">
+          <button class="modal-close-btn" onclick="closePushSuccessModal()">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Push Notification Received Modal -->
+    <div id="pushReceivedModal" class="modal-custom" style="display:none;z-index:4000;">
+      <div class="modal-content-custom" style="max-width: 340px; text-align: center;">
+        <span class="close-modal" onclick="closePushReceivedModal()">&times;</span>
+        <div class="modal-header-custom" style="justify-content: center;">
+          <span class="modal-icon"><i class="fas fa-bell"></i></span>
+          <span class="modal-title" id="pushReceivedTitle">Notification</span>
+        </div>
+        <div class="modal-desc" id="pushReceivedBody">You have a new notification.</div>
+        <div class="modal-footer-custom" style="justify-content: center;">
+          <button class="modal-close-btn" onclick="closePushReceivedModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
     <script>
-    async function subscribeUserToPush() {
-        console.log('Starting push notification subscription...');
-        
-        if (!('serviceWorker' in navigator)) {
-            alert('Service workers are not supported in this browser.');
-            return;
-        }
-        
+    function showPushSuccessModal() {
+      document.getElementById('pushSuccessModal').style.display = 'flex';
+    }
+    function closePushSuccessModal() {
+      document.getElementById('pushSuccessModal').style.display = 'none';
+    }
+    function showPushReceivedModal(title, body) {
+      document.getElementById('pushReceivedTitle').textContent = title || 'Notification';
+      document.getElementById('pushReceivedBody').textContent = body || 'You have a new notification.';
+      document.getElementById('pushReceivedModal').style.display = 'flex';
+    }
+    function closePushReceivedModal() {
+      document.getElementById('pushReceivedModal').style.display = 'none';
+    }
+
+    // Replace enablePushBtn click handler
+    const enablePushBtn = document.getElementById('enablePushBtn');
+    if (enablePushBtn) {
+      enablePushBtn.onclick = async function() {
         try {
-            console.log('Registering service worker...');
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            console.log('Service worker registered:', registration);
-            
-            await navigator.serviceWorker.ready;
-            console.log('Service worker ready');
-            
-            console.log('Requesting notification permission...');
-            const permission = await Notification.requestPermission();
-            console.log('Permission result:', permission);
-            
-            if (permission !== 'granted') {
-                alert('You must allow notifications to enable push notifications!');
-                return;
-            }
-            
-            console.log('Getting VAPID public key...');
-            const vapidResp = await fetch('/pwa-dashboard/api/vapid_public_key');
-            if (!vapidResp.ok) {
-                throw new Error(`Failed to get VAPID key: ${vapidResp.status} ${vapidResp.statusText}`);
-            }
-            const vapidPublicKey = await vapidResp.text();
-            console.log('VAPID key received:', vapidPublicKey.substring(0, 20) + '...');
-            
-            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-            console.log('VAPID key converted');
-            
-            console.log('Subscribing to push...');
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: convertedVapidKey
-            });
-            console.log('Push subscription created:', subscription);
-            
-            console.log('Sending subscription to backend...');
-            const response = await fetch('/pwa-dashboard/api/subscribe', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({subscription})
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Failed to save subscription: ${response.status} ${response.statusText}`);
-            }
-            
-            const result = await response.json();
-            console.log('Backend response:', result);
-            
-            if (result.success) {
-                alert('Push notifications enabled successfully!');
-                document.getElementById('enablePushBtn').textContent = 'Push Enabled ✓';
-                document.getElementById('enablePushBtn').style.background = '#28a745';
-            } else {
-                alert('Failed to enable push notifications: ' + result.error);
-            }
-        } catch (error) {
-            console.error('Error enabling push notifications:', error);
-            alert('Error enabling push notifications: ' + error.message);
+          await subscribeUserToPush();
+          showPushSuccessModal();
+        } catch (e) {
+          alert('Error enabling push notifications: ' + (e && e.message ? e.message : e));
         }
+      };
     }
-    
-    function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding)
-            .replace(/-/g, '+')
-            .replace(/_/g, '/');
-        const rawData = window.atob(base64);
-        return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+
+    // Show modal on push notification received (foreground)
+    if (typeof messaging !== 'undefined') {
+      messaging.onMessage(function(payload) {
+        const title = payload.notification && payload.notification.title ? payload.notification.title : 'Notification';
+        const body = payload.notification && payload.notification.body ? payload.notification.body : '';
+        showPushReceivedModal(title, body);
+      });
     }
-    
-    // Register service worker on page load
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Service Worker registered', reg))
-            .catch(err => console.error('Service Worker registration failed', err));
-    }
-    
-    // Add click handler
-    document.getElementById('enablePushBtn').onclick = subscribeUserToPush;
     </script>
     <!-- END PUSH NOTIFICATION -->
     <!-- Add Firebase SDKs for FCM -->
