@@ -21,24 +21,26 @@
             width: 100%;
             max-width: 480px;
             margin: 0 auto;
-            padding-top: 8rem;
+            padding-top: 12rem;
             padding-bottom: 6.2rem;
             position: relative;
             z-index: 1;
         }
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        .fixed-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             background: #f7f7fa;
-            padding: 1rem 0;
             z-index: 100;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1rem 0 0.5rem 0;
+        }
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
         }
         .avatar {
             width: 64px;
@@ -574,21 +576,22 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <div class="header">
-            <div class="avatar"><img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="Avatar"></div>
-            <div class="greeting-row">
-                <div class="greeting">Hi, {{ name }}!</div>
-                <div class="header-actions">
-                    <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
-                    <button class="logout-btn" onclick="showLogoutModal()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        <div class="fixed-header">
+            <div class="header">
+                <div class="avatar"><img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="Avatar"></div>
+                <div class="greeting-row">
+                    <div class="greeting">Hi, {{ name }}!</div>
+                    <div class="header-actions">
+                        <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
+                        <button class="logout-btn" onclick="showLogoutModal()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
                 </div>
+                {% if vehicle %}
+                <div class="vehicle-info">{{ vehicle }}</div>
+                {% endif %}
             </div>
-            {% if vehicle %}
-            <div class="vehicle-info">{{ vehicle }}</div>
-            {% endif %}
-        </div>
-        <div class="feature-desc">All your FASTag Parking features at a glance</div>
-        <div class="feature-scroll">
+            <div class="feature-desc">All your FASTag Parking features at a glance</div>
+            <div class="feature-scroll">
             <button class="feature-btn" onclick="openLocationsModal()"><span class="icon"><i class="fas fa-map-marker-alt"></i></span></button>
             <button class="feature-btn" onclick="openLanesModal()"><span class="icon"><i class="fas fa-road"></i></span></button>
             <button class="feature-btn" onclick="openKycUsersListModal()"><span class="icon"><i class="fas fa-id-card"></i></span></button>
@@ -602,6 +605,7 @@
             <button class="feature-btn" onclick="showReaderSettingsModal()"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
             <button class="feature-btn" onclick="showBarrierModal()"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
             <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
+        </div>
         </div>
         <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3500">
             <div class="carousel-inner">
