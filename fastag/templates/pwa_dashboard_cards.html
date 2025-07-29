@@ -5278,7 +5278,7 @@
       el.textContent = msg;
       el.style.display = 'block';
     }
-    document.getElementById('enablePushBtn').onclick = subscribeForPushNotifications;
+    
     // On load, check if already subscribed and hide button if so
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       navigator.serviceWorker.ready.then(function(reg) {
