@@ -1695,7 +1695,11 @@
         const container = document.getElementById('readers-container');
         container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading readers...</div>';
         
-        fetch('/pwa-dashboard/reader-settings')
+        fetch('/pwa-dashboard/reader-settings', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
             .then(response => response.text())
             .then(html => {
                 // Extract the readers data from the response
