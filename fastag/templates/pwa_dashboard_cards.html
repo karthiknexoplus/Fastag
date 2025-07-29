@@ -2520,6 +2520,15 @@
                 container.innerHTML = html;
                 alert('HTML set in container');
                 
+                // Test if content is visible
+                setTimeout(() => {
+                    const testDiv = document.createElement('div');
+                    testDiv.style.cssText = 'background: red; color: white; padding: 10px; margin: 10px; text-align: center;';
+                    testDiv.textContent = 'TEST CONTENT - If you see this, the container is working!';
+                    container.appendChild(testDiv);
+                    alert('Test content added - do you see red text?');
+                }, 1000);
+                
                 // Create line chart
                 createHourlyActivityChart(data);
             })
