@@ -5834,8 +5834,14 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         registrations.forEach(function(registration) {
+          console.log('Checking service worker:', registration.active ? registration.active.scriptURL : 'inactive');
           if (!registration.active || !registration.active.scriptURL.endsWith('firebase-messaging-sw.js')) {
-            registration.unregister();
+            console.log('Unregistering service worker:', registration.active ? registration.active.scriptURL : 'inactive');
+            registration.unregister().then(function() {
+              console.log('Service worker unregistered successfully');
+            }).catch(function(error) {
+              console.error('Failed to unregister service worker:', error);
+            });
           }
         });
       });
