@@ -278,3 +278,24 @@ def subscribe():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500 
+
+@pwa_dashboard_bp.route('/api/save-fcm-token', methods=['POST'])
+def save_fcm_token():
+    data = request.get_json()
+    token = data.get('token')
+    if not token:
+        return jsonify({'success': False, 'error': 'No token provided'}), 400
+    tokens_path = os.path.join(os.path.dirname(__file__), '../../fcm_tokens.json')
+    try:
+        if os.path.exists(tokens_path):
+            with open(tokens_path, 'r') as f:
+                tokens = json.load(f)
+        else:
+            tokens = []
+        if token not in tokens:
+            tokens.append(token)
+            with open(tokens_path, 'w') as f:
+                json.dump(tokens, f, indent=2)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500 

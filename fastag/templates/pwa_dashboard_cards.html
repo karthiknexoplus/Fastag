@@ -5784,5 +5784,71 @@
     document.getElementById('enablePushBtn').onclick = subscribeUserToPush;
     </script>
     <!-- END PUSH NOTIFICATION -->
+    <!-- Add Firebase SDKs for FCM -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+    <script>
+    // TODO: Replace with your Firebase project config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCHHIovN0SCj7DTuCni2NY1IsCSIRRgFnE",
+      authDomain: "pwapush-4e4e4.firebaseapp.com",
+      projectId: "pwapush-4e4e4",
+      storageBucket: "pwapush-4e4e4.firebasestorage.app",
+      messagingSenderId: "876451632085",
+      appId: "1:876451632085:web:bf98d777d19e45bb00e35c",
+      measurementId: "G-P6EVG2YPTR"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    async function subscribeUserToPush() {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          alert('You must allow notifications to enable push notifications!');
+          return;
+        }
+        // Get FCM token
+        const fcmToken = await messaging.getToken({ vapidKey: undefined });
+        if (!fcmToken) {
+          alert('Failed to get FCM token.');
+          return;
+        }
+        // Send token to backend (implement /pwa-dashboard/api/save-fcm-token)
+        const response = await fetch('/pwa-dashboard/api/save-fcm-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: fcmToken })
+        });
+        if (!response.ok) {
+          throw new Error('Failed to save FCM token: ' + response.status);
+        }
+        alert('Push notifications enabled successfully!');
+        document.getElementById('enablePushBtn').textContent = 'Push Enabled ✓';
+        document.getElementById('enablePushBtn').style.background = '#28a745';
+      } catch (error) {
+        alert('Error enabling push notifications: ' + error.message);
+      }
+    }
+
+    document.getElementById('enablePushBtn').onclick = subscribeUserToPush;
+
+    // Handle foreground messages
+    messaging.onMessage(function(payload) {
+      alert('Push notification received: ' + (payload.notification && payload.notification.title));
+    });
+    </script>
+    <!-- Register the Firebase Messaging service worker for FCM push notifications -->
+    <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/firebase-messaging-sw.js')
+        .then(function(reg) {
+          console.log('Firebase Messaging Service Worker registered', reg);
+        })
+        .catch(function(err) {
+          console.error('Service Worker registration failed', err);
+        });
+    }
+    </script>
 </body>
 </html> 
