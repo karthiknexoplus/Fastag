@@ -2999,7 +2999,7 @@
     function loadVehicleDemographicsSlide() {
         const container = document.getElementById('analyticsContent');
         
-        fetch('/pwa-dashboard/api/vehicle-demographics')
+        fetch('/analytics/api/vehicle-demographics')
             .then(response => response.json())
             .then(data => {
                 if (data.fuel_types && data.top_models) {
