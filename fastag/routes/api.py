@@ -499,6 +499,35 @@ def relay_control(relay_number, action):
         logger.error(f"Error in /api/relay/{relay_number}/{action}: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+@api.route('/readers', methods=['GET'])
+def get_readers():
+    """Get all readers with their information"""
+    try:
+        db = get_db()
+        readers = db.execute('''
+            SELECT r.id, r.reader_ip, r.type, r.mac_address, l.lane_name, loc.name as location_name
+            FROM readers r
+            JOIN lanes l ON r.lane_id = l.id
+            JOIN locations loc ON l.location_id = loc.id
+            ORDER BY r.id
+        ''').fetchall()
+        
+        readers_list = []
+        for reader in readers:
+            readers_list.append({
+                'id': reader['id'],
+                'reader_ip': reader['reader_ip'],
+                'type': reader['type'],
+                'mac_address': reader['mac_address'],
+                'lane_name': reader['lane_name'],
+                'location_name': reader['location_name']
+            })
+        
+        return jsonify({'success': True, 'readers': readers_list})
+    except Exception as e:
+        logging.exception(f"Error getting readers: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @api.route('/relay/all/<action>', methods=['POST'])
 def relay_control_all(action):
     """

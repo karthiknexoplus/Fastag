@@ -1713,50 +1713,68 @@
                         getReaderPower(readerId);
                     });
                 } else {
-                    // Fallback: show the working template content directly
-                    container.innerHTML = `
-                        <div class="reader-card" data-reader-id="1">
-                            <div class="reader-header">
-                                <div class="reader-icon">
-                                    <i class="fas fa-broadcast-tower"></i>
-                                </div>
-                                <div class="reader-info">
-                                    <div class="reader-name">Reader 1</div>
-                                    <div class="reader-details">Entry • Lane 1 • Location 1</div>
-                                </div>
-                            </div>
-                            
-                            <div class="reader-status">
-                                <span class="status-dot" id="status-1"></span>
-                                <span class="status-text" id="status-text-1">Checking...</span>
-                            </div>
-                            
-                            <div class="power-control">
-                                <div class="power-display">
-                                    <div class="power-label">Current RF Power</div>
-                                    <div class="power-value" id="power-1">--</div>
-                                </div>
-                                <div class="power-input">
-                                    <input type="number" 
-                                           id="power-input-1" 
-                                           min="1" 
-                                           max="30" 
-                                           placeholder="1-30"
-                                           style="width: 60px;">
-                                    <button class="power-btn" 
-                                            onclick="setReaderPower(1)"
-                                            id="set-btn-1">
-                                        Set
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div id="feedback-1" class="feedback" style="display: none;"></div>
-                        </div>
-                    `;
-                    
-                    // Initialize the reader
-                    getReaderPower(1);
+                    // If no readers found in the response, fetch them directly from the API
+                    fetch('/api/readers')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.readers && data.readers.length > 0) {
+                                let html = '';
+                                data.readers.forEach(reader => {
+                                    html += `
+                                        <div class="reader-card" data-reader-id="${reader.id}">
+                                            <div class="reader-header">
+                                                <div class="reader-icon">
+                                                    <i class="fas fa-broadcast-tower"></i>
+                                                </div>
+                                                <div class="reader-info">
+                                                    <div class="reader-name">Reader ${reader.id}</div>
+                                                    <div class="reader-details">${reader.type || 'Unknown'} • ${reader.lane_name || 'Unknown'} • ${reader.location_name || 'Unknown'}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="reader-status">
+                                                <span class="status-dot" id="status-${reader.id}"></span>
+                                                <span class="status-text" id="status-text-${reader.id}">Checking...</span>
+                                            </div>
+                                            
+                                            <div class="power-control">
+                                                <div class="power-display">
+                                                    <div class="power-label">Current RF Power</div>
+                                                    <div class="power-value" id="power-${reader.id}">--</div>
+                                                </div>
+                                                <div class="power-input">
+                                                    <input type="number" 
+                                                           id="power-input-${reader.id}" 
+                                                           min="1" 
+                                                           max="30" 
+                                                           placeholder="1-30"
+                                                           style="width: 60px;">
+                                                    <button class="power-btn" 
+                                                            onclick="setReaderPower(${reader.id})"
+                                                            id="set-btn-${reader.id}">
+                                                        Set
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="feedback-${reader.id}" class="feedback" style="display: none;"></div>
+                                        </div>
+                                    `;
+                                });
+                                container.innerHTML = html;
+                                
+                                // Initialize all readers
+                                data.readers.forEach(reader => {
+                                    getReaderPower(reader.id);
+                                });
+                            } else {
+                                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-broadcast-tower" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i><div>No readers configured</div></div>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching readers:', error);
+                            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading readers</div></div>';
+                        });
                 }
             })
             .catch(error => {
