@@ -2474,6 +2474,7 @@
             })
             .then(data => {
                 console.log('Data received:', data);
+                alert('Data received: ' + JSON.stringify(data).substring(0, 100) + '...');
                 let html = '<div class="analytics-chart-container">';
                 html += '<div class="analytics-chart-title"><i class="fas fa-clock"></i>Hourly Activity (Last 24 Hours)</div>';
                 html += '<div style="text-align: center; padding: 1rem; color: #666;">Data loaded successfully! Chart will appear below.</div>';
@@ -2515,7 +2516,9 @@
                 }
                 
                 html += '</div></div>';
+                console.log('Setting container HTML:', html.substring(0, 200) + '...');
                 container.innerHTML = html;
+                alert('HTML set in container');
                 
                 // Create line chart
                 createHourlyActivityChart(data);
