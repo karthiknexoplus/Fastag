@@ -5704,7 +5704,7 @@
         
         try {
             console.log('Registering service worker...');
-            const registration = await navigator.serviceWorker.register('/static/sw.js');
+            const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('Service worker registered:', registration);
             
             await navigator.serviceWorker.ready;
@@ -5775,7 +5775,7 @@
     
     // Register service worker on page load
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/static/sw.js')
+        navigator.serviceWorker.register('/sw.js')
             .then(reg => console.log('Service Worker registered', reg))
             .catch(err => console.error('Service Worker registration failed', err));
     }
