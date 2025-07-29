@@ -5782,14 +5782,7 @@
       };
     }
 
-    // Show modal on push notification received (foreground)
-    if (typeof messaging !== 'undefined') {
-      messaging.onMessage(function(payload) {
-        const title = payload.notification && payload.notification.title ? payload.notification.title : 'Notification';
-        const body = payload.notification && payload.notification.body ? payload.notification.body : '';
-        showPushReceivedModal(title, body);
-      });
-    }
+
     </script>
     <!-- END PUSH NOTIFICATION -->
     <!-- Add Firebase SDKs for FCM -->
@@ -5841,7 +5834,9 @@
 
     // Handle foreground messages
     messaging.onMessage(function(payload) {
-      alert('Push notification received: ' + (payload.notification && payload.notification.title));
+      const title = payload.notification && payload.notification.title ? payload.notification.title : 'Onebee Parking';
+      const body = payload.notification && payload.notification.body ? payload.notification.body : '';
+      showPushReceivedModal(title, body);
     });
     </script>
     <!-- Firebase Messaging service worker registration moved to cleanup script -->
