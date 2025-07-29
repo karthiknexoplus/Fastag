@@ -2365,8 +2365,17 @@
             headers: {
                 'Content-Type': 'application/json',
             }
-        }).then(() => {
-            window.location.href = '/pwa-login';
+        }).then(response => {
+            if (response.ok) {
+                // Clear any local storage or session storage if needed
+                localStorage.clear();
+                sessionStorage.clear();
+                // Redirect to login
+                window.location.href = '/pwa-login';
+            } else {
+                // Fallback logout
+                window.location.href = '/pwa-login';
+            }
         }).catch(() => {
             // Fallback logout
             window.location.href = '/pwa-login';

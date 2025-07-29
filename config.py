@@ -8,6 +8,13 @@ class Config:
     DB_PATH = os.environ.get('DB_PATH', os.path.join(BASE_DIR, 'instance', 'fastag.db'))
     DEBUG = False
     
+    # Session configuration for persistent login
+    PERMANENT_SESSION_LIFETIME = 30 * 24 * 60 * 60  # 30 days
+    SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_REFRESH_EACH_REQUEST = True
+    
     # Google OAuth Configuration
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com')
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', 'GOCSPX-your-nexoplus@1234')

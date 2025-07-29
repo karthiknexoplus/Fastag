@@ -205,6 +205,9 @@ def watchlist():
 @auth_bp.route('/onboarding')
 def onboarding():
     """Serve the onboarding slider page before login."""
+    # If user is already logged in, redirect to dashboard
+    if 'user' in session:
+        return redirect('/pwa-dashboard')
     return render_template('onboarding.html')
 
 @auth_bp.route('/debug/env')
@@ -369,6 +372,10 @@ def get_the_app():
 
 @auth_bp.route('/pwa-login', methods=['GET', 'POST'])
 def pwa_login():
+    # If user is already logged in, redirect to dashboard
+    if 'user' in session:
+        return redirect('/pwa-dashboard')
+        
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -379,6 +386,8 @@ def pwa_login():
         if len(contact_number) == 10:
             kyc_user = db.execute('SELECT * FROM kyc_users WHERE contact_number = ?', (contact_number,)).fetchone()
             if kyc_user and password == contact_number:
+                # Make session permanent (30 days)
+                session.permanent = True
                 session['user'] = {
                     'username': f"kyc_{contact_number}",
                     'login_method': 'kyc',
@@ -406,6 +415,10 @@ def pwa_login():
 
 @auth_bp.route('/pwa-dashboard')
 def pwa_dashboard():
+    # Check if user is logged in
+    if 'user' not in session:
+        return redirect('/pwa-login')
+    
     user = session.get('user', {})
     name = user.get('kyc_user_name', 'Karthik')
     vehicle = user.get('kyc_user_vehicle', None)
