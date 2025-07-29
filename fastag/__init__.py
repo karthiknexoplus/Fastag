@@ -205,4 +205,9 @@ def create_app():
     @app.route('/sw.js')
     def sw():
         return send_from_directory(os.path.abspath(os.path.dirname(__file__) + '/../'), 'sw.js')
+    @app.route('/firebase-messaging-sw.js')
+    def firebase_messaging_sw():
+        from flask import send_from_directory
+        import os
+        return send_from_directory(os.path.abspath(os.path.dirname(__file__) + '/../'), 'firebase-messaging-sw.js')
     return app 
