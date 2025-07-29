@@ -1053,7 +1053,7 @@
     
     <!-- Analytics Details Modal -->
     <div id="analyticsDetailsModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom analytics-details-modal" style="max-width: 95vw; min-width: 320px; max-height: 85vh;">
+        <div class="modal-content-custom analytics-details-modal" style="max-width: 98vw; min-width: 350px; max-height: 90vh;">
             <span class="close-modal" onclick="closeAnalyticsDetailsModal()">&times;</span>
             <div class="modal-header-custom">
                 <span class="modal-icon" id="detailsModalIcon"><i class="fas fa-chart-line"></i></span>
@@ -1895,34 +1895,40 @@
         flex: 1;
         overflow-y: auto;
         overflow-x: auto;
-        padding: 0.5rem 0;
-        max-height: 60vh;
+        padding: 0.3rem 0;
+        max-height: 70vh;
     }
     
     .analytics-details-content table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.75rem;
-        min-width: 600px;
+        font-size: 0.7rem;
+        table-layout: fixed;
     }
     
     .analytics-details-content th {
         background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         color: white;
-        padding: 0.5rem 0.3rem;
+        padding: 0.4rem 0.2rem;
         text-align: left;
         font-weight: 600;
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         position: sticky;
         top: 0;
         z-index: 10;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .analytics-details-content td {
-        padding: 0.4rem 0.3rem;
+        padding: 0.3rem 0.2rem;
         border-bottom: 1px solid #eee;
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .analytics-details-content tr:nth-child(even) {
@@ -2256,25 +2262,25 @@
                 // Render table/list based on type
                 if(type === 'occupancy' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Entry Time</th></tr>' +
-                        data.records.slice(0,20).map(r => 
+                        data.records.slice(0,50).map(r => 
                             `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.entry_time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'granted' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Type</th><th>Time</th></tr>' +
-                        data.records.slice(0,20).map(r => 
+                        data.records.slice(0,50).map(r => 
                             `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="reader-type ${r.reader_type}">${r.reader_type}</td><td class="time">${r.time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'denied' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Type</th><th>Time</th></tr>' +
-                        data.records.slice(0,20).map(r => 
+                        data.records.slice(0,50).map(r => 
                             `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="reader-type ${r.reader_type}">${r.reader_type}</td><td class="time">${r.time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'trend' && data.entry_exit_trend && data.entry_exit_trend.length) {
                     tableHtml = '<table><tr><th>Hour</th><th>Entries</th><th>Exits</th></tr>' +
-                        data.entry_exit_trend.slice(0,6).map(r => `<tr><td>${r[0]}:00</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('') + '</table>';
+                        data.entry_exit_trend.slice(0,12).map(r => `<tr><td>${r[0]}:00</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('') + '</table>';
                 } else if(type === 'unique' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Events</th><th>First Seen</th></tr>' +
-                        data.records.slice(0,20).map(r => 
+                        data.records.slice(0,50).map(r => 
                             `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="total-events">${r.total_events}</td><td class="time">${r.first_seen}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'fuel' && data.fuel_types && data.fuel_types.length) {
