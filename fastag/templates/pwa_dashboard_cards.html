@@ -1753,6 +1753,13 @@
         margin: 1rem 0;
     }
     
+    .share-options-grid-compact {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin: 1rem 0;
+    }
+    
     .share-option-btn {
         background: #fff;
         border: 1px solid #e9ecef;
@@ -1768,7 +1775,29 @@
         color: inherit;
     }
     
+    .share-option-btn-compact {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        text-decoration: none;
+        color: inherit;
+        min-width: 80px;
+    }
+    
     .share-option-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(118, 75, 162, 0.2);
+        border-color: #764ba2;
+    }
+    
+    .share-option-btn-compact:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 16px rgba(118, 75, 162, 0.2);
         border-color: #764ba2;
@@ -1785,11 +1814,24 @@
         color: white;
     }
     
-    .share-option-icon.whatsapp {
+    .share-option-icon-compact {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: white;
+    }
+    
+    .share-option-icon.whatsapp,
+    .share-option-icon-compact.whatsapp {
         background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
     }
     
-    .share-option-icon.email {
+    .share-option-icon.email,
+    .share-option-icon-compact.email {
         background: linear-gradient(135deg, #EA4335 0%, #C62828 100%);
     }
     
@@ -1812,6 +1854,12 @@
     .share-option-label {
         font-weight: 600;
         font-size: 0.9rem;
+        color: #333;
+    }
+    
+    .share-option-label-compact {
+        font-weight: 600;
+        font-size: 0.8rem;
         color: #333;
     }
     .analytics-chart-container {
@@ -5511,7 +5559,7 @@
     
     <!-- Share Report Modal -->
     <div id="shareReportModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 400px;">
+        <div class="modal-content-custom" style="max-width: 300px;">
             <span class="close-modal" onclick="closeShareReportModal()">&times;</span>
             <div class="modal-header-custom">
                 <span class="modal-icon"><i class="fas fa-share-alt"></i></span>
@@ -5519,47 +5567,19 @@
             </div>
             <div class="modal-desc" id="shareReportDesc">Choose how to share this report</div>
             
-            <div class="share-options-grid">
-                <button class="share-option-btn" onclick="shareViaWhatsApp()">
-                    <div class="share-option-icon whatsapp">
+            <div class="share-options-grid-compact">
+                <button class="share-option-btn-compact" onclick="shareViaWhatsApp()">
+                    <div class="share-option-icon-compact whatsapp">
                         <i class="fab fa-whatsapp"></i>
                     </div>
-                    <div class="share-option-label">WhatsApp</div>
+                    <div class="share-option-label-compact">WhatsApp</div>
                 </button>
                 
-                <button class="share-option-btn" onclick="shareViaEmail()">
-                    <div class="share-option-icon email">
+                <button class="share-option-btn-compact" onclick="shareViaEmail()">
+                    <div class="share-option-icon-compact email">
                         <i class="fas fa-envelope"></i>
                     </div>
-                    <div class="share-option-label">Email</div>
-                </button>
-                
-                <button class="share-option-btn" onclick="shareViaTelegram()">
-                    <div class="share-option-icon telegram">
-                        <i class="fab fa-telegram"></i>
-                    </div>
-                    <div class="share-option-label">Telegram</div>
-                </button>
-                
-                <button class="share-option-btn" onclick="shareViaSMS()">
-                    <div class="share-option-icon sms">
-                        <i class="fas fa-sms"></i>
-                    </div>
-                    <div class="share-option-label">SMS</div>
-                </button>
-                
-                <button class="share-option-btn" onclick="shareViaCopy()">
-                    <div class="share-option-icon copy">
-                        <i class="fas fa-copy"></i>
-                    </div>
-                    <div class="share-option-label">Copy Link</div>
-                </button>
-                
-                <button class="share-option-btn" onclick="shareViaSystem()">
-                    <div class="share-option-icon system">
-                        <i class="fas fa-share-alt"></i>
-                    </div>
-                    <div class="share-option-label">More Options</div>
+                    <div class="share-option-label-compact">Email</div>
                 </button>
             </div>
             
