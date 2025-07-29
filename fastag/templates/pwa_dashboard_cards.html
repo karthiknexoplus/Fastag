@@ -5293,10 +5293,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       var btn = document.getElementById('enablePushBtn');
       if (btn) {
-        btn.onclick = function() {
-          alert('Button clicked!');
-          subscribeForPushNotifications();
-        };
+        btn.onclick = subscribeUserToPush;
       }
     });
 
