@@ -3903,72 +3903,147 @@
         
         const reportUrl = `/analytics/api/export-data?report_type=${currentShareReportType}&start_date=${startDate}&end_date=${endDate}&format=excel`;
         
-        // Create download link
-        const link = document.createElement('a');
-        link.href = reportUrl;
-        link.download = `${currentShareReportType}_${startDate}_to_${endDate}.xlsx`;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        
-        // Trigger download
-        link.click();
-        document.body.removeChild(link);
-        
-        // Wait a moment for download to start, then share
-        setTimeout(() => {
-            shareFileBasedOnMethod(shareMethod, `${currentShareReportType}_${startDate}_to_${endDate}.xlsx`);
-        }, 1000);
+        // Fetch the file as blob and share directly
+        fetch(reportUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to generate report');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create file object
+                const filename = `${currentShareReportType}_${startDate}_to_${endDate}.xlsx`;
+                const file = new File([blob], filename, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                
+                // Share the actual file
+                shareFileDirectly(shareMethod, file);
+            })
+            .catch(error => {
+                console.error('Error generating report:', error);
+                showShareSuccess('Error generating report. Please try again.');
+            });
     }
     
-    function shareFileBasedOnMethod(shareMethod, filename) {
-        const message = `FASTag Parking Report: ${currentShareReportTitle}\n\nFile: ${filename}\nGenerated on: ${new Date().toLocaleDateString()}`;
+    function shareFileDirectly(shareMethod, file) {
+        const message = `FASTag Parking Report: ${currentShareReportTitle}\n\nFile: ${file.name}\nGenerated on: ${new Date().toLocaleDateString()}`;
         
         switch(shareMethod) {
             case 'whatsapp':
-                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message + '\n\nCheck your downloads for the Excel file.')}`;
-                window.open(whatsappUrl, '_blank');
+                shareFileViaWhatsApp(file, message);
                 break;
                 
             case 'email':
-                const subject = `FASTag Parking Report - ${currentShareReportTitle}`;
-                const body = `Please find the ${currentShareReportTitle} report attached.\n\nFile: ${filename}\nGenerated on: ${new Date().toLocaleDateString()}\n\nNote: The Excel file has been downloaded to your device.`;
-                const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                window.open(mailtoUrl, '_blank');
+                shareFileViaEmail(file, message);
                 break;
                 
             case 'telegram':
-                const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(message + '\n\nCheck your downloads for the Excel file.')}`;
-                window.open(telegramUrl, '_blank');
+                shareFileViaTelegram(file, message);
                 break;
                 
             case 'sms':
-                const smsUrl = `sms:?body=${encodeURIComponent(message + '\n\nCheck your downloads for the Excel file.')}`;
+                // SMS can't share files, so fallback to text
+                const smsUrl = `sms:?body=${encodeURIComponent(message + '\n\nFile: ' + file.name)}`;
                 window.open(smsUrl, '_blank');
                 break;
                 
             case 'system':
-                // Use Web Share API if available
-                if (navigator.share) {
-                    const shareData = {
-                        title: `FASTag Parking Report - ${currentShareReportTitle}`,
-                        text: message + '\n\nCheck your downloads for the Excel file.',
-                        url: window.location.origin
-                    };
-                    
-                    navigator.share(shareData).then(() => {
-                        showShareSuccess('Report shared successfully!');
-                    }).catch((error) => {
-                        console.log('Error sharing:', error);
-                        shareViaCopy();
-                    });
-                } else {
-                    shareViaCopy();
-                }
+                shareFileViaSystem(file, message);
                 break;
         }
         
         closeShareReportModal();
-        showShareSuccess('Report file downloaded and shared!');
+    }
+    
+    function shareFileViaWhatsApp(file, message) {
+        // Create a temporary download link for WhatsApp
+        const url = URL.createObjectURL(file);
+        
+        // Try to use WhatsApp Web API with file
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+        
+        // Also trigger download so user can manually attach
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.click();
+        
+        showShareSuccess('WhatsApp opened! Please attach the downloaded file manually.');
+    }
+    
+    function shareFileViaEmail(file, message) {
+        // Create mailto link with file attachment info
+        const subject = `FASTag Parking Report - ${currentShareReportTitle}`;
+        const body = `${message}\n\nFile: ${file.name}\n\nNote: The Excel file has been downloaded to your device. Please attach it manually.`;
+        const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.open(mailtoUrl, '_blank');
+        
+        // Also trigger download
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.click();
+        
+        showShareSuccess('Email opened! Please attach the downloaded file manually.');
+    }
+    
+    function shareFileViaTelegram(file, message) {
+        // Create Telegram share link
+        const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(message)}`;
+        window.open(telegramUrl, '_blank');
+        
+        // Also trigger download
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.click();
+        
+        showShareSuccess('Telegram opened! Please attach the downloaded file manually.');
+    }
+    
+    function shareFileViaSystem(file, message) {
+        // Use Web Share API with files if supported
+        if (navigator.share && navigator.canShare) {
+            const shareData = {
+                title: `FASTag Parking Report - ${currentShareReportTitle}`,
+                text: message,
+                files: [file]
+            };
+            
+            if (navigator.canShare(shareData)) {
+                navigator.share(shareData).then(() => {
+                    showShareSuccess('Report shared successfully with file!');
+                }).catch((error) => {
+                    console.log('Error sharing file:', error);
+                    // Fallback to download
+                    const url = URL.createObjectURL(file);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name;
+                    link.click();
+                    showShareSuccess('File downloaded! Please share manually.');
+                });
+            } else {
+                // Fallback to download
+                const url = URL.createObjectURL(file);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = file.name;
+                link.click();
+                showShareSuccess('File downloaded! Please share manually.');
+            }
+        } else {
+            // Fallback to download
+            const url = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = file.name;
+            link.click();
+            showShareSuccess('File downloaded! Please share manually.');
+        }
     }
     
     function showShareSuccess(message) {
