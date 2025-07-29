@@ -1903,32 +1903,31 @@
         width: 100%;
         border-collapse: collapse;
         font-size: 0.7rem;
-        table-layout: fixed;
+        table-layout: auto;
     }
     
     .analytics-details-content th {
         background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         color: white;
-        padding: 0.4rem 0.2rem;
+        padding: 0.4rem 0.3rem;
         text-align: left;
         font-weight: 600;
         font-size: 0.65rem;
         position: sticky;
         top: 0;
         z-index: 10;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        word-wrap: break-word;
+        white-space: normal;
     }
     
     .analytics-details-content td {
-        padding: 0.3rem 0.2rem;
+        padding: 0.3rem 0.3rem;
         border-bottom: 1px solid #eee;
         font-size: 0.65rem;
-        vertical-align: middle;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        vertical-align: top;
+        word-wrap: break-word;
+        white-space: normal;
+        line-height: 1.2;
     }
     
     .analytics-details-content tr:nth-child(even) {
@@ -1943,21 +1942,29 @@
         font-weight: 600;
         color: #764ba2;
         font-size: 0.7rem;
+        word-wrap: break-word;
+        white-space: normal;
     }
     
     .analytics-details-content .owner-name {
         color: #495057;
         font-size: 0.7rem;
+        word-wrap: break-word;
+        white-space: normal;
     }
     
     .analytics-details-content .lane-name {
         color: #6c757d;
         font-size: 0.7rem;
+        word-wrap: break-word;
+        white-space: normal;
     }
     
     .analytics-details-content .time {
         color: #6c757d;
         font-size: 0.65rem;
+        word-wrap: break-word;
+        white-space: normal;
     }
     
     .analytics-details-content .reader-type {
@@ -1966,6 +1973,8 @@
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
         text-transform: uppercase;
+        word-wrap: break-word;
+        white-space: normal;
     }
     
     .analytics-details-content .reader-type.entry {
@@ -1982,6 +1991,8 @@
         font-weight: 600;
         color: #764ba2;
         font-size: 0.7rem;
+        word-wrap: break-word;
+        white-space: normal;
     }
     
     /* Scrollbar styling */
