@@ -5829,5 +5829,17 @@
         });
     }
     </script>
+    <script>
+    // Unregister all service workers except firebase-messaging-sw.js to prevent duplicate notifications
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        registrations.forEach(function(registration) {
+          if (!registration.active || !registration.active.scriptURL.endsWith('firebase-messaging-sw.js')) {
+            registration.unregister();
+          }
+        });
+      });
+    }
+    </script>
 </body>
 </html> 
