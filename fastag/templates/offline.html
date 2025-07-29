@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline - FASTag Parking</title>
+    <title>Offline - Onebee Parking</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background: #f4f6fb;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
         .offline-container {
             min-height: 100vh;
@@ -19,13 +22,15 @@
             padding: 2rem;
         }
         .offline-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(118, 75, 162, 0.15);
-            padding: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(118, 75, 162, 0.25);
+            padding: 3rem 2rem;
             text-align: center;
-            max-width: 500px;
-            width: 100%;
+            max-width: 480px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .offline-icon {
             font-size: 4rem;
@@ -45,22 +50,23 @@
             margin-bottom: 2rem;
         }
         .retry-btn {
-            background: #764ba2;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
             border: none;
             color: white;
-            padding: 0.8rem 2rem;
+            padding: 1rem 2.5rem;
             border-radius: 50px;
             font-size: 1.1rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.3);
         }
         .retry-btn:hover {
-            background: #4b2e83;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(118, 75, 162, 0.4);
         }
         .status-indicator {
             display: inline-flex;
@@ -105,20 +111,26 @@
 <body>
     <div class="offline-container">
         <div class="offline-card">
+            <!-- Onebee Logo -->
+            <div style="margin-bottom: 1.5rem;">
+                <div style="font-size: 2.5rem; color: #764ba2; font-weight: 700; margin-bottom: 0.5rem;">Onebee</div>
+                <div style="font-size: 0.9rem; color: #888; font-weight: 500;">Parking Management</div>
+            </div>
+            
             <div class="status-indicator">
                 <i class="fas fa-wifi-slash"></i>
-                You're currently offline
+                Connection Unavailable
             </div>
             
             <div class="offline-icon">
                 <i class="fas fa-signal-slash"></i>
             </div>
             
-            <h1 class="offline-title">No Internet Connection</h1>
+            <h1 class="offline-title">Connection Unavailable</h1>
             
             <p class="offline-message">
-                It looks like you've lost your internet connection. 
-                Don't worry - some features of FASTag Parking are still available offline.
+                We're having trouble connecting to Onebee Parking. 
+                This could be due to a network issue or the server being temporarily unavailable.
             </p>
             
             <button class="retry-btn" onclick="retryConnection()">
@@ -127,12 +139,12 @@
             </button>
             
             <div class="features-list">
-                <h5><i class="fas fa-info-circle"></i> What's Available Offline</h5>
+                <h5><i class="fas fa-info-circle"></i> What You Can Do</h5>
                 <ul>
-                    <li><i class="fas fa-check-circle"></i> View cached dashboard data</li>
-                    <li><i class="fas fa-check-circle"></i> Access previously loaded pages</li>
-                    <li><i class="fas fa-check-circle"></i> View stored vehicle information</li>
-                    <li><i class="fas fa-check-circle"></i> Read cached reports</li>
+                    <li><i class="fas fa-check-circle"></i> Check your internet connection</li>
+                    <li><i class="fas fa-check-circle"></i> Try refreshing the page</li>
+                    <li><i class="fas fa-check-circle"></i> Contact support if the issue persists</li>
+                    <li><i class="fas fa-check-circle"></i> Wait a few minutes and try again</li>
                 </ul>
             </div>
         </div>
@@ -177,7 +189,7 @@
         function showOfflineMessage() {
             const message = document.createElement('div');
             message.className = 'alert alert-warning mt-3';
-            message.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Still offline. Please check your internet connection.';
+            message.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Connection still unavailable. Please try again in a moment.';
             document.querySelector('.offline-card').appendChild(message);
             
             // Remove message after 3 seconds
