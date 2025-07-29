@@ -5817,25 +5817,17 @@
       alert('Push notification received: ' + (payload.notification && payload.notification.title));
     });
     </script>
-    <!-- Register the Firebase Messaging service worker for FCM push notifications -->
+    <!-- Firebase Messaging service worker registration moved to cleanup script -->
     <script>
+    // Aggressively unregister all service workers except firebase-messaging-sw.js to prevent duplicate notifications
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/static/firebase-messaging-sw.js')
-        .then(function(reg) {
-          console.log('Firebase Messaging Service Worker registered', reg);
-        })
-        .catch(function(err) {
-          console.error('Service Worker registration failed', err);
-        });
-    }
-    </script>
-    <script>
-    // Unregister all service workers except firebase-messaging-sw.js to prevent duplicate notifications
-    if ('serviceWorker' in navigator) {
+      // First, unregister all existing service workers
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        console.log('Found', registrations.length, 'service workers');
         registrations.forEach(function(registration) {
           console.log('Checking service worker:', registration.active ? registration.active.scriptURL : 'inactive');
-          if (!registration.active || !registration.active.scriptURL.endsWith('firebase-messaging-sw.js')) {
+          // Unregister all except the root firebase-messaging-sw.js
+          if (!registration.active || !registration.active.scriptURL.includes('firebase-messaging-sw.js') || registration.active.scriptURL.includes('/static/')) {
             console.log('Unregistering service worker:', registration.active ? registration.active.scriptURL : 'inactive');
             registration.unregister().then(function() {
               console.log('Service worker unregistered successfully');
@@ -5845,6 +5837,17 @@
           }
         });
       });
+      
+      // Then, ensure only the correct firebase-messaging-sw.js is registered
+      setTimeout(function() {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then(function(reg) {
+            console.log('Firebase Messaging Service Worker registered at root:', reg);
+          })
+          .catch(function(err) {
+            console.error('Service Worker registration failed:', err);
+          });
+      }, 1000);
     }
     </script>
 </body>

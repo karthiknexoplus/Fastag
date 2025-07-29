@@ -1,6 +1,6 @@
 {
-  "name": "FASTag Parking Management",
-  "short_name": "FASTag",
+  "name": "Onebee Parking",
+  "short_name": "Onebee",
   "description": "FASTag Parking Management System - Monitor RFID readers, manage lanes, and track vehicle access",
   "start_url": "/onboarding",
   "display": "standalone",

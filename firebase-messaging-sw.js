@@ -20,7 +20,11 @@ messaging.onBackgroundMessage(function(payload) {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/static/icons/icon-192x192.png'
+    icon: '/static/icons/icon-192x192.png',
+    badge: '/static/icons/icon-192x192.png',
+    tag: 'onebee-notification', // Prevents duplicate notifications
+    requireInteraction: false,
+    silent: false
   };
   self.registration.showNotification(notificationTitle, notificationOptions);
 });

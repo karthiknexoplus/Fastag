@@ -40,52 +40,52 @@ headers = {
 # List of 10 different push notification messages
 MESSAGES = [
     {
-        "title": "🚗 Onebee Parking Update",
+        "title": "Onebee Parking",
         "body": "Dear Onebee User,\n\nExperience our world-class parking management system at your esteemed premises! ✨\n\nStay tuned for more updates from Onebee.\n\nBest Regards,\nTeam Onebee 🅿️🚦",
         "link": "https://www.onebee.in/"
     },
     {
-        "title": "🅿️ Hassle-Free Parking Awaits!",
+        "title": "Onebee Parking",
         "body": "Hello from Onebee!\n\nEnjoy seamless entry and exit at your location. Your convenience is our priority.\n\nKeep in touch for exciting features! 🚦",
         "link": "https://www.onebee.in/parking"
     },
     {
-        "title": "✨ Welcome to Onebee!",
+        "title": "Onebee Parking",
         "body": "Dear User,\n\nThank you for choosing Onebee for your parking needs. Discover smart, secure, and efficient parking today!\n\nTeam Onebee 🚗",
         "link": "https://www.onebee.in/welcome"
     },
     {
-        "title": "🚦 Parking Just Got Smarter!",
+        "title": "Onebee Parking",
         "body": "Hi!\n\nUnlock the power of technology with Onebee’s advanced parking management.\n\nStay tuned for more updates! ✨",
         "link": "https://www.onebee.in/smart"
     },
     {
-        "title": "🔔 Onebee Notification",
+        "title": "Onebee Parking",
         "body": "Dear User,\n\nYour parking experience is about to get even better. Watch this space for new features and offers!\n\nBest, Team Onebee 🅿️",
         "link": "https://www.onebee.in/updates"
     },
     {
-        "title": "🌟 Premium Parking Experience",
+        "title": "Onebee Parking",
         "body": "Hello!\n\nEnjoy premium parking services at your premises with Onebee.\n\nContact us for feedback or support! 🚗",
         "link": "https://www.onebee.in/support"
     },
     {
-        "title": "🚗 Your Spot Awaits!",
+        "title": "Onebee Parking",
         "body": "Dear Onebee User,\n\nYour reserved parking spot is ready. Enjoy a smooth and secure experience every time.\n\nTeam Onebee 🚦",
         "link": "https://www.onebee.in/reserve"
     },
     {
-        "title": "💡 Did You Know?",
+        "title": "Onebee Parking",
         "body": "Onebee offers real-time parking analytics and easy access control.\n\nExplore more on our website! 🌐",
         "link": "https://www.onebee.in/features"
     },
     {
-        "title": "🎉 Thank You for Choosing Onebee!",
+        "title": "Onebee Parking",
         "body": "We appreciate your trust in our parking solutions.\n\nStay connected for exclusive updates and offers! 🅿️",
         "link": "https://www.onebee.in/thankyou"
     },
     {
-        "title": "🚀 Upgrade Your Parking!",
+        "title": "Onebee Parking",
         "body": "Hi!\n\nUpgrade to Onebee’s smart parking for a seamless experience.\n\nVisit us for more info! ✨",
         "link": "https://www.onebee.in/upgrade"
     }
