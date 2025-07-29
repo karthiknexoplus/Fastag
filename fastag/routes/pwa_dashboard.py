@@ -247,29 +247,3 @@ def set_reader_power(reader_id):
     except Exception as e:
         logging.exception(f"Exception in SET reader power: {e}")
         return jsonify({"error": str(e)}), 500 
-
-@pwa_dashboard_bp.route('/api/vapid_public_key', methods=['GET'])
-def get_vapid_public_key():
-    return current_app.config['VAPID_PUBLIC_KEY'], 200, {'Content-Type': 'text/plain'}
-
-@pwa_dashboard_bp.route('/api/subscribe', methods=['POST'])
-def subscribe():
-    data = request.get_json()
-    subscription = data.get('subscription')
-    if not subscription:
-        return jsonify({'success': False, 'error': 'No subscription provided'}), 400
-    # Store subscriptions in a file (append mode)
-    subs_path = os.path.join(os.path.dirname(__file__), '../../push_subscriptions.json')
-    try:
-        if os.path.exists(subs_path):
-            with open(subs_path, 'r') as f:
-                subs = json.load(f)
-        else:
-            subs = []
-        if subscription not in subs:
-            subs.append(subscription)
-            with open(subs_path, 'w') as f:
-                json.dump(subs, f)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500 
