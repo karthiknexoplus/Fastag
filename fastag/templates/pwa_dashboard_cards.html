@@ -3734,9 +3734,9 @@
                             <button class="report-action-btn" onclick="event.stopPropagation(); openReportGenerator('${report.type}', '${report.title}')">
                                 <i class="fas fa-download"></i> Generate
                             </button>
-                            <button class="report-action-btn secondary" onclick="event.stopPropagation(); shareReport('${report.type}', '${report.title}')">
-                                <i class="fas fa-share"></i> Share
-                            </button>
+                                                       <button class="report-action-btn secondary" onclick="event.stopPropagation(); shareReportWithDateRange('${report.type}', '${report.title}', '', '')">
+                               <i class="fas fa-share"></i> Share
+                           </button>
                         </div>
                     </div>
                 `;
@@ -3821,39 +3821,45 @@
         document.getElementById('shareReportModal').style.display = 'flex';
     }
     
+    // Global variables for file sharing with date range
+    let currentShareStartDate = '';
+    let currentShareEndDate = '';
+    
+    function shareReportWithDateRange(reportType, reportTitle, startDate, endDate) {
+        currentShareReportType = reportType;
+        currentShareReportTitle = reportTitle;
+        currentShareStartDate = startDate;
+        currentShareEndDate = endDate;
+        
+        // Update modal description
+        document.getElementById('shareReportDesc').textContent = `Share ${reportTitle} (${startDate} to ${endDate})`;
+        
+        // Show share modal
+        document.getElementById('shareReportModal').style.display = 'flex';
+    }
+    
     function closeShareReportModal() {
         document.getElementById('shareReportModal').style.display = 'none';
     }
     
     function shareViaWhatsApp() {
-        const message = `Check out this ${currentShareReportTitle} report from FASTag Parking System!`;
-        const url = `${window.location.origin}/analytics/reports?type=${currentShareReportType}`;
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message + ' ' + url)}`;
-        window.open(whatsappUrl, '_blank');
-        closeShareReportModal();
+        // Generate and download the file first
+        generateAndShareFile('whatsapp');
     }
     
     function shareViaEmail() {
-        const subject = `FASTag Parking Report - ${currentShareReportTitle}`;
-        const body = `Please find the ${currentShareReportTitle} report attached.\n\nReport Type: ${currentShareReportTitle}\nGenerated from: ${window.location.origin}`;
-        const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.open(mailtoUrl, '_blank');
-        closeShareReportModal();
+        // Generate and download the file first
+        generateAndShareFile('email');
     }
     
     function shareViaTelegram() {
-        const message = `Check out this ${currentShareReportTitle} report from FASTag Parking System!`;
-        const url = `${window.location.origin}/analytics/reports?type=${currentShareReportType}`;
-        const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(message)}`;
-        window.open(telegramUrl, '_blank');
-        closeShareReportModal();
+        // Generate and download the file first
+        generateAndShareFile('telegram');
     }
     
     function shareViaSMS() {
-        const message = `FASTag Parking Report: ${currentShareReportTitle} - ${window.location.origin}/analytics/reports?type=${currentShareReportType}`;
-        const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
-        window.open(smsUrl, '_blank');
-        closeShareReportModal();
+        // Generate and download the file first
+        generateAndShareFile('sms');
     }
     
     function shareViaCopy() {
@@ -3876,25 +3882,93 @@
     }
     
     function shareViaSystem() {
-        // Use Web Share API if available
-        if (navigator.share) {
-            const shareData = {
-                title: `FASTag Parking Report - ${currentShareReportTitle}`,
-                text: `Check out this ${currentShareReportTitle} report from FASTag Parking System!`,
-                url: `${window.location.origin}/analytics/reports?type=${currentShareReportType}`
-            };
-            
-            navigator.share(shareData).then(() => {
-                showShareSuccess('Report shared successfully!');
-            }).catch((error) => {
-                console.log('Error sharing:', error);
-                shareViaCopy(); // Fallback to copy
-            });
+        // Generate and download the file first
+        generateAndShareFile('system');
+    }
+    
+    function generateAndShareFile(shareMethod) {
+        // Show loading
+        showShareSuccess('Generating report file...');
+        
+        // Use provided date range or default to last 7 days
+        let startDate, endDate;
+        if (currentShareStartDate && currentShareEndDate) {
+            startDate = currentShareStartDate;
+            endDate = currentShareEndDate;
         } else {
-            // Fallback to copy
-            shareViaCopy();
+            const today = new Date();
+            endDate = today.toISOString().split('T')[0];
+            startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         }
+        
+        const reportUrl = `/analytics/api/export-data?report_type=${currentShareReportType}&start_date=${startDate}&end_date=${endDate}&format=excel`;
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.href = reportUrl;
+        link.download = `${currentShareReportType}_${startDate}_to_${endDate}.xlsx`;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        
+        // Trigger download
+        link.click();
+        document.body.removeChild(link);
+        
+        // Wait a moment for download to start, then share
+        setTimeout(() => {
+            shareFileBasedOnMethod(shareMethod, `${currentShareReportType}_${startDate}_to_${endDate}.xlsx`);
+        }, 1000);
+    }
+    
+    function shareFileBasedOnMethod(shareMethod, filename) {
+        const message = `FASTag Parking Report: ${currentShareReportTitle}\n\nFile: ${filename}\nGenerated on: ${new Date().toLocaleDateString()}`;
+        
+        switch(shareMethod) {
+            case 'whatsapp':
+                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message + '\n\nCheck your downloads for the Excel file.')}`;
+                window.open(whatsappUrl, '_blank');
+                break;
+                
+            case 'email':
+                const subject = `FASTag Parking Report - ${currentShareReportTitle}`;
+                const body = `Please find the ${currentShareReportTitle} report attached.\n\nFile: ${filename}\nGenerated on: ${new Date().toLocaleDateString()}\n\nNote: The Excel file has been downloaded to your device.`;
+                const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                window.open(mailtoUrl, '_blank');
+                break;
+                
+            case 'telegram':
+                const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(message + '\n\nCheck your downloads for the Excel file.')}`;
+                window.open(telegramUrl, '_blank');
+                break;
+                
+            case 'sms':
+                const smsUrl = `sms:?body=${encodeURIComponent(message + '\n\nCheck your downloads for the Excel file.')}`;
+                window.open(smsUrl, '_blank');
+                break;
+                
+            case 'system':
+                // Use Web Share API if available
+                if (navigator.share) {
+                    const shareData = {
+                        title: `FASTag Parking Report - ${currentShareReportTitle}`,
+                        text: message + '\n\nCheck your downloads for the Excel file.',
+                        url: window.location.origin
+                    };
+                    
+                    navigator.share(shareData).then(() => {
+                        showShareSuccess('Report shared successfully!');
+                    }).catch((error) => {
+                        console.log('Error sharing:', error);
+                        shareViaCopy();
+                    });
+                } else {
+                    shareViaCopy();
+                }
+                break;
+        }
+        
         closeShareReportModal();
+        showShareSuccess('Report file downloaded and shared!');
     }
     
     function showShareSuccess(message) {
