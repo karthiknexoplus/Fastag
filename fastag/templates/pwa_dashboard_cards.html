@@ -2602,27 +2602,33 @@
                 html += '</div>';
                 
                 html += '<div class="analytics-stats-grid">';
+                const fastagCount = data.fastag || 0;
+                const nonfastagCount = data.nonfastag || 0;
+                const total = fastagCount + nonfastagCount;
+                const fastagPercentage = total > 0 ? Math.round((fastagCount / total) * 100) : 0;
+                const nonfastagPercentage = total > 0 ? Math.round((nonfastagCount / total) * 100) : 0;
+                
                 html += `
                     <div class="analytics-stat-card">
                         <div class="analytics-stat-icon"><i class="fas fa-tag"></i></div>
                         <div class="analytics-stat-label">FASTag</div>
-                        <div class="analytics-stat-value">${data.fastag_count || 0}</div>
-                        <div class="analytics-stat-percentage">${data.fastag_percentage || 0}%</div>
+                        <div class="analytics-stat-value">${fastagCount}</div>
+                        <div class="analytics-stat-percentage">${fastagPercentage}%</div>
                     </div>
                 `;
                 html += `
                     <div class="analytics-stat-card">
                         <div class="analytics-stat-icon"><i class="fas fa-times-circle"></i></div>
                         <div class="analytics-stat-label">Non-FASTag</div>
-                        <div class="analytics-stat-value">${data.nonfastag_count || 0}</div>
-                        <div class="analytics-stat-percentage">${data.nonfastag_percentage || 0}%</div>
+                        <div class="analytics-stat-value">${nonfastagCount}</div>
+                        <div class="analytics-stat-percentage">${nonfastagPercentage}%</div>
                     </div>
                 `;
                 html += `
                     <div class="analytics-stat-card">
                         <div class="analytics-stat-icon"><i class="fas fa-percentage"></i></div>
                         <div class="analytics-stat-label">Total</div>
-                        <div class="analytics-stat-value">${(data.fastag_count || 0) + (data.nonfastag_count || 0)}</div>
+                        <div class="analytics-stat-value">${total}</div>
                         <div class="analytics-stat-percentage">vehicles</div>
                     </div>
                 `;
@@ -2901,7 +2907,7 @@
             data: {
                 labels: ['FASTag', 'Non-FASTag'],
                 datasets: [{
-                    data: [data.fastag_count || 0, data.nonfastag_count || 0],
+                    data: [data.fastag || 0, data.nonfastag || 0],
                     backgroundColor: ['#28a745', '#dc3545'],
                     borderWidth: 2,
                     borderColor: '#FFFFFF'
