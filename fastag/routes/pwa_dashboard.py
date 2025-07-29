@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for
 from fastag.utils.db import get_db
 import logging
+import requests
+from bs4 import BeautifulSoup
 
 pwa_dashboard_bp = Blueprint('pwa_dashboard', __name__)
 
@@ -25,6 +27,56 @@ def reader_settings():
     ''').fetchall()
     
     return render_template('pwa_reader_settings.html', readers=readers)
+
+@pwa_dashboard_bp.route('/api/fuel-price', methods=['GET'])
+def api_fuel_price():
+    """API endpoint for fuel prices"""
+    city_filter = request.args.get('city', '').strip().lower()
+    url = "https://www.coverfox.com/petrol-price-in-india/"
+    
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Find the first table for city-wise prices
+        tables = soup.find_all('table', class_='art-table')
+        city_table = tables[0] if tables else None
+        prices = []
+        cities = set()
+        
+        if city_table:
+            for row in city_table.tbody.find_all('tr'):
+                cols = row.find_all('td')
+                if len(cols) == 4:
+                    city1 = cols[0].text.strip()
+                    price1 = cols[1].text.strip()
+                    city2 = cols[2].text.strip()
+                    price2 = cols[3].text.strip()
+                    prices.append({'city': city1, 'price': price1})
+                    prices.append({'city': city2, 'price': price2})
+                    cities.add(city1)
+                    cities.add(city2)
+        
+        # Filter if city_filter is set
+        if city_filter:
+            filtered_prices = [p for p in prices if p['city'].lower() == city_filter]
+        else:
+            filtered_prices = prices
+            
+        return jsonify({
+            "success": True,
+            "prices": filtered_prices,
+            "cities": sorted(list(cities)),
+            "selected_city": city_filter
+        })
+        
+    except Exception as e:
+        logging.error(f"Error fetching fuel prices: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Unable to fetch fuel prices at the moment."
+        }), 500
 
 @pwa_dashboard_bp.route('/api/reader/<int:reader_id>/power', methods=['GET'])
 def get_reader_power(reader_id):

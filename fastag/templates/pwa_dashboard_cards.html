@@ -590,7 +590,7 @@
             <button class="feature-btn" onclick="showBankFinderModal()"><span class="icon"><i class="fas fa-university"></i></span></button>
             <button class="feature-btn" onclick="showFastagBalanceModal()"><span class="icon"><i class="fas fa-wallet"></i></span></button>
             <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-receipt"></i></span></button>
-            <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
+            <button class="feature-btn" onclick="showFuelPriceModal()"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
             <button class="feature-btn" onclick="showReaderSettingsModal()"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
             <button class="feature-btn" onclick="showBarrierModal()"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
             <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
@@ -984,6 +984,31 @@
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeReaderSettingsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Fuel Price Modal -->
+    <div id="fuelPriceModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closeFuelPriceModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-gas-pump"></i></span>
+                <span class="modal-title">Fuel Prices</span>
+            </div>
+            <div class="modal-desc">Current petrol prices across India</div>
+            <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:0.5em;">
+                <button class="input-icon-btn" style="font-size:1.3rem;color:#764ba2;background:none;border:none;outline:none;cursor:pointer;" onclick="toggleFuelPriceSearch()" title="Search"><i class="fas fa-search"></i></button>
+            </div>
+            <div id="fuelPriceSearchBox" class="fuel-price-search" style="display:none;">
+                <select id="fuelPriceCitySelect" class="form-control" onchange="filterFuelPrices()">
+                    <option value="">All Cities</option>
+                </select>
+            </div>
+            <div id="fuelPriceContainer" class="modal-records" style="overflow-x:auto;max-height:45vh;overflow-y:auto;">
+                <!-- Fuel prices will be loaded here -->
+            </div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeFuelPriceModal()">Close</button>
             </div>
         </div>
     </div>
@@ -1394,6 +1419,62 @@
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+    
+    /* Fuel Price Modal Styles */
+    .fuel-price-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(80,80,160,0.10);
+        padding: 1.2rem;
+        margin-bottom: 0.8rem;
+        transition: box-shadow 0.18s, transform 0.12s;
+        border: 1px solid #e8e8e8;
+    }
+    .fuel-price-card:hover {
+        box-shadow: 0 6px 18px rgba(118,75,162,0.13);
+        transform: translateY(2px);
+    }
+    .fuel-price-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .fuel-price-city {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    .fuel-price-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.2rem;
+    }
+    .fuel-price-value {
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        min-width: 80px;
+        text-align: center;
+    }
+    .fuel-price-search {
+        margin-bottom: 0.5em;
+    }
+    .fuel-price-search select {
+        border: 2px solid #e0d7f7;
+        border-radius: 8px;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        color: #333;
+        background: #fff;
+    }
+    .fuel-price-search select:focus {
+        outline: none;
+        border-color: #764ba2;
     }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -1898,6 +1979,122 @@
     document.getElementById('readerSettingsModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeReaderSettingsModal();
+        }
+    });
+
+    // Fuel Price modal functions
+    function showFuelPriceModal() {
+        document.getElementById('fuelPriceModal').style.display = 'flex';
+        loadFuelPrices();
+    }
+    
+    function closeFuelPriceModal() {
+        document.getElementById('fuelPriceModal').style.display = 'none';
+    }
+    
+    function loadFuelPrices() {
+        const container = document.getElementById('fuelPriceContainer');
+        const citySelect = document.getElementById('fuelPriceCitySelect');
+        
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading fuel prices...</div>';
+        
+        fetch('/pwa-dashboard/api/fuel-price')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.prices) {
+                    // Populate city dropdown
+                    citySelect.innerHTML = '<option value="">All Cities</option>';
+                    data.cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                    
+                    // Display prices
+                    displayFuelPrices(data.prices);
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Unable to fetch fuel prices</div></div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching fuel prices:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading fuel prices</div></div>';
+            });
+    }
+    
+    function displayFuelPrices(prices) {
+        const container = document.getElementById('fuelPriceContainer');
+        
+        if (prices.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-gas-pump" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i><div>No fuel prices available</div></div>';
+            return;
+        }
+        
+        let html = '<div style="max-height: 45vh; overflow-y: auto;">';
+        html += '<div style="display: grid; gap: 0.8rem;">';
+        
+        prices.forEach(price => {
+            html += `
+                <div class="fuel-price-card">
+                    <div class="fuel-price-header">
+                        <div>
+                            <div class="fuel-price-city">${price.city}</div>
+                            <div class="fuel-price-label">Petrol Price</div>
+                        </div>
+                        <div class="fuel-price-value">
+                            ₹${price.price}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+        container.innerHTML = html;
+    }
+    
+    function toggleFuelPriceSearch() {
+        const searchBox = document.getElementById('fuelPriceSearchBox');
+        const searchBtn = document.querySelector('[onclick="toggleFuelPriceSearch()"]');
+        
+        if (searchBox.style.display === 'none') {
+            searchBox.style.display = 'block';
+            searchBtn.innerHTML = '<i class="fas fa-times"></i>';
+            searchBtn.title = 'Close Search';
+        } else {
+            searchBox.style.display = 'none';
+            searchBtn.innerHTML = '<i class="fas fa-search"></i>';
+            searchBtn.title = 'Search';
+        }
+    }
+    
+    function filterFuelPrices() {
+        const citySelect = document.getElementById('fuelPriceCitySelect');
+        const selectedCity = citySelect.value;
+        
+        if (!selectedCity) {
+            // Reload all prices
+            loadFuelPrices();
+        } else {
+            // Filter by selected city
+            fetch(`/pwa-dashboard/api/fuel-price?city=${encodeURIComponent(selectedCity)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.prices) {
+                        displayFuelPrices(data.prices);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error filtering fuel prices:', error);
+                });
+        }
+    }
+    
+    // Close fuel price modal when clicking outside
+    document.getElementById('fuelPriceModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeFuelPriceModal();
         }
     });
 
