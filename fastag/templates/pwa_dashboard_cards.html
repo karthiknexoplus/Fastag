@@ -2505,9 +2505,18 @@
 
     function showAnalyticsModal() {
         console.log('Opening analytics modal...');
-        document.getElementById('analyticsModal').style.display = 'flex';
-        currentAnalyticsSlide = 0;
-        loadAnalyticsSlide(0);
+        try {
+            const modal = document.getElementById('analyticsModal');
+            if (!modal) {
+                console.error('Analytics modal not found!');
+                return;
+            }
+            modal.style.display = 'flex';
+            currentAnalyticsSlide = 0;
+            loadAnalyticsSlide(0);
+        } catch (error) {
+            console.error('Error opening analytics modal:', error);
+        }
     }
     
     function closeAnalyticsModal() {
@@ -2529,44 +2538,60 @@
     }
     
     function loadAnalyticsSlide(slideIndex) {
-        const container = document.getElementById('analyticsContent');
-        const slideName = analyticsSlides[slideIndex];
-        
-        console.log('Loading analytics slide:', slideIndex, slideName);
-        
-        // Update navigation
-        document.getElementById('currentSlide').textContent = slideIndex + 1;
-        document.getElementById('totalSlides').textContent = analyticsSlides.length;
-        document.getElementById('prevArrow').disabled = slideIndex === 0;
-        document.getElementById('nextArrow').disabled = slideIndex === analyticsSlides.length - 1;
-        
-        // Show loading
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading analytics...</div>';
-        
-        // Load specific slide content
-        switch(slideName) {
-            case 'vehicle-demographics':
-                // Temporary test - show static content
-                container.innerHTML = '<div class="analytics-chart-container"><div class="analytics-chart-title"><i class="fas fa-chart-pie"></i>Vehicle Demographics</div><div style="text-align: center; padding: 2rem; color: #666;">Analytics modal is working! This is slide 1 of 7.</div></div>';
-                break;
-            case 'fastag-vs-nonfastag':
-                loadFastagVsNonfastagSlide(container);
-                break;
-            case 'overstayed-vehicles':
-                loadOverstayedVehiclesSlide(container);
-                break;
-            case 'unique-vehicles':
-                loadUniqueVehiclesSlide(container);
-                break;
-            case 'entry-exit-trend':
-                loadEntryExitTrendSlide(container);
-                break;
-            case 'hourly-activity':
-                loadHourlyActivitySlide(container);
-                break;
-            case 'reader-health':
-                loadReaderHealthSlide(container);
-                break;
+        try {
+            const container = document.getElementById('analyticsContent');
+            if (!container) {
+                console.error('Analytics content container not found!');
+                return;
+            }
+            
+            const slideName = analyticsSlides[slideIndex];
+            console.log('Loading analytics slide:', slideIndex, slideName);
+            
+            // Update navigation
+            const currentSlideEl = document.getElementById('currentSlide');
+            const totalSlidesEl = document.getElementById('totalSlides');
+            const prevArrowEl = document.getElementById('prevArrow');
+            const nextArrowEl = document.getElementById('nextArrow');
+            
+            if (currentSlideEl) currentSlideEl.textContent = slideIndex + 1;
+            if (totalSlidesEl) totalSlidesEl.textContent = analyticsSlides.length;
+            if (prevArrowEl) prevArrowEl.disabled = slideIndex === 0;
+            if (nextArrowEl) nextArrowEl.disabled = slideIndex === analyticsSlides.length - 1;
+            
+            // Show loading
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading analytics...</div>';
+            
+                        // Load specific slide content
+            switch(slideName) {
+                case 'vehicle-demographics':
+                    // Temporary test - show static content
+                    container.innerHTML = '<div class="analytics-chart-container"><div class="analytics-chart-title"><i class="fas fa-chart-pie"></i>Vehicle Demographics</div><div style="text-align: center; padding: 2rem; color: #666;">Analytics modal is working! This is slide 1 of 7.</div></div>';
+                    break;
+                case 'fastag-vs-nonfastag':
+                    loadFastagVsNonfastagSlide(container);
+                    break;
+                case 'overstayed-vehicles':
+                    loadOverstayedVehiclesSlide(container);
+                    break;
+                case 'unique-vehicles':
+                    loadUniqueVehiclesSlide(container);
+                    break;
+                case 'entry-exit-trend':
+                    loadEntryExitTrendSlide(container);
+                    break;
+                case 'hourly-activity':
+                    loadHourlyActivitySlide(container);
+                    break;
+                case 'reader-health':
+                    loadReaderHealthSlide(container);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error loading analytics slide:', error);
+            if (container) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading analytics: ' + error.message + '</div></div>';
+            }
         }
     }
     
