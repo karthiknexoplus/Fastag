@@ -5275,8 +5275,10 @@
     }
     function showPushStatusMsg(msg) {
       var el = document.getElementById('pushStatusMsg');
-      el.textContent = msg;
-      el.style.display = 'block';
+      if (el) {
+        el.textContent = msg;
+        el.style.display = 'block';
+      }
     }
     
     // On load, check if already subscribed and hide button if so
