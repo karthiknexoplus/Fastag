@@ -20,12 +20,17 @@ class Config:
     VAPID_PUBLIC_KEY = None
     VAPID_PRIVATE_KEY_PATH = os.path.join(os.path.dirname(__file__), 'vapid_private.pem')
     VAPID_PUBLIC_KEY_PATH = os.path.join(os.path.dirname(__file__), 'vapid_public.txt')
+    
+    print(f"Loading VAPID keys from: {VAPID_PRIVATE_KEY_PATH} and {VAPID_PUBLIC_KEY_PATH}")
     try:
         with open(VAPID_PRIVATE_KEY_PATH, 'r') as f:
             VAPID_PRIVATE_KEY = f.read()
+            print("✓ VAPID private key loaded successfully")
         with open(VAPID_PUBLIC_KEY_PATH, 'r') as f:
             VAPID_PUBLIC_KEY = f.read().strip()
+            print(f"✓ VAPID public key loaded: {VAPID_PUBLIC_KEY[:20]}...")
     except Exception as e:
+        print(f"✗ Error loading VAPID keys: {e}")
         raise RuntimeError(f"VAPID key files not found or unreadable. Please generate 'vapid_private.pem' and 'vapid_public.txt' in the project root. Error: {e}")
 
 class ProductionConfig(Config):

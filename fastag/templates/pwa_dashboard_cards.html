@@ -5691,40 +5691,62 @@
     <button id="enablePushBtn" style="position:fixed;top:1rem;right:1rem;z-index:3000;background:#764ba2;color:#fff;padding:0.5rem 1rem;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(80,80,160,0.10);font-weight:600;">Enable Push Notifications</button>
     <script>
     async function subscribeUserToPush() {
+        console.log('Starting push notification subscription...');
+        
         if (!('serviceWorker' in navigator)) {
             alert('Service workers are not supported in this browser.');
             return;
         }
         
         try {
+            console.log('Registering service worker...');
             const registration = await navigator.serviceWorker.register('/static/sw.js');
-            await navigator.serviceWorker.ready;
+            console.log('Service worker registered:', registration);
             
+            await navigator.serviceWorker.ready;
+            console.log('Service worker ready');
+            
+            console.log('Requesting notification permission...');
             const permission = await Notification.requestPermission();
+            console.log('Permission result:', permission);
+            
             if (permission !== 'granted') {
                 alert('You must allow notifications to enable push notifications!');
                 return;
             }
             
-            // Get VAPID public key
+            console.log('Getting VAPID public key...');
             const vapidResp = await fetch('/pwa-dashboard/api/vapid_public_key');
+            if (!vapidResp.ok) {
+                throw new Error(`Failed to get VAPID key: ${vapidResp.status} ${vapidResp.statusText}`);
+            }
             const vapidPublicKey = await vapidResp.text();
-            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+            console.log('VAPID key received:', vapidPublicKey.substring(0, 20) + '...');
             
-            // Subscribe to push
+            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+            console.log('VAPID key converted');
+            
+            console.log('Subscribing to push...');
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: convertedVapidKey
             });
+            console.log('Push subscription created:', subscription);
             
-            // Send subscription to backend
+            console.log('Sending subscription to backend...');
             const response = await fetch('/pwa-dashboard/api/subscribe', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({subscription})
             });
             
+            if (!response.ok) {
+                throw new Error(`Failed to save subscription: ${response.status} ${response.statusText}`);
+            }
+            
             const result = await response.json();
+            console.log('Backend response:', result);
+            
             if (result.success) {
                 alert('Push notifications enabled successfully!');
                 document.getElementById('enablePushBtn').textContent = 'Push Enabled ✓';
