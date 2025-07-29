@@ -1,0 +1,52 @@
+{% if readers %}
+    {% for reader in readers %}
+    <div class="reader-card" data-reader-id="{{ reader.id }}">
+        <div class="reader-header">
+            <div class="reader-icon">
+                <i class="fas fa-broadcast-tower"></i>
+            </div>
+            <div class="reader-info">
+                <div class="reader-name">Reader {{ reader.id }}</div>
+                <div class="reader-details">
+                    {{ reader.type|title }} • {{ reader.lane_name }} • {{ reader.location_name }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="reader-status">
+            <span class="status-dot" id="status-{{ reader.id }}"></span>
+            <span class="status-text" id="status-text-{{ reader.id }}">Checking...</span>
+        </div>
+        
+        <div class="power-control">
+            <div class="power-display">
+                <div class="power-label">Current RF Power</div>
+                <div class="power-value" id="power-{{ reader.id }}">--</div>
+            </div>
+            <div class="power-input">
+                <input type="number" 
+                       id="power-input-{{ reader.id }}" 
+                       min="1" 
+                       max="30" 
+                       placeholder="1-30"
+                       style="width: 60px;">
+                <button class="power-btn" 
+                        onclick="setReaderPower({{ reader.id }})"
+                        id="set-btn-{{ reader.id }}">
+                    Set
+                </button>
+            </div>
+        </div>
+        
+        <div id="feedback-{{ reader.id }}" class="feedback" style="display: none;"></div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="no-readers">
+        <i class="fas fa-broadcast-tower"></i>
+        <div>No readers configured</div>
+        <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+            Configure readers in the main dashboard
+        </div>
+    </div>
+{% endif %} 
