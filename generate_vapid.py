@@ -18,8 +18,8 @@ def b64url(b):
     return base64.urlsafe_b64encode(b).rstrip(b'=') .decode('utf-8')
 
 # Save private key
-with open('vapid_private.pem', 'w') as f:
-    f.write(private_bytes.decode())
+with open('vapid_private.pem', 'wb') as f:
+    f.write(private_bytes)
 # Save public key
 with open('vapid_public.txt', 'w') as f:
     f.write(b64url(public_bytes))
