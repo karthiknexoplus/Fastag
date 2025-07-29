@@ -1392,6 +1392,14 @@
     .status-text.offline {
         color: #dc3545;
     }
+    .status-text.idle {
+        color: #ffc107;
+    }
+    .reader-activity {
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 0.2rem;
+    }
     .power-control {
         display: flex;
         align-items: center;
@@ -2428,6 +2436,18 @@
                             if (data.readers && data.readers.length > 0) {
                                 let html = '';
                                 data.readers.forEach(reader => {
+                                    // Determine status color and class based on backend status
+                                    let statusColor = '#dc3545'; // offline
+                                    let statusClass = 'offline';
+                                    
+                                    if (reader.status === 'online') {
+                                        statusColor = '#28a745';
+                                        statusClass = '';
+                                    } else if (reader.status === 'idle') {
+                                        statusColor = '#ffc107';
+                                        statusClass = 'idle';
+                                    }
+                                    
                                     html += `
                                         <div class="reader-card" data-reader-id="${reader.id}">
                                             <div class="reader-header">
@@ -2437,12 +2457,13 @@
                                                 <div class="reader-info">
                                                     <div class="reader-name">Reader ${reader.id}</div>
                                                     <div class="reader-details">${reader.type || 'Unknown'} • ${reader.lane_name || 'Unknown'} • ${reader.location_name || 'Unknown'}</div>
+                                                    <div class="reader-activity">${reader.last_event} • ${reader.events_24h} events (24h)</div>
                                                 </div>
                                             </div>
                                             
                                             <div class="reader-status">
-                                                <span class="status-dot" id="status-${reader.id}"></span>
-                                                <span class="status-text" id="status-text-${reader.id}">Checking...</span>
+                                                <span class="status-dot" id="status-${reader.id}" style="background: ${statusColor};"></span>
+                                                <span class="status-text ${statusClass}" id="status-text-${reader.id}">${reader.status.charAt(0).toUpperCase() + reader.status.slice(1)}</span>
                                             </div>
                                             
                                             <div class="power-control">
@@ -2499,34 +2520,31 @@
         
         if (!statusDot || !statusText || !powerValue || !setBtn) return;
         
-        // Show loading state
-        statusText.innerHTML = '<span class="loading"></span> Checking...';
-        setBtn.disabled = true;
-        
-        fetch(`/pwa-dashboard/api/reader/${readerId}/power`)
+        // Always try to get RF power regardless of status
+        fetch(`/api/rfid/rfpower?reader=${readerId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.rf_power !== undefined) {
                     powerValue.textContent = data.rf_power;
-                    statusDot.style.background = '#28a745';
-                    statusText.textContent = 'Online';
-                    statusText.className = 'status-text';
+                    // Enable power setting regardless of activity status
                     setBtn.disabled = false;
+                    
+                    // Update status to show RF power is accessible
+                    const currentStatus = statusText.textContent.toLowerCase();
+                    if (currentStatus === 'offline' || currentStatus === 'idle') {
+                        // Keep the original status but show RF power is available
+                        console.log(`Reader ${readerId}: RF power accessible (${data.rf_power}) but status is ${currentStatus}`);
+                    }
                 } else {
                     powerValue.textContent = '--';
-                    statusDot.style.background = '#dc3545';
-                    statusText.textContent = 'Offline';
-                    statusText.className = 'status-text offline';
                     setBtn.disabled = true;
                 }
             })
             .catch(error => {
                 console.error('Error fetching power:', error);
                 powerValue.textContent = '--';
-                statusDot.style.background = '#dc3545';
-                statusText.textContent = 'Error';
-                statusText.className = 'status-text offline';
                 setBtn.disabled = true;
+                // Don't change the status display - keep the backend-determined status
             });
     }
     
@@ -2549,12 +2567,12 @@
         setBtn.disabled = true;
         hideFeedback(readerId);
         
-        fetch(`/pwa-dashboard/api/reader/${readerId}/power`, {
+        fetch(`/api/rfid/rfpower`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ rf_power: newPower })
+            body: JSON.stringify({ reader_id: readerId, rf_power: newPower })
         })
         .then(response => response.json())
         .then(data => {
