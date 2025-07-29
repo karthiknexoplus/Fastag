@@ -1050,6 +1050,27 @@
             </div>
         </div>
     </div>
+    
+    <!-- Analytics Details Modal -->
+    <div id="analyticsDetailsModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closeAnalyticsDetailsModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon" id="detailsModalIcon"><i class="fas fa-chart-line"></i></span>
+                <span class="modal-title" id="detailsModalTitle">Analytics Details</span>
+            </div>
+            <div class="modal-desc" id="detailsModalDesc">Detailed analytics information</div>
+            
+            <div class="analytics-details-content" id="analyticsDetailsContent">
+                <!-- Individual analytics details will be loaded here -->
+            </div>
+            
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeAnalyticsDetailsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    
     <style>
     .modal-custom {
         position: fixed;
@@ -2064,11 +2085,11 @@
 
     // Show analytics details modal
     function showAnalyticsDetails(type) {
-        const modal = document.getElementById('analyticsModal');
-        const icon = document.getElementById('modalIcon');
-        const title = document.getElementById('modalTitle');
-        const desc = document.getElementById('modalDesc');
-        const records = document.getElementById('modalRecords');
+        const modal = document.getElementById('analyticsDetailsModal');
+        const icon = document.getElementById('detailsModalIcon');
+        const title = document.getElementById('detailsModalTitle');
+        const desc = document.getElementById('detailsModalDesc');
+        const content = document.getElementById('analyticsDetailsContent');
         modal.style.display = 'flex';
         let iconHtml = '', titleText = '', descText = '', apiUrl = '', tableHtml = '';
         // Set icon, title, desc, and API endpoint for each type
@@ -2113,7 +2134,7 @@
         icon.innerHTML = iconHtml;
         title.textContent = titleText;
         desc.textContent = descText;
-        records.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
         // Fetch and render records
         fetch(apiUrl)
             .then(r => r.json())
@@ -2148,11 +2169,15 @@
                 } else {
                     tableHtml = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No records found.</div>';
                 }
-                records.innerHTML = tableHtml;
+                content.innerHTML = tableHtml;
             })
             .catch(() => {
-                records.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Failed to load records.</div>';
+                content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Failed to load records.</div>';
             });
+    }
+    
+    function closeAnalyticsDetailsModal() {
+        document.getElementById('analyticsDetailsModal').style.display = 'none';
     }
     function closeAnalyticsModal() {
         document.getElementById('analyticsModal').style.display = 'none';
