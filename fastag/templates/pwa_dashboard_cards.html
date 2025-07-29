@@ -4075,14 +4075,13 @@
             .catch(() => alert('Failed to delete user'));
     }
     function editKycUser(id) {
-        // Close the KYC users list modal first
-        closeKycUsersListModal();
-        
         // For simplicity, open the add modal prefilled for editing
         fetch(`/api/kyc_users/${id}`)
             .then(r => r.json())
             .then(data => {
                 if (data.success && data.user) {
+                    // Close the KYC users list modal first, then open edit modal
+                    closeKycUsersListModal();
                     openAddKycUserModal();
                     document.getElementById('kycName').value = data.user.name;
                     document.getElementById('kycFastagId').value = data.user.fastag_id;
