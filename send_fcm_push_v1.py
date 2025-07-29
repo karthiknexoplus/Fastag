@@ -8,8 +8,8 @@ from google.oauth2 import service_account
 import google.auth.transport.requests
 
 # TODO: Fill in your service account JSON file path and Firebase project ID
-SERVICE_ACCOUNT_FILE = 'path/to/your-service-account.json'
-FIREBASE_PROJECT_ID = 'your-firebase-project-id'
+SERVICE_ACCOUNT_FILE = 'pwapush-4e4e4-5a979a55d9d3.json'
+FIREBASE_PROJECT_ID = 'pwapush-4e4e4'
 
 FCM_ENDPOINT = f'https://fcm.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/messages:send'
 
