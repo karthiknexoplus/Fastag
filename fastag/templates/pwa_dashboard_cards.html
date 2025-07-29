@@ -591,7 +591,7 @@
             <button class="feature-btn" onclick="showFastagBalanceModal()"><span class="icon"><i class="fas fa-wallet"></i></span></button>
             <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-receipt"></i></span></button>
             <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
-            <button class="feature-btn" onclick="location.href='/pwa-dashboard/reader-settings'"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
+            <button class="feature-btn" onclick="showReaderSettingsModal()"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
             <button class="feature-btn" onclick="showBarrierModal()"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
             <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
         </div>
@@ -970,6 +970,23 @@
             </div>
         </div>
     </div>
+    <!-- Reader Settings Modal -->
+    <div id="readerSettingsModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closeReaderSettingsModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-sliders-h"></i></span>
+                <span class="modal-title">Reader Settings</span>
+            </div>
+            <div class="modal-desc">Manage RF power for all readers</div>
+            <div id="readers-container" class="modal-records">
+                <!-- Readers will be loaded here -->
+            </div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeReaderSettingsModal()">Close</button>
+            </div>
+        </div>
+    </div>
     <style>
     .modal-custom {
         position: fixed;
@@ -1214,6 +1231,170 @@
     .kyc-address-cell { max-width: 180px; word-break: break-word; white-space: pre-line; }
     .kyc-edit-btn i { color: #764ba2; }
     .kyc-delete-btn i { color: #dc3545; }
+    
+    /* Reader Settings Modal Styles */
+    .reader-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(80,80,160,0.10);
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        transition: box-shadow 0.18s, transform 0.12s;
+        cursor: pointer;
+        border: none;
+        outline: none;
+    }
+    .reader-card:active, .reader-card:focus {
+        box-shadow: 0 6px 18px rgba(118,75,162,0.13);
+        transform: translateY(2px) scale(0.98);
+    }
+    .reader-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
+    .reader-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+    }
+    .reader-info {
+        flex: 1;
+    }
+    .reader-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 0.2rem;
+    }
+    .reader-details {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    .reader-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.8rem;
+    }
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #28a745;
+    }
+    .status-dot.offline {
+        background: #dc3545;
+    }
+    .status-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #28a745;
+    }
+    .status-text.offline {
+        color: #dc3545;
+    }
+    .power-control {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 0.8rem;
+    }
+    .power-display {
+        flex: 1;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 0.8rem;
+        text-align: center;
+    }
+    .power-label {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 0.3rem;
+    }
+    .power-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #764ba2;
+    }
+    .power-input {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .power-input input {
+        width: 60px;
+        text-align: center;
+        border: 2px solid #e0d7f7;
+        border-radius: 6px;
+        padding: 0.5rem;
+        font-weight: 600;
+        color: #764ba2;
+    }
+    .power-input input:focus {
+        outline: none;
+        border-color: #764ba2;
+    }
+    .power-btn {
+        background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.18s;
+    }
+    .power-btn:active {
+        background: linear-gradient(90deg, #ffe082 0%, #764ba2 100%);
+    }
+    .power-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    .feedback {
+        margin-top: 0.8rem;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .feedback.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .feedback.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .feedback.warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #764ba2;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -1497,6 +1678,164 @@
     document.getElementById('logoutModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeLogoutModal();
+        }
+    });
+
+    // Reader Settings modal functions
+    function showReaderSettingsModal() {
+        document.getElementById('readerSettingsModal').style.display = 'flex';
+        loadReadersData();
+    }
+    
+    function closeReaderSettingsModal() {
+        document.getElementById('readerSettingsModal').style.display = 'none';
+    }
+    
+    function loadReadersData() {
+        const container = document.getElementById('readers-container');
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading readers...</div>';
+        
+        fetch('/pwa-dashboard/reader-settings')
+            .then(response => response.text())
+            .then(html => {
+                // Extract the readers data from the response
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const readersContainer = doc.getElementById('readers-container');
+                
+                if (readersContainer) {
+                    container.innerHTML = readersContainer.innerHTML;
+                    // Initialize all readers after loading
+                    const readers = container.querySelectorAll('.reader-card');
+                    readers.forEach(reader => {
+                        const readerId = reader.getAttribute('data-reader-id');
+                        getReaderPower(readerId);
+                    });
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-broadcast-tower" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i><div>No readers configured</div></div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading readers:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading readers</div></div>';
+            });
+    }
+    
+    function getReaderPower(readerId) {
+        const statusDot = document.getElementById(`status-${readerId}`);
+        const statusText = document.getElementById(`status-text-${readerId}`);
+        const powerValue = document.getElementById(`power-${readerId}`);
+        const setBtn = document.getElementById(`set-btn-${readerId}`);
+        
+        if (!statusDot || !statusText || !powerValue || !setBtn) return;
+        
+        // Show loading state
+        statusText.innerHTML = '<span class="loading"></span> Checking...';
+        setBtn.disabled = true;
+        
+        fetch(`/pwa-dashboard/api/reader/${readerId}/power`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.rf_power !== undefined) {
+                    powerValue.textContent = data.rf_power;
+                    statusDot.style.background = '#28a745';
+                    statusText.textContent = 'Online';
+                    statusText.className = 'status-text';
+                    setBtn.disabled = false;
+                } else {
+                    powerValue.textContent = '--';
+                    statusDot.style.background = '#dc3545';
+                    statusText.textContent = 'Offline';
+                    statusText.className = 'status-text offline';
+                    setBtn.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching power:', error);
+                powerValue.textContent = '--';
+                statusDot.style.background = '#dc3545';
+                statusText.textContent = 'Error';
+                statusText.className = 'status-text offline';
+                setBtn.disabled = true;
+            });
+    }
+    
+    function setReaderPower(readerId) {
+        const powerInput = document.getElementById(`power-input-${readerId}`);
+        const setBtn = document.getElementById(`set-btn-${readerId}`);
+        const feedback = document.getElementById(`feedback-${readerId}`);
+        
+        if (!powerInput || !setBtn || !feedback) return;
+        
+        const newPower = parseInt(powerInput.value);
+        
+        if (!newPower || newPower < 1 || newPower > 30) {
+            showFeedback(readerId, 'Please enter a valid power value (1-30)', 'error');
+            return;
+        }
+        
+        // Show loading state
+        setBtn.innerHTML = '<span class="loading"></span>';
+        setBtn.disabled = true;
+        hideFeedback(readerId);
+        
+        fetch(`/pwa-dashboard/api/reader/${readerId}/power`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rf_power: newPower })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showFeedback(readerId, data.message, 'success');
+                document.getElementById(`power-${readerId}`).textContent = data.rf_power;
+                powerInput.value = '';
+            } else if (data.status === 'warning') {
+                showFeedback(readerId, data.message, 'warning');
+                if (data.rf_power) {
+                    document.getElementById(`power-${readerId}`).textContent = data.rf_power;
+                }
+            } else {
+                showFeedback(readerId, data.error || 'Failed to set power', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error setting power:', error);
+            showFeedback(readerId, 'Network error. Please try again.', 'error');
+        })
+        .finally(() => {
+            setBtn.innerHTML = 'Set';
+            setBtn.disabled = false;
+        });
+    }
+    
+    function showFeedback(readerId, message, type) {
+        const feedback = document.getElementById(`feedback-${readerId}`);
+        if (!feedback) return;
+        
+        feedback.textContent = message;
+        feedback.className = `feedback ${type}`;
+        feedback.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            hideFeedback(readerId);
+        }, 5000);
+    }
+    
+    function hideFeedback(readerId) {
+        const feedback = document.getElementById(`feedback-${readerId}`);
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+    
+    // Close reader settings modal when clicking outside
+    document.getElementById('readerSettingsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeReaderSettingsModal();
         }
     });
 

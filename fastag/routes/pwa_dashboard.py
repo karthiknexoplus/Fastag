@@ -24,6 +24,11 @@ def reader_settings():
         ORDER BY r.id
     ''').fetchall()
     
+    # Check if this is an AJAX request (from modal)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Return just the readers container HTML
+        return render_template('pwa_reader_settings_partial.html', readers=readers)
+    
     return render_template('pwa_reader_settings.html', readers=readers)
 
 @pwa_dashboard_bp.route('/api/reader/<int:reader_id>/power', methods=['GET'])
