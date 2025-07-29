@@ -138,6 +138,8 @@ def vehicle_mask(value):
 
 def create_app():
     from fastag.rfid.relay_controller import RelayController  # updated import after moving class
+    from flask import send_from_directory
+    import os
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config.Config')
     setup_logging(app.config['LOG_DIR'])
@@ -161,10 +163,8 @@ def create_app():
     from fastag.routes.offline import offline_bp
     from fastag.routes.health import health_bp
     from fastag.routes.pwa_dashboard import pwa_dashboard_bp
-    
     # Initialize OAuth
     init_oauth(app)
-    
     app.register_blueprint(auth_bp)
     app.register_blueprint(locations_bp)
     app.register_blueprint(lanes_bp)
@@ -201,12 +201,8 @@ def create_app():
             'FAVICON_FILENAME': os.environ.get('FAVICON_FILENAME', 'favicon.ico'),
             'APP_TITLE': os.environ.get('APP_TITLE', 'FASTag Parking'),
         }
-    return app
-
-# Serve the service worker at the web root
-from flask import send_from_directory
-from flask import current_app as app
-
-@app.route('/sw.js')
-def sw():
-    return send_from_directory(os.path.abspath(os.path.dirname(__file__) + '/../'), 'sw.js') 
+    # Serve the service worker at the web root
+    @app.route('/sw.js')
+    def sw():
+        return send_from_directory(os.path.abspath(os.path.dirname(__file__) + '/../'), 'sw.js')
+    return app 
