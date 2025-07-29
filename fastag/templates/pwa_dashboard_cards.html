@@ -4182,25 +4182,32 @@
     }
     
     // Close reports modal when clicking outside
-    document.getElementById('reportsModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeReportsModal();
-        }
-    });
-    
+    var reportsModal = document.getElementById('reportsModal');
+    if (reportsModal) {
+        reportsModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReportsModal();
+            }
+        });
+    }
     // Close report generator modal when clicking outside
-    document.getElementById('reportGeneratorModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeReportGeneratorModal();
-        }
-    });
-    
+    var reportGeneratorModal = document.getElementById('reportGeneratorModal');
+    if (reportGeneratorModal) {
+        reportGeneratorModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReportGeneratorModal();
+            }
+        });
+    }
     // Close share report modal when clicking outside
-    document.getElementById('shareReportModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeShareReportModal();
-        }
-    });
+    var shareReportModal = document.getElementById('shareReportModal');
+    if (shareReportModal) {
+        shareReportModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeShareReportModal();
+            }
+        });
+    }
 
     function showBarrierModal() {
         document.getElementById('barrierModal').style.display = 'flex';
