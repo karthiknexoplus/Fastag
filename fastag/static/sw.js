@@ -212,3 +212,41 @@ async function doBackgroundSync() {
   // For example, sync offline form submissions
   console.log('Performing background sync...');
 } 
+
+self.addEventListener('push', function(event) {
+    let data = {};
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data = { body: event.data.text() };
+        }
+    }
+    const title = data.title || 'FASTag Notification';
+    const options = {
+        body: data.body || 'You have a new notification!',
+        icon: '/static/icons/icon-192x192.png',
+        badge: '/static/icons/icon-192x192.png',
+        data: data.url || '/' // optional click url
+    };
+    event.waitUntil(
+        self.registration.showNotification(title, options)
+    );
+});
+
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    const url = event.notification.data || '/';
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then(function(clientList) {
+            for (var i = 0; i < clientList.length; i++) {
+                var client = clientList[i];
+                if (client.url === url && 'focus' in client)
+                    return client.focus();
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(url);
+            }
+        })
+    );
+}); 
