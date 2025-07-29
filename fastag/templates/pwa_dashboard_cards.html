@@ -2531,9 +2531,14 @@
         const ctx = canvas.getContext('2d');
         
         if (data.hourly_data && data.hourly_data.length > 0) {
+            console.log('Processing hourly data:', data.hourly_data);
             const labels = data.hourly_data.map(item => item[0] + ':00');
             const grantedData = data.hourly_data.map(item => item[2]);
             const deniedData = data.hourly_data.map(item => item[3]);
+            
+            console.log('Chart labels:', labels);
+            console.log('Granted data:', grantedData);
+            console.log('Denied data:', deniedData);
             
             new Chart(ctx, {
                 type: 'line',
