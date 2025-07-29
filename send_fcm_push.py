@@ -38,4 +38,4 @@ headers = {
 response = requests.post(FCM_ENDPOINT, headers=headers, json=payload)
 
 print(f"Response status: {response.status_code}")
-print(response.json()) 
+print(response.text) 
