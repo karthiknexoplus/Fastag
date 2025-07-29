@@ -1025,8 +1025,6 @@
                 <span class="modal-icon"><i class="fas fa-chart-line"></i></span>
                 <span class="modal-title">Analytics Dashboard</span>
             </div>
-            <div class="modal-desc">Analytics Dashboard</div>
-            
             <!-- Navigation Arrows -->
             <div class="analytics-nav">
                 <button class="nav-arrow" onclick="previousAnalyticsSlide()" id="prevArrow" style="display:none;">
@@ -1043,7 +1041,7 @@
             </div>
             
             <!-- Analytics Content Container -->
-            <div id="analyticsContent" class="analytics-content">
+            <div id="analyticsContent" class="analytics-content" style="padding: 0 3rem;">
                 <!-- Content will be loaded here -->
             </div>
             
@@ -1593,11 +1591,13 @@
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        width: 100%;
+        left: 0;
+        right: 0;
         display: flex;
         justify-content: space-between;
         pointer-events: none;
         z-index: 10;
+        padding: 0 1rem;
     }
     
     .nav-arrow {
@@ -1616,7 +1616,6 @@
         box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
         transition: all 0.3s ease;
         pointer-events: auto;
-        margin: 0 1rem;
     }
     
     .nav-arrow:hover {
