@@ -3900,39 +3900,7 @@
         generateAndShareFile('email');
     }
     
-    function shareViaTelegram() {
-        // Generate and download the file first
-        generateAndShareFile('telegram');
-    }
-    
-    function shareViaSMS() {
-        // Generate and download the file first
-        generateAndShareFile('sms');
-    }
-    
-    function shareViaCopy() {
-        const url = `${window.location.origin}/analytics/reports?type=${currentShareReportType}`;
-        
-        // Copy to clipboard
-        navigator.clipboard.writeText(url).then(() => {
-            showShareSuccess('Report link copied to clipboard!');
-        }).catch(() => {
-            // Fallback for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = url;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            showShareSuccess('Report link copied to clipboard!');
-        });
-        closeShareReportModal();
-    }
-    
-    function shareViaSystem() {
-        // Generate and download the file first
-        generateAndShareFile('system');
-    }
+
     
     function generateAndShareFile(shareMethod) {
         // Show loading
@@ -3984,20 +3952,6 @@
             case 'email':
                 shareFileViaEmail(file, message);
                 break;
-                
-            case 'telegram':
-                shareFileViaTelegram(file, message);
-                break;
-                
-            case 'sms':
-                // SMS can't share files, so fallback to text
-                const smsUrl = `sms:?body=${encodeURIComponent(message + '\n\nFile: ' + file.name)}`;
-                window.open(smsUrl, '_blank');
-                break;
-                
-            case 'system':
-                shareFileViaSystem(file, message);
-                break;
         }
         
         closeShareReportModal();
@@ -4037,62 +3991,7 @@
         showShareSuccess('Email opened! Please attach the downloaded file manually.');
     }
     
-    function shareFileViaTelegram(file, message) {
-        // Create Telegram share link
-        const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(message)}`;
-        window.open(telegramUrl, '_blank');
-        
-        // Also trigger download
-        const url = URL.createObjectURL(file);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = file.name;
-        link.click();
-        
-        showShareSuccess('Telegram opened! Please attach the downloaded file manually.');
-    }
-    
-    function shareFileViaSystem(file, message) {
-        // Use Web Share API with files if supported
-        if (navigator.share && navigator.canShare) {
-            const shareData = {
-                title: `FASTag Parking Report - ${currentShareReportTitle}`,
-                text: message,
-                files: [file]
-            };
-            
-            if (navigator.canShare(shareData)) {
-                navigator.share(shareData).then(() => {
-                    showShareSuccess('Report shared successfully with file!');
-                }).catch((error) => {
-                    console.log('Error sharing file:', error);
-                    // Fallback to download
-                    const url = URL.createObjectURL(file);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = file.name;
-                    link.click();
-                    showShareSuccess('File downloaded! Please share manually.');
-                });
-            } else {
-                // Fallback to download
-                const url = URL.createObjectURL(file);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = file.name;
-                link.click();
-                showShareSuccess('File downloaded! Please share manually.');
-            }
-        } else {
-            // Fallback to download
-            const url = URL.createObjectURL(file);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = file.name;
-            link.click();
-            showShareSuccess('File downloaded! Please share manually.');
-        }
-    }
+
     
     function showShareSuccess(message) {
         // Create a temporary success message
