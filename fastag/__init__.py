@@ -201,4 +201,12 @@ def create_app():
             'FAVICON_FILENAME': os.environ.get('FAVICON_FILENAME', 'favicon.ico'),
             'APP_TITLE': os.environ.get('APP_TITLE', 'FASTag Parking'),
         }
-    return app 
+    return app
+
+# Serve the service worker at the web root
+from flask import send_from_directory
+from flask import current_app as app
+
+@app.route('/sw.js')
+def sw():
+    return send_from_directory(os.path.abspath(os.path.dirname(__file__) + '/../'), 'sw.js') 
