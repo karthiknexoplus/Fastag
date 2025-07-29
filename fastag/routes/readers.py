@@ -221,15 +221,94 @@ def api_delete_reader(id):
 
 @readers_bp.route('/api/readers', methods=['GET'])
 def api_view_readers():
-    """API endpoint to view all readers (optionally filter by lane_id)"""
+    """API endpoint to view all readers with enhanced status and activity information"""
     lane_id = request.args.get('lane_id', type=int)
     try:
         db = get_db()
+        
+        # Build query with optional lane filter
         if lane_id:
-            readers = db.execute('SELECT id, lane_id, mac_address, type, reader_ip FROM readers WHERE lane_id = ?', (lane_id,)).fetchall()
+            readers = db.execute('''
+                SELECT r.id, r.lane_id, r.mac_address, r.type, r.reader_ip, l.lane_name, loc.name as location_name
+                FROM readers r
+                LEFT JOIN lanes l ON r.lane_id = l.id
+                LEFT JOIN locations loc ON l.location_id = loc.id
+                WHERE r.lane_id = ?
+                ORDER BY r.id
+            ''', (lane_id,)).fetchall()
         else:
-            readers = db.execute('SELECT id, lane_id, mac_address, type, reader_ip FROM readers').fetchall()
-        readers_list = [dict(r) for r in readers]
+            readers = db.execute('''
+                SELECT r.id, r.lane_id, r.mac_address, r.type, r.reader_ip, l.lane_name, loc.name as location_name
+                FROM readers r
+                LEFT JOIN lanes l ON r.lane_id = l.id
+                LEFT JOIN locations loc ON l.location_id = loc.id
+                ORDER BY r.id
+            ''').fetchall()
+        
+        readers_list = []
+        for reader in readers:
+            reader_id = reader['id']
+            
+            # Get activity data for last 24 hours
+            activity_data = db.execute("""
+                SELECT 
+                    COUNT(*) as total_events,
+                    MAX(al.timestamp) as last_event_time
+                FROM access_logs al
+                WHERE al.reader_id = ? AND al.timestamp >= datetime('now', '-24 hours')
+            """, (reader_id,)).fetchone()
+            
+            total_events = activity_data[0] or 0
+            last_event_time = activity_data[1]
+            
+            # Improved status logic
+            if total_events > 0:
+                status = "online"
+            else:
+                # Check if there's any activity in last 7 days
+                week_activity = db.execute("""
+                    SELECT COUNT(*) FROM access_logs 
+                    WHERE reader_id = ? AND timestamp >= datetime('now', '-7 days')
+                """, (reader_id,)).fetchone()[0]
+                
+                if week_activity > 0:
+                    status = "idle"
+                else:
+                    status = "offline"
+            
+            # Calculate time since last event
+            if last_event_time:
+                from datetime import datetime, timezone
+                last_event_dt = datetime.strptime(last_event_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
+                now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+                time_diff = now_utc - last_event_dt
+                minutes_ago = int(time_diff.total_seconds() / 60)
+                hours_ago = int(time_diff.total_seconds() / 3600)
+                days_ago = int(time_diff.total_seconds() / 86400)
+                
+                if minutes_ago < 60:
+                    last_event_str = f"{minutes_ago} min ago"
+                elif hours_ago < 24:
+                    last_event_str = f"{hours_ago} hours ago"
+                else:
+                    last_event_str = f"{days_ago} days ago"
+            else:
+                last_event_str = "No events yet"
+            
+            reader_dict = {
+                'id': reader['id'],
+                'lane_id': reader['lane_id'],
+                'mac_address': reader['mac_address'],
+                'type': reader['type'],
+                'reader_ip': reader['reader_ip'],
+                'lane_name': reader['lane_name'] or 'Unknown',
+                'location_name': reader['location_name'] or 'Unknown',
+                'status': status,
+                'last_event': last_event_str,
+                'events_24h': total_events
+            }
+            readers_list.append(reader_dict)
+        
         return {"success": True, "readers": readers_list}, 200
     except Exception as e:
         return {"success": False, "error": str(e)}, 500 
