@@ -555,6 +555,8 @@
             .analytics-grid { gap: 0.7rem; }
             .fab-center { width: 48px; height: 48px; font-size: 1.5rem; bottom: 1.2rem; }
             .logout-btn-gradient { width: 42px; height: 42px; font-size: 1.2rem; left: 1rem; top: 1rem; }
+            .action-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+            #actionModal .modal-content-custom { max-width: 95vw; margin: 1rem; }
         }
     </style>
 </head>
@@ -776,33 +778,43 @@
     </div>
     <!-- Action Modal -->
     <div id="actionModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 450px;">
+        <div class="modal-content-custom" style="max-width: 600px; max-height: 85vh;">
             <span class="close-modal" onclick="closeActionModal()">&times;</span>
             <div class="modal-header-custom">
                 <span class="modal-icon"><i class="fas fa-bolt"></i></span>
-                <span class="modal-title">Quick Actions</span>
+                <span class="modal-title">Recent Activity & Analytics</span>
             </div>
-            <div class="modal-desc">Perform quick actions and view important information.</div>
+            <div class="modal-desc">View recent activities and analytics data from the dashboard.</div>
             <div class="action-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
-                <div class="action-card" onclick="showTodayGranted()" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                <div class="action-card" onclick="showRecentActivity()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-list-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Recent Activity</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">All Events</div>
+                </div>
+                <div class="action-card" onclick="showRecentEntries()" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-sign-in-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Recent Entries</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Entry events</div>
+                </div>
+                <div class="action-card" onclick="showRecentExits()" style="background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-sign-out-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Recent Exits</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Exit events</div>
+                </div>
+                <div class="action-card" onclick="showRecentGrantedTags()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Today's Granted</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">View granted entries</div>
+                    <div style="font-weight: 600;">Recent Granted Tags</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Granted access</div>
                 </div>
-                <div class="action-card" onclick="showTodayDenied()" style="background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-times-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Today's Denied</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">View denied entries</div>
+                <div class="action-card" onclick="showTopGrantedTags()" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Top Granted Tags</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Most active tags</div>
                 </div>
-                <div class="action-card" onclick="showBarrierModal()" style="background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-door-open" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Barrier Control</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Control barriers</div>
-                </div>
-                <div class="action-card" onclick="showControllerStatusModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-microchip" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">System Status</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Check system health</div>
+                <div class="action-card" onclick="showMostDeniedTags()" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-ban" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Most Denied Tags</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Denied access</div>
                 </div>
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
@@ -2425,14 +2437,34 @@
         document.getElementById('actionModal').style.display = 'none';
     }
     
-    function showTodayGranted() {
+    function showRecentActivity() {
         closeActionModal();
-        showAnalyticsDetails('granted');
+        showAnalyticsDetails('recent-activity');
     }
     
-    function showTodayDenied() {
+    function showRecentEntries() {
         closeActionModal();
-        showAnalyticsDetails('denied');
+        showAnalyticsDetails('recent-entries');
+    }
+    
+    function showRecentExits() {
+        closeActionModal();
+        showAnalyticsDetails('recent-exits');
+    }
+    
+    function showRecentGrantedTags() {
+        closeActionModal();
+        showAnalyticsDetails('recent-granted-tags');
+    }
+    
+    function showTopGrantedTags() {
+        closeActionModal();
+        showAnalyticsDetails('top-granted-tags');
+    }
+    
+    function showMostDeniedTags() {
+        closeActionModal();
+        showAnalyticsDetails('most-denied-tags');
     }
     
     // Close action modal when clicking outside
