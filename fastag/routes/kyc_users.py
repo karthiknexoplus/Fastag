@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify, Response, send_file
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify, Response, send_file, current_app
 from fastag.utils.db import get_db
 import logging
 import requests
@@ -25,8 +25,19 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 kyc_users_bp = Blueprint('kyc_users', __name__)
 
+# PWA-only mode check function
+def check_pwa_only_mode():
+    if current_app.config.get('PWA_ONLY_MODE', False):
+        return redirect('/get-the-app')
+    return None
+
 @kyc_users_bp.route('/kyc_users', methods=['GET', 'POST'])
 def kyc_users():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -272,6 +283,11 @@ def api_delete_kyc_user(id):
 
 @kyc_users_bp.route('/kyc_users/edit/<int:id>', methods=['GET', 'POST'])
 def edit_kyc_user(id):
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -295,6 +311,11 @@ def edit_kyc_user(id):
 
 @kyc_users_bp.route('/kyc_users/delete/<int:id>', methods=['POST'])
 def delete_kyc_user(id):
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -306,6 +327,11 @@ def delete_kyc_user(id):
 
 @kyc_users_bp.route('/kyc_users/export/csv', methods=['GET'])
 def export_kyc_users_csv():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -340,6 +366,11 @@ def export_kyc_users_csv():
 
 @kyc_users_bp.route('/kyc_users/export/xlsx', methods=['GET'])
 def export_kyc_users_xlsx():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     if openpyxl is None:
@@ -380,6 +411,11 @@ def export_kyc_users_xlsx():
 
 @kyc_users_bp.route('/kyc_users/import', methods=['POST'])
 def import_kyc_users():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     db = get_db()
     file = request.files.get('file')
     if not file:

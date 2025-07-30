@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request, Response
+from flask import Blueprint, render_template, jsonify, request, Response, current_app, redirect
 from fastag.utils.db import get_db
 from datetime import datetime, timedelta
 import sqlite3
@@ -10,6 +10,12 @@ import csv
 from io import StringIO, BytesIO
 
 analytics_bp = Blueprint('analytics', __name__)
+
+# PWA-only mode check function
+def check_pwa_only_mode():
+    if current_app.config.get('PWA_ONLY_MODE', False):
+        return redirect('/get-the-app')
+    return None
 
 def get_analytics_data():
     """Get comprehensive analytics data"""
@@ -312,6 +318,11 @@ def get_analytics_data():
 @analytics_bp.route('/dashboard')
 def dashboard():
     """Main analytics dashboard"""
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     return render_template('analytics/dashboard.html')
 
 @analytics_bp.route('/api/analytics-data')
@@ -572,6 +583,11 @@ def today_denied_details():
 @analytics_bp.route('/reports')
 def reports():
     """Reports page"""
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     return render_template('analytics/reports.html')
 
 @analytics_bp.route('/api/export-data')
@@ -1119,6 +1135,11 @@ def export_data():
 @analytics_bp.route('/barrier-events')
 def barrier_events():
     """Barrier Events Analytics Page"""
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     return render_template('analytics/barrier_events.html')
 
 @analytics_bp.route('/api/barrier-events')
@@ -1874,6 +1895,11 @@ def denied_fastag_activity_feed():
 
 @analytics_bp.route('/pricing')
 def pricing():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     return render_template('pricing.html')
 
 @analytics_bp.route('/api/lane-utilization')

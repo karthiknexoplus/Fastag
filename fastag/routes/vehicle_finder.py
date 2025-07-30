@@ -1,12 +1,23 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, current_app, redirect
 import requests
 import logging
 import re
 
 vehicle_finder_bp = Blueprint('vehicle_finder', __name__)
 
+# PWA-only mode check function
+def check_pwa_only_mode():
+    if current_app.config.get('PWA_ONLY_MODE', False):
+        return redirect('/get-the-app')
+    return None
+
 @vehicle_finder_bp.route('/find-vehicle', methods=['GET', 'POST'])
 def find_vehicle():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     vehicle_data = None
     error = None
     

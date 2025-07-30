@@ -1,11 +1,22 @@
-from flask import Blueprint, redirect, url_for, session, flash, jsonify, request
+from flask import Blueprint, redirect, url_for, session, flash, jsonify, request, current_app
 import subprocess
 import os
 
 admin_bp = Blueprint('admin', __name__)
 
+# PWA-only mode check function
+def check_pwa_only_mode():
+    if current_app.config.get('PWA_ONLY_MODE', False):
+        return redirect('/get-the-app')
+    return None
+
 @admin_bp.route('/admin/restart_readers', methods=['POST'])
 def restart_readers():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         if request.is_json:
             return jsonify({'success': False, 'error': 'Unauthorized'}), 401

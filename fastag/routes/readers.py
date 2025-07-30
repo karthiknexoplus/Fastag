@@ -6,8 +6,19 @@ import re
 
 readers_bp = Blueprint('readers', __name__)
 
+# PWA-only mode check function
+def check_pwa_only_mode():
+    if current_app.config.get('PWA_ONLY_MODE', False):
+        return redirect('/get-the-app')
+    return None
+
 @readers_bp.route('/readers/<int:lane_id>', methods=['GET', 'POST'])
 def readers(lane_id):
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -31,6 +42,11 @@ def readers(lane_id):
 
 @readers_bp.route('/readers/edit/<int:id>', methods=['GET', 'POST'])
 def edit_reader(id):
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -54,6 +70,11 @@ def edit_reader(id):
 
 @readers_bp.route('/readers/delete/<int:id>', methods=['POST'])
 def delete_reader(id):
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -150,6 +171,11 @@ def open_barrier(id):
 
 @readers_bp.route('/rfid/rfpower', methods=['GET'])
 def rfid_rfpower_page():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     return render_template('rfid_rfpower.html')

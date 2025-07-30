@@ -1,12 +1,23 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, current_app
 from fastag.utils.db import get_db
 import logging
 import os
 
 locations_bp = Blueprint('locations', __name__)
 
+# PWA-only mode check function
+def check_pwa_only_mode():
+    if current_app.config.get('PWA_ONLY_MODE', False):
+        return redirect('/get-the-app')
+    return None
+
 @locations_bp.route('/locations', methods=['GET', 'POST'])
 def locations():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -24,6 +35,11 @@ def locations():
 
 @locations_bp.route('/locations/edit/<int:id>', methods=['GET', 'POST'])
 def edit_location(id):
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
@@ -40,6 +56,11 @@ def edit_location(id):
 
 @locations_bp.route('/locations/delete/<int:id>', methods=['POST'])
 def delete_location(id):
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
