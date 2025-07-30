@@ -335,6 +335,34 @@
         .action-card:active {
             transform: scale(0.98);
         }
+        /* KYC Users Modal Text Wrapping */
+        .kyc-address-cell {
+            max-width: 200px;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+        #kycUsersListRecords table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        #kycUsersListRecords table th,
+        #kycUsersListRecords table td {
+            padding: 0.5rem;
+            vertical-align: top;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+        #kycUsersListRecords table th:nth-child(1) { width: 15%; } /* Name */
+        #kycUsersListRecords table th:nth-child(2) { width: 15%; } /* FASTag ID */
+        #kycUsersListRecords table th:nth-child(3) { width: 15%; } /* Vehicle Number */
+        #kycUsersListRecords table th:nth-child(4) { width: 12%; } /* Contact */
+        #kycUsersListRecords table th:nth-child(5) { width: 28%; } /* Address */
+        #kycUsersListRecords table th:nth-child(6) { width: 7%; }  /* Edit */
+        #kycUsersListRecords table th:nth-child(7) { width: 8%; }  /* Delete */
         .bottom-nav {
             position: fixed;
             left: 0; right: 0; bottom: 0;
@@ -5027,14 +5055,14 @@
             });
     }
     function renderKycUsersList(users) {
-        let tableHtml = '<table style="min-width:700px;"><tr>' +
+        let tableHtml = '<table><tr>' +
             '<th>Name</th><th>FASTag ID</th><th>Vehicle Number</th><th>Contact</th><th>Address</th><th>Edit</th><th>Delete</th></tr>' +
             users.map(u => `<tr>` +
-                `<td>${u.name}</td>` +
-                `<td>${u.fastag_id}</td>` +
-                `<td>${u.vehicle_number}</td>` +
-                `<td>${u.contact_number}</td>` +
-                `<td class="kyc-address-cell">${u.address}</td>` +
+                `<td>${u.name || 'N/A'}</td>` +
+                `<td>${u.fastag_id || 'N/A'}</td>` +
+                `<td>${u.vehicle_number || 'N/A'}</td>` +
+                `<td>${u.contact_number || 'N/A'}</td>` +
+                `<td class="kyc-address-cell">${u.address || 'N/A'}</td>` +
                 `<td><button class="input-icon-btn kyc-edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
                 `<td><button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
             `</tr>`).join('') + '</table>';
