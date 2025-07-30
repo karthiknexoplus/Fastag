@@ -138,13 +138,27 @@ def vehicle_mask(value):
 
 def create_app():
     from fastag.rfid.relay_controller import RelayController  # updated import after moving class
-    from flask import send_from_directory
+    from flask import send_from_directory, redirect, url_for
     import os
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config.Config')
     setup_logging(app.config['LOG_DIR'])
     # Attach a single RelayController instance to the app
     app.relay_controller = RelayController()
+    
+    # PWA-only mode decorator
+    def pwa_only_required(f):
+        from functools import wraps
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if app.config.get('PWA_ONLY_MODE', False):
+                # In PWA-only mode, redirect non-PWA routes to get-the-app
+                return redirect('/get-the-app')
+            return f(*args, **kwargs)
+        return decorated_function
+    
+    # Register the decorator with the app
+    app.pwa_only_required = pwa_only_required
     # Register blueprints
     from fastag.routes.auth import auth_bp
     from fastag.routes.locations import locations_bp

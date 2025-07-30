@@ -9,15 +9,30 @@ import sqlite3
 
 auth_bp = Blueprint('auth', __name__)
 
+# PWA-only mode check function
+def check_pwa_only_mode():
+    if current_app.config.get('PWA_ONLY_MODE', False):
+        return redirect('/get-the-app')
+    return None
+
 @auth_bp.route('/')
 @auth_bp.route('/home')
 def home():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
+    
     if 'user' not in session:
         return redirect(url_for('auth.login'))
     return redirect(url_for('locations.locations'))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -59,6 +74,10 @@ def login():
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -99,6 +118,10 @@ def signup():
 
 @auth_bp.route('/logout')
 def logout():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
     user = session.get('user')
     username = user['username'] if isinstance(user, dict) else user
     session.pop('user', None)
@@ -111,6 +134,10 @@ def logout():
 
 @auth_bp.route('/audit-log')
 def audit_log():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
     db = get_db()
     # Get query params
     page = int(request.args.get('page', 1))
@@ -200,10 +227,18 @@ def api_audit_log():
 
 @auth_bp.route('/watchlist')
 def watchlist():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
     return render_template('watchlist.html')
 
 @auth_bp.route('/onboarding')
 def onboarding():
+    # Check PWA-only mode
+    pwa_check = check_pwa_only_mode()
+    if pwa_check:
+        return pwa_check
     """Serve the onboarding slider page before login."""
     # If user is already logged in, redirect to dashboard
     if 'user' in session:

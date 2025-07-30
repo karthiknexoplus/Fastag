@@ -21,6 +21,9 @@ class Config:
     
     # Feature flags
     FASTAG_FEATURES_ENABLED = os.environ.get('FASTAG_FEATURES_ENABLED', 'true').lower() == 'true'
+    
+    # PWA-only mode - when enabled, only PWA routes work
+    PWA_ONLY_MODE = os.environ.get('PWA_ONLY_MODE', 'false').lower() == 'true'
 
     # VAPID keys
     VAPID_PRIVATE_KEY = None
