@@ -1,0 +1,10 @@
+[Unit]
+Description=Onebee Push Notifications Timer
+Requires=onebee-notifications.service
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+
+[Install]
+WantedBy=timers.target 
