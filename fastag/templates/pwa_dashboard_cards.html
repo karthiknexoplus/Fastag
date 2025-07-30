@@ -788,33 +788,33 @@
             <div class="action-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
                 <div class="action-card" onclick="showRecentActivity()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-list-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Activity</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">All Events</div>
+                    <div style="font-weight: 600;">Today's Granted</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Successful entries</div>
                 </div>
                 <div class="action-card" onclick="showRecentEntries()" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-sign-in-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Entries</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Entry events</div>
+                    <div style="font-weight: 600;">Current Occupancy</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Vehicles inside</div>
                 </div>
                 <div class="action-card" onclick="showRecentExits()" style="background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-sign-out-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Exits</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Exit events</div>
+                    <i class="fas fa-times-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Today's Denied</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Denied entries</div>
                 </div>
                 <div class="action-card" onclick="showRecentGrantedTags()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Granted Tags</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Granted access</div>
+                    <div style="font-weight: 600;">Granted Access</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Successful entries</div>
                 </div>
                 <div class="action-card" onclick="showTopGrantedTags()" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Top Granted Tags</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Most active tags</div>
+                    <i class="fas fa-car" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Unique Vehicles</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Different vehicles</div>
                 </div>
                 <div class="action-card" onclick="showMostDeniedTags()" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-ban" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Most Denied Tags</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Denied access</div>
+                    <div style="font-weight: 600;">Denied Access</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Failed entries</div>
                 </div>
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
@@ -2439,32 +2439,32 @@
     
     function showRecentActivity() {
         closeActionModal();
-        showAnalyticsDetails('recent-activity');
+        showAnalyticsDetails('granted'); // Map to granted records for recent activity
     }
     
     function showRecentEntries() {
         closeActionModal();
-        showAnalyticsDetails('recent-entries');
+        showAnalyticsDetails('occupancy'); // Map to occupancy for recent entries
     }
     
     function showRecentExits() {
         closeActionModal();
-        showAnalyticsDetails('recent-exits');
+        showAnalyticsDetails('denied'); // Map to denied for recent exits
     }
     
     function showRecentGrantedTags() {
         closeActionModal();
-        showAnalyticsDetails('recent-granted-tags');
+        showAnalyticsDetails('granted'); // Map to granted records
     }
     
     function showTopGrantedTags() {
         closeActionModal();
-        showAnalyticsDetails('top-granted-tags');
+        showAnalyticsDetails('unique'); // Map to unique vehicles for top tags
     }
     
     function showMostDeniedTags() {
         closeActionModal();
-        showAnalyticsDetails('most-denied-tags');
+        showAnalyticsDetails('denied'); // Map to denied records
     }
     
     // Close action modal when clicking outside
