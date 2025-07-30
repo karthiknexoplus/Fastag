@@ -2441,8 +2441,11 @@
     
     function closeAnalyticsDetailsModal() {
         document.getElementById('analyticsDetailsModal').style.display = 'none';
-        // Show the action modal again when closing analytics details
-        showActionModal();
+        // Check if we came from action modal and return there
+        if (window.cameFromActionModal) {
+            showActionModal();
+            window.cameFromActionModal = false;
+        }
     }
     function closeAnalyticsModal() {
         document.getElementById('analyticsModal').style.display = 'none';
@@ -2527,36 +2530,43 @@
     
     function showRecentActivity() {
         document.getElementById('actionModal').style.display = 'none';
+        window.cameFromActionModal = true;
         showAnalyticsDetails('recent-activity');
     }
     
     function showRecentEntries() {
         document.getElementById('actionModal').style.display = 'none';
+        window.cameFromActionModal = true;
         showAnalyticsDetails('recent-entries');
     }
     
     function showRecentExits() {
         document.getElementById('actionModal').style.display = 'none';
+        window.cameFromActionModal = true;
         showAnalyticsDetails('recent-exits');
     }
     
     function showRecentGrantedTags() {
         document.getElementById('actionModal').style.display = 'none';
+        window.cameFromActionModal = true;
         showAnalyticsDetails('recent-granted-tags');
     }
     
     function showTopGrantedTags() {
         document.getElementById('actionModal').style.display = 'none';
+        window.cameFromActionModal = true;
         showAnalyticsDetails('top-granted-tags');
     }
     
     function showMostDeniedTags() {
         document.getElementById('actionModal').style.display = 'none';
+        window.cameFromActionModal = true;
         showAnalyticsDetails('most-denied-tags');
     }
     
     function showDeniedFastagActivity() {
         document.getElementById('actionModal').style.display = 'none';
+        window.cameFromActionModal = true;
         showAnalyticsDetails('denied-fastag-activity');
     }
     
