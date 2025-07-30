@@ -555,8 +555,11 @@
             .analytics-grid { gap: 0.7rem; }
             .fab-center { width: 48px; height: 48px; font-size: 1.5rem; bottom: 1.2rem; }
             .logout-btn-gradient { width: 42px; height: 42px; font-size: 1.2rem; left: 1rem; top: 1rem; }
-            .action-grid { grid-template-columns: 1fr; gap: 0.8rem; }
-            #actionModal .modal-content-custom { max-width: 95vw; margin: 1rem; }
+            .action-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+            #actionModal .modal-content-custom { max-width: 95vw; margin: 1rem; max-height: 90vh; }
+            .action-card { padding: 0.6rem !important; }
+            .action-card i { font-size: 1.3rem !important; }
+            .action-card div { font-size: 0.85rem !important; }
         }
     </style>
 </head>
@@ -785,36 +788,41 @@
                 <span class="modal-title">Recent Activity & Analytics</span>
             </div>
             <div class="modal-desc">View recent activities and analytics data from the dashboard.</div>
-            <div class="action-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
-                <div class="action-card" onclick="showRecentActivity()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-list-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Activity</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">All Events</div>
+            <div class="action-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin: 1rem 0;">
+                <div class="action-card" onclick="showRecentActivity()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.8rem; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-list-alt" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Recent Activity</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">All Events</div>
                 </div>
-                <div class="action-card" onclick="showRecentEntries()" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-sign-in-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Entries</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Entry events</div>
+                <div class="action-card" onclick="showRecentEntries()" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); color: white; padding: 0.8rem; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-sign-in-alt" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Recent Entries</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Entry events</div>
                 </div>
-                <div class="action-card" onclick="showRecentExits()" style="background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-sign-out-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Exits</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Exit events</div>
+                <div class="action-card" onclick="showRecentExits()" style="background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%); color: white; padding: 0.8rem; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-sign-out-alt" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Recent Exits</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Exit events</div>
                 </div>
-                <div class="action-card" onclick="showRecentGrantedTags()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Recent Granted Tags</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Granted access</div>
+                <div class="action-card" onclick="showRecentGrantedTags()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 0.8rem; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Recent Granted Tags</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Granted access</div>
                 </div>
-                <div class="action-card" onclick="showTopGrantedTags()" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Top Granted Tags</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Most active tags</div>
+                <div class="action-card" onclick="showTopGrantedTags()" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 0.8rem; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-trophy" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Top Granted Tags</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Most active tags</div>
                 </div>
-                <div class="action-card" onclick="showMostDeniedTags()" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-ban" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Most Denied Tags</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Denied access</div>
+                <div class="action-card" onclick="showMostDeniedTags()" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 0.8rem; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-ban" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Most Denied Tags</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Denied access</div>
+                </div>
+                <div class="action-card" onclick="showDeniedFastagActivity()" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 0.8rem; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Denied FASTag Activity</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">FASTag denials</div>
                 </div>
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
@@ -2343,6 +2351,12 @@
                 descText = 'Most frequently denied tags.';
                 apiUrl = '/analytics/api/most-denied-tags';
                 break;
+            case 'denied-fastag-activity':
+                iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+                titleText = 'Denied FASTag Activity';
+                descText = 'FASTag denial events and analysis.';
+                apiUrl = '/analytics/api/denied-fastag-activity-feed';
+                break;
         }
         icon.innerHTML = iconHtml;
         title.textContent = titleText;
@@ -2408,6 +2422,11 @@
                     tableHtml = '<table><tr><th>Vehicle</th><th>Owner</th><th>Count</th><th>Last Seen</th></tr>' +
                         data.most_denied_tags.slice(0,50).map(r => 
                             `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="count">${r.count}</td><td class="time">${r.last_seen}</td></tr>`
+                        ).join('') + '</table>';
+                } else if(type === 'denied-fastag-activity' && data.denied_fastag_activity && data.denied_fastag_activity.length) {
+                    tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Owner</th><th>Lane</th><th>Reason</th></tr>' +
+                        data.denied_fastag_activity.slice(0,50).map(r => 
+                            `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="lane-name">${r.lane_name}</td><td class="reason">${r.reason || 'N/A'}</td></tr>`
                         ).join('') + '</table>';
                 } else {
                     tableHtml = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No records found.</div>';
@@ -2531,6 +2550,11 @@
     function showMostDeniedTags() {
         closeActionModal();
         showAnalyticsDetails('most-denied-tags');
+    }
+    
+    function showDeniedFastagActivity() {
+        closeActionModal();
+        showAnalyticsDetails('denied-fastag-activity');
     }
     
     // Close action modal when clicking outside
