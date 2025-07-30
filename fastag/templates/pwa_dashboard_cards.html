@@ -61,47 +61,8 @@
             color: #222;
             text-align: center;
         }
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .notif-bell {
-            font-size: 1.3rem;
-            color: #764ba2;
-            background: #fff;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(80,80,160,0.10);
-            position: relative;
-        }
-        .logout-btn {
-            font-size: 1.2rem;
-            color: #764ba2;
-            background: #fff;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(80,80,160,0.10);
-            border: none;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.18s;
-        }
-        .logout-btn:hover {
-            background: #f3e9ff;
-            transform: scale(1.05);
-        }
-        .logout-btn:active {
-            transform: scale(0.95);
-        }
+
+
         .vehicle-info {
             font-size: 1.13rem;
             font-weight: 700;
@@ -111,17 +72,7 @@
             margin-bottom: 0.2rem;
             letter-spacing: 0.01em;
         }
-        .notif-bell .badge {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: #ffe082;
-            color: #764ba2;
-            font-size: 0.7rem;
-            border-radius: 50%;
-            padding: 2px 5px;
-            font-weight: 700;
-        }
+
         .feature-desc {
             width: 100%;
             text-align: center;
@@ -350,6 +301,34 @@
             color: #764ba2;
             transform: translateX(-50%) translateY(2px) scale(0.98);
         }
+        .logout-btn-gradient {
+            position: fixed;
+            left: 50%;
+            bottom: 5.5rem;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 12px rgba(255,81,47,0.25);
+            z-index: 1003;
+            transition: all 0.18s;
+            cursor: pointer;
+        }
+        .logout-btn-gradient:hover {
+            background: linear-gradient(135deg, #dd2476 0%, #ff512f 100%);
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 6px 16px rgba(255,81,47,0.35);
+        }
+        .logout-btn-gradient:active {
+            transform: translateX(-50%) scale(0.95);
+        }
         .bottom-nav {
             position: fixed;
             left: 0; right: 0; bottom: 0;
@@ -569,6 +548,7 @@
             .feature-scroll { gap: 0.7rem; padding-left: 0.1rem; }
             .analytics-grid { gap: 0.7rem; }
             .fab-center { width: 48px; height: 48px; font-size: 1.5rem; bottom: 1.2rem; }
+            .logout-btn-gradient { width: 42px; height: 42px; font-size: 1.2rem; bottom: 4.8rem; }
         }
     </style>
 </head>
@@ -578,10 +558,6 @@
             <div class="avatar"><img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="Avatar"></div>
             <div class="greeting-row">
                 <div class="greeting">Hi, {{ name }}!</div>
-                <div class="header-actions">
-                    <div class="notif-bell"><i class="fas fa-bell"></i><span class="badge">2</span></div>
-                    <button class="logout-btn" onclick="showLogoutModal()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
-                </div>
             </div>
             {% if vehicle %}
             <div class="vehicle-info">{{ vehicle }}</div>
@@ -771,6 +747,7 @@
         </div>
     </div>
     <button class="fab-center" onclick="openAddKycUserModal()" title="Scan QR"><i class="fas fa-qrcode"></i></button>
+    <button class="logout-btn-gradient" onclick="showLogoutModal()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
     <nav class="bottom-nav">
         <button class="bottom-nav-btn active"><i class="fas fa-home"></i><span>Home</span></button>
         <button class="bottom-nav-btn" onclick="showAnalyticsModal()"><i class="fas fa-chart-line"></i><span>Analytics</span></button>
