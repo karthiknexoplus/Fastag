@@ -788,33 +788,33 @@
             <div class="action-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
                 <div class="action-card" onclick="showRecentActivity()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-list-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Today's Granted</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Successful entries</div>
+                    <div style="font-weight: 600;">Recent Activity</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">All Events</div>
                 </div>
                 <div class="action-card" onclick="showRecentEntries()" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-sign-in-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Current Occupancy</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Vehicles inside</div>
+                    <div style="font-weight: 600;">Recent Entries</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Entry events</div>
                 </div>
                 <div class="action-card" onclick="showRecentExits()" style="background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-times-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Today's Denied</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Denied entries</div>
+                    <i class="fas fa-sign-out-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Recent Exits</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Exit events</div>
                 </div>
                 <div class="action-card" onclick="showRecentGrantedTags()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Granted Access</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Successful entries</div>
+                    <div style="font-weight: 600;">Recent Granted Tags</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Granted access</div>
                 </div>
                 <div class="action-card" onclick="showTopGrantedTags()" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
-                    <i class="fas fa-car" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Unique Vehicles</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Different vehicles</div>
+                    <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600;">Top Granted Tags</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Most active tags</div>
                 </div>
                 <div class="action-card" onclick="showMostDeniedTags()" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
                     <i class="fas fa-ban" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Denied Access</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Failed entries</div>
+                    <div style="font-weight: 600;">Most Denied Tags</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Denied access</div>
                 </div>
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
@@ -2307,6 +2307,42 @@
                 descText = 'Most common fuel type among registered vehicles.';
                 apiUrl = '/analytics/api/vehicle-demographics';
                 break;
+            case 'recent-activity':
+                iconHtml = '<i class="fas fa-list-alt"></i>';
+                titleText = 'Recent Activity (All Events)';
+                descText = 'All recent access events from the system.';
+                apiUrl = '/analytics/api/recent-activity';
+                break;
+            case 'recent-entries':
+                iconHtml = '<i class="fas fa-sign-in-alt"></i>';
+                titleText = 'Recent Entries';
+                descText = 'Recent entry events from entry readers.';
+                apiUrl = '/analytics/api/recent-entries';
+                break;
+            case 'recent-exits':
+                iconHtml = '<i class="fas fa-sign-out-alt"></i>';
+                titleText = 'Recent Exits';
+                descText = 'Recent exit events from exit readers.';
+                apiUrl = '/analytics/api/recent-exits';
+                break;
+            case 'recent-granted-tags':
+                iconHtml = '<i class="fas fa-check-circle"></i>';
+                titleText = 'Recent Granted Tags';
+                descText = 'Recently granted access tags.';
+                apiUrl = '/analytics/api/recent-granted-tags';
+                break;
+            case 'top-granted-tags':
+                iconHtml = '<i class="fas fa-trophy"></i>';
+                titleText = 'Top Granted Tags';
+                descText = 'Most frequently granted tags.';
+                apiUrl = '/analytics/api/top-granted-tags';
+                break;
+            case 'most-denied-tags':
+                iconHtml = '<i class="fas fa-ban"></i>';
+                titleText = 'Most Denied Tags';
+                descText = 'Most frequently denied tags.';
+                apiUrl = '/analytics/api/most-denied-tags';
+                break;
         }
         icon.innerHTML = iconHtml;
         title.textContent = titleText;
@@ -2343,6 +2379,36 @@
                 } else if(type === 'fuel' && data.fuel_types && data.fuel_types.length) {
                     tableHtml = '<table><tr><th>Type</th><th>Count</th><th>%</th></tr>' +
                         data.fuel_types.map(r => `<tr><td>${r.type}</td><td>${r.count}</td><td>${r.percentage}</td></tr>`).join('') + '</table>';
+                } else if(type === 'recent-activity' && data.recent_activity && data.recent_activity.length) {
+                    tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Result</th><th>Lane</th><th>Type</th></tr>' +
+                        data.recent_activity.slice(0,50).map(r => 
+                            `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="access-result ${r.access_result}">${r.access_result}</td><td class="lane-name">${r.lane_name}</td><td class="lane-type">${r.lane_type}</td></tr>`
+                        ).join('') + '</table>';
+                } else if(type === 'recent-entries' && data.recent_entries && data.recent_entries.length) {
+                    tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Owner</th><th>Lane</th><th>Result</th></tr>' +
+                        data.recent_entries.slice(0,50).map(r => 
+                            `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="lane-name">${r.lane_name}</td><td class="access-result ${r.access_result}">${r.access_result}</td></tr>`
+                        ).join('') + '</table>';
+                } else if(type === 'recent-exits' && data.recent_exits && data.recent_exits.length) {
+                    tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Owner</th><th>Lane</th><th>Result</th></tr>' +
+                        data.recent_exits.slice(0,50).map(r => 
+                            `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="lane-name">${r.lane_name}</td><td class="access-result ${r.access_result}">${r.access_result}</td></tr>`
+                        ).join('') + '</table>';
+                } else if(type === 'recent-granted-tags' && data.recent_granted_tags && data.recent_granted_tags.length) {
+                    tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Owner</th><th>Lane</th><th>Type</th></tr>' +
+                        data.recent_granted_tags.slice(0,50).map(r => 
+                            `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="lane-name">${r.lane_name}</td><td class="lane-type">${r.lane_type}</td></tr>`
+                        ).join('') + '</table>';
+                } else if(type === 'top-granted-tags' && data.top_granted_tags && data.top_granted_tags.length) {
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Owner</th><th>Count</th><th>Last Seen</th></tr>' +
+                        data.top_granted_tags.slice(0,50).map(r => 
+                            `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="count">${r.count}</td><td class="time">${r.last_seen}</td></tr>`
+                        ).join('') + '</table>';
+                } else if(type === 'most-denied-tags' && data.most_denied_tags && data.most_denied_tags.length) {
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Owner</th><th>Count</th><th>Last Seen</th></tr>' +
+                        data.most_denied_tags.slice(0,50).map(r => 
+                            `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="count">${r.count}</td><td class="time">${r.last_seen}</td></tr>`
+                        ).join('') + '</table>';
                 } else {
                     tableHtml = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No records found.</div>';
                 }
@@ -2439,32 +2505,32 @@
     
     function showRecentActivity() {
         closeActionModal();
-        showAnalyticsDetails('granted'); // Map to granted records for recent activity
+        showAnalyticsDetails('recent-activity');
     }
     
     function showRecentEntries() {
         closeActionModal();
-        showAnalyticsDetails('occupancy'); // Map to occupancy for recent entries
+        showAnalyticsDetails('recent-entries');
     }
     
     function showRecentExits() {
         closeActionModal();
-        showAnalyticsDetails('denied'); // Map to denied for recent exits
+        showAnalyticsDetails('recent-exits');
     }
     
     function showRecentGrantedTags() {
         closeActionModal();
-        showAnalyticsDetails('granted'); // Map to granted records
+        showAnalyticsDetails('recent-granted-tags');
     }
     
     function showTopGrantedTags() {
         closeActionModal();
-        showAnalyticsDetails('unique'); // Map to unique vehicles for top tags
+        showAnalyticsDetails('top-granted-tags');
     }
     
     function showMostDeniedTags() {
         closeActionModal();
-        showAnalyticsDetails('denied'); // Map to denied records
+        showAnalyticsDetails('most-denied-tags');
     }
     
     // Close action modal when clicking outside
