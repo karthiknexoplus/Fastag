@@ -1,0 +1,14 @@
+[Unit]
+Description=Onebee Push Notifications Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Fastag
+ExecStart=/home/ubuntu/Fastag/send_notifications.sh
+StandardOutput=append:/home/ubuntu/Fastag/logs/systemd_notifications.log
+StandardError=append:/home/ubuntu/Fastag/logs/systemd_notifications.log
+
+[Install]
+WantedBy=multi-user.target 
