@@ -2415,14 +2415,14 @@
                             `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="lane-name">${r.lane_name}</td><td class="lane-type">${r.lane_type}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'top-granted-tags' && data.top_granted_tags && data.top_granted_tags.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Owner</th><th>Count</th><th>Last Seen</th></tr>' +
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Owner</th><th>Model</th><th>Granted Count</th></tr>' +
                         data.top_granted_tags.slice(0,50).map(r => 
-                            `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="count">${r.count}</td><td class="time">${r.last_seen}</td></tr>`
+                            `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="model-name">${r.model_name || 'N/A'}</td><td class="count">${r.granted_count}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'most-denied-tags' && data.most_denied_tags && data.most_denied_tags.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Owner</th><th>Count</th><th>Last Seen</th></tr>' +
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Owner</th><th>Model</th><th>Denied Count</th><th>Last Denied</th></tr>' +
                         data.most_denied_tags.slice(0,50).map(r => 
-                            `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="count">${r.count}</td><td class="time">${r.last_seen}</td></tr>`
+                            `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="model-name">${r.model_name || 'N/A'}</td><td class="count">${r.denied_count}</td><td class="time">${r.last_denied_time || 'N/A'}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'denied-fastag-activity' && data.results && data.results.length) {
                     tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Owner</th><th>Model</th><th>Reason</th></tr>' +
