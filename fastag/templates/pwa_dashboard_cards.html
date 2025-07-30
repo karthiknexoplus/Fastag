@@ -2423,10 +2423,10 @@
                         data.most_denied_tags.slice(0,50).map(r => 
                             `<tr><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="count">${r.count}</td><td class="time">${r.last_seen}</td></tr>`
                         ).join('') + '</table>';
-                } else if(type === 'denied-fastag-activity' && data.denied_fastag_activity && data.denied_fastag_activity.length) {
-                    tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Owner</th><th>Lane</th><th>Reason</th></tr>' +
-                        data.denied_fastag_activity.slice(0,50).map(r => 
-                            `<tr><td class="time">${r.time}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="lane-name">${r.lane_name}</td><td class="reason">${r.reason || 'N/A'}</td></tr>`
+                } else if(type === 'denied-fastag-activity' && data.results && data.results.length) {
+                    tableHtml = '<table><tr><th>Time</th><th>Vehicle</th><th>Owner</th><th>Model</th><th>Reason</th></tr>' +
+                        data.results.slice(0,50).map(r => 
+                            `<tr><td class="time">${r.timestamp || 'N/A'}</td><td class="vehicle-number">${r.vehicle_number || 'N/A'}</td><td class="owner-name">${r.owner_name || 'N/A'}</td><td class="model-name">${r.model_name || 'N/A'}</td><td class="reason">${r.reason || 'N/A'}</td></tr>`
                         ).join('') + '</table>';
                 } else {
                     tableHtml = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No records found.</div>';
