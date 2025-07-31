@@ -5994,7 +5994,7 @@
             users.map(u => `<tr>` +
                 `<td style="padding: 0.5rem 0.3rem;word-wrap:break-word;">${u.name || 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;">${u.contact || 'N/A'}</td>` +
-                `<td style="padding: 0.5rem 0.3rem;font-size:0.8rem;word-wrap:break-word;max-width:200px;">${u.fcm_token ? u.fcm_token.substring(0, 50) + '...' : 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;font-size:0.8rem;word-wrap:break-word;max-width:200px;" title="${u.fcm_token || 'N/A'}">${u.fcm_token ? u.fcm_token.substring(0, 10) + '...' : 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;">${u.device_type || 'Unknown'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;font-size:0.85rem;">${u.last_active || 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;"><span class="status-badge ${u.status === 'active' ? 'active' : 'inactive'}">${u.status === 'active' ? '✓ Active' : '✗ Inactive'}</span></td>` +
