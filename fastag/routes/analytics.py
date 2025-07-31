@@ -2093,10 +2093,11 @@ def api_entry_exit_trend():
     db = get_db()
     rows = db.execute('''
         SELECT strftime('%H', timestamp) as hour,
-            SUM(CASE WHEN access_result = 'granted' THEN 1 ELSE 0 END) as entries,
-            SUM(CASE WHEN access_result = 'exit' THEN 1 ELSE 0 END) as exits
-        FROM access_logs
-        WHERE DATE(timestamp) = DATE('now')
+            SUM(CASE WHEN r.type = 'entry' THEN 1 ELSE 0 END) as entries,
+            SUM(CASE WHEN r.type = 'exit' THEN 1 ELSE 0 END) as exits
+        FROM access_logs al
+        JOIN readers r ON al.reader_id = r.id
+        WHERE DATE(al.timestamp) = DATE('now')
         GROUP BY hour
         ORDER BY hour
     ''').fetchall()
