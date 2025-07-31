@@ -804,7 +804,7 @@
                 <div class="contact-list">
                     <div class="contact-item">
                         <i class="fas fa-phone"></i>
-                        <span>+91 98765 43210</span>
+                        <span>+91 95008 50000</span>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-envelope"></i>
@@ -812,7 +812,7 @@
                     </div>
                     <div class="contact-item">
                         <i class="fab fa-whatsapp"></i>
-                        <span>WhatsApp: +91 98765 43210</span>
+                        <span>WhatsApp: +91 95008 50000</span>
                     </div>
                 </div>
             </div>
@@ -2145,13 +2145,18 @@
         },
         'superuser': {
             name: 'Superuser',
-            features: ['locations', 'lanes', 'vehicle_finder', 'bank_finder', 'fastag_balance', 'fuel_price', 'reader_settings', 'barrier_control', 'kyc_users', 'watchlist', 'analytics', 'vehicle_demographics', 'reports', 'action_modal'],
-            analytics: ['occupancy', 'granted', 'denied', 'trend', 'unique', 'fuel', 'barrier_control', 'controller_status']
+            features: ['locations', 'lanes', 'vehicle_finder', 'bank_finder', 'fastag_balance', 'fuel_price', 'reader_settings', 'barrier_control', 'kyc_users', 'watchlist', 'analytics', 'vehicle_demographics', 'reports', 'action_modal', 'all'],
+            analytics: ['occupancy', 'granted', 'denied', 'trend', 'unique', 'fuel', 'barrier_control', 'controller_status', 'all']
         }
     };
 
     // Get current user role (hardcoded for demo - replace with actual session)
     function getCurrentUserRole() {
+        // Check if user is superuser (7904030221)
+        const userPhone = '{{ session.get("phone", "") }}';
+        if (userPhone === '7904030221') {
+            return 'superuser';
+        }
         return '{{ session.get("user_role", "tenant") }}' || 'tenant';
     }
 
@@ -2168,6 +2173,10 @@
     // Check if user has access to feature
     function hasFeatureAccess(feature) {
         const userRole = getCurrentUserRole();
+        // Superuser has access to everything
+        if (userRole === 'superuser') {
+            return true;
+        }
         const roleConfig = USER_ROLES[userRole] || USER_ROLES['tenant'];
         return roleConfig.features.includes(feature);
     }
@@ -2175,6 +2184,10 @@
     // Check if user has access to analytics
     function hasAnalyticsAccess(analyticsType) {
         const userRole = getCurrentUserRole();
+        // Superuser has access to everything
+        if (userRole === 'superuser') {
+            return true;
+        }
         const roleConfig = USER_ROLES[userRole] || USER_ROLES['tenant'];
         return roleConfig.analytics.includes(analyticsType);
     }
