@@ -739,6 +739,9 @@ headers = {
     "Content-Type": "application/json; UTF-8"
 }
 
+# Track invalid tokens to remove
+invalid_tokens = []
+
 # Send a notification to each token
 for i, token in enumerate(tokens, 1):
     msg = random.choice(MESSAGES)
@@ -776,6 +779,13 @@ for i, token in enumerate(tokens, 1):
         if response.status_code == 200:
             result = response.json()
             print(f"✅ Successfully sent to device")
+        elif response.status_code == 404:
+            error_data = response.json()
+            if (error_data.get('error', {}).get('details', [{}])[0].get('errorCode') == 'UNREGISTERED'):
+                print(f"❌ Token is unregistered (device uninstalled app or token expired)")
+                invalid_tokens.append(token)
+            else:
+                print(f"❌ Error: {response.text}")
         else:
             print(f"❌ Error: {response.text}")
             
@@ -785,5 +795,20 @@ for i, token in enumerate(tokens, 1):
     # Small delay between messages to avoid rate limiting
     import time
     time.sleep(0.5)
+
+# Remove invalid tokens from the file
+if invalid_tokens:
+    print(f"\n🗑️  Removing {len(invalid_tokens)} invalid token(s)...")
+    valid_tokens = [token for token in tokens if token not in invalid_tokens]
+    
+    try:
+        with open('fcm_tokens.json', 'w') as f:
+            json.dump(valid_tokens, f, indent=2)
+        print(f"✅ Updated fcm_tokens.json - removed {len(invalid_tokens)} invalid token(s)")
+        print(f"📊 Remaining valid tokens: {len(valid_tokens)}")
+    except Exception as e:
+        print(f"❌ Error updating fcm_tokens.json: {e}")
+else:
+    print(f"\n✅ No invalid tokens found - all {len(tokens)} tokens are valid")
 
 print(f"\n🎉 Completed sending {len(MESSAGES)} different Onebee notifications!") 
