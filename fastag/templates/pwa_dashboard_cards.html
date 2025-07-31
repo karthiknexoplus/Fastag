@@ -3160,7 +3160,7 @@
         container.innerHTML = '<div style="text-align: center; padding: 2rem; color: white;"><span class="loading"></span> Loading readers...</div>';
         
         // Use the working separate page approach - fetch the full page and extract content
-        fetch('/pwa-dashboard/reader-settings')
+        fetch('/reader-settings')
             .then(response => response.text())
             .then(html => {
                 // Parse the HTML and extract the readers container
