@@ -970,6 +970,21 @@
                     <div style="font-weight: 600; font-size: 0.9rem;">Database Backup</div>
                     <div style="font-size: 0.8rem; opacity: 0.9;">Download & Backup</div>
                 </div>
+                <div class="controller-option" onclick="restartController()" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-power-off" style="font-size: 1.8rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Restart Controller</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Reboot System</div>
+                </div>
+                <div class="controller-option" onclick="restartApplication()" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-sync-alt" style="font-size: 1.8rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Restart App</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Restart Fastag Service</div>
+                </div>
+                <div class="controller-option" onclick="restartReaders()" style="background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-wifi" style="font-size: 1.8rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Restart Readers</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Restart RFID Service</div>
+                </div>
             </div>
             
             <div class="modal-records" id="controllerStatusRecords"></div>
@@ -5292,6 +5307,79 @@
         // Show success message
         document.getElementById('controllerStatusRecords').innerHTML += 
             '<div style="text-align:center;color:#28a745;margin-top:1rem;font-weight:600;">Database backup download started!</div>';
+    }
+    
+    // Restart Functions
+    function restartController() {
+        if (confirm('Are you sure you want to restart the controller? This will reboot the entire system.')) {
+            document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting controller...</div>';
+            fetch('/api/restart-controller', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('controllerStatusRecords').innerHTML = 
+                        '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">Controller restart initiated! System will reboot shortly.</div>';
+                } else {
+                    document.getElementById('controllerStatusRecords').innerHTML = 
+                        '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart controller: ' + (data.error || 'Unknown error') + '</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('controllerStatusRecords').innerHTML = 
+                    '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart controller.</div>';
+            });
+        }
+    }
+    
+    function restartApplication() {
+        if (confirm('Are you sure you want to restart the Fastag application? This will restart the web service.')) {
+            document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting application...</div>';
+            fetch('/api/restart-application', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('controllerStatusRecords').innerHTML = 
+                        '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">Application restart initiated! Service will restart shortly.</div>';
+                } else {
+                    document.getElementById('controllerStatusRecords').innerHTML = 
+                        '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart application: ' + (data.error || 'Unknown error') + '</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('controllerStatusRecords').innerHTML = 
+                    '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart application.</div>';
+            });
+        }
+    }
+    
+    function restartReaders() {
+        if (confirm('Are you sure you want to restart the RFID readers? This will restart the RFID service.')) {
+            document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting RFID readers...</div>';
+            fetch('/api/restart-readers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('controllerStatusRecords').innerHTML = 
+                        '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">RFID readers restart initiated! Service will restart shortly.</div>';
+                } else {
+                    document.getElementById('controllerStatusRecords').innerHTML = 
+                        '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart readers: ' + (data.error || 'Unknown error') + '</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('controllerStatusRecords').innerHTML = 
+                    '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart readers.</div>';
+            });
+        }
     }
 
     function openAllBarriers() {

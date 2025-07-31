@@ -686,6 +686,90 @@ def get_fcm_tokens():
             'error': str(e)
         }), 500
 
+@api.route('/restart-controller', methods=['POST'])
+def restart_controller():
+    """Restart the controller (reboot system)"""
+    try:
+        # Execute sudo reboot command
+        result = subprocess.run(['sudo', 'reboot'], capture_output=True, text=True, timeout=30)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Controller restart initiated'
+        })
+        
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            'success': True,
+            'message': 'Controller restart initiated (timeout)'
+        })
+    except Exception as e:
+        logger.error(f"Error in restart-controller endpoint: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api.route('/restart-application', methods=['POST'])
+def restart_application():
+    """Restart the Fastag application service"""
+    try:
+        # Execute sudo systemctl restart fastag command
+        result = subprocess.run(['sudo', 'systemctl', 'restart', 'fastag'], capture_output=True, text=True, timeout=30)
+        
+        if result.returncode == 0:
+            return jsonify({
+                'success': True,
+                'message': 'Application restart initiated'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Failed to restart application: {result.stderr}'
+            }), 500
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            'success': True,
+            'message': 'Application restart initiated (timeout)'
+        })
+    except Exception as e:
+        logger.error(f"Error in restart-application endpoint: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api.route('/restart-readers', methods=['POST'])
+def restart_readers():
+    """Restart the RFID readers service"""
+    try:
+        # Execute sudo systemctl restart rfid_readers.service command
+        result = subprocess.run(['sudo', 'systemctl', 'restart', 'rfid_readers.service'], capture_output=True, text=True, timeout=30)
+        
+        if result.returncode == 0:
+            return jsonify({
+                'success': True,
+                'message': 'RFID readers restart initiated'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Failed to restart readers: {result.stderr}'
+            }), 500
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            'success': True,
+            'message': 'RFID readers restart initiated (timeout)'
+        })
+    except Exception as e:
+        logger.error(f"Error in restart-readers endpoint: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @api.route('/network-info', methods=['GET'])
 def get_network_info():
     """Get network interface information using ifconfig/ipconfig"""
