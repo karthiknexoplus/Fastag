@@ -1438,22 +1438,22 @@
     /* KYC Users Action Buttons */
     .action-buttons {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.3rem;
         justify-content: center;
         align-items: center;
     }
     
     .action-btn {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border: none;
-        border-radius: 6px;
+        border-radius: 4px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: all 0.2s ease;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
     
     .action-btn.edit-btn {
@@ -5462,16 +5462,16 @@
         }
         
         let tableHtml = '<table style="min-width:600px;"><tr>' +
-            '<th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Role</th><th>Status</th><th style="text-align:center;">Actions</th></tr>' +
+            '<th style="min-width:120px;">Name</th><th style="min-width:140px;">FASTag ID</th><th style="min-width:100px;">Vehicle</th><th style="min-width:100px;">Contact</th><th style="min-width:150px;">Address</th><th style="min-width:80px;">Role</th><th style="min-width:80px;text-align:center;">Status</th><th style="min-width:100px;text-align:center;">Actions</th></tr>' +
             users.map(u => `<tr>` +
-                `<td>${u.name || 'N/A'}</td>` +
-                `<td>${u.fastag_id || 'N/A'}</td>` +
-                `<td>${u.vehicle_number || 'N/A'}</td>` +
-                `<td>${u.contact_number || 'N/A'}</td>` +
-                `<td>${u.address || 'N/A'}</td>` +
-                `<td>${u.user_role || 'tenant'}</td>` +
-                `<td style="text-align:center;"><i class="fas ${u.is_active ? 'fa-check-circle' : 'fa-times-circle'}" style="color: ${u.is_active ? '#28a745' : '#dc3545'}; font-size: 1.2rem;"></i></td>` +
-                `<td style="text-align:center;"><div class="action-buttons">` +
+                `<td style="padding: 0.5rem 0.3rem;">${u.name || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;font-size:0.85rem;">${u.fastag_id || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;">${u.vehicle_number || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;">${u.contact_number || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;font-size:0.85rem;">${u.address || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;">${u.user_role || 'tenant'}</td>` +
+                `<td style="text-align:center;padding: 0.5rem 0.3rem;"><i class="fas ${u.is_active ? 'fa-check-circle' : 'fa-times-circle'}" style="color: ${u.is_active ? '#28a745' : '#dc3545'}; font-size: 1.1rem;"></i></td>` +
+                `<td style="text-align:center;padding: 0.5rem 0.3rem;"><div class="action-buttons">` +
                     `<button class="action-btn edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button>` +
                     `<button class="action-btn delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button>` +
                 `</div></td>` +
