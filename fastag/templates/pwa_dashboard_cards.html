@@ -5231,7 +5231,7 @@
         }
         
         let tableHtml = '<table style="min-width:600px;"><tr>' +
-            '<th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Role</th><th>Status</th></tr>' +
+            '<th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Role</th><th>Status</th><th>Edit</th><th>Delete</th></tr>' +
             users.map(u => `<tr>` +
                 `<td>${u.name || 'N/A'}</td>` +
                 `<td>${u.fastag_id || 'N/A'}</td>` +
@@ -5239,7 +5239,9 @@
                 `<td>${u.contact_number || 'N/A'}</td>` +
                 `<td>${u.address || 'N/A'}</td>` +
                 `<td>${u.user_role || 'tenant'}</td>` +
-                `<td><span class="status-badge ${u.is_active ? 'active' : 'inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>` +
+                `<td><i class="fas ${u.is_active ? 'fa-check-circle' : 'fa-times-circle'}" style="color: ${u.is_active ? '#28a745' : '#dc3545'}; font-size: 1.2rem;"></i></td>` +
+                `<td><button class="input-icon-btn kyc-edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
+                `<td><button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
             `</tr>`).join('') + '</table>';
         document.getElementById('kycUsersListRecords').innerHTML = tableHtml;
     }
@@ -5276,6 +5278,65 @@
         } else {
             renderKycUsersList(filtered);
         }
+    }
+    
+    function editKycUser(id) {
+        // For simplicity, open the add form prefilled for editing
+        fetch(`/api/kyc_users/${id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.user) {
+                    const user = data.user;
+                    openAddKycUserModal();
+                    document.getElementById('addKycUserForm').name.value = user.name || '';
+                    document.getElementById('addKycUserForm').fastag_id.value = user.fastag_id || '';
+                    document.getElementById('addKycUserForm').vehicle_number.value = user.vehicle_number || '';
+                    document.getElementById('addKycUserForm').contact_number.value = user.contact_number || '';
+                    document.getElementById('addKycUserForm').address.value = user.address || '';
+                    document.getElementById('addKycUserForm').onsubmit = function(e) {
+                        e.preventDefault();
+                        submitEditKycUser(id);
+                    };
+                }
+            })
+            .catch(() => alert('Failed to load user details'));
+    }
+    
+    function submitEditKycUser(id) {
+        const form = document.getElementById('addKycUserForm');
+        const data = {
+            name: form.name.value.trim(),
+            fastag_id: form.fastag_id.value.trim(),
+            vehicle_number: form.vehicle_number.value.trim(),
+            contact_number: form.contact_number.value.trim(),
+            address: form.address.value.trim()
+        };
+        fetch(`/api/kyc_users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                closeAddKycUserModal();
+                loadKycUsersList();
+            } else {
+                alert(data.error || 'Failed to update user');
+            }
+        })
+        .catch(() => alert('Failed to update user'));
+    }
+    
+    function deleteKycUser(id) {
+        if (!confirm('Delete this KYC user?')) return;
+        fetch(`/api/kyc_users/${id}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) loadKycUsersList();
+                else alert(data.error || 'Failed to delete user');
+            })
+            .catch(() => alert('Failed to delete user'));
     }
     function editLocation(id) {
         // For simplicity, open the add form prefilled for editing
