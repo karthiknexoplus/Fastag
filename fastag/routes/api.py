@@ -734,21 +734,42 @@ def restart_controller():
 def restart_application():
     """Restart the Fastag application service"""
     try:
+        logger.info("Application restart requested")
+        
+        # Check if systemctl is available
+        try:
+            # Test systemctl access
+            test_result = subprocess.run(['systemctl', '--version'], capture_output=True, text=True, timeout=5)
+            if test_result.returncode != 0:
+                return jsonify({
+                    'success': False,
+                    'error': 'Systemctl not available'
+                }), 500
+        except Exception as e:
+            logger.error(f"Error checking systemctl: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Unable to verify systemctl availability'
+            }), 500
+        
         # Execute sudo systemctl restart fastag command
         result = subprocess.run(['sudo', 'systemctl', 'restart', 'fastag'], capture_output=True, text=True, timeout=30)
         
         if result.returncode == 0:
+            logger.info("Application restart command executed successfully")
             return jsonify({
                 'success': True,
                 'message': 'Application restart initiated'
             })
         else:
+            logger.error(f"Application restart failed: {result.stderr}")
             return jsonify({
                 'success': False,
                 'error': f'Failed to restart application: {result.stderr}'
             }), 500
             
     except subprocess.TimeoutExpired:
+        logger.warning("Application restart command timed out")
         return jsonify({
             'success': True,
             'message': 'Application restart initiated (timeout)'
@@ -764,27 +785,68 @@ def restart_application():
 def restart_readers():
     """Restart the RFID readers service"""
     try:
+        logger.info("RFID readers restart requested")
+        
+        # Check if systemctl is available
+        try:
+            # Test systemctl access
+            test_result = subprocess.run(['systemctl', '--version'], capture_output=True, text=True, timeout=5)
+            if test_result.returncode != 0:
+                return jsonify({
+                    'success': False,
+                    'error': 'Systemctl not available'
+                }), 500
+        except Exception as e:
+            logger.error(f"Error checking systemctl: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Unable to verify systemctl availability'
+            }), 500
+        
         # Execute sudo systemctl restart rfid_readers.service command
         result = subprocess.run(['sudo', 'systemctl', 'restart', 'rfid_readers.service'], capture_output=True, text=True, timeout=30)
         
         if result.returncode == 0:
+            logger.info("RFID readers restart command executed successfully")
             return jsonify({
                 'success': True,
                 'message': 'RFID readers restart initiated'
             })
         else:
+            logger.error(f"RFID readers restart failed: {result.stderr}")
             return jsonify({
                 'success': False,
                 'error': f'Failed to restart readers: {result.stderr}'
             }), 500
             
     except subprocess.TimeoutExpired:
+        logger.warning("RFID readers restart command timed out")
         return jsonify({
             'success': True,
             'message': 'RFID readers restart initiated (timeout)'
         })
     except Exception as e:
         logger.error(f"Error in restart-readers endpoint: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api.route('/test-restart-apis', methods=['GET'])
+def test_restart_apis():
+    """Test endpoint to verify restart APIs are accessible"""
+    try:
+        return jsonify({
+            'success': True,
+            'message': 'Restart APIs are accessible',
+            'endpoints': {
+                'restart-controller': '/api/restart-controller',
+                'restart-application': '/api/restart-application', 
+                'restart-readers': '/api/restart-readers'
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error in test-restart-apis endpoint: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
