@@ -5961,6 +5961,21 @@
       </div>
     </div>
 
+    <!-- Push Notification Error Modal -->
+    <div id="pushErrorModal" class="modal-custom" style="display:none;z-index:4000;">
+      <div class="modal-content-custom" style="max-width: 400px; text-align: center;">
+        <span class="close-modal" onclick="closePushErrorModal()">&times;</span>
+        <div class="modal-header-custom" style="justify-content: center;">
+          <span class="modal-icon" style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i></span>
+          <span class="modal-title" style="color: #dc3545;">Error</span>
+        </div>
+        <div class="modal-desc" id="pushErrorBody">An error occurred while enabling push notifications.</div>
+        <div class="modal-footer-custom" style="justify-content: center;">
+          <button class="modal-close-btn" onclick="closePushErrorModal()" style="background: #dc3545; color: white;">OK</button>
+        </div>
+      </div>
+    </div>
+
     <script>
     function showPushSuccessModal() {
       document.getElementById('pushSuccessModal').style.display = 'flex';
@@ -5976,6 +5991,13 @@
     function closePushReceivedModal() {
       document.getElementById('pushReceivedModal').style.display = 'none';
     }
+    function showPushErrorModal(message) {
+      document.getElementById('pushErrorBody').textContent = message || 'An error occurred while enabling push notifications.';
+      document.getElementById('pushErrorModal').style.display = 'flex';
+    }
+    function closePushErrorModal() {
+      document.getElementById('pushErrorModal').style.display = 'none';
+    }
 
     // Replace enablePushBtn click handler
     const enablePushBtn = document.getElementById('enablePushBtn');
@@ -5985,7 +6007,7 @@
           await subscribeUserToPush();
           showPushSuccessModal();
         } catch (e) {
-          alert('Error enabling push notifications: ' + (e && e.message ? e.message : e));
+          showPushErrorModal('Error enabling push notifications: ' + (e && e.message ? e.message : e));
         }
       };
     }
@@ -6014,27 +6036,37 @@
       try {
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          alert('You must allow notifications to enable push notifications!');
+          showPushErrorModal('You must allow notifications to enable push notifications!');
           return;
         }
         // Get FCM token
         const fcmToken = await messaging.getToken({ vapidKey: undefined });
         if (!fcmToken) {
-          alert('Failed to get FCM token.');
+          showPushErrorModal('Failed to get FCM token. Please try again.');
           return;
         }
-        // Send token to backend (implement /pwa-dashboard/api/save-fcm-token)
+        // Send token to backend
         const response = await fetch('/pwa-dashboard/api/save-fcm-token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: fcmToken })
         });
+        
         if (!response.ok) {
-          throw new Error('Failed to save FCM token: ' + response.status);
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage = errorData.error || errorData.details || `Server error (${response.status})`;
+          showPushErrorModal('Failed to save FCM token: ' + errorMessage);
+          return;
         }
-        showPushSuccessModal()
+        
+        const result = await response.json();
+        if (result.success) {
+          showPushSuccessModal();
+        } else {
+          showPushErrorModal(result.error || 'Failed to enable push notifications');
+        }
       } catch (error) {
-        alert('Error enabling push notifications: ' + error.message);
+        showPushErrorModal('Error enabling push notifications: ' + error.message);
       }
     }
 
