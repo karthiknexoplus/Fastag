@@ -715,6 +715,52 @@ MESSAGES = [
     }
 ]
 
+def get_all_user_names():
+    """Get all user names from kyc_users table and cache them"""
+    if not os.path.exists(DATABASE_PATH):
+        return {}
+    
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('''
+            SELECT contact_number, name FROM kyc_users 
+            WHERE contact_number IS NOT NULL AND contact_number != ''
+        ''')
+        
+        user_names = {}
+        for row in cursor.fetchall():
+            mobile = row[0]
+            name = row[1]
+            # Store both with and without spaces for flexible matching
+            user_names[mobile] = name
+            user_names[mobile.replace(' ', '')] = name
+        
+        print(f"✅ Loaded {len(set(user_names.values()))} user names from database")
+        return user_names
+    except Exception as e:
+        print(f"Error fetching user names: {e}")
+        return {}
+    finally:
+        conn.close()
+
+def get_user_name_from_mobile(mobile_number, user_names_cache):
+    """Get user's name from cache using mobile number"""
+    if not mobile_number or mobile_number == 'anonymous':
+        return None
+    
+    # Try exact match first
+    if mobile_number in user_names_cache:
+        return user_names_cache[mobile_number]
+    
+    # Try without spaces
+    clean_mobile = mobile_number.replace(' ', '')
+    if clean_mobile in user_names_cache:
+        return user_names_cache[clean_mobile]
+    
+    return None
+
 def get_tokens_from_database():
     """Get active FCM tokens from database"""
     if not os.path.exists(DATABASE_PATH):
@@ -790,26 +836,70 @@ headers = {
 invalid_tokens = []
 
 # Send a notification to each token
+print(f"\n🚀 Starting push notification campaign...")
+print(f"📊 Total users to notify: {len(tokens_data)}")
+
+# Track statistics
+success_count = 0
+error_count = 0
+user_stats = {}
+
+# Load user names once
+user_names_cache = get_all_user_names()
+
 for i, token_row in enumerate(tokens_data, 1):
     token = token_row['token']
-    username = token_row['username'] or 'unknown'
+    mobile_number = token_row['username'] or 'anonymous'
     device_type = token_row['device_type'] or 'unknown'
     browser = token_row['browser'] or 'unknown'
     os_name = token_row['os'] or 'unknown'
+    created_at = token_row['created_at'] or 'unknown'
+    
+    # Get user's actual name from kyc_users table
+    user_name = get_user_name_from_mobile(mobile_number, user_names_cache)
+    display_name = user_name if user_name else mobile_number
+    
+    # Track user statistics
+    if mobile_number not in user_stats:
+        user_stats[mobile_number] = {'devices': set(), 'success': 0, 'errors': 0, 'name': user_name}
+    user_stats[mobile_number]['devices'].add(f"{device_type} ({os_name})")
     
     msg = random.choice(MESSAGES)
-    print(f"\n--- Sending Message {i}/{len(tokens_data)} ---")
-    print(f"User: {username}")
-    print(f"Device: {device_type} ({os_name}, {browser})")
-    print(f"Title: {msg['title']}")
-    print(f"Body: {msg['body']}")
+    print(f"\n{'='*60}")
+    print(f"📱 Message {i}/{len(tokens_data)} - User: {display_name}")
+    print(f"📱 Mobile: {mobile_number}")
+    print(f"🖥️  Device: {device_type} ({os_name}, {browser})")
+    print(f"📅 Registered: {created_at}")
+    
+    # Personalize the notification with user's actual name
+    if mobile_number.lower() == 'anonymous':
+        personalized_title = f"🚀 {msg['title']}"
+        personalized_body = f"{msg['body']}"
+    else:
+        # Create more personal greeting based on time and user's name
+        current_hour = datetime.now().hour
+        if 5 <= current_hour < 12:
+            greeting = f"Good morning {display_name}!"
+        elif 12 <= current_hour < 17:
+            greeting = f"Good afternoon {display_name}!"
+        elif 17 <= current_hour < 21:
+            greeting = f"Good evening {display_name}!"
+        else:
+            greeting = f"Hi {display_name}!"
+        
+        personalized_title = f"{greeting} {msg['title']}"
+        personalized_body = f"{msg['body']}"
+    
+    print(f"📢 Title: {personalized_title}")
+    print(f"📝 Body: {personalized_body}")
+    print(f"{'='*60}")
     
     message = {
         "message": {
             "token": token,
             "notification": {
-                "title": msg["title"],
-                "body": msg["body"]
+                "title": personalized_title,
+                "body": personalized_body
             },
             "webpush": {
                 "fcm_options": {
@@ -823,31 +913,43 @@ for i, token_row in enumerate(tokens_data, 1):
                 "company": "Onebee",
                 "contact": "95008 50000",
                 "website": "www.onebee.in",
-                "username": username,
-                "device_type": device_type
+                "username": mobile_number,
+                "user_name": user_name or mobile_number,
+                "device_type": device_type,
+                "campaign": "onebee_marketing",
+                "personalized": "true"
             }
         }
     }
     
     try:
         response = requests.post(FCM_ENDPOINT, headers=headers, json=message, timeout=10)
-        print(f"Response status: {response.status_code}")
         
         if response.status_code == 200:
             result = response.json()
-            print(f"✅ Successfully sent to {username} on {device_type}")
+            print(f"✅ SUCCESS: Delivered to {display_name} on {device_type}")
+            success_count += 1
+            user_stats[mobile_number]['success'] += 1
         elif response.status_code == 404:
             error_data = response.json()
             if (error_data.get('error', {}).get('details', [{}])[0].get('errorCode') == 'UNREGISTERED'):
-                print(f"❌ Token is unregistered for {username} (device uninstalled app or token expired)")
+                print(f"❌ UNREGISTERED: {display_name}'s device uninstalled app or token expired")
                 invalid_tokens.append(token)
+                error_count += 1
+                user_stats[mobile_number]['errors'] += 1
             else:
-                print(f"❌ Error: {response.text}")
+                print(f"❌ ERROR: {response.text}")
+                error_count += 1
+                user_stats[mobile_number]['errors'] += 1
         else:
-            print(f"❌ Error: {response.text}")
+            print(f"❌ ERROR: {response.text}")
+            error_count += 1
+            user_stats[mobile_number]['errors'] += 1
             
     except requests.exceptions.RequestException as e:
-        print(f"❌ Network error: {e}")
+        print(f"❌ NETWORK ERROR: {e}")
+        error_count += 1
+        user_stats[mobile_number]['errors'] += 1
     
     # Small delay between messages to avoid rate limiting
     import time
@@ -855,7 +957,7 @@ for i, token_row in enumerate(tokens_data, 1):
 
 # Mark invalid tokens as inactive in database
 if invalid_tokens:
-    print(f"\n🗑️  Marking {len(invalid_tokens)} invalid token(s) as inactive...")
+    print(f"\n🗑️  Cleaning up invalid tokens...")
     marked_count = 0
     
     for token in invalid_tokens:
@@ -868,6 +970,21 @@ if invalid_tokens:
     remaining_tokens = get_tokens_from_database()
     print(f"📊 Remaining active tokens: {len(remaining_tokens)}")
 else:
-    print(f"\n✅ No invalid tokens found - all {len(tokens_data)} tokens are valid")
+    print(f"\n✅ All {len(tokens_data)} tokens are valid!")
 
-print(f"\n🎉 Completed sending {len(MESSAGES)} different Onebee notifications!") 
+# Print user statistics
+print(f"\n{'='*60}")
+print(f"📈 CAMPAIGN SUMMARY")
+print(f"{'='*60}")
+print(f"✅ Successful deliveries: {success_count}")
+print(f"❌ Failed deliveries: {error_count}")
+print(f"📊 Success rate: {(success_count/(success_count+error_count)*100):.1f}%")
+
+print(f"\n👥 USER BREAKDOWN:")
+for mobile_number, stats in user_stats.items():
+    devices = ', '.join(stats['devices'])
+    user_display = stats['name'] if stats['name'] else mobile_number
+    print(f"  • {user_display} ({mobile_number}): {stats['success']} success, {stats['errors']} errors")
+    print(f"    Devices: {devices}")
+
+print(f"\n🎉 Campaign completed! Sent {len(MESSAGES)} different Onebee notifications!") 
