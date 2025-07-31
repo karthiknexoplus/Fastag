@@ -5192,21 +5192,8 @@
 
     function showControllerStatusModal() {
         document.getElementById('controllerStatusModal').style.display = 'flex';
-        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
-        fetch('/api/status')
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success || !data.info_str) {
-                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load status.</div>';
-                    return;
-                }
-                // info_str is already HTML with icons and badges
-                document.getElementById('controllerStatusRecords').innerHTML =
-                    '<div style="font-size:1.08em;line-height:1.7;">' + data.info_str.split('|').map(x => x.trim()).join('<br>') + '</div>';
-            })
-            .catch(() => {
-                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load status.</div>';
-            });
+        // Clear the records area to show only the option cards
+        document.getElementById('controllerStatusRecords').innerHTML = '';
     }
     function closeControllerStatusModal() {
         document.getElementById('controllerStatusModal').style.display = 'none';
