@@ -408,6 +408,19 @@ def save_fcm_token():
     device_info = parse_user_agent(user_agent)
     ip_address = get_client_ip()
     
+    # Ensure all values are strings for SQLite
+    device_type = str(device_info.get('device_type', 'unknown'))
+    browser = str(device_info.get('browser', 'unknown'))
+    os_name = str(device_info.get('os', 'unknown'))
+    username = str(username)
+    user_agent = str(user_agent)
+    ip_address = str(ip_address)
+    token = str(token)
+    
+    # Debug logging
+    print(f"DEBUG: device_type={device_type}, browser={browser}, os={os_name}")
+    print(f"DEBUG: username={username}, ip={ip_address}")
+    
     # Store token in database
     db = get_db()
     try:
@@ -432,8 +445,7 @@ def save_fcm_token():
                     ip_address = ?, last_used = CURRENT_TIMESTAMP
                 WHERE token = ?
             ''', (
-                username, user_agent, device_info['device_type'], device_info['browser'],
-                device_info['os'], ip_address, token
+                username, user_agent, device_type, browser, os_name, ip_address, token
             ))
             print(f"✅ Updated existing FCM token for {username}")
         else:
@@ -444,8 +456,7 @@ def save_fcm_token():
                  created_at, last_used)
                 VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ''', (
-                token, username, user_agent, device_info['device_type'], device_info['browser'],
-                device_info['os'], ip_address
+                token, username, user_agent, device_type, browser, os_name, ip_address
             ))
             print(f"✅ Inserted new FCM token for {username}")
         
@@ -469,7 +480,7 @@ def save_fcm_token():
         
         return jsonify({
             'success': True,
-            'message': f'FCM token saved for {username} on {device_info["device_type"]} ({device_info["os"]})'
+            'message': f'FCM token saved for {username} on {device_type} ({os_name})'
         })
     except sqlite3.OperationalError as e:
         db.rollback()
