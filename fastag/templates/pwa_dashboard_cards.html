@@ -2154,10 +2154,18 @@
     function getCurrentUserRole() {
         // Check if user is superuser (7904030221)
         const userPhone = '{{ session.get("phone", "") }}';
-        if (userPhone === '7904030221') {
+        const userRole = '{{ session.get("user_role", "tenant") }}' || 'tenant';
+        
+        console.log('User phone from session:', userPhone);
+        console.log('User role from session:', userRole);
+        
+        // Superuser detection - by phone or role
+        if (userPhone === '7904030221' || userRole === 'superuser') {
+            console.log('Superuser detected');
             return 'superuser';
         }
-        return '{{ session.get("user_role", "tenant") }}' || 'tenant';
+        
+        return userRole;
     }
 
     // Show access modal
@@ -2196,6 +2204,12 @@
     function initAccessControl() {
         const userRole = getCurrentUserRole();
         console.log('Current user role:', userRole);
+        
+        // If superuser, don't disable anything
+        if (userRole === 'superuser') {
+            console.log('Superuser detected - all features enabled');
+            return;
+        }
         
         // Disable feature buttons based on access
         const featureButtons = {
