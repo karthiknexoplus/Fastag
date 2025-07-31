@@ -694,40 +694,83 @@ def get_network_info():
         
         if platform.system() == "Linux":
             # Use ifconfig command for Linux/Raspberry Pi
-            try:
-                result = subprocess.run(['ifconfig'], capture_output=True, text=True, timeout=10)
-                if result.returncode == 0:
-                    current_interface = None
-                    for line in result.stdout.split('\n'):
-                        line = line.strip()
-                        if line and not line.startswith('lo:'):  # Skip loopback
-                            if ':' in line and not line.startswith(' '):
-                                # Interface name
-                                current_interface = line.split(':')[0].strip()
-                                interfaces.append({
-                                    'name': current_interface,
-                                    'ip': 'N/A',
-                                    'mac': 'N/A',
-                                    'status': 'UP'
-                                })
-                            elif line.startswith('inet ') and current_interface:
-                                # IP address
-                                ip = line.split()[1]
-                                for iface in interfaces:
-                                    if iface['name'] == current_interface:
-                                        iface['ip'] = ip
-                                        break
-                            elif line.startswith('ether ') and current_interface:
-                                # MAC address
-                                mac = line.split()[1]
-                                for iface in interfaces:
-                                    if iface['name'] == current_interface:
-                                        iface['mac'] = mac
-                                        break
-            except subprocess.TimeoutExpired:
-                logger.error("Timeout getting network info")
-            except Exception as e:
-                logger.error(f"Error getting network info: {e}")
+            ifconfig_paths = ['/sbin/ifconfig', '/usr/sbin/ifconfig', 'ifconfig']
+            ifconfig_found = None
+            
+            # Find ifconfig executable
+            for path in ifconfig_paths:
+                try:
+                    result = subprocess.run([path, '--version'], capture_output=True, text=True, timeout=5)
+                    if result.returncode == 0:
+                        ifconfig_found = path
+                        break
+                except:
+                    continue
+            
+            if ifconfig_found:
+                try:
+                    result = subprocess.run([ifconfig_found], capture_output=True, text=True, timeout=10)
+                    if result.returncode == 0:
+                        current_interface = None
+                        for line in result.stdout.split('\n'):
+                            line = line.strip()
+                            if line and not line.startswith('lo:'):  # Skip loopback
+                                if ':' in line and not line.startswith(' '):
+                                    # Interface name
+                                    current_interface = line.split(':')[0].strip()
+                                    interfaces.append({
+                                        'name': current_interface,
+                                        'ip': 'N/A',
+                                        'mac': 'N/A',
+                                        'status': 'UP'
+                                    })
+                                elif line.startswith('inet ') and current_interface:
+                                    # IP address
+                                    ip = line.split()[1]
+                                    for iface in interfaces:
+                                        if iface['name'] == current_interface:
+                                            iface['ip'] = ip
+                                            break
+                                elif line.startswith('ether ') and current_interface:
+                                    # MAC address
+                                    mac = line.split()[1]
+                                    for iface in interfaces:
+                                        if iface['name'] == current_interface:
+                                            iface['mac'] = mac
+                                            break
+                except subprocess.TimeoutExpired:
+                    logger.error("Timeout getting network info")
+                except Exception as e:
+                    logger.error(f"Error getting network info: {e}")
+            else:
+                # Fallback: try to get network info from /proc/net/dev and /sys/class/net
+                try:
+                    # Read /proc/net/dev for interface names
+                    with open('/proc/net/dev', 'r') as f:
+                        lines = f.readlines()[2:]  # Skip header lines
+                        for line in lines:
+                            if ':' in line:
+                                interface_name = line.split(':')[0].strip()
+                                if interface_name not in ['lo']:  # Skip loopback
+                                    interfaces.append({
+                                        'name': interface_name,
+                                        'ip': 'N/A',
+                                        'mac': 'N/A',
+                                        'status': 'UP'
+                                    })
+                    
+                    # Try to get IP addresses using hostname
+                    try:
+                        import socket
+                        hostname = socket.gethostname()
+                        ip = socket.gethostbyname(hostname)
+                        if interfaces:
+                            interfaces[0]['ip'] = ip
+                    except:
+                        pass
+                        
+                except Exception as e:
+                    logger.error(f"Error in fallback network info: {e}")
                 
         elif platform.system() == "Windows":
             # Use ipconfig for Windows
