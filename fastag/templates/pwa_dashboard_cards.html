@@ -5462,7 +5462,7 @@
         }
         
         let tableHtml = '<table style="min-width:600px;"><tr>' +
-            '<th style="min-width:120px;">Name</th><th style="min-width:140px;">FASTag ID</th><th style="min-width:100px;">Vehicle</th><th style="min-width:100px;">Contact</th><th style="min-width:150px;">Address</th><th style="min-width:80px;">Role</th><th style="min-width:80px;text-align:center;">Status</th><th style="min-width:100px;text-align:center;">Actions</th></tr>' +
+            '<th style="min-width:140px;">Name</th><th style="min-width:160px;">FASTag ID</th><th style="min-width:120px;">Vehicle</th><th style="min-width:120px;">Contact</th><th style="min-width:180px;">Address</th><th style="min-width:100px;">Role</th><th style="min-width:120px;text-align:center;">Actions</th></tr>' +
             users.map(u => `<tr>` +
                 `<td style="padding: 0.5rem 0.3rem;">${u.name || 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;font-size:0.85rem;">${u.fastag_id || 'N/A'}</td>` +
@@ -5470,7 +5470,6 @@
                 `<td style="padding: 0.5rem 0.3rem;">${u.contact_number || 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;font-size:0.85rem;">${u.address || 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;">${u.user_role || 'tenant'}</td>` +
-                `<td style="text-align:center;padding: 0.5rem 0.3rem;"><i class="fas ${u.is_active ? 'fa-check-circle' : 'fa-times-circle'}" style="color: ${u.is_active ? '#28a745' : '#dc3545'}; font-size: 1.1rem;"></i></td>` +
                 `<td style="text-align:center;padding: 0.5rem 0.3rem;"><div class="action-buttons">` +
                     `<button class="action-btn edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button>` +
                     `<button class="action-btn delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button>` +
@@ -5520,7 +5519,9 @@
             .then(data => {
                 if (data.user) {
                     const user = data.user;
-                    openAddKycUserModal();
+                    // Don't close the current modal, just open the edit modal on top
+                    document.getElementById('addKycUserModal').style.display = 'flex';
+                    document.getElementById('addKycUserModal').style.zIndex = '9999';
                     document.getElementById('addKycUserForm').name.value = user.name || '';
                     document.getElementById('addKycUserForm').fastag_id.value = user.fastag_id || '';
                     document.getElementById('addKycUserForm').vehicle_number.value = user.vehicle_number || '';
@@ -5553,6 +5554,8 @@
         .then(data => {
             if (data.success) {
                 closeAddKycUserModal();
+                // Reset the z-index after closing
+                document.getElementById('addKycUserModal').style.zIndex = '';
                 loadKycUsersList();
             } else {
                 alert(data.error || 'Failed to update user');
