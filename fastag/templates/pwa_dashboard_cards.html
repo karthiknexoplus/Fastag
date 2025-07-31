@@ -608,6 +608,7 @@
             <button class="feature-btn" onclick="openLocationsModal()"><span class="icon"><i class="fas fa-map-marker-alt"></i></span></button>
             <button class="feature-btn" onclick="openLanesModal()"><span class="icon"><i class="fas fa-road"></i></span></button>
             <button class="feature-btn" onclick="openKycUsersListModal()"><span class="icon"><i class="fas fa-id-card"></i></span></button>
+            <button class="feature-btn" onclick="openPushNotificationUsersModal()"><span class="icon"><i class="fas fa-bell"></i></span></button>
             <button class="feature-btn" onclick="openWatchlistFromIcon()"><span class="icon"><i class="fas fa-eye"></i></span></button>
                             <button class="feature-btn" onclick="showAnalyticsModal()" title="Analytics Dashboard"><span class="icon"><i class="fas fa-chart-line"></i></span></button>
             <button class="feature-btn" onclick="showVehicleFinderModal()"><span class="icon"><i class="fas fa-car"></i></span></button>
@@ -988,6 +989,28 @@
                     <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Add User</button>
                 </div>
             </form>
+        </div>
+    </div>
+    
+    <!-- Push Notification Users Modal -->
+    <div id="pushNotificationUsersModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+            <span class="close-modal" onclick="closePushNotificationUsersModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-bell"></i></span>
+                <span class="modal-title">Push Notification Users</span>
+            </div>
+            <div class="modal-desc" id="pushNotificationUsersTotal">All users registered for push notifications.</div>
+            <div class="modal-records" id="pushNotificationUsersRecords" style="overflow-x:auto;max-height:45vh;overflow-y:auto;"></div>
+            <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:0.5em;">
+                <button class="input-icon-btn" style="font-size:1.3rem;color:#764ba2;background:none;border:none;outline:none;cursor:pointer;" onclick="togglePushNotificationUsersSearch()" title="Search"><i class="fas fa-search"></i></button>
+            </div>
+            <div id="pushNotificationUsersSearchBox" style="display:none;margin-bottom:0.5em;">
+                <input type="text" id="pushNotificationUsersSearchInput" class="form-control" placeholder="Search by name, contact, or FCM token..." oninput="filterPushNotificationUsers()">
+            </div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closePushNotificationUsersModal()">Close</button>
+            </div>
         </div>
     </div>
     
@@ -5926,6 +5949,84 @@
             }
         })
         .catch(() => alert('Failed to add location'));
+    }
+    
+    // Push Notification Users Functions
+    function openPushNotificationUsersModal() {
+        document.getElementById('pushNotificationUsersModal').style.display = 'flex';
+        loadPushNotificationUsersList();
+    }
+    
+    function closePushNotificationUsersModal() {
+        document.getElementById('pushNotificationUsersModal').style.display = 'none';
+    }
+    
+    function loadPushNotificationUsersList() {
+        document.getElementById('pushNotificationUsersRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        
+        // Fetch FCM tokens from the database
+        fetch('/api/fcm-tokens')
+            .then(r => r.json())
+            .then(data => {
+                let users = data.tokens || [];
+                window._pushNotificationUsersList = users;
+                document.getElementById('pushNotificationUsersTotal').innerHTML = `All push notification users. <b>Total: ${users.length}</b>`;
+                renderPushNotificationUsersList(users);
+            })
+            .catch(() => {
+                document.getElementById('pushNotificationUsersRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load push notification users.</div>';
+            });
+    }
+    
+    function renderPushNotificationUsersList(users) {
+        if (users.length === 0) {
+            document.getElementById('pushNotificationUsersRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No push notification users found.</div>';
+            return;
+        }
+        
+        let tableHtml = '<table style="min-width:800px;"><tr>' +
+            '<th style="min-width:120px;">Name</th>' +
+            '<th style="min-width:120px;">Contact</th>' +
+            '<th style="min-width:200px;">FCM Token</th>' +
+            '<th style="min-width:120px;">Device Type</th>' +
+            '<th style="min-width:120px;">Last Active</th>' +
+            '<th style="min-width:100px;">Status</th></tr>' +
+            users.map(u => `<tr>` +
+                `<td style="padding: 0.5rem 0.3rem;word-wrap:break-word;">${u.name || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;">${u.contact || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;font-size:0.8rem;word-wrap:break-word;max-width:200px;">${u.fcm_token ? u.fcm_token.substring(0, 50) + '...' : 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;">${u.device_type || 'Unknown'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;font-size:0.85rem;">${u.last_active || 'N/A'}</td>` +
+                `<td style="padding: 0.5rem 0.3rem;"><span class="status-badge ${u.status === 'active' ? 'active' : 'inactive'}">${u.status === 'active' ? '✓ Active' : '✗ Inactive'}</span></td>` +
+            `</tr>`).join('') + '</table>';
+        document.getElementById('pushNotificationUsersRecords').innerHTML = tableHtml;
+    }
+    
+    function togglePushNotificationUsersSearch() {
+        const box = document.getElementById('pushNotificationUsersSearchBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block') {
+            document.getElementById('pushNotificationUsersSearchInput').focus();
+        } else {
+            filterPushNotificationUsers('');
+        }
+    }
+    
+    function filterPushNotificationUsers() {
+        const val = document.getElementById('pushNotificationUsersSearchInput').value.trim().toLowerCase();
+        const users = window._pushNotificationUsersList || [];
+        if (!val) {
+            renderPushNotificationUsersList(users);
+            document.getElementById('pushNotificationUsersTotal').innerHTML = `All push notification users. <b>Total: ${users.length}</b>`;
+            return;
+        }
+        const filtered = users.filter(u =>
+            (u.name && u.name.toLowerCase().includes(val)) ||
+            (u.contact && u.contact.toLowerCase().includes(val)) ||
+            (u.fcm_token && u.fcm_token.toLowerCase().includes(val))
+        );
+        renderPushNotificationUsersList(filtered);
+        document.getElementById('pushNotificationUsersTotal').innerHTML = `Search results: <b>${filtered.length}</b> / ${users.length}`;
     }
     
     // QR Scanner Functions

@@ -612,3 +612,49 @@ def relay_control_all(action):
     except Exception as e:
         logger.error(f"Error in /api/relay/all/{action}: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500 
+
+@api.route('/fcm-tokens', methods=['GET'])
+def get_fcm_tokens():
+    """Get all FCM tokens for push notification users"""
+    try:
+        db = get_db()
+        
+        # Get FCM tokens with user information
+        rows = db.execute('''
+            SELECT 
+                ft.id,
+                ft.fcm_token,
+                ft.device_type,
+                ft.created_at,
+                ft.last_active,
+                ft.status,
+                ku.name,
+                ku.contact_number as contact
+            FROM fcm_tokens ft
+            LEFT JOIN kyc_users ku ON ft.user_id = ku.id
+            ORDER BY ft.created_at DESC
+        ''').fetchall()
+        
+        tokens = []
+        for row in rows:
+            tokens.append({
+                'id': row[0],
+                'fcm_token': row[1],
+                'device_type': row[2],
+                'created_at': row[3],
+                'last_active': row[4],
+                'status': row[5] or 'active',
+                'name': row[6] or 'Unknown User',
+                'contact': row[7] or 'N/A'
+            })
+        
+        return jsonify({
+            'success': True,
+            'tokens': tokens
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500 
