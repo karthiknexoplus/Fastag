@@ -693,17 +693,17 @@ def get_network_info():
         interfaces = []
         
         if platform.system() == "Linux":
-            # Use ip command for Linux
+            # Use ifconfig command for Linux/Raspberry Pi
             try:
-                result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True, timeout=10)
+                result = subprocess.run(['ifconfig'], capture_output=True, text=True, timeout=10)
                 if result.returncode == 0:
                     current_interface = None
                     for line in result.stdout.split('\n'):
                         line = line.strip()
-                        if line and not line.startswith('inet6'):
+                        if line and not line.startswith('lo:'):  # Skip loopback
                             if ':' in line and not line.startswith(' '):
                                 # Interface name
-                                current_interface = line.split(':')[1].strip()
+                                current_interface = line.split(':')[0].strip()
                                 interfaces.append({
                                     'name': current_interface,
                                     'ip': 'N/A',
@@ -712,12 +712,12 @@ def get_network_info():
                                 })
                             elif line.startswith('inet ') and current_interface:
                                 # IP address
-                                ip = line.split()[1].split('/')[0]
+                                ip = line.split()[1]
                                 for iface in interfaces:
                                     if iface['name'] == current_interface:
                                         iface['ip'] = ip
                                         break
-                            elif line.startswith('link/ether ') and current_interface:
+                            elif line.startswith('ether ') and current_interface:
                                 # MAC address
                                 mac = line.split()[1]
                                 for iface in interfaces:
