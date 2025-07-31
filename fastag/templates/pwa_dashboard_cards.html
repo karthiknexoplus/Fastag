@@ -5330,39 +5330,45 @@
     let currentRestartAction = null;
     
     function restartController() {
+        console.log('restartController called');
         showRestartConfirmModal('controller', 'Restart Controller', 'Are you sure you want to restart the controller? This will reboot the entire system.', 'fas fa-power-off', 'dc3545');
     }
     
     function restartApplication() {
+        console.log('restartApplication called');
         showRestartConfirmModal('application', 'Restart Application', 'Are you sure you want to restart the Fastag application? This will restart the web service.', 'fas fa-sync-alt', '6f42c1');
     }
     
     function restartReaders() {
+        console.log('restartReaders called');
         showRestartConfirmModal('readers', 'Restart RFID Readers', 'Are you sure you want to restart the RFID readers? This will restart the RFID service.', 'fas fa-wifi', 'fd7e14');
     }
     
     function showRestartConfirmModal(action, title, description, icon, color) {
-        console.log('Setting restart action:', action);
-        currentRestartAction = action;
+        console.log('showRestartConfirmModal called with action:', action);
+        window.currentRestartAction = action; // Use window to ensure global scope
         document.getElementById('restartConfirmTitle').textContent = title;
         document.getElementById('restartConfirmDesc').textContent = description;
         document.getElementById('restartConfirmIcon').innerHTML = `<i class="${icon}"></i>`;
         document.getElementById('restartConfirmIcon').style.color = `#${color}`;
         document.getElementById('restartConfirmModal').style.display = 'flex';
+        console.log('Modal shown, currentRestartAction set to:', window.currentRestartAction);
     }
     
     function closeRestartConfirmModal() {
         document.getElementById('restartConfirmModal').style.display = 'none';
-        currentRestartAction = null;
+        window.currentRestartAction = null;
     }
     
     function executeRestartAction() {
-        if (!currentRestartAction) {
+        console.log('executeRestartAction called, currentRestartAction:', window.currentRestartAction);
+        
+        if (!window.currentRestartAction) {
             console.error('No restart action set');
+            document.getElementById('controllerStatusRecords').innerHTML = 
+                '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Error: No restart action selected.</div>';
             return;
         }
-        
-        console.log('Executing restart action:', currentRestartAction);
         
         closeRestartConfirmModal();
         document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting...</div>';
@@ -5379,8 +5385,15 @@
             'readers': 'RFID readers restart initiated! Service will restart shortly.'
         };
         
-        const endpoint = endpoints[currentRestartAction];
+        const endpoint = endpoints[window.currentRestartAction];
         console.log('Using endpoint:', endpoint);
+        
+        if (!endpoint) {
+            console.error('Invalid endpoint for action:', window.currentRestartAction);
+            document.getElementById('controllerStatusRecords').innerHTML = 
+                '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Error: Invalid restart action.</div>';
+            return;
+        }
         
         fetch(endpoint, {
             method: 'POST',
@@ -5390,7 +5403,7 @@
         .then(data => {
             if (data.success) {
                 document.getElementById('controllerStatusRecords').innerHTML = 
-                    `<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">${messages[currentRestartAction]}</div>`;
+                    `<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">${messages[window.currentRestartAction]}</div>`;
             } else {
                 document.getElementById('controllerStatusRecords').innerHTML = 
                     '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart: ' + (data.error || 'Unknown error') + '</div>';
