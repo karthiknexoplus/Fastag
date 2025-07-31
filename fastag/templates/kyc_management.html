@@ -6,179 +6,506 @@
     <title>KYC Management - Fastag</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --info-color: #0891b2;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
         }
-        
+
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
-        
-        .header-card {
+
+        /* Header Section */
+        .header-section {
             background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border: none;
+            color: white;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Search and Filters */
+        .filters-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .content-card {
+
+        .search-input {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        .filter-select {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        /* Users List */
+        .users-section {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .user-card {
             background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
+            border-radius: 16px;
+            padding: 1.75rem;
             margin-bottom: 1rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            border-left: 4px solid #667eea;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary-color), var(--info-color));
+        }
+
         .user-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
-        
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .user-details {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-fastag {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Role Badges */
         .role-badge {
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
             color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .role-tenant { background: #1976d2; }
-        .role-service_engineer { background: #f57c00; }
-        .role-manager { background: #7b1fa2; }
-        .role-superuser { background: #388e3c; }
-        
+
+        .role-tenant { 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        .role-service_engineer { 
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        .role-manager { 
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+        .role-superuser { 
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        /* Status Badges */
         .status-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.7rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .status-active { background: #e8f5e8; color: #388e3c; }
-        .status-inactive { background: #ffebee; color: #d32f2f; }
-        
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
+
+        .status-active { 
+            background: #dcfce7; 
+            color: #166534;
+        }
+        .status-inactive { 
+            background: #fee2e2; 
+            color: #991b1b;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 0.5rem;
             border-radius: 10px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
+            border: none;
             transition: all 0.3s ease;
+            margin-left: 0.5rem;
         }
-        
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+
+        .btn-edit {
+            background: var(--primary-color);
             color: white;
         }
-        
-        .search-box {
-            background: white;
-            border-radius: 15px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .btn-edit:hover {
+            background: var(--primary-dark);
             color: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-            margin-bottom: 1rem;
+            transform: scale(1.05);
         }
-        
+
+        .btn-toggle {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-toggle.inactive {
+            background: var(--danger-color);
+        }
+
+        .btn-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* Modal Styling */
         .modal-content {
             border-radius: 20px;
             border: none;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow-xl);
         }
-        
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
         .form-control {
-            border-radius: 10px;
-            border: 2px solid #e9ecef;
-            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
-        
+
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+        }
+
+        .btn-cancel {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-update:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .header-section {
+                padding: 1.5rem;
+            }
+
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .user-card {
+                padding: 1.25rem;
+            }
+
+            .user-name {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-title {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <!-- Header -->
-        <div class="header-card">
+        <!-- Header Section -->
+        <div class="header-section">
             <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="mb-2"><i class="fas fa-users me-3"></i>KYC Management</h1>
-                    <p class="text-muted mb-0">Manage KYC users and assign roles for access control</p>
+                <div class="col-lg-8">
+                    <h1 class="header-title">
+                        <i class="fas fa-users-cog" style="color: var(--primary-color);"></i>
+                        KYC Management
+                    </h1>
+                    <p class="header-subtitle">Manage KYC users and assign roles for access control</p>
                 </div>
-                <div class="col-md-4 text-end">
-                    <button class="btn btn-gradient" onclick="refreshUsers()">
+                <div class="col-lg-4 text-lg-end">
+                    <button class="refresh-btn" onclick="refreshUsers()">
                         <i class="fas fa-sync-alt me-2"></i>Refresh
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Statistics -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <h3 id="totalUsers">0</h3>
-                    <p class="mb-0">Total Users</p>
-                </div>
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <h3 id="activeUsers">0</h3>
-                    <p class="mb-0">Active Users</p>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeUsers">0</div>
+                <div class="stat-label">Active Users</div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <h3 id="tenants">0</h3>
-                    <p class="mb-0">Tenants</p>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number" id="tenants">0</div>
+                <div class="stat-label">Tenants</div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <h3 id="managers">0</h3>
-                    <p class="mb-0">Managers</p>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number" id="managers">0</div>
+                <div class="stat-label">Managers</div>
             </div>
         </div>
 
         <!-- Search and Filters -->
-        <div class="search-box">
-            <div class="row">
-                <div class="col-md-6">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search users by name, vehicle, or contact...">
+        <div class="filters-section">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <input type="text" class="form-control search-input" id="searchInput" placeholder="Search users by name, vehicle, or contact...">
                 </div>
-                <div class="col-md-3">
-                    <select class="form-control" id="roleFilter">
+                <div class="col-lg-3">
+                    <select class="form-control filter-select" id="roleFilter">
                         <option value="">All Roles</option>
                         <option value="tenant">Tenant</option>
                         <option value="service_engineer">Service Engineer</option>
@@ -186,8 +513,8 @@
                         <option value="superuser">Superuser</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <select class="form-control" id="statusFilter">
+                <div class="col-lg-3">
+                    <select class="form-control filter-select" id="statusFilter">
                         <option value="">All Status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
@@ -197,35 +524,37 @@
         </div>
 
         <!-- Users List -->
-        <div class="content-card">
+        <div class="users-section">
             <div id="usersList">
                 {% for user in users %}
                 <div class="user-card" data-role="{{ user.role }}" data-status="{{ 'active' if user.is_active else 'inactive' }}">
                     <div class="row align-items-center">
-                        <div class="col-md-3">
-                            <h5 class="mb-1">{{ user.name }}</h5>
-                            <p class="text-muted mb-0">{{ user.vehicle_number }}</p>
-                            <small class="text-muted">{{ user.contact_number }}</small>
+                        <div class="col-lg-4">
+                            <div class="user-name">{{ user.name }}</div>
+                            <div class="user-details">{{ user.vehicle_number }}</div>
+                            <div class="user-details">{{ user.contact_number }}</div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-lg-2">
                             <span class="role-badge role-{{ user.role }}">{{ roles[user.role].name }}</span>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-lg-2">
                             <span class="status-badge status-{{ 'active' if user.is_active else 'inactive' }}">
                                 {{ 'Active' if user.is_active else 'Inactive' }}
                             </span>
                         </div>
-                        <div class="col-md-3">
-                            <small class="text-muted">
-                                FASTag: {{ user.fastag_id }}<br>
-                                Created: {{ user.created_at.split(' ')[0] if user.created_at else 'N/A' }}
-                            </small>
+                        <div class="col-lg-3">
+                            <div class="user-fastag">
+                                <strong>FASTag:</strong> {{ user.fastag_id }}
+                            </div>
+                            <div class="user-details">
+                                <strong>Created:</strong> {{ user.created_at.split(' ')[0] if user.created_at else 'N/A' }}
+                            </div>
                         </div>
-                        <div class="col-md-2 text-end">
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editUser({{ user.id }}, '{{ user.name }}', '{{ user.role }}', {{ user.is_active|lower }})">
+                        <div class="col-lg-1 text-end">
+                            <button class="btn action-btn btn-edit" onclick="editUser({{ user.id }}, '{{ user.name }}', '{{ user.role }}', {{ user.is_active|lower }})" title="Edit User">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-{{ 'danger' if user.is_active else 'success' }}" onclick="toggleUserStatus({{ user.id }}, {{ user.is_active|lower }})">
+                            <button class="btn action-btn btn-toggle {{ 'inactive' if user.is_active else '' }}" onclick="toggleUserStatus({{ user.id }}, {{ user.is_active|lower }})" title="{{ 'Deactivate' if user.is_active else 'Activate' }} User">
                                 <i class="fas fa-{{ 'ban' if user.is_active else 'check' }}"></i>
                             </button>
                         </div>
@@ -238,20 +567,23 @@
 
     <!-- Edit User Modal -->
     <div class="modal fade" id="editUserModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Edit User Role</h5>
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-edit me-2" style="color: var(--primary-color);"></i>
+                        Edit User Role
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editUserForm">
                         <input type="hidden" id="editUserId">
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label class="form-label">User Name</label>
                             <input type="text" class="form-control" id="editUserName" readonly>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label class="form-label">Role</label>
                             <select class="form-control" id="editUserRole" required>
                                 <option value="tenant">Tenant - Basic access</option>
@@ -260,7 +592,7 @@
                                 <option value="superuser">Superuser - Full access</option>
                             </select>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="editUserActive" checked>
                                 <label class="form-check-label" for="editUserActive">
@@ -271,8 +603,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-gradient" onclick="updateUser()">Update User</button>
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-update" onclick="updateUser()">Update User</button>
                 </div>
             </div>
         </div>
@@ -291,10 +623,12 @@
             const statusFilter = document.getElementById('statusFilter').value;
 
             const userCards = document.querySelectorAll('.user-card');
+            let visibleCount = 0;
+
             userCards.forEach(card => {
-                const userName = card.querySelector('h5').textContent.toLowerCase();
-                const vehicleNumber = card.querySelector('p').textContent.toLowerCase();
-                const contactNumber = card.querySelector('small').textContent.toLowerCase();
+                const userName = card.querySelector('.user-name').textContent.toLowerCase();
+                const vehicleNumber = card.querySelector('.user-details').textContent.toLowerCase();
+                const contactNumber = card.querySelectorAll('.user-details')[1].textContent.toLowerCase();
                 const userRole = card.dataset.role;
                 const userStatus = card.dataset.status;
 
@@ -304,8 +638,30 @@
                 const matchesRole = !roleFilter || userRole === roleFilter;
                 const matchesStatus = !statusFilter || userStatus === statusFilter;
 
-                card.style.display = matchesSearch && matchesRole && matchesStatus ? 'block' : 'none';
+                if (matchesSearch && matchesRole && matchesStatus) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
             });
+
+            // Show empty state if no results
+            const usersSection = document.querySelector('.users-section');
+            let emptyState = usersSection.querySelector('.empty-state');
+            
+            if (visibleCount === 0 && !emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    <h4>No users found</h4>
+                    <p>Try adjusting your search criteria or filters</p>
+                `;
+                usersSection.appendChild(emptyState);
+            } else if (visibleCount > 0 && emptyState) {
+                emptyState.remove();
+            }
         }
 
         function editUser(userId, userName, userRole, isActive) {
@@ -322,6 +678,12 @@
             const role = document.getElementById('editUserRole').value;
             const isActive = document.getElementById('editUserActive').checked;
 
+            // Add loading state
+            const updateBtn = document.querySelector('.btn-update');
+            const originalText = updateBtn.innerHTML;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+            updateBtn.disabled = true;
+
             fetch(`/api/kyc-users/${userId}`, {
                 method: 'PUT',
                 headers: {
@@ -332,15 +694,19 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    location.reload();
+                    showNotification(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert('Error: ' + data.error);
+                    showNotification('Error: ' + data.error, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error updating user');
+                showNotification('Error updating user', 'error');
+            })
+            .finally(() => {
+                updateBtn.innerHTML = originalText;
+                updateBtn.disabled = false;
             });
         }
 
@@ -359,20 +725,52 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    location.reload();
+                    showNotification(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert('Error: ' + data.error);
+                    showNotification('Error: ' + data.error, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error updating user status');
+                showNotification('Error updating user status', 'error');
             });
         }
 
         function refreshUsers() {
-            location.reload();
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+            refreshBtn.disabled = true;
+            
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+            notification.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                border-radius: 12px;
+                box-shadow: var(--shadow-lg);
+            `;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
         // Update statistics on page load
@@ -383,11 +781,28 @@
             const tenants = Array.from(userCards).filter(card => card.dataset.role === 'tenant').length;
             const managers = Array.from(userCards).filter(card => card.dataset.role === 'manager').length;
 
-            document.getElementById('totalUsers').textContent = totalUsers;
-            document.getElementById('activeUsers').textContent = activeUsers;
-            document.getElementById('tenants').textContent = tenants;
-            document.getElementById('managers').textContent = managers;
+            // Animate statistics
+            animateCounter('totalUsers', totalUsers);
+            animateCounter('activeUsers', activeUsers);
+            animateCounter('tenants', tenants);
+            animateCounter('managers', managers);
         });
+
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            const duration = 1000;
+            const step = targetValue / (duration / 16);
+            let currentValue = 0;
+
+            const timer = setInterval(() => {
+                currentValue += step;
+                if (currentValue >= targetValue) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(currentValue);
+            }, 16);
+        }
     </script>
 </body>
 </html> 
