@@ -690,15 +690,35 @@ def get_fcm_tokens():
 def restart_controller():
     """Restart the controller (reboot system)"""
     try:
+        logger.info("Controller restart requested")
+        
+        # Check if running as root or has sudo privileges
+        try:
+            # Test sudo access
+            test_result = subprocess.run(['sudo', '-n', 'true'], capture_output=True, text=True, timeout=5)
+            if test_result.returncode != 0:
+                return jsonify({
+                    'success': False,
+                    'error': 'Insufficient privileges to restart controller'
+                }), 403
+        except Exception as e:
+            logger.error(f"Error checking sudo privileges: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Unable to verify system privileges'
+            }), 500
+        
         # Execute sudo reboot command
         result = subprocess.run(['sudo', 'reboot'], capture_output=True, text=True, timeout=30)
         
+        logger.info("Controller restart command executed successfully")
         return jsonify({
             'success': True,
             'message': 'Controller restart initiated'
         })
         
     except subprocess.TimeoutExpired:
+        logger.warning("Controller restart command timed out")
         return jsonify({
             'success': True,
             'message': 'Controller restart initiated (timeout)'
