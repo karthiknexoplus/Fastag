@@ -2933,9 +2933,9 @@
                             `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="reader-type ${r.reader_type}">${r.reader_type}</td><td class="time">${r.time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'denied' && data.records && data.records.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Type</th><th>Time</th></tr>' +
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Type</th><th>Time</th></tr>' +
                         data.records.slice(0,50).map(r => 
-                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="reader-type ${r.reader_type}">${r.reader_type}</td><td class="time">${r.time}</td></tr>`
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="reader-type ${r.reader_type}">${r.reader_type}</td><td class="time">${r.time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'trend' && data.entry_exit_trend && data.entry_exit_trend.length) {
                     tableHtml = '<table><tr><th>Hour</th><th>Entries</th><th>Exits</th></tr>' +
