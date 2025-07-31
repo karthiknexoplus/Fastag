@@ -703,9 +703,9 @@
                     <div class="form-text">Format: KA03KD1578</div>
                 </div>
                 <div id="vehicleSearchError" style="color:#dc3545;font-size:0.9em;margin-bottom:0.5em;display:none;"></div>
-                            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Search</button>
-            </div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Search</button>
+                </div>
             </form>
             <div id="vehicleResults" style="margin-top:1rem;display:none;">
                 <div class="modal-records" id="vehicleResultsContent"></div>
@@ -735,9 +735,9 @@
                     <div class="form-text" id="bankHelpText">Format: TN66AT2938 (VRN) or 24-character TagID</div>
                 </div>
                 <div id="bankSearchError" style="color:#dc3545;font-size:0.9em;margin-bottom:0.5em;display:none;"></div>
-                            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Search</button>
-            </div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Search</button>
+                </div>
             </form>
             <div id="bankResults" style="margin-top:1rem;display:none;">
                 <div class="modal-records" id="bankResultsContent"></div>
@@ -790,9 +790,9 @@
                     </select>
                 </div>
                 <div id="fastagBalanceError" style="color:#dc3545;font-size:0.9em;margin-bottom:0.5em;display:none;"></div>
-                            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Check Balance</button>
-            </div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Check Balance</button>
+                </div>
             </form>
             <div id="fastagBalanceResults" style="margin-top:1rem;display:none;">
                 <div class="modal-records" id="fastagBalanceResultsContent"></div>
@@ -3259,7 +3259,7 @@
         document.getElementById('offline-readers').textContent = offline;
     }
     
-        function loadReadersData() {
+    function loadReadersData() {
         const container = document.getElementById('readers-container');
         container.innerHTML = '<div style="text-align: center; padding: 2rem; color: white;"><span class="loading"></span> Loading readers...</div>';
         
@@ -3334,7 +3334,7 @@
                                                     <input type="number" 
                                                            id="power-input-${reader.id}" 
                                                            min="1" 
-                                                           max="30"
+                                                           max="30" 
                                                            placeholder="1-30"
                                                            class="power-input-field">
                                                     <button class="power-set-btn" 
@@ -5346,23 +5346,38 @@
     
     function showRestartConfirmModal(action, title, description, icon, color) {
         console.log('showRestartConfirmModal called with action:', action);
-        window.currentRestartAction = action; // Use window to ensure global scope
+        
+        // Validate action parameter
+        if (!action || !['controller', 'application', 'readers'].includes(action)) {
+            console.error('Invalid action provided to showRestartConfirmModal:', action);
+            return;
+        }
+        
+        // Set the action globally
+        window.currentRestartAction = action;
+        
+        // Update modal content
         document.getElementById('restartConfirmTitle').textContent = title;
         document.getElementById('restartConfirmDesc').textContent = description;
         document.getElementById('restartConfirmIcon').innerHTML = `<i class="${icon}"></i>`;
         document.getElementById('restartConfirmIcon').style.color = `#${color}`;
+        
+        // Show modal
         document.getElementById('restartConfirmModal').style.display = 'flex';
+        
         console.log('Modal shown, currentRestartAction set to:', window.currentRestartAction);
     }
     
     function closeRestartConfirmModal() {
         document.getElementById('restartConfirmModal').style.display = 'none';
-        window.currentRestartAction = null;
+        // Don't clear the action immediately, let it be cleared after execution
+        console.log('Modal closed, currentRestartAction remains:', window.currentRestartAction);
     }
     
     function executeRestartAction() {
         console.log('executeRestartAction called, currentRestartAction:', window.currentRestartAction);
         
+        // Validate action
         if (!window.currentRestartAction) {
             console.error('No restart action set');
             document.getElementById('controllerStatusRecords').innerHTML = 
@@ -5370,30 +5385,51 @@
             return;
         }
         
-        closeRestartConfirmModal();
-        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting...</div>';
-        
-        // Call the appropriate function based on action
-        if (window.currentRestartAction === 'controller') {
-            restartControllerSystem();
-        } else if (window.currentRestartAction === 'application') {
-            restartApplicationSystem();
-        } else if (window.currentRestartAction === 'readers') {
-            restartReadersSystem();
-        } else {
+        // Validate action value
+        if (!['controller', 'application', 'readers'].includes(window.currentRestartAction)) {
             console.error('Invalid restart action:', window.currentRestartAction);
             document.getElementById('controllerStatusRecords').innerHTML = 
                 '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Error: Invalid restart action.</div>';
+            return;
+        }
+        
+        // Store action locally before clearing
+        const actionToExecute = window.currentRestartAction;
+        
+        // Close modal and clear action
+        closeRestartConfirmModal();
+        window.currentRestartAction = null;
+        
+        // Show loading message
+        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting...</div>';
+        
+        // Execute based on action
+        console.log('Executing restart action:', actionToExecute);
+        
+        if (actionToExecute === 'controller') {
+            restartControllerSystem();
+        } else if (actionToExecute === 'application') {
+            restartApplicationSystem();
+        } else if (actionToExecute === 'readers') {
+            restartReadersSystem();
+        } else {
+            console.error('Unexpected action in executeRestartAction:', actionToExecute);
+            document.getElementById('controllerStatusRecords').innerHTML = 
+                '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Error: Unexpected restart action.</div>';
         }
     }
     
+
+    
     function restartControllerSystem() {
+        console.log('restartControllerSystem called');
         fetch('/api/restart-controller', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
         .then(r => r.json())
         .then(data => {
+            console.log('Controller restart response:', data);
             if (data.success) {
                 document.getElementById('controllerStatusRecords').innerHTML = 
                     '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">Controller restart initiated! System will reboot shortly.</div>';
@@ -5410,12 +5446,14 @@
     }
     
     function restartApplicationSystem() {
+        console.log('restartApplicationSystem called');
         fetch('/api/restart-application', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
         .then(r => r.json())
         .then(data => {
+            console.log('Application restart response:', data);
             if (data.success) {
                 document.getElementById('controllerStatusRecords').innerHTML = 
                     '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">Application restart initiated! Service will restart shortly.</div>';
@@ -5432,12 +5470,14 @@
     }
     
     function restartReadersSystem() {
+        console.log('restartReadersSystem called');
         fetch('/api/restart-readers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
         .then(r => r.json())
         .then(data => {
+            console.log('Readers restart response:', data);
             if (data.success) {
                 document.getElementById('controllerStatusRecords').innerHTML = 
                     '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">RFID readers restart initiated! Service will restart shortly.</div>';
@@ -6034,7 +6074,7 @@
             return;
         }
         
-        const filtered = users.filter(u => 
+        const filtered = users.filter(u =>
             (u.name && u.name.toLowerCase().includes(query)) ||
             (u.vehicle_number && u.vehicle_number.toLowerCase().includes(query)) ||
             (u.fastag_id && u.fastag_id.toLowerCase().includes(query)) ||
@@ -6044,7 +6084,7 @@
         if (filtered.length === 0) {
             document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No users found matching your search.</div>';
         } else {
-            renderKycUsersList(filtered);
+        renderKycUsersList(filtered);
         }
     }
     
@@ -6173,7 +6213,7 @@
             return;
         }
         
-        const filtered = locations.filter(l => 
+        const filtered = locations.filter(l =>
             (l.name && l.name.toLowerCase().includes(query)) ||
             (l.address && l.address.toLowerCase().includes(query))
         );
@@ -6181,7 +6221,7 @@
         if (filtered.length === 0) {
             document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No locations found matching your search.</div>';
         } else {
-            renderLocationsList(filtered);
+        renderLocationsList(filtered);
         }
     }
     function editLocation(id) {
@@ -6846,55 +6886,55 @@
       });
     }
     function openEditWatchlistReasonModal(id, reason) {
-        document.getElementById('editWatchlistReasonModal').style.display = 'flex';
-        document.getElementById('editWatchlistReasonId').value = id;
-        document.getElementById('editWatchlistReasonInput').value = reason;
+      document.getElementById('editWatchlistReasonModal').style.display = 'flex';
+      document.getElementById('editWatchlistReasonId').value = id;
+      document.getElementById('editWatchlistReasonInput').value = reason;
     }
     function closeEditWatchlistReasonModal() {
-        document.getElementById('editWatchlistReasonModal').style.display = 'none';
+      document.getElementById('editWatchlistReasonModal').style.display = 'none';
     }
     function submitEditWatchlistReason(e) {
-        e.preventDefault();
-        const id = document.getElementById('editWatchlistReasonId').value;
-        const reason = document.getElementById('editWatchlistReasonInput').value;
-        fetch(`/api/watchlist/edit/${id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                closeEditWatchlistReasonModal();
-                loadWatchlistData();
-            } else {
-                alert('Failed to update reason.');
-            }
-        });
+      e.preventDefault();
+      const id = document.getElementById('editWatchlistReasonId').value;
+      const reason = document.getElementById('editWatchlistReasonInput').value;
+      fetch(`/api/watchlist/edit/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          closeEditWatchlistReasonModal();
+          loadWatchlistData();
+        } else {
+          alert('Failed to update reason.');
+        }
+      });
     }
     function deleteWatchlistUser(id) {
-        if (!confirm('Delete this user/vehicle from the watchlist?')) return;
-        fetch(`/api/watchlist/delete/${id}`, { method: 'DELETE' })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) loadWatchlistData();
-                else alert('Failed to delete.');
-            });
+      if (!confirm('Delete this user/vehicle from the watchlist?')) return;
+      fetch(`/api/watchlist/delete/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) loadWatchlistData();
+          else alert('Failed to delete.');
+        });
     }
     function toIST(utcString) {
-        if (!utcString) return '-';
-        let utcDate;
-        if (utcString.includes('T')) {
-            utcDate = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z');
-        } else {
-            utcDate = new Date(utcString.replace(' ', 'T') + 'Z');
-        }
-        if (isNaN(utcDate.getTime())) return utcString;
-        return utcDate.toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(',', '');
+      if (!utcString) return '-';
+      let utcDate;
+      if (utcString.includes('T')) {
+        utcDate = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z');
+      } else {
+        utcDate = new Date(utcString.replace(' ', 'T') + 'Z');
+      }
+      if (isNaN(utcDate.getTime())) return utcString;
+      return utcDate.toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' }).replace(',', '');
     }
     // Eye icon click handler
     function openWatchlistFromIcon() {
-        openWatchlistModal();
+      openWatchlistModal();
     }
     // Watchlist KYC User Autocomplete
     const kycSearchInput = document.getElementById('addWatchlistKycSearch');
@@ -6902,135 +6942,135 @@
     const kycFastagInput = document.getElementById('addWatchlistKycFastag');
     let kycSearchTimer = null;
     if (kycSearchInput) {
-        kycSearchInput.addEventListener('input', function() {
-            const q = this.value.trim();
-            kycSuggestions.innerHTML = '';
-            kycFastagInput.value = '';
-            if (q.length < 2) return;
-            clearTimeout(kycSearchTimer);
-            kycSearchTimer = setTimeout(() => {
-                fetch(`/analytics/api/search-kyc-users?q=${encodeURIComponent(q)}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!data.results.length) {
-                            kycSuggestions.innerHTML = '<div class="list-group-item text-muted">No matches found</div>';
-                            return;
-                        }
-                        kycSuggestions.innerHTML = data.results.map(u =>
-                            `<button type="button" class="list-group-item list-group-item-action" data-id="${u.fastag_id}" data-name="${u.name}" data-veh="${u.vehicle_number}">
-                                ${u.fastag_id} | ${u.name} | ${u.vehicle_number}
-                            </button>`
-                        ).join('');
-                    });
-            }, 200);
-        });
-        kycSuggestions.addEventListener('click', function(e) {
-            if (e.target && e.target.matches('button[data-id]')) {
-                kycFastagInput.value = e.target.getAttribute('data-id');
-                kycSearchInput.value = `${e.target.getAttribute('data-name')} | ${e.target.getAttribute('data-veh')}`;
-                kycSuggestions.innerHTML = '';
-            }
-        });
-        kycSearchInput.addEventListener('blur', function() {
-            setTimeout(() => { kycSuggestions.innerHTML = ''; }, 200);
-        });
+      kycSearchInput.addEventListener('input', function() {
+        const q = this.value.trim();
+        kycSuggestions.innerHTML = '';
+        kycFastagInput.value = '';
+        if (q.length < 2) return;
+        clearTimeout(kycSearchTimer);
+        kycSearchTimer = setTimeout(() => {
+          fetch(`/analytics/api/search-kyc-users?q=${encodeURIComponent(q)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (!data.results.length) {
+                kycSuggestions.innerHTML = '<div class="list-group-item text-muted">No matches found</div>';
+                return;
+              }
+              kycSuggestions.innerHTML = data.results.map(u =>
+                `<button type="button" class="list-group-item list-group-item-action" data-id="${u.fastag_id}" data-name="${u.name}" data-veh="${u.vehicle_number}">
+                    ${u.fastag_id} | ${u.name} | ${u.vehicle_number}
+                </button>`
+              ).join('');
+            });
+        }, 200);
+      });
+      kycSuggestions.addEventListener('click', function(e) {
+        if (e.target && e.target.matches('button[data-id]')) {
+          kycFastagInput.value = e.target.getAttribute('data-id');
+          kycSearchInput.value = `${e.target.getAttribute('data-name')} | ${e.target.getAttribute('data-veh')}`;
+          kycSuggestions.innerHTML = '';
+        }
+      });
+      kycSearchInput.addEventListener('blur', function() {
+        setTimeout(() => { kycSuggestions.innerHTML = ''; }, 200);
+      });
     }
     // Activity History Modal for Watchlist
     function openWatchlistActivityModal(id) {
-        document.getElementById('watchlistActivityModal').style.display = 'flex';
-        const content = document.getElementById('watchlistActivityContent');
-        content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
-        fetch(`/api/watchlist/activity/${id}`)
-            .then(res => res.json())
-            .then(data => {
-                if (!data.results || !data.results.length) {
-                    content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No activity found for this user/vehicle.</div>';
-                    return;
-                }
-                const rows = data.results.map(log => `
-                    <tr>
-                        <td>${toIST(log.timestamp)}</td>
-                        <td>${log.lane_name || log.lane_id}</td>
-                        <td>${log.lane_type ? log.lane_type.charAt(0).toUpperCase() + log.lane_type.slice(1) : '-'}</td>
-                        <td>${log.access_result}</td>
-                        <td>${log.reason || '-'}</td>
-                    </tr>
-                `).join('');
-                content.innerHTML = `
-                    <table style="width:100%;min-width:400px;font-size:0.9em;">
-                        <thead><tr><th>Timestamp (IST)</th><th>Lane</th><th>Type</th><th>Result</th><th>Reason</th></tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                `;
-            });
+      document.getElementById('watchlistActivityModal').style.display = 'flex';
+      const content = document.getElementById('watchlistActivityContent');
+      content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+      fetch(`/api/watchlist/activity/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.results || !data.results.length) {
+            content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No activity found for this user/vehicle.</div>';
+            return;
+          }
+          const rows = data.results.map(log => `
+            <tr>
+              <td>${toIST(log.timestamp)}</td>
+              <td>${log.lane_name || log.lane_id}</td>
+              <td>${log.lane_type ? log.lane_type.charAt(0).toUpperCase() + log.lane_type.slice(1) : '-'}</td>
+              <td>${log.access_result}</td>
+              <td>${log.reason || '-'}</td>
+            </tr>
+          `).join('');
+          content.innerHTML = `
+            <table style="width:100%;min-width:400px;font-size:0.9em;">
+              <thead><tr><th>Timestamp (IST)</th><th>Lane</th><th>Type</th><th>Result</th><th>Reason</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+        });
     }
     function closeWatchlistActivityModal() {
-        document.getElementById('watchlistActivityModal').style.display = 'none';
+      document.getElementById('watchlistActivityModal').style.display = 'none';
     }
-</script>
-<!-- Watchlist Modal -->
-<div id="watchlistModal" class="modal-custom" style="display:none;">
-    <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+    </script>
+    <!-- Watchlist Modal -->
+    <div id="watchlistModal" class="modal-custom" style="display:none;">
+      <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
         <span class="close-modal" onclick="closeWatchlistModal()">&times;</span>
         <div class="modal-header-custom">
-            <span class="modal-icon"><i class="fas fa-eye"></i></span>
-            <span class="modal-title">Watchlist</span>
+          <span class="modal-icon"><i class="fas fa-eye"></i></span>
+          <span class="modal-title">Watchlist</span>
         </div>
         <div class="modal-desc">Registered KYC Users and Non-User Vehicles on the watchlist.</div>
         <div style="display:flex;gap:1em;margin-bottom:0.7em;">
-            <button class="modal-close-btn" onclick="showAddWatchlistModal('kyc')"><i class="fas fa-user-plus"></i> Add KYC User</button>
-            <button class="modal-close-btn" onclick="showAddWatchlistModal('nonuser')"><i class="fas fa-car"></i> Add Non-User</button>
+          <button class="modal-close-btn" onclick="showAddWatchlistModal('kyc')"><i class="fas fa-user-plus"></i> Add KYC User</button>
+          <button class="modal-close-btn" onclick="showAddWatchlistModal('nonuser')"><i class="fas fa-car"></i> Add Non-User</button>
         </div>
         <div style="overflow-x:auto;max-height:30vh;overflow-y:auto;margin-bottom:0.7em;">
-            <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Registered KYC Users</div>
-            <table style="min-width:700px;font-size:0.93em;">
-                <thead><tr><th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
-                <tbody id="watchlistKycTbody"><tr><td colspan="8" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
-            </table>
+          <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Registered KYC Users</div>
+          <table style="min-width:700px;font-size:0.93em;">
+            <thead><tr><th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody id="watchlistKycTbody"><tr><td colspan="8" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
+          </table>
         </div>
         <div style="overflow-x:auto;max-height:30vh;overflow-y:auto;">
-            <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Non-User Vehicles</div>
-            <table style="min-width:500px;font-size:0.93em;">
-                <thead><tr><th>FASTag ID</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
-                <tbody id="watchlistNonuserTbody"><tr><td colspan="4" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
-            </table>
+          <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Non-User Vehicles</div>
+          <table style="min-width:500px;font-size:0.93em;">
+            <thead><tr><th>FASTag ID</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody id="watchlistNonuserTbody"><tr><td colspan="4" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
+          </table>
         </div>
         <div class="modal-footer-custom" style="justify-content: flex-end;">
-            <button class="modal-close-btn" onclick="closeWatchlistModal()">Close</button>
+          <button class="modal-close-btn" onclick="closeWatchlistModal()">Close</button>
         </div>
+      </div>
     </div>
-</div>
-<!-- Add/Edit Watchlist Modal (reused for both types) -->
-<div id="addWatchlistModal" class="modal-custom" style="display:none;">
-    <div class="modal-content-custom" style="max-width: 350px;">
+    <!-- Add/Edit Watchlist Modal (reused for both types) -->
+    <div id="addWatchlistModal" class="modal-custom" style="display:none;">
+      <div class="modal-content-custom" style="max-width: 350px;">
         <span class="close-modal" onclick="closeAddWatchlistModal()">&times;</span>
         <div class="modal-header-custom">
-            <span class="modal-icon"><i class="fas fa-user-plus"></i></span>
-            <span class="modal-title" id="addWatchlistModalTitle">Add to Watchlist</span>
+          <span class="modal-icon"><i class="fas fa-user-plus"></i></span>
+          <span class="modal-title" id="addWatchlistModalTitle">Add to Watchlist</span>
         </div>
         <form id="addWatchlistForm" onsubmit="submitAddWatchlist(event)">
-            <div class="mb-2" id="addWatchlistKycRow" style="display:none;position:relative;">
-                <label class="form-label">Search KYC User (name or vehicle number)</label>
-                <input type="text" class="form-control" id="addWatchlistKycSearch" autocomplete="off" placeholder="Type name or vehicle number...">
-                <div id="addWatchlistKycSuggestions" class="list-group position-absolute w-100" style="z-index: 1051;"></div>
-                <input type="hidden" id="addWatchlistKycFastag" required>
-            </div>
-            <div class="mb-2" id="addWatchlistNonuserRow" style="display:none;">
-                <label class="form-label">FASTag ID (Non-User)</label>
-                <input type="text" class="form-control" id="addWatchlistNonuserFastag" required>
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Reason</label>
-                <input type="text" class="form-control" id="addWatchlistReason">
-            </div>
-            <div class="modal-footer-custom" style="justify-content: flex-end;">
-                <button class="modal-close-btn" type="button" onclick="closeAddWatchlistModal()">Cancel</button>
-                <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Add</button>
-            </div>
+          <div class="mb-2" id="addWatchlistKycRow" style="display:none;position:relative;">
+            <label class="form-label">Search KYC User (name or vehicle number)</label>
+            <input type="text" class="form-control" id="addWatchlistKycSearch" autocomplete="off" placeholder="Type name or vehicle number...">
+            <div id="addWatchlistKycSuggestions" class="list-group position-absolute w-100" style="z-index: 1051;"></div>
+            <input type="hidden" id="addWatchlistKycFastag" required>
+          </div>
+          <div class="mb-2" id="addWatchlistNonuserRow" style="display:none;">
+            <label class="form-label">FASTag ID (Non-User)</label>
+            <input type="text" class="form-control" id="addWatchlistNonuserFastag" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Reason</label>
+            <input type="text" class="form-control" id="addWatchlistReason">
+          </div>
+          <div class="modal-footer-custom" style="justify-content: flex-end;">
+            <button class="modal-close-btn" type="button" onclick="closeAddWatchlistModal()">Cancel</button>
+            <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Add</button>
+          </div>
         </form>
+      </div>
     </div>
-</div>
-<!-- Reports Modal -->
+    <!-- Reports Modal -->
     <div id="reportsModal" class="modal-custom" style="display:none;">
         <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
             <span class="close-modal" onclick="closeReportsModal()">&times;</span>
