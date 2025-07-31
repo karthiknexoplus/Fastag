@@ -54,6 +54,15 @@ def add_missing_columns():
         c.execute("ALTER TABLE access_logs ADD COLUMN access_time TIMESTAMP;")
     if 'status' not in columns:
         c.execute("ALTER TABLE access_logs ADD COLUMN status TEXT;")
+    
+    # Add kyc_users columns if missing
+    c.execute("PRAGMA table_info(kyc_users)")
+    kyc_columns = [row[1] for row in c.fetchall()]
+    if 'user_role' not in kyc_columns:
+        c.execute("ALTER TABLE kyc_users ADD COLUMN user_role TEXT DEFAULT 'tenant';")
+    if 'is_active' not in kyc_columns:
+        c.execute("ALTER TABLE kyc_users ADD COLUMN is_active BOOLEAN DEFAULT 1;")
+    
     conn.commit()
     conn.close()
 
