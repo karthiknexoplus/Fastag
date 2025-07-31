@@ -5373,29 +5373,22 @@
         closeRestartConfirmModal();
         document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting...</div>';
         
-        const endpoints = {
-            'controller': '/api/restart-controller',
-            'application': '/api/restart-application',
-            'readers': '/api/restart-readers'
-        };
-        
-        const messages = {
-            'controller': 'Controller restart initiated! System will reboot shortly.',
-            'application': 'Application restart initiated! Service will restart shortly.',
-            'readers': 'RFID readers restart initiated! Service will restart shortly.'
-        };
-        
-        const endpoint = endpoints[window.currentRestartAction];
-        console.log('Using endpoint:', endpoint);
-        
-        if (!endpoint) {
-            console.error('Invalid endpoint for action:', window.currentRestartAction);
+        // Call the appropriate function based on action
+        if (window.currentRestartAction === 'controller') {
+            restartControllerSystem();
+        } else if (window.currentRestartAction === 'application') {
+            restartApplicationSystem();
+        } else if (window.currentRestartAction === 'readers') {
+            restartReadersSystem();
+        } else {
+            console.error('Invalid restart action:', window.currentRestartAction);
             document.getElementById('controllerStatusRecords').innerHTML = 
                 '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Error: Invalid restart action.</div>';
-            return;
         }
-        
-        fetch(endpoint, {
+    }
+    
+    function restartControllerSystem() {
+        fetch('/api/restart-controller', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
@@ -5403,16 +5396,60 @@
         .then(data => {
             if (data.success) {
                 document.getElementById('controllerStatusRecords').innerHTML = 
-                    `<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">${messages[window.currentRestartAction]}</div>`;
+                    '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">Controller restart initiated! System will reboot shortly.</div>';
             } else {
                 document.getElementById('controllerStatusRecords').innerHTML = 
-                    '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart: ' + (data.error || 'Unknown error') + '</div>';
+                    '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart controller: ' + (data.error || 'Unknown error') + '</div>';
             }
         })
         .catch((error) => {
-            console.error('Restart error:', error);
+            console.error('Controller restart error:', error);
             document.getElementById('controllerStatusRecords').innerHTML = 
-                '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart.</div>';
+                '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart controller.</div>';
+        });
+    }
+    
+    function restartApplicationSystem() {
+        fetch('/api/restart-application', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('controllerStatusRecords').innerHTML = 
+                    '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">Application restart initiated! Service will restart shortly.</div>';
+            } else {
+                document.getElementById('controllerStatusRecords').innerHTML = 
+                    '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart application: ' + (data.error || 'Unknown error') + '</div>';
+            }
+        })
+        .catch((error) => {
+            console.error('Application restart error:', error);
+            document.getElementById('controllerStatusRecords').innerHTML = 
+                '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart application.</div>';
+        });
+    }
+    
+    function restartReadersSystem() {
+        fetch('/api/restart-readers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('controllerStatusRecords').innerHTML = 
+                    '<div style="text-align:center;color:#28a745;padding:0.7rem;font-weight:600;">RFID readers restart initiated! Service will restart shortly.</div>';
+            } else {
+                document.getElementById('controllerStatusRecords').innerHTML = 
+                    '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart readers: ' + (data.error || 'Unknown error') + '</div>';
+            }
+        })
+        .catch((error) => {
+            console.error('Readers restart error:', error);
+            document.getElementById('controllerStatusRecords').innerHTML = 
+                '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart readers.</div>';
         });
     }
 
