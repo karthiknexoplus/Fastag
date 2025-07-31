@@ -5,6 +5,10 @@ import ctypes
 import time
 import sqlite3
 import json
+import subprocess
+import os
+import platform
+from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -677,6 +681,161 @@ def get_fcm_tokens():
         })
         
     except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api.route('/network-info', methods=['GET'])
+def get_network_info():
+    """Get network interface information using ifconfig/ipconfig"""
+    try:
+        interfaces = []
+        
+        if platform.system() == "Linux":
+            # Use ip command for Linux
+            try:
+                result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    current_interface = None
+                    for line in result.stdout.split('\n'):
+                        line = line.strip()
+                        if line and not line.startswith('inet6'):
+                            if ':' in line and not line.startswith(' '):
+                                # Interface name
+                                current_interface = line.split(':')[1].strip()
+                                interfaces.append({
+                                    'name': current_interface,
+                                    'ip': 'N/A',
+                                    'mac': 'N/A',
+                                    'status': 'UP'
+                                })
+                            elif line.startswith('inet ') and current_interface:
+                                # IP address
+                                ip = line.split()[1].split('/')[0]
+                                for iface in interfaces:
+                                    if iface['name'] == current_interface:
+                                        iface['ip'] = ip
+                                        break
+                            elif line.startswith('link/ether ') and current_interface:
+                                # MAC address
+                                mac = line.split()[1]
+                                for iface in interfaces:
+                                    if iface['name'] == current_interface:
+                                        iface['mac'] = mac
+                                        break
+            except subprocess.TimeoutExpired:
+                logger.error("Timeout getting network info")
+            except Exception as e:
+                logger.error(f"Error getting network info: {e}")
+                
+        elif platform.system() == "Windows":
+            # Use ipconfig for Windows
+            try:
+                result = subprocess.run(['ipconfig'], capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    current_interface = None
+                    for line in result.stdout.split('\n'):
+                        line = line.strip()
+                        if line and not line.startswith('IPv6'):
+                            if 'adapter' in line.lower() and ':' in line:
+                                # Interface name
+                                current_interface = line.split(':')[0].strip()
+                                interfaces.append({
+                                    'name': current_interface,
+                                    'ip': 'N/A',
+                                    'mac': 'N/A',
+                                    'status': 'UP'
+                                })
+                            elif 'IPv4' in line and current_interface:
+                                # IP address
+                                ip = line.split(':')[1].strip()
+                                for iface in interfaces:
+                                    if iface['name'] == current_interface:
+                                        iface['ip'] = ip
+                                        break
+                            elif 'Physical Address' in line and current_interface:
+                                # MAC address
+                                mac = line.split(':')[1].strip()
+                                for iface in interfaces:
+                                    if iface['name'] == current_interface:
+                                        iface['mac'] = mac
+                                        break
+            except subprocess.TimeoutExpired:
+                logger.error("Timeout getting network info")
+            except Exception as e:
+                logger.error(f"Error getting network info: {e}")
+        
+        # Filter out interfaces without IP addresses
+        interfaces = [iface for iface in interfaces if iface['ip'] != 'N/A']
+        
+        return jsonify({
+            'success': True,
+            'interfaces': interfaces
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in network-info endpoint: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api.route('/database-info', methods=['GET'])
+def get_database_info():
+    """Get database file information"""
+    try:
+        db_path = current_app.config.get('DATABASE', 'instance/fastag.db')
+        
+        if os.path.exists(db_path):
+            # Get file size
+            size_bytes = os.path.getsize(db_path)
+            size_mb = size_bytes / (1024 * 1024)
+            
+            # Get last modified time
+            mtime = os.path.getmtime(db_path)
+            last_modified = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            
+            return jsonify({
+                'success': True,
+                'db_file': db_path,
+                'db_size': f"{size_mb:.2f} MB",
+                'last_modified': last_modified
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Database file not found'
+            }), 404
+            
+    except Exception as e:
+        logger.error(f"Error in database-info endpoint: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api.route('/download-database', methods=['GET'])
+def download_database():
+    """Download database file"""
+    try:
+        from flask import send_file
+        db_path = current_app.config.get('DATABASE', 'instance/fastag.db')
+        
+        if os.path.exists(db_path):
+            return send_file(
+                db_path,
+                as_attachment=True,
+                download_name=f'fastag_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.db'
+            )
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Database file not found'
+            }), 404
+            
+    except Exception as e:
+        logger.error(f"Error in download-database endpoint: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)

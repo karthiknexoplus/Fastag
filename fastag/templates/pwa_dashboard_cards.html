@@ -945,13 +945,33 @@
         </div>
     </div>
     <div id="controllerStatusModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 420px;">
+        <div class="modal-content-custom" style="max-width: 500px;">
             <span class="close-modal" onclick="closeControllerStatusModal()">&times;</span>
             <div class="modal-header-custom">
                 <span class="modal-icon"><i class="fas fa-microchip"></i></span>
                 <span class="modal-title">Controller Status</span>
             </div>
-            <div class="modal-desc">Live controller health and system info.</div>
+            <div class="modal-desc">System monitoring and management options.</div>
+            
+            <!-- Controller Status Options -->
+            <div class="controller-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
+                <div class="controller-option" onclick="showControllerHealth()" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-heartbeat" style="font-size: 1.8rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">System Health</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">CPU, Memory, Disk</div>
+                </div>
+                <div class="controller-option" onclick="showControllerIPInfo()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-network-wired" style="font-size: 1.8rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Network Info</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">IP, MAC, Interfaces</div>
+                </div>
+                <div class="controller-option" onclick="showControllerBackup()" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                    <i class="fas fa-database" style="font-size: 1.8rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Database Backup</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Download & Backup</div>
+                </div>
+            </div>
+            
             <div class="modal-records" id="controllerStatusRecords"></div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeControllerStatusModal()">Close</button>
@@ -5190,6 +5210,101 @@
     }
     function closeControllerStatusModal() {
         document.getElementById('controllerStatusModal').style.display = 'none';
+    }
+    
+    // Controller Status Functions
+    function showControllerHealth() {
+        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading system health...</div>';
+        fetch('/api/status')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success || !data.info_str) {
+                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load system health.</div>';
+                    return;
+                }
+                // Parse and display health info
+                const healthInfo = data.info_str.split('|').filter(line => 
+                    line.includes('CPU') || line.includes('Memory') || line.includes('Disk') || 
+                    line.includes('Temperature') || line.includes('Uptime')
+                );
+                document.getElementById('controllerStatusRecords').innerHTML =
+                    '<div style="font-size:1.08em;line-height:1.7;">' + healthInfo.join('<br>') + '</div>';
+            })
+            .catch(() => {
+                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load system health.</div>';
+            });
+    }
+    
+    function showControllerIPInfo() {
+        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading network information...</div>';
+        fetch('/api/network-info')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    let html = '<div style="font-size:1.08em;line-height:1.7;">';
+                    if (data.interfaces) {
+                        data.interfaces.forEach(iface => {
+                            html += `<div style="margin-bottom:1rem;padding:0.8rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #667eea;">`;
+                            html += `<strong style="color:#667eea;">${iface.name}</strong><br>`;
+                            html += `IP: <code>${iface.ip || 'N/A'}</code><br>`;
+                            html += `MAC: <code>${iface.mac || 'N/A'}</code><br>`;
+                            html += `Status: <span style="color:${iface.status === 'UP' ? '#28a745' : '#dc3545'}">${iface.status || 'UNKNOWN'}</span>`;
+                            html += '</div>';
+                        });
+                    } else {
+                        html += '<div style="text-align:center;color:#dc3545;">No network interfaces found.</div>';
+                    }
+                    html += '</div>';
+                    document.getElementById('controllerStatusRecords').innerHTML = html;
+                } else {
+                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load network information.</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load network information.</div>';
+            });
+    }
+    
+    function showControllerBackup() {
+        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading database information...</div>';
+        fetch('/api/database-info')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    let html = '<div style="font-size:1.08em;line-height:1.7;">';
+                    html += `<div style="margin-bottom:1rem;padding:0.8rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #ffc107;">`;
+                    html += `<strong style="color:#ffc107;">Database Information</strong><br>`;
+                    html += `File: <code>${data.db_file || 'N/A'}</code><br>`;
+                    html += `Size: <code>${data.db_size || 'N/A'}</code><br>`;
+                    html += `Last Modified: <code>${data.last_modified || 'N/A'}</code>`;
+                    html += '</div>';
+                    html += `<div style="text-align:center;margin-top:1rem;">`;
+                    html += `<button onclick="downloadDatabase()" style="background:linear-gradient(90deg,#ffc107 0%,#fd7e14 100%);color:white;border:none;padding:0.8rem 1.5rem;border-radius:8px;font-weight:600;cursor:pointer;">`;
+                    html += `<i class="fas fa-download"></i> Download Backup</button>`;
+                    html += '</div>';
+                    html += '</div>';
+                    document.getElementById('controllerStatusRecords').innerHTML = html;
+                } else {
+                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load database information.</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load database information.</div>';
+            });
+    }
+    
+    function downloadDatabase() {
+        // Create a download link for the database file
+        const link = document.createElement('a');
+        link.href = '/api/download-database';
+        link.download = 'fastag_backup_' + new Date().toISOString().slice(0, 10) + '.db';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Show success message
+        document.getElementById('controllerStatusRecords').innerHTML += 
+            '<div style="text-align:center;color:#28a745;margin-top:1rem;font-weight:600;">Database backup download started!</div>';
     }
 
     function openAllBarriers() {
