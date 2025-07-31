@@ -2728,6 +2728,10 @@
         
         if (!statusDot || !statusText || !powerValue || !setBtn) return;
         
+        // Show loading state
+        statusText.innerHTML = '<span class="loading"></span> Checking...';
+        setBtn.disabled = true;
+        
         // Always try to get RF power regardless of status
         fetch(`/api/rfid/rfpower?reader=${readerId}`)
             .then(response => response.json())
@@ -2738,11 +2742,9 @@
                     setBtn.disabled = false;
                     
                     // Update status to show RF power is accessible
-                    const currentStatus = statusText.textContent.toLowerCase();
-                    if (currentStatus === 'offline' || currentStatus === 'idle') {
-                        // Keep the original status but show RF power is available
-                        console.log(`Reader ${readerId}: RF power accessible (${data.rf_power}) but status is ${currentStatus}`);
-                    }
+                    statusDot.style.background = '#28a745';
+                    statusText.textContent = 'Online';
+                    statusText.className = 'status-text';
                 } else {
                     powerValue.textContent = '--';
                     setBtn.disabled = true;

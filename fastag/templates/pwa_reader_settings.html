@@ -330,7 +330,7 @@
             statusText.innerHTML = '<span class="loading"></span> Checking...';
             setBtn.disabled = true;
             
-            fetch(`/pwa-dashboard/api/reader/${readerId}/power`)
+            fetch(`/api/rfid/rfpower?reader=${readerId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.rf_power !== undefined) {
@@ -374,12 +374,12 @@
             setBtn.disabled = true;
             hideFeedback(readerId);
             
-            fetch(`/pwa-dashboard/api/reader/${readerId}/power`, {
+            fetch(`/api/rfid/rfpower`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ rf_power: newPower })
+                body: JSON.stringify({ reader_id: readerId, rf_power: newPower })
             })
             .then(response => response.json())
             .then(data => {
