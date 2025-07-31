@@ -692,28 +692,46 @@ def restart_controller():
     try:
         logger.info("Controller restart requested")
         
-        # Execute sudo reboot command
-        result = subprocess.run(['sudo', 'reboot'], capture_output=True, text=True, timeout=30)
+        # Try different sudo paths and commands
+        sudo_paths = ['/usr/bin/sudo', '/bin/sudo', 'sudo']
+        reboot_commands = ['reboot', 'shutdown', '-r', 'now']
         
-        if result.returncode == 0:
-            logger.info("Controller restart command executed successfully")
+        success = False
+        error_msg = ""
+        
+        for sudo_path in sudo_paths:
+            try:
+                cmd = [sudo_path] + reboot_commands
+                logger.info(f"Trying command: {' '.join(cmd)}")
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                
+                if result.returncode == 0:
+                    logger.info(f"Controller restart command executed successfully: {' '.join(cmd)}")
+                    success = True
+                    break
+                else:
+                    error_msg = f"Command failed: {' '.join(cmd)} - {result.stderr}"
+                    logger.warning(error_msg)
+                    
+            except subprocess.TimeoutExpired:
+                logger.warning(f"Command timed out: {' '.join(cmd)}")
+                success = True  # Timeout might mean the reboot is in progress
+                break
+            except Exception as e:
+                logger.warning(f"Command failed: {' '.join(cmd)} - {str(e)}")
+                error_msg = f"Command failed: {' '.join(cmd)} - {str(e)}"
+        
+        if success:
             return jsonify({
                 'success': True,
                 'message': 'Controller restart initiated'
             })
         else:
-            logger.error(f"Controller restart failed: {result.stderr}")
             return jsonify({
                 'success': False,
-                'error': f'Failed to restart controller: {result.stderr}'
+                'error': f'Failed to restart controller: {error_msg}'
             }), 500
             
-    except subprocess.TimeoutExpired:
-        logger.warning("Controller restart command timed out")
-        return jsonify({
-            'success': True,
-            'message': 'Controller restart initiated (timeout)'
-        })
     except Exception as e:
         logger.error(f"Error in restart-controller endpoint: {str(e)}")
         return jsonify({
@@ -727,28 +745,50 @@ def restart_application():
     try:
         logger.info("Application restart requested")
         
-        # Execute sudo systemctl restart fastag command
-        result = subprocess.run(['sudo', 'systemctl', 'restart', 'fastag'], capture_output=True, text=True, timeout=30)
+        # Try different sudo paths and systemctl paths
+        sudo_paths = ['/usr/bin/sudo', '/bin/sudo', 'sudo']
+        systemctl_paths = ['/bin/systemctl', '/usr/bin/systemctl', 'systemctl']
         
-        if result.returncode == 0:
-            logger.info("Application restart command executed successfully")
+        success = False
+        error_msg = ""
+        
+        for sudo_path in sudo_paths:
+            for systemctl_path in systemctl_paths:
+                try:
+                    cmd = [sudo_path, systemctl_path, 'restart', 'fastag']
+                    logger.info(f"Trying command: {' '.join(cmd)}")
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                    
+                    if result.returncode == 0:
+                        logger.info(f"Application restart command executed successfully: {' '.join(cmd)}")
+                        success = True
+                        break
+                    else:
+                        error_msg = f"Command failed: {' '.join(cmd)} - {result.stderr}"
+                        logger.warning(error_msg)
+                        
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"Command timed out: {' '.join(cmd)}")
+                    success = True  # Timeout might mean the restart is in progress
+                    break
+                except Exception as e:
+                    logger.warning(f"Command failed: {' '.join(cmd)} - {str(e)}")
+                    error_msg = f"Command failed: {' '.join(cmd)} - {str(e)}"
+            
+            if success:
+                break
+        
+        if success:
             return jsonify({
                 'success': True,
                 'message': 'Application restart initiated'
             })
         else:
-            logger.error(f"Application restart failed: {result.stderr}")
             return jsonify({
                 'success': False,
-                'error': f'Failed to restart application: {result.stderr}'
+                'error': f'Failed to restart application: {error_msg}'
             }), 500
             
-    except subprocess.TimeoutExpired:
-        logger.warning("Application restart command timed out")
-        return jsonify({
-            'success': True,
-            'message': 'Application restart initiated (timeout)'
-        })
     except Exception as e:
         logger.error(f"Error in restart-application endpoint: {str(e)}")
         return jsonify({
@@ -762,28 +802,50 @@ def restart_readers():
     try:
         logger.info("RFID readers restart requested")
         
-        # Execute sudo systemctl restart rfid_readers.service command
-        result = subprocess.run(['sudo', 'systemctl', 'restart', 'rfid_readers.service'], capture_output=True, text=True, timeout=30)
+        # Try different sudo paths and systemctl paths
+        sudo_paths = ['/usr/bin/sudo', '/bin/sudo', 'sudo']
+        systemctl_paths = ['/bin/systemctl', '/usr/bin/systemctl', 'systemctl']
         
-        if result.returncode == 0:
-            logger.info("RFID readers restart command executed successfully")
+        success = False
+        error_msg = ""
+        
+        for sudo_path in sudo_paths:
+            for systemctl_path in systemctl_paths:
+                try:
+                    cmd = [sudo_path, systemctl_path, 'restart', 'rfid_readers.service']
+                    logger.info(f"Trying command: {' '.join(cmd)}")
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                    
+                    if result.returncode == 0:
+                        logger.info(f"RFID readers restart command executed successfully: {' '.join(cmd)}")
+                        success = True
+                        break
+                    else:
+                        error_msg = f"Command failed: {' '.join(cmd)} - {result.stderr}"
+                        logger.warning(error_msg)
+                        
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"Command timed out: {' '.join(cmd)}")
+                    success = True  # Timeout might mean the restart is in progress
+                    break
+                except Exception as e:
+                    logger.warning(f"Command failed: {' '.join(cmd)} - {str(e)}")
+                    error_msg = f"Command failed: {' '.join(cmd)} - {str(e)}"
+            
+            if success:
+                break
+        
+        if success:
             return jsonify({
                 'success': True,
                 'message': 'RFID readers restart initiated'
             })
         else:
-            logger.error(f"RFID readers restart failed: {result.stderr}")
             return jsonify({
                 'success': False,
-                'error': f'Failed to restart readers: {result.stderr}'
+                'error': f'Failed to restart readers: {error_msg}'
             }), 500
             
-    except subprocess.TimeoutExpired:
-        logger.warning("RFID readers restart command timed out")
-        return jsonify({
-            'success': True,
-            'message': 'RFID readers restart initiated (timeout)'
-        })
     except Exception as e:
         logger.error(f"Error in restart-readers endpoint: {str(e)}")
         return jsonify({
