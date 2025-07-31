@@ -5574,6 +5574,80 @@
             })
             .catch(() => alert('Failed to delete user'));
     }
+    
+    // Locations Modal logic
+    function openLocationsModal() {
+        document.getElementById('locationsModal').style.display = 'flex';
+        loadLocationsList();
+    }
+    
+    function closeLocationsModal() {
+        document.getElementById('locationsModal').style.display = 'none';
+    }
+    
+    function loadLocationsList() {
+        document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        fetch('/api/locations')
+            .then(r => r.json())
+            .then(data => {
+                let locations = data.locations || [];
+                window._locationsList = locations;
+                document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${locations.length}</b>`;
+                renderLocationsList(locations);
+            })
+            .catch(() => {
+                document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load locations.</div>';
+            });
+    }
+    
+    function renderLocationsList(locations) {
+        if (locations.length === 0) {
+            document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No locations found.</div>';
+            return;
+        }
+        
+        let tableHtml = '<table style="min-width:500px;"><tr>' +
+            '<th>Name</th><th>Address</th><th>Edit</th><th>Delete</th></tr>' +
+            locations.map(l => `<tr>` +
+                `<td>${l.name}</td>` +
+                `<td>${l.address}</td>` +
+                `<td><button class="action-btn edit-btn" title="Edit" onclick="editLocation(${l.id})"><i class="fas fa-edit"></i></button></td>` +
+                `<td><button class="action-btn delete-btn" title="Delete" onclick="deleteLocation(${l.id})"><i class="fas fa-trash"></i></button></td>` +
+            `</tr>`).join('') + '</table>';
+        document.getElementById('locationsRecords').innerHTML = tableHtml;
+    }
+    
+    function toggleLocationsSearch() {
+        const box = document.getElementById('locationsSearchBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block') {
+            document.getElementById('locationsSearchInput').focus();
+        } else {
+            filterLocationsList('');
+        }
+    }
+    
+    function filterLocationsList(query = '') {
+        const input = document.getElementById('locationsSearchInput');
+        query = query || input.value.toLowerCase();
+        const locations = window._locationsList || [];
+        
+        if (!query) {
+            renderLocationsList(locations);
+            return;
+        }
+        
+        const filtered = locations.filter(l => 
+            (l.name && l.name.toLowerCase().includes(query)) ||
+            (l.address && l.address.toLowerCase().includes(query))
+        );
+        
+        if (filtered.length === 0) {
+            document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No locations found matching your search.</div>';
+        } else {
+            renderLocationsList(filtered);
+        }
+    }
     function editLocation(id) {
         // For simplicity, open the add form prefilled for editing
         fetch(`/api/locations`)
@@ -5619,6 +5693,42 @@
                 else alert(data.error || 'Failed to delete location');
             })
             .catch(() => alert('Failed to delete location'));
+    }
+    
+    function showAddLocationForm() {
+        document.getElementById('addLocationFormBox').style.display = 'block';
+        document.getElementById('locationName').value = '';
+        document.getElementById('locationAddress').value = '';
+        document.getElementById('addLocationForm').onsubmit = function(e) {
+            e.preventDefault();
+            submitAddLocation(e);
+        };
+    }
+    
+    function hideAddLocationForm() {
+        document.getElementById('addLocationFormBox').style.display = 'none';
+    }
+    
+    function submitAddLocation(e) {
+        e.preventDefault();
+        const name = document.getElementById('locationName').value.trim();
+        const address = document.getElementById('locationAddress').value.trim();
+        
+        fetch('/api/locations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, address })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                hideAddLocationForm();
+                loadLocationsList();
+            } else {
+                alert(data.error || 'Failed to add location');
+            }
+        })
+        .catch(() => alert('Failed to add location'));
     }
     // Lanes Modal logic
     function openLanesModal() {
