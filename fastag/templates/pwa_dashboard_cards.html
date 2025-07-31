@@ -5342,6 +5342,7 @@
     }
     
     function showRestartConfirmModal(action, title, description, icon, color) {
+        console.log('Setting restart action:', action);
         currentRestartAction = action;
         document.getElementById('restartConfirmTitle').textContent = title;
         document.getElementById('restartConfirmDesc').textContent = description;
@@ -5356,7 +5357,12 @@
     }
     
     function executeRestartAction() {
-        if (!currentRestartAction) return;
+        if (!currentRestartAction) {
+            console.error('No restart action set');
+            return;
+        }
+        
+        console.log('Executing restart action:', currentRestartAction);
         
         closeRestartConfirmModal();
         document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Restarting...</div>';
@@ -5373,7 +5379,10 @@
             'readers': 'RFID readers restart initiated! Service will restart shortly.'
         };
         
-        fetch(endpoints[currentRestartAction], {
+        const endpoint = endpoints[currentRestartAction];
+        console.log('Using endpoint:', endpoint);
+        
+        fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
@@ -5387,7 +5396,8 @@
                     '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart: ' + (data.error || 'Unknown error') + '</div>';
             }
         })
-        .catch(() => {
+        .catch((error) => {
+            console.error('Restart error:', error);
             document.getElementById('controllerStatusRecords').innerHTML = 
                 '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to restart.</div>';
         });
