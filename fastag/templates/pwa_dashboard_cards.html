@@ -6039,20 +6039,16 @@
             return;
         }
         
-        let tableHtml = '<table style="min-width:800px;"><tr>' +
-            '<th style="min-width:120px;">Name</th>' +
-            '<th style="min-width:120px;">Contact</th>' +
-            '<th style="min-width:200px;">FCM Token</th>' +
+        let tableHtml = '<table style="min-width:600px;"><tr>' +
+            '<th style="min-width:150px;">Name</th>' +
+            '<th style="min-width:150px;">Contact</th>' +
             '<th style="min-width:120px;">Device Type</th>' +
-            '<th style="min-width:120px;">Last Active</th>' +
-            '<th style="min-width:100px;">Status</th></tr>' +
+            '<th style="min-width:80px;text-align:center;">Status</th></tr>' +
             users.map(u => `<tr>` +
                 `<td style="padding: 0.5rem 0.3rem;word-wrap:break-word;">${u.name || 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;">${u.contact || 'N/A'}</td>` +
-                `<td style="padding: 0.5rem 0.3rem;font-size:0.8rem;word-wrap:break-word;max-width:200px;" title="${u.fcm_token || 'N/A'}">${u.fcm_token ? u.fcm_token.substring(0, 10) + '...' : 'N/A'}</td>` +
                 `<td style="padding: 0.5rem 0.3rem;">${u.device_type || 'Unknown'}</td>` +
-                `<td style="padding: 0.5rem 0.3rem;font-size:0.85rem;">${u.last_active || 'N/A'}</td>` +
-                `<td style="padding: 0.5rem 0.3rem;"><span class="status-badge ${u.status === 'active' ? 'active' : 'inactive'}">${u.status === 'active' ? '✓ Active' : '✗ Inactive'}</span></td>` +
+                `<td style="text-align:center;padding: 0.5rem 0.3rem;">${u.status === 'active' ? '<i class="fas fa-check-circle" style="color: #28a745; font-size: 1.2rem;"></i>' : '<i class="fas fa-times-circle" style="color: #dc3545; font-size: 1.2rem;"></i>'}</td>` +
             `</tr>`).join('') + '</table>';
         document.getElementById('pushNotificationUsersRecords').innerHTML = tableHtml;
     }
