@@ -61,7 +61,8 @@ def login():
                     'kyc_user_name': kyc_user['name'],
                     'kyc_user_contact': kyc_user['contact_number'],
                     'kyc_user_vehicle': kyc_user['vehicle_number'],
-                    'kyc_user_fastag': kyc_user['fastag_id']
+                    'kyc_user_fastag': kyc_user['fastag_id'],
+                    'user_role': kyc_user['user_role']  # Store the user_role from database
                 }
                 logging.info(f"KYC user logged in: {contact_number} ({kyc_user['name']})")
                 log_user_login(f"kyc_{contact_number}", 'kyc')
@@ -430,7 +431,8 @@ def pwa_login():
                     'kyc_user_name': kyc_user['name'],
                     'kyc_user_contact': kyc_user['contact_number'],
                     'kyc_user_vehicle': kyc_user['vehicle_number'],
-                    'kyc_user_fastag': kyc_user['fastag_id']
+                    'kyc_user_fastag': kyc_user['fastag_id'],
+                    'user_role': kyc_user['user_role']  # Store the user_role from database
                 }
                 return redirect('/pwa-dashboard')
             elif kyc_user:

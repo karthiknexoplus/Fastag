@@ -2150,22 +2150,37 @@
         }
     };
 
-    // Get current user role (hardcoded for demo - replace with actual session)
+    // Get current user role from session
     function getCurrentUserRole() {
-        // Check if user is superuser (7904030221)
-        const userPhone = '{{ session.get("phone", "") }}';
-        const userRole = '{{ session.get("user_role", "tenant") }}' || 'tenant';
+        // Get user info from session
+        const user = {{ session.get('user', '{}') | tojson }};
+        const kycUserContact = '{{ session.get("user", {}).get("kyc_user_contact", "") }}';
+        const loginMethod = '{{ session.get("user", {}).get("login_method", "") }}';
+        const userRole = '{{ session.get("user", {}).get("user_role", "tenant") }}' || 'tenant';
         
-        console.log('User phone from session:', userPhone);
-        console.log('User role from session:', userRole);
+        console.log('User from session:', user);
+        console.log('KYC User Contact:', kycUserContact);
+        console.log('Login Method:', loginMethod);
+        console.log('User Role from session:', userRole);
         
-        // Superuser detection - by phone or role
-        if (userPhone === '7904030221' || userRole === 'superuser') {
-            console.log('Superuser detected');
+        // Superuser detection - by phone number (7904030221)
+        if (kycUserContact === '7904030221') {
+            console.log('Superuser detected by phone number');
             return 'superuser';
         }
         
-        return userRole;
+        // Use the user_role from the database
+        if (userRole && userRole !== 'tenant') {
+            console.log('User role from database:', userRole);
+            return userRole;
+        }
+        
+        // Default role based on login method
+        if (loginMethod === 'kyc') {
+            return 'tenant'; // KYC users are tenants by default
+        }
+        
+        return userRole || 'tenant';
     }
 
     // Show access modal
