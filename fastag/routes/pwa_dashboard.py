@@ -401,7 +401,18 @@ def save_fcm_token():
         return jsonify({'success': False, 'error': 'No token provided'}), 400
     
     # Get user information from session
-    username = session.get('user', 'anonymous')
+    session_user = session.get('user', 'anonymous')
+    
+    # Extract mobile number from session data
+    if isinstance(session_user, dict):
+        # If session user is a dictionary, extract the mobile number
+        username = session_user.get('kyc_user_contact') or session_user.get('mobile') or session_user.get('contact_number') or 'anonymous'
+    elif isinstance(session_user, str):
+        # If session user is already a string (mobile number)
+        username = session_user
+    else:
+        # Fallback to anonymous
+        username = 'anonymous'
     
     # Get device information
     user_agent = request.headers.get('User-Agent', '')
@@ -418,8 +429,10 @@ def save_fcm_token():
     token = str(token)
     
     # Debug logging
+    print(f"DEBUG: session_user={session_user}")
+    print(f"DEBUG: extracted_username={username}")
     print(f"DEBUG: device_type={device_type}, browser={browser}, os={os_name}")
-    print(f"DEBUG: username={username}, ip={ip_address}")
+    print(f"DEBUG: ip={ip_address}")
     
     # Store token in database
     db = get_db()

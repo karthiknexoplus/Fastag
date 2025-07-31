@@ -11,6 +11,8 @@ import random
 from datetime import datetime
 import sqlite3
 import os
+import ast
+import re
 
 # TODO: Fill in your service account JSON file path and Firebase project ID
 SERVICE_ACCOUNT_FILE = 'pwapush-4e4e4-5a979a55d9d3.json'
@@ -745,19 +747,49 @@ def get_all_user_names():
     finally:
         conn.close()
 
+def extract_mobile_from_username(username):
+    """Extract mobile number from username which might be a dictionary string"""
+    if not username or username == 'anonymous':
+        return 'anonymous'
+    
+    # If it's already a clean mobile number
+    if username.isdigit() or (username.startswith('+') and username[1:].isdigit()):
+        return username
+    
+    # If it's a dictionary string like "{'kyc_user_contact': '7904...'}"
+    if username.startswith('{') and username.endswith('}'):
+        try:
+            # Try to parse as dictionary
+            user_dict = ast.literal_eval(username)
+            if isinstance(user_dict, dict):
+                mobile = user_dict.get('kyc_user_contact') or user_dict.get('mobile') or user_dict.get('contact_number')
+                if mobile:
+                    return str(mobile)
+        except:
+            pass
+    
+    # If it contains mobile number pattern
+    mobile_match = re.search(r'(\d{10,})', username)
+    if mobile_match:
+        return mobile_match.group(1)
+    
+    return username
+
 def get_user_name_from_mobile(mobile_number, user_names_cache):
     """Get user's name from cache using mobile number"""
     if not mobile_number or mobile_number == 'anonymous':
         return None
     
-    # Try exact match first
-    if mobile_number in user_names_cache:
-        return user_names_cache[mobile_number]
+    # Clean the mobile number
+    clean_mobile = mobile_number.replace(' ', '').replace('+', '')
     
-    # Try without spaces
-    clean_mobile = mobile_number.replace(' ', '')
+    # Try exact match first
     if clean_mobile in user_names_cache:
         return user_names_cache[clean_mobile]
+    
+    # Try without spaces
+    if mobile_number.replace(' ', '') in user_names_cache:
+        return user_names_cache[mobile_number.replace(' ', '')]
     
     return None
 
@@ -849,7 +881,8 @@ user_names_cache = get_all_user_names()
 
 for i, token_row in enumerate(tokens_data, 1):
     token = token_row['token']
-    mobile_number = token_row['username'] or 'anonymous'
+    username = token_row['username']
+    mobile_number = extract_mobile_from_username(username)
     device_type = token_row['device_type'] or 'unknown'
     browser = token_row['browser'] or 'unknown'
     os_name = token_row['os'] or 'unknown'
