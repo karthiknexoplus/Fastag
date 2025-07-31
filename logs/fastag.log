@@ -1681,3 +1681,9 @@
 [2025-07-31 16:24:07,437] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
 [2025-07-31 16:24:07,898] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
 [2025-07-31 16:24:07,899] INFO in google_auth: Google OAuth initialized successfully
+[2025-07-31 16:26:13,883] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-07-31 16:26:13,883] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-07-31 16:26:13,883] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-07-31 16:26:13,884] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-07-31 16:26:14,357] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-07-31 16:26:14,358] INFO in google_auth: Google OAuth initialized successfully
