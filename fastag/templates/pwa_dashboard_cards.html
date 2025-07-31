@@ -5224,10 +5224,11 @@
                     document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load system health.</div>';
                     return;
                 }
-                // Parse and display health info
+                // Parse and display health info - show all health-related data
                 const healthInfo = data.info_str.split('|').filter(line => 
-                    line.includes('CPU') || line.includes('Memory') || line.includes('Disk') || 
-                    line.includes('Temperature') || line.includes('Uptime')
+                    line.includes('Temp') || line.includes('Volt') || line.includes('Throttled') || 
+                    line.includes('Uptime') || line.includes('RAM') || line.includes('Disk') ||
+                    line.includes('CPU') || line.includes('Memory')
                 );
                 document.getElementById('controllerStatusRecords').innerHTML =
                     '<div style="font-size:1.08em;line-height:1.7;">' + healthInfo.join('<br>') + '</div>';
