@@ -1071,16 +1071,45 @@
     </div>
     <!-- Reader Settings Modal -->
     <div id="readerSettingsModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+        <div class="modal-content-custom reader-settings-modal" style="max-width: 98vw; min-width: 340px;">
             <span class="close-modal" onclick="closeReaderSettingsModal()">&times;</span>
             <div class="modal-header-custom">
                 <span class="modal-icon"><i class="fas fa-sliders-h"></i></span>
                 <span class="modal-title">Reader Settings</span>
             </div>
             <div class="modal-desc">Manage RF power for all readers</div>
-            <div id="readers-container" class="modal-records">
+            
+            <!-- Reader Settings Header -->
+            <div class="reader-settings-header">
+                <div class="settings-stats">
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fas fa-broadcast-tower"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-readers">0</div>
+                            <div class="stat-label">Total Readers</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon online"><i class="fas fa-circle"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="online-readers">0</div>
+                            <div class="stat-label">Online</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon offline"><i class="fas fa-circle"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="offline-readers">0</div>
+                            <div class="stat-label">Offline</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="readers-container" class="readers-grid">
                 <!-- Readers will be loaded here -->
             </div>
+            
             <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeReaderSettingsModal()">Close</button>
             </div>
@@ -1088,22 +1117,50 @@
     </div>
     <!-- Fuel Price Modal -->
     <div id="fuelPriceModal" class="modal-custom" style="display:none;">
-        <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
+        <div class="modal-content-custom fuel-price-modal" style="max-width: 98vw; min-width: 340px;">
             <span class="close-modal" onclick="closeFuelPriceModal()">&times;</span>
             <div class="modal-header-custom">
                 <span class="modal-icon"><i class="fas fa-gas-pump"></i></span>
                 <span class="modal-title">Fuel Prices</span>
             </div>
             <div class="modal-desc">Current petrol prices across India</div>
+            
+            <!-- Fuel Price Header -->
+            <div class="fuel-price-header">
+                <div class="fuel-stats">
+                    <div class="fuel-stat-item">
+                        <div class="fuel-stat-icon"><i class="fas fa-gas-pump"></i></div>
+                        <div class="fuel-stat-content">
+                            <div class="fuel-stat-value" id="total-cities">0</div>
+                            <div class="fuel-stat-label">Cities</div>
+                        </div>
+                    </div>
+                    <div class="fuel-stat-item">
+                        <div class="fuel-stat-icon petrol"><i class="fas fa-fire"></i></div>
+                        <div class="fuel-stat-content">
+                            <div class="fuel-stat-value" id="avg-petrol">₹0</div>
+                            <div class="fuel-stat-label">Avg Petrol</div>
+                        </div>
+                    </div>
+                    <div class="fuel-stat-item">
+                        <div class="fuel-stat-icon diesel"><i class="fas fa-tint"></i></div>
+                        <div class="fuel-stat-content">
+                            <div class="fuel-stat-value" id="avg-diesel">₹0</div>
+                            <div class="fuel-stat-label">Avg Diesel</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:0.5em;">
-                <button class="input-icon-btn" style="font-size:1.3rem;color:#764ba2;background:none;border:none;outline:none;cursor:pointer;" onclick="toggleFuelPriceSearch()" title="Search"><i class="fas fa-search"></i></button>
+                <button class="input-icon-btn" style="font-size:1.3rem;color:white;background:none;border:none;outline:none;cursor:pointer;" onclick="toggleFuelPriceSearch()" title="Search"><i class="fas fa-search"></i></button>
             </div>
             <div id="fuelPriceSearchBox" class="fuel-price-search" style="display:none;">
                 <select id="fuelPriceCitySelect" class="form-control" onchange="filterFuelPrices()">
                     <option value="">All Cities</option>
                 </select>
             </div>
-            <div id="fuelPriceContainer" class="modal-records" style="overflow-x:auto;max-height:45vh;overflow-y:auto;">
+            <div id="fuelPriceContainer" class="fuel-prices-grid" style="overflow-x:auto;max-height:45vh;overflow-y:auto;">
                 <!-- Fuel prices will be loaded here -->
             </div>
             <div class="modal-footer-custom" style="justify-content: flex-end;">
@@ -1223,6 +1280,458 @@
     .contact-item span {
         font-size: 0.9rem;
         color: #333;
+    }
+    
+    /* Reader Settings Modal Styles */
+    .reader-settings-modal {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .reader-settings-header {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .settings-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .stat-icon.online {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .stat-icon.offline {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    }
+    
+    .stat-content {
+        flex: 1;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.2rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+    }
+    
+    .readers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.2rem;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 0.5rem;
+    }
+    
+    .readers-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .readers-grid::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+    
+    .readers-grid::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        border-radius: 3px;
+    }
+    
+    .reader-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .reader-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #764ba2 0%, #ffe082 100%);
+    }
+    
+    .reader-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    .reader-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .reader-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+    }
+    
+    .reader-info {
+        flex: 1;
+    }
+    
+    .reader-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.3rem;
+    }
+    
+    .reader-details {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.2rem;
+    }
+    
+    .reader-activity {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .reader-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    .status-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .status-text.offline {
+        color: #ff6b6b;
+    }
+    
+    .status-text.idle {
+        color: #ffd93d;
+    }
+    
+    .power-control {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .power-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .power-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+    }
+    
+    .power-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: white;
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .power-input {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+    }
+    
+    .power-input input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 0.6rem;
+        color: white;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .power-input input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .power-input input:focus {
+        outline: none;
+        border-color: #ffe082;
+        box-shadow: 0 0 0 2px rgba(255, 224, 130, 0.2);
+    }
+    
+    .power-btn {
+        background: linear-gradient(135deg, #764ba2 0%, #ffe082 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .power-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+    }
+    
+    .power-btn:active {
+        transform: translateY(0);
+    }
+    
+    .feedback {
+        margin-top: 1rem;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-align: center;
+    }
+    
+    .feedback.success {
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.2) 0%, rgba(32, 201, 151, 0.2) 100%);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+    
+    .feedback.error {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(253, 126, 20, 0.2) 100%);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    /* Fuel Price Modal Styles */
+    .fuel-price-modal {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .fuel-price-header {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .fuel-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+    
+    .fuel-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .fuel-stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .fuel-stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .fuel-stat-icon.petrol {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+    }
+    
+    .fuel-stat-icon.diesel {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    }
+    
+    .fuel-stat-content {
+        flex: 1;
+    }
+    
+    .fuel-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.2rem;
+    }
+    
+    .fuel-stat-label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+    }
+    
+    .fuel-prices-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 0.5rem;
+    }
+    
+    .fuel-prices-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .fuel-prices-grid::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+    
+    .fuel-prices-grid::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border-radius: 3px;
+    }
+    
+    .fuel-price-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 15px;
+        padding: 1.2rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .fuel-price-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%);
+    }
+    
+    .fuel-price-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    .fuel-city-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.8rem;
+    }
+    
+    .fuel-prices-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .fuel-type {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+    }
+    
+    .fuel-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     /* Disabled Feature Styles */
@@ -2738,9 +3247,23 @@
         document.getElementById('readerSettingsModal').style.display = 'none';
     }
     
-    function loadReadersData() {
+    function updateReaderStats(total = 0, online = 0, offline = 0) {
+        // If no parameters provided, count from existing cards
+        if (total === 0) {
+            const cards = document.querySelectorAll('.reader-card');
+            total = cards.length;
+            online = document.querySelectorAll('.status-text:not(.offline)').length;
+            offline = document.querySelectorAll('.status-text.offline').length;
+        }
+        
+        document.getElementById('total-readers').textContent = total;
+        document.getElementById('online-readers').textContent = online;
+        document.getElementById('offline-readers').textContent = offline;
+    }
+    
+        function loadReadersData() {
         const container = document.getElementById('readers-container');
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading readers...</div>';
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: white;"><span class="loading"></span> Loading readers...</div>';
         
         // Use the working separate page approach - fetch the full page and extract content
         fetch('/pwa-dashboard/reader-settings')
@@ -2759,6 +3282,7 @@
                         const readerId = reader.getAttribute('data-reader-id');
                         getReaderPower(readerId);
                     });
+                    updateReaderStats();
                 } else {
                     // If no readers found in the response, fetch them directly from the API
                     fetch('/api/readers')
@@ -2766,6 +3290,9 @@
                         .then(data => {
                             if (data.readers && data.readers.length > 0) {
                                 let html = '';
+                                let onlineCount = 0;
+                                let offlineCount = 0;
+                                
                                 data.readers.forEach(reader => {
                                     // Determine status color and class based on backend status
                                     let statusColor = '#dc3545'; // offline
@@ -2774,9 +3301,13 @@
                                     if (reader.status === 'online') {
                                         statusColor = '#28a745';
                                         statusClass = '';
+                                        onlineCount++;
                                     } else if (reader.status === 'idle') {
                                         statusColor = '#ffc107';
                                         statusClass = 'idle';
+                                        onlineCount++;
+                                    } else {
+                                        offlineCount++;
                                     }
                                     
                                     html += `
@@ -2806,7 +3337,7 @@
                                                     <input type="number" 
                                                            id="power-input-${reader.id}" 
                                                            min="1" 
-                                                           max="30" 
+                                                           max="30"
                                                            placeholder="1-30"
                                                            style="width: 60px;">
                                                     <button class="power-btn" 
@@ -2822,6 +3353,9 @@
                                     `;
                                 });
                                 container.innerHTML = html;
+                                
+                                // Update statistics
+                                updateReaderStats(data.readers.length, onlineCount, offlineCount);
                                 
                                 // Initialize all readers
                                 data.readers.forEach(reader => {
