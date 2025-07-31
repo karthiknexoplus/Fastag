@@ -619,34 +619,56 @@ def get_fcm_tokens():
     try:
         db = get_db()
         
-        # Get FCM tokens with user information
+        # Get FCM tokens with user information based on actual table structure
         rows = db.execute('''
             SELECT 
                 ft.id,
-                ft.fcm_token,
+                ft.token,
+                ft.username,
                 ft.device_type,
+                ft.browser,
+                ft.os,
                 ft.created_at,
-                ft.last_active,
-                ft.status,
+                ft.last_used,
+                ft.is_active,
                 ku.name,
                 ku.contact_number as contact
             FROM fcm_tokens ft
-            LEFT JOIN kyc_users ku ON ft.user_id = ku.id
-            WHERE ft.status = 'active' OR ft.status IS NULL
+            LEFT JOIN kyc_users ku ON ku.contact_number = ft.username
+            WHERE ft.is_active = 1
             ORDER BY ft.created_at DESC
         ''').fetchall()
         
         tokens = []
         for row in rows:
+            # Extract user info from username if it's a dictionary string
+            username = row[2]
+            user_name = row[9] or 'Unknown User'
+            contact = row[10] or 'N/A'
+            
+            # If username is a dictionary string, try to extract info
+            if username and username.startswith('{') and username.endswith('}'):
+                try:
+                    import ast
+                    user_dict = ast.literal_eval(username)
+                    if isinstance(user_dict, dict):
+                        user_name = user_dict.get('kyc_user_name', user_name)
+                        contact = user_dict.get('kyc_user_contact', contact)
+                except:
+                    pass
+            
             tokens.append({
                 'id': row[0],
                 'fcm_token': row[1],
-                'device_type': row[2] or 'Unknown',
-                'created_at': row[3],
-                'last_active': row[4],
-                'status': row[5] or 'active',
-                'name': row[6] or 'Unknown User',
-                'contact': row[7] or 'N/A'
+                'username': username,
+                'device_type': row[3] or 'Unknown',
+                'browser': row[4] or 'Unknown',
+                'os': row[5] or 'Unknown',
+                'created_at': row[6],
+                'last_active': row[7],
+                'status': 'active' if row[8] else 'inactive',
+                'name': user_name,
+                'contact': contact
             })
         
         return jsonify({
