@@ -692,31 +692,22 @@ def restart_controller():
     try:
         logger.info("Controller restart requested")
         
-        # Check if running as root or has sudo privileges
-        try:
-            # Test sudo access
-            test_result = subprocess.run(['sudo', '-n', 'true'], capture_output=True, text=True, timeout=5)
-            if test_result.returncode != 0:
-                return jsonify({
-                    'success': False,
-                    'error': 'Insufficient privileges to restart controller'
-                }), 403
-        except Exception as e:
-            logger.error(f"Error checking sudo privileges: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': 'Unable to verify system privileges'
-            }), 500
-        
         # Execute sudo reboot command
         result = subprocess.run(['sudo', 'reboot'], capture_output=True, text=True, timeout=30)
         
-        logger.info("Controller restart command executed successfully")
-        return jsonify({
-            'success': True,
-            'message': 'Controller restart initiated'
-        })
-        
+        if result.returncode == 0:
+            logger.info("Controller restart command executed successfully")
+            return jsonify({
+                'success': True,
+                'message': 'Controller restart initiated'
+            })
+        else:
+            logger.error(f"Controller restart failed: {result.stderr}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to restart controller: {result.stderr}'
+            }), 500
+            
     except subprocess.TimeoutExpired:
         logger.warning("Controller restart command timed out")
         return jsonify({
@@ -735,22 +726,6 @@ def restart_application():
     """Restart the Fastag application service"""
     try:
         logger.info("Application restart requested")
-        
-        # Check if systemctl is available
-        try:
-            # Test systemctl access
-            test_result = subprocess.run(['systemctl', '--version'], capture_output=True, text=True, timeout=5)
-            if test_result.returncode != 0:
-                return jsonify({
-                    'success': False,
-                    'error': 'Systemctl not available'
-                }), 500
-        except Exception as e:
-            logger.error(f"Error checking systemctl: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': 'Unable to verify systemctl availability'
-            }), 500
         
         # Execute sudo systemctl restart fastag command
         result = subprocess.run(['sudo', 'systemctl', 'restart', 'fastag'], capture_output=True, text=True, timeout=30)
@@ -786,22 +761,6 @@ def restart_readers():
     """Restart the RFID readers service"""
     try:
         logger.info("RFID readers restart requested")
-        
-        # Check if systemctl is available
-        try:
-            # Test systemctl access
-            test_result = subprocess.run(['systemctl', '--version'], capture_output=True, text=True, timeout=5)
-            if test_result.returncode != 0:
-                return jsonify({
-                    'success': False,
-                    'error': 'Systemctl not available'
-                }), 500
-        except Exception as e:
-            logger.error(f"Error checking systemctl: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': 'Unable to verify systemctl availability'
-            }), 500
         
         # Execute sudo systemctl restart rfid_readers.service command
         result = subprocess.run(['sudo', 'systemctl', 'restart', 'rfid_readers.service'], capture_output=True, text=True, timeout=30)
