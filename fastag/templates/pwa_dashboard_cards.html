@@ -387,10 +387,19 @@
             color: #764ba2;
             font-size: 1.25rem;
             font-weight: 700;
-            transition: color 0.18s;
+            transition: all 0.2s ease;
             flex: 1;
             min-width: 0;
             padding: 0.3rem 0.2rem;
+            transform: scale(1);
+            cursor: pointer;
+        }
+        .bottom-nav-btn:hover {
+            color: #ffe082;
+            transform: scale(1.1);
+        }
+        .bottom-nav-btn:active {
+            transform: scale(0.95);
         }
         .bottom-nav-btn.active, .bottom-nav-btn:focus {
             color: #ffe082;
@@ -5644,13 +5653,38 @@
         })
         .catch(() => showKycUserError('Failed to add user'));
     }
-    // Bottom navigation button handlers
-    document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-        if (btn.innerText.trim() === 'Vehicles') {
-            btn.onclick = openKycUsersListModal;
-        } else if (btn.innerText.trim() === 'Analytics') {
-            btn.onclick = showAnalyticsModal;
+    // Haptic feedback function
+    function triggerHapticFeedback() {
+        if ('vibrate' in navigator) {
+            navigator.vibrate(10); // Short vibration for haptic feedback
         }
+    }
+    
+    // Bottom navigation button handlers with haptic feedback
+    document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            triggerHapticFeedback();
+            
+            // Handle specific button clicks
+            if (this.innerText.trim() === 'Vehicles') {
+                openKycUsersListModal();
+            } else if (this.innerText.trim() === 'Analytics') {
+                showAnalyticsModal();
+            } else if (this.innerText.trim() === 'Reports') {
+                showReportsModal();
+            } else if (this.innerText.trim() === 'Action') {
+                showActionModal();
+            }
+        });
+        
+        // Add hover effect for better UX
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
     });
     function openKycUsersListModal() {
         document.getElementById('kycUsersListModal').style.display = 'flex';
