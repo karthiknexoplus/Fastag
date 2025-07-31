@@ -1223,8 +1223,7 @@
                 <!-- Individual analytics details will be loaded here -->
             </div>
             
-            <div class="modal-footer-custom" style="justify-content: space-between;">
-                <button class="modal-close-btn" onclick="closeAnalyticsDetailsModal()" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">Back to Actions</button>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
                 <button class="modal-close-btn" onclick="closeAnalyticsDetailsModal()">Close</button>
             </div>
         </div>
@@ -2924,9 +2923,9 @@
             .then(data => {
                 // Render table/list based on type
                 if(type === 'occupancy' && data.records && data.records.length) {
-                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Lane</th><th>Entry Time</th></tr>' +
+                    tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Entry Time</th></tr>' +
                         data.records.slice(0,50).map(r => 
-                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="lane-name">${r.lane_name}</td><td class="time">${r.entry_time}</td></tr>`
+                            `<tr><td class="vehicle-number">${r.vehicle_number}</td><td class="owner-name">${r.owner_name}</td><td class="time">${r.entry_time}</td></tr>`
                         ).join('') + '</table>';
                 } else if(type === 'granted' && data.records && data.records.length) {
                     tableHtml = '<table><tr><th>Vehicle</th><th>Name</th><th>Type</th><th>Time</th></tr>' +
