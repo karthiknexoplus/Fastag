@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 import os
 import json
 import re
+import sqlite3
+from fastag.utils.db import get_db
 
 # Add user agent parsing utilities
 def parse_user_agent(user_agent):
@@ -409,6 +411,16 @@ def save_fcm_token():
     # Store token in database
     db = get_db()
     try:
+        # First, check if fcm_tokens table exists
+        cursor = db.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='fcm_tokens'")
+        if not cursor.fetchone():
+            return jsonify({
+                'success': False, 
+                'error': 'FCM tokens table does not exist. Please run database initialization.',
+                'details': 'Missing fcm_tokens table in database'
+            }), 500
+        
         # Check if token already exists
         existing = db.execute('SELECT id FROM fcm_tokens WHERE token = ?', (token,)).fetchone()
         
@@ -423,6 +435,7 @@ def save_fcm_token():
                 username, user_agent, device_info['device_type'], device_info['browser'],
                 device_info['os'], ip_address, token
             ))
+            print(f"✅ Updated existing FCM token for {username}")
         else:
             # Insert new token
             db.execute('''
@@ -434,6 +447,7 @@ def save_fcm_token():
                 token, username, user_agent, device_info['device_type'], device_info['browser'],
                 device_info['os'], ip_address
             ))
+            print(f"✅ Inserted new FCM token for {username}")
         
         db.commit()
         
@@ -449,6 +463,7 @@ def save_fcm_token():
                 tokens.append(token)
                 with open(tokens_path, 'w') as f:
                     json.dump(tokens, f, indent=2)
+                print(f"✅ Updated JSON file with token for {username}")
         except Exception as e:
             logging.warning(f"Failed to update JSON file: {e}")
         
@@ -456,10 +471,36 @@ def save_fcm_token():
             'success': True,
             'message': f'FCM token saved for {username} on {device_info["device_type"]} ({device_info["os"]})'
         })
+    except sqlite3.OperationalError as e:
+        db.rollback()
+        error_msg = str(e)
+        if "no such table" in error_msg.lower():
+            return jsonify({
+                'success': False, 
+                'error': 'Database table missing. Please run: python3 add_fcm_tokens_table.py',
+                'details': error_msg
+            }), 500
+        else:
+            return jsonify({
+                'success': False, 
+                'error': 'Database operation failed',
+                'details': error_msg
+            }), 500
+    except sqlite3.IntegrityError as e:
+        db.rollback()
+        return jsonify({
+            'success': False, 
+            'error': 'Token already exists or database constraint violation',
+            'details': str(e)
+        }), 500
     except Exception as e:
         db.rollback()
         logging.exception(f"Error saving FCM token: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500 
+        return jsonify({
+            'success': False, 
+            'error': 'Failed to save FCM token',
+            'details': str(e)
+        }), 500 
 
 @pwa_dashboard_bp.route('/api/fcm-tokens/stats', methods=['GET'])
 def get_fcm_token_stats():
