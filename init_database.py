@@ -154,6 +154,22 @@ def init_database():
                 FOREIGN KEY (lane_id) REFERENCES lanes (id),
                 FOREIGN KEY (reader_id) REFERENCES readers (id)
             );
+
+            CREATE TABLE IF NOT EXISTS fcm_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                token TEXT UNIQUE NOT NULL,
+                username TEXT,
+                user_agent TEXT,
+                device_type TEXT,
+                browser TEXT,
+                os TEXT,
+                ip_address TEXT,
+                subscription_endpoint TEXT,
+                subscription_keys TEXT,
+                is_active BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         ''')
         # Add missing column migration (add more as needed)
         add_column_if_not_exists(cursor, 'users', 'email', 'TEXT')

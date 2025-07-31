@@ -4,6 +4,67 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import json
+import re
+
+# Add user agent parsing utilities
+def parse_user_agent(user_agent):
+    """Parse user agent string to extract device information"""
+    if not user_agent:
+        return {
+            'device_type': 'unknown',
+            'browser': 'unknown',
+            'os': 'unknown'
+        }
+    
+    user_agent = user_agent.lower()
+    
+    # Device type detection
+    device_type = 'desktop'
+    if 'mobile' in user_agent or 'android' in user_agent or 'iphone' in user_agent:
+        device_type = 'mobile'
+    elif 'tablet' in user_agent or 'ipad' in user_agent:
+        device_type = 'tablet'
+    
+    # Browser detection
+    browser = 'unknown'
+    if 'chrome' in user_agent:
+        browser = 'chrome'
+    elif 'firefox' in user_agent:
+        browser = 'firefox'
+    elif 'safari' in user_agent:
+        browser = 'safari'
+    elif 'edge' in user_agent:
+        browser = 'edge'
+    elif 'opera' in user_agent:
+        browser = 'opera'
+    
+    # OS detection
+    os_name = 'unknown'
+    if 'android' in user_agent:
+        os_name = 'android'
+    elif 'iphone' in user_agent or 'ipad' in user_agent:
+        os_name = 'ios'
+    elif 'windows' in user_agent:
+        os_name = 'windows'
+    elif 'mac' in user_agent:
+        os_name = 'macos'
+    elif 'linux' in user_agent:
+        os_name = 'linux'
+    
+    return {
+        'device_type': device_type,
+        'browser': browser,
+        'os': os_name
+    }
+
+def get_client_ip():
+    """Get client IP address"""
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    elif request.headers.get('X-Real-IP'):
+        return request.headers.get('X-Real-IP')
+    else:
+        return request.remote_addr
 
 pwa_dashboard_bp = Blueprint('pwa_dashboard', __name__)
 
@@ -259,25 +320,76 @@ def subscribe():
     if not subscription:
         return jsonify({'success': False, 'error': 'No subscription provided'}), 400
     
-    # Store subscriptions in a file
-    subs_path = os.path.join(os.path.dirname(__file__), '../../push_subscriptions.json')
+    # Get user information from session
+    username = session.get('user', 'anonymous')
+    
+    # Get device information
+    user_agent = request.headers.get('User-Agent', '')
+    device_info = parse_user_agent(user_agent)
+    ip_address = get_client_ip()
+    
+    # Store subscription in database
+    db = get_db()
     try:
-        if os.path.exists(subs_path):
-            with open(subs_path, 'r') as f:
-                subs = json.load(f)
-        else:
-            subs = []
-        
         # Check if subscription already exists
-        sub_exists = any(sub.get('endpoint') == subscription.get('endpoint') for sub in subs)
-        if not sub_exists:
-            subs.append(subscription)
-            with open(subs_path, 'w') as f:
-                json.dump(subs, f, indent=2)
+        existing = db.execute(
+            'SELECT id FROM fcm_tokens WHERE subscription_endpoint = ?',
+            (subscription.get('endpoint'),)
+        ).fetchone()
         
-        return jsonify({'success': True})
+        if existing:
+            # Update existing subscription
+            db.execute('''
+                UPDATE fcm_tokens 
+                SET username = ?, user_agent = ?, device_type = ?, browser = ?, os = ?, 
+                    ip_address = ?, subscription_keys = ?, last_used = CURRENT_TIMESTAMP
+                WHERE subscription_endpoint = ?
+            ''', (
+                username, user_agent, device_info['device_type'], device_info['browser'],
+                device_info['os'], ip_address, json.dumps(subscription.get('keys', {})),
+                subscription.get('endpoint')
+            ))
+        else:
+            # Insert new subscription
+            db.execute('''
+                INSERT INTO fcm_tokens 
+                (username, user_agent, device_type, browser, os, ip_address, 
+                 subscription_endpoint, subscription_keys, created_at, last_used)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ''', (
+                username, user_agent, device_info['device_type'], device_info['browser'],
+                device_info['os'], ip_address, subscription.get('endpoint'),
+                json.dumps(subscription.get('keys', {}))
+            ))
+        
+        db.commit()
+        
+        # Also maintain backward compatibility with JSON file
+        subs_path = os.path.join(os.path.dirname(__file__), '../../push_subscriptions.json')
+        try:
+            if os.path.exists(subs_path):
+                with open(subs_path, 'r') as f:
+                    subs = json.load(f)
+            else:
+                subs = []
+            
+            # Check if subscription already exists
+            sub_exists = any(sub.get('endpoint') == subscription.get('endpoint') for sub in subs)
+            if not sub_exists:
+                subs.append(subscription)
+                with open(subs_path, 'w') as f:
+                    json.dump(subs, f, indent=2)
+        except Exception as e:
+            logging.warning(f"Failed to update JSON file: {e}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Subscription saved for {username} on {device_info["device_type"]} ({device_info["os"]})'
+        })
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500 
+        db.rollback()
+        logging.exception(f"Error saving subscription: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @pwa_dashboard_bp.route('/api/save-fcm-token', methods=['POST'])
 def save_fcm_token():
@@ -285,17 +397,137 @@ def save_fcm_token():
     token = data.get('token')
     if not token:
         return jsonify({'success': False, 'error': 'No token provided'}), 400
-    tokens_path = os.path.join(os.path.dirname(__file__), '../../fcm_tokens.json')
+    
+    # Get user information from session
+    username = session.get('user', 'anonymous')
+    
+    # Get device information
+    user_agent = request.headers.get('User-Agent', '')
+    device_info = parse_user_agent(user_agent)
+    ip_address = get_client_ip()
+    
+    # Store token in database
+    db = get_db()
     try:
-        if os.path.exists(tokens_path):
-            with open(tokens_path, 'r') as f:
-                tokens = json.load(f)
+        # Check if token already exists
+        existing = db.execute('SELECT id FROM fcm_tokens WHERE token = ?', (token,)).fetchone()
+        
+        if existing:
+            # Update existing token
+            db.execute('''
+                UPDATE fcm_tokens 
+                SET username = ?, user_agent = ?, device_type = ?, browser = ?, os = ?, 
+                    ip_address = ?, last_used = CURRENT_TIMESTAMP
+                WHERE token = ?
+            ''', (
+                username, user_agent, device_info['device_type'], device_info['browser'],
+                device_info['os'], ip_address, token
+            ))
         else:
-            tokens = []
-        if token not in tokens:
-            tokens.append(token)
-            with open(tokens_path, 'w') as f:
-                json.dump(tokens, f, indent=2)
-        return jsonify({'success': True})
+            # Insert new token
+            db.execute('''
+                INSERT INTO fcm_tokens 
+                (token, username, user_agent, device_type, browser, os, ip_address, 
+                 created_at, last_used)
+                VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ''', (
+                token, username, user_agent, device_info['device_type'], device_info['browser'],
+                device_info['os'], ip_address
+            ))
+        
+        db.commit()
+        
+        # Also maintain backward compatibility with JSON file
+        tokens_path = os.path.join(os.path.dirname(__file__), '../../fcm_tokens.json')
+        try:
+            if os.path.exists(tokens_path):
+                with open(tokens_path, 'r') as f:
+                    tokens = json.load(f)
+            else:
+                tokens = []
+            if token not in tokens:
+                tokens.append(token)
+                with open(tokens_path, 'w') as f:
+                    json.dump(tokens, f, indent=2)
+        except Exception as e:
+            logging.warning(f"Failed to update JSON file: {e}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'FCM token saved for {username} on {device_info["device_type"]} ({device_info["os"]})'
+        })
     except Exception as e:
+        db.rollback()
+        logging.exception(f"Error saving FCM token: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500 
+
+@pwa_dashboard_bp.route('/api/fcm-tokens/stats', methods=['GET'])
+def get_fcm_token_stats():
+    """Get FCM token statistics"""
+    if 'user' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    db = get_db()
+    try:
+        # Get overall statistics
+        total_tokens = db.execute('SELECT COUNT(*) FROM fcm_tokens').fetchone()[0]
+        active_tokens = db.execute('SELECT COUNT(*) FROM fcm_tokens WHERE is_active = 1').fetchone()[0]
+        inactive_tokens = db.execute('SELECT COUNT(*) FROM fcm_tokens WHERE is_active = 0').fetchone()[0]
+        
+        # Get device type breakdown
+        device_stats = db.execute('''
+            SELECT device_type, COUNT(*) as count 
+            FROM fcm_tokens 
+            WHERE is_active = 1 
+            GROUP BY device_type
+        ''').fetchall()
+        
+        # Get OS breakdown
+        os_stats = db.execute('''
+            SELECT os, COUNT(*) as count 
+            FROM fcm_tokens 
+            WHERE is_active = 1 
+            GROUP BY os
+        ''').fetchall()
+        
+        # Get browser breakdown
+        browser_stats = db.execute('''
+            SELECT browser, COUNT(*) as count 
+            FROM fcm_tokens 
+            WHERE is_active = 1 
+            GROUP BY browser
+        ''').fetchall()
+        
+        # Get recent tokens (last 7 days)
+        recent_tokens = db.execute('''
+            SELECT username, device_type, os, browser, created_at 
+            FROM fcm_tokens 
+            WHERE is_active = 1 
+            AND created_at >= datetime('now', '-7 days')
+            ORDER BY created_at DESC
+            LIMIT 10
+        ''').fetchall()
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_tokens': total_tokens,
+                'active_tokens': active_tokens,
+                'inactive_tokens': inactive_tokens,
+                'device_types': [{'type': row[0], 'count': row[1]} for row in device_stats],
+                'operating_systems': [{'os': row[0], 'count': row[1]} for row in os_stats],
+                'browsers': [{'browser': row[0], 'count': row[1]} for row in browser_stats],
+                'recent_tokens': [
+                    {
+                        'username': row[0],
+                        'device_type': row[1],
+                        'os': row[2],
+                        'browser': row[3],
+                        'created_at': row[4]
+                    } for row in recent_tokens
+                ]
+            }
+        })
+    except Exception as e:
+        logging.exception(f"Error getting FCM token stats: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500 

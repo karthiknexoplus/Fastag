@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Send 200 different test push notifications to all FCM tokens using the HTTP v1 API and a Google service account.
+Now uses database instead of JSON file for better tracking.
 """
 import json
 import requests
@@ -8,10 +9,13 @@ from google.oauth2 import service_account
 import google.auth.transport.requests
 import random
 from datetime import datetime
+import sqlite3
+import os
 
 # TODO: Fill in your service account JSON file path and Firebase project ID
 SERVICE_ACCOUNT_FILE = 'pwapush-4e4e4-5a979a55d9d3.json'
 FIREBASE_PROJECT_ID = 'pwapush-4e4e4'
+DATABASE_PATH = 'instance/fastag.db'
 
 FCM_ENDPOINT = f'https://fcm.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/messages:send'
 
@@ -711,19 +715,62 @@ MESSAGES = [
     }
 ]
 
-# Load tokens
-try:
-    with open('fcm_tokens.json', 'r') as f:
-        tokens = json.load(f)
-except FileNotFoundError:
-    print("fcm_tokens.json not found. Please enable push notifications in your PWA first.")
+def get_tokens_from_database():
+    """Get active FCM tokens from database"""
+    if not os.path.exists(DATABASE_PATH):
+        print(f"Database not found at {DATABASE_PATH}")
+        return []
+    
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('''
+            SELECT token, username, device_type, browser, os, created_at 
+            FROM fcm_tokens 
+            WHERE is_active = 1 AND token IS NOT NULL AND token != ''
+        ''')
+        tokens = cursor.fetchall()
+        return tokens
+    except sqlite3.OperationalError as e:
+        print(f"Database error: {e}")
+        print("FCM tokens table may not exist. Please run database initialization first.")
+        return []
+    finally:
+        conn.close()
+
+def mark_token_inactive(token):
+    """Mark a token as inactive in the database"""
+    if not os.path.exists(DATABASE_PATH):
+        return False
+    
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('''
+            UPDATE fcm_tokens 
+            SET is_active = 0, last_used = CURRENT_TIMESTAMP 
+            WHERE token = ?
+        ''', (token,))
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error marking token inactive: {e}")
+        return False
+    finally:
+        conn.close()
+
+# Load tokens from database
+tokens_data = get_tokens_from_database()
+
+if not tokens_data:
+    print("No active FCM tokens found in database.")
+    print("Please enable push notifications in your PWA first.")
     exit(1)
 
-if not tokens:
-    print("No FCM tokens found. Please enable push notifications in your PWA first.")
-    exit(1)
-
-print(f"Found {len(tokens)} FCM token(s)")
+print(f"Found {len(tokens_data)} active FCM token(s) in database")
 print(f"Sending {len(MESSAGES)} different notifications...")
 
 # Authenticate with service account
@@ -743,9 +790,17 @@ headers = {
 invalid_tokens = []
 
 # Send a notification to each token
-for i, token in enumerate(tokens, 1):
+for i, token_row in enumerate(tokens_data, 1):
+    token = token_row['token']
+    username = token_row['username'] or 'unknown'
+    device_type = token_row['device_type'] or 'unknown'
+    browser = token_row['browser'] or 'unknown'
+    os_name = token_row['os'] or 'unknown'
+    
     msg = random.choice(MESSAGES)
-    print(f"\n--- Sending Message {i}/{len(tokens)} ---")
+    print(f"\n--- Sending Message {i}/{len(tokens_data)} ---")
+    print(f"User: {username}")
+    print(f"Device: {device_type} ({os_name}, {browser})")
     print(f"Title: {msg['title']}")
     print(f"Body: {msg['body']}")
     
@@ -767,7 +822,9 @@ for i, token in enumerate(tokens, 1):
                 "type": "marketing",
                 "company": "Onebee",
                 "contact": "95008 50000",
-                "website": "www.onebee.in"
+                "website": "www.onebee.in",
+                "username": username,
+                "device_type": device_type
             }
         }
     }
@@ -778,11 +835,11 @@ for i, token in enumerate(tokens, 1):
         
         if response.status_code == 200:
             result = response.json()
-            print(f"✅ Successfully sent to device")
+            print(f"✅ Successfully sent to {username} on {device_type}")
         elif response.status_code == 404:
             error_data = response.json()
             if (error_data.get('error', {}).get('details', [{}])[0].get('errorCode') == 'UNREGISTERED'):
-                print(f"❌ Token is unregistered (device uninstalled app or token expired)")
+                print(f"❌ Token is unregistered for {username} (device uninstalled app or token expired)")
                 invalid_tokens.append(token)
             else:
                 print(f"❌ Error: {response.text}")
@@ -796,19 +853,21 @@ for i, token in enumerate(tokens, 1):
     import time
     time.sleep(0.5)
 
-# Remove invalid tokens from the file
+# Mark invalid tokens as inactive in database
 if invalid_tokens:
-    print(f"\n🗑️  Removing {len(invalid_tokens)} invalid token(s)...")
-    valid_tokens = [token for token in tokens if token not in invalid_tokens]
+    print(f"\n🗑️  Marking {len(invalid_tokens)} invalid token(s) as inactive...")
+    marked_count = 0
     
-    try:
-        with open('fcm_tokens.json', 'w') as f:
-            json.dump(valid_tokens, f, indent=2)
-        print(f"✅ Updated fcm_tokens.json - removed {len(invalid_tokens)} invalid token(s)")
-        print(f"📊 Remaining valid tokens: {len(valid_tokens)}")
-    except Exception as e:
-        print(f"❌ Error updating fcm_tokens.json: {e}")
+    for token in invalid_tokens:
+        if mark_token_inactive(token):
+            marked_count += 1
+    
+    print(f"✅ Marked {marked_count} tokens as inactive in database")
+    
+    # Get updated count
+    remaining_tokens = get_tokens_from_database()
+    print(f"📊 Remaining active tokens: {len(remaining_tokens)}")
 else:
-    print(f"\n✅ No invalid tokens found - all {len(tokens)} tokens are valid")
+    print(f"\n✅ No invalid tokens found - all {len(tokens_data)} tokens are valid")
 
 print(f"\n🎉 Completed sending {len(MESSAGES)} different Onebee notifications!") 
