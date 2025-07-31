@@ -828,7 +828,8 @@ def get_network_info():
 def get_database_info():
     """Get database file information"""
     try:
-        db_path = current_app.config.get('DATABASE', 'instance/fastag.db')
+        # Use the correct database path for RPi
+        db_path = '/home/ubuntu/Fastag/instance/fastag.db'
         
         if os.path.exists(db_path):
             # Get file size
@@ -863,7 +864,8 @@ def download_database():
     """Download database file"""
     try:
         from flask import send_file
-        db_path = current_app.config.get('DATABASE', 'instance/fastag.db')
+        # Use the correct database path for RPi
+        db_path = '/home/ubuntu/Fastag/instance/fastag.db'
         
         if os.path.exists(db_path):
             return send_file(
