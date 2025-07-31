@@ -113,6 +113,8 @@ def init_database():
                 vehicle_number TEXT NOT NULL,
                 contact_number TEXT NOT NULL,
                 address TEXT,
+                user_role TEXT DEFAULT 'tenant',
+                is_active BOOLEAN DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS access_logs (
