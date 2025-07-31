@@ -1734,6 +1734,26 @@
         background-clip: text;
     }
     
+    /* Status Badge Styles */
+    .status-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-badge.active {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .status-badge.inactive {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        color: white;
+    }
+    
     /* Disabled Feature Styles */
     .feature-btn.disabled {
         opacity: 0.4 !important;
@@ -5698,6 +5718,75 @@
     }
     function closeKycUsersListModal() {
         document.getElementById('kycUsersListModal').style.display = 'none';
+    }
+    
+    function loadKycUsersList() {
+        document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        fetch('/api/kyc_users')
+            .then(r => r.json())
+            .then(data => {
+                let users = data.users || [];
+                window._kycUsersList = users;
+                document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${users.length}</b>`;
+                renderKycUsersList(users);
+            })
+            .catch(() => {
+                document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load KYC users.</div>';
+            });
+    }
+    
+    function renderKycUsersList(users) {
+        if (users.length === 0) {
+            document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No KYC users found.</div>';
+            return;
+        }
+        
+        let tableHtml = '<table style="min-width:600px;"><tr>' +
+            '<th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Role</th><th>Status</th></tr>' +
+            users.map(u => `<tr>` +
+                `<td>${u.name || 'N/A'}</td>` +
+                `<td>${u.fastag_id || 'N/A'}</td>` +
+                `<td>${u.vehicle_number || 'N/A'}</td>` +
+                `<td>${u.contact_number || 'N/A'}</td>` +
+                `<td>${u.address || 'N/A'}</td>` +
+                `<td>${u.user_role || 'tenant'}</td>` +
+                `<td><span class="status-badge ${u.is_active ? 'active' : 'inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>` +
+            `</tr>`).join('') + '</table>';
+        document.getElementById('kycUsersListRecords').innerHTML = tableHtml;
+    }
+    
+    function toggleKycUserSearch() {
+        const box = document.getElementById('kycUserSearchBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block') {
+            document.getElementById('kycUserSearchInput').focus();
+        } else {
+            filterKycUsersList('');
+        }
+    }
+    
+    function filterKycUsersList(query = '') {
+        const input = document.getElementById('kycUserSearchInput');
+        query = query || input.value.toLowerCase();
+        const users = window._kycUsersList || [];
+        
+        if (!query) {
+            renderKycUsersList(users);
+            return;
+        }
+        
+        const filtered = users.filter(u => 
+            (u.name && u.name.toLowerCase().includes(query)) ||
+            (u.vehicle_number && u.vehicle_number.toLowerCase().includes(query)) ||
+            (u.fastag_id && u.fastag_id.toLowerCase().includes(query)) ||
+            (u.contact_number && u.contact_number.includes(query))
+        );
+        
+        if (filtered.length === 0) {
+            document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">No users found matching your search.</div>';
+        } else {
+            renderKycUsersList(filtered);
+        }
     }
     function editLocation(id) {
         // For simplicity, open the add form prefilled for editing
