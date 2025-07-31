@@ -1435,6 +1435,49 @@
         color: white;
     }
     
+    /* KYC Users Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+    }
+    
+    .action-btn.edit-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+    }
+    
+    .action-btn.edit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+    }
+    
+    .action-btn.delete-btn {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    }
+    
+    .action-btn.delete-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+    }
+    
     /* Disabled Feature Styles */
     .feature-btn.disabled {
         opacity: 0.4 !important;
@@ -5419,7 +5462,7 @@
         }
         
         let tableHtml = '<table style="min-width:600px;"><tr>' +
-            '<th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Role</th><th>Status</th><th>Edit</th><th>Delete</th></tr>' +
+            '<th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Role</th><th>Status</th><th style="text-align:center;">Actions</th></tr>' +
             users.map(u => `<tr>` +
                 `<td>${u.name || 'N/A'}</td>` +
                 `<td>${u.fastag_id || 'N/A'}</td>` +
@@ -5427,9 +5470,11 @@
                 `<td>${u.contact_number || 'N/A'}</td>` +
                 `<td>${u.address || 'N/A'}</td>` +
                 `<td>${u.user_role || 'tenant'}</td>` +
-                `<td><i class="fas ${u.is_active ? 'fa-check-circle' : 'fa-times-circle'}" style="color: ${u.is_active ? '#28a745' : '#dc3545'}; font-size: 1.2rem;"></i></td>` +
-                `<td><button class="input-icon-btn kyc-edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button></td>` +
-                `<td><button class="input-icon-btn kyc-delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button></td>` +
+                `<td style="text-align:center;"><i class="fas ${u.is_active ? 'fa-check-circle' : 'fa-times-circle'}" style="color: ${u.is_active ? '#28a745' : '#dc3545'}; font-size: 1.2rem;"></i></td>` +
+                `<td style="text-align:center;"><div class="action-buttons">` +
+                    `<button class="action-btn edit-btn" title="Edit" onclick="editKycUser(${u.id})"><i class="fas fa-edit"></i></button>` +
+                    `<button class="action-btn delete-btn" title="Delete" onclick="deleteKycUser(${u.id})"><i class="fas fa-trash"></i></button>` +
+                `</div></td>` +
             `</tr>`).join('') + '</table>';
         document.getElementById('kycUsersListRecords').innerHTML = tableHtml;
     }
