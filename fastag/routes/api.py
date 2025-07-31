@@ -632,6 +632,7 @@ def get_fcm_tokens():
                 ku.contact_number as contact
             FROM fcm_tokens ft
             LEFT JOIN kyc_users ku ON ft.user_id = ku.id
+            WHERE ft.status = 'active' OR ft.status IS NULL
             ORDER BY ft.created_at DESC
         ''').fetchall()
         
@@ -640,7 +641,7 @@ def get_fcm_tokens():
             tokens.append({
                 'id': row[0],
                 'fcm_token': row[1],
-                'device_type': row[2],
+                'device_type': row[2] or 'Unknown',
                 'created_at': row[3],
                 'last_active': row[4],
                 'status': row[5] or 'active',
