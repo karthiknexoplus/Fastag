@@ -3963,9 +3963,15 @@
     function loadReaderHealthSlide() {
         const container = document.getElementById('analyticsContent');
         
-        fetch('/analytics/api/reader-health-dashboard')
+        // Use the same API that works well in reader settings
+        fetch('/api/readers')
             .then(response => response.json())
             .then(data => {
+                if (!data.success || !data.readers || data.readers.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-heart" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i><div>No reader health data available</div></div>';
+                    return;
+                }
+                
                 let html = '<div class="analytics-chart-container">';
                 html += '<div class="analytics-chart-title"><i class="fas fa-heart"></i>Reader Health Dashboard</div>';
                 html += '<div class="analytics-chart"><canvas id="readerHealthChart"></canvas></div>';
@@ -3973,45 +3979,51 @@
                 
                 html += '<div class="analytics-stats-grid">';
                 
-                // Reader 1 (Entry)
-                const reader1 = data.readers?.find(r => r.type === 'entry') || { uptime: 0, events_per_hour: 0, last_event: 'No recent events' };
+                // Calculate stats from real reader data
+                const onlineReaders = data.readers.filter(r => r.status === 'online').length;
+                const idleReaders = data.readers.filter(r => r.status === 'idle').length;
+                const offlineReaders = data.readers.filter(r => r.status === 'offline').length;
+                const totalReaders = data.readers.length;
+                
+                // Online Readers
                 html += `
                     <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-circle" style="color: ${reader1.uptime > 0 ? '#28a745' : '#dc3545'};"></i></div>
-                        <div class="analytics-stat-label">Reader 1 (Entry)</div>
-                        <div class="analytics-stat-value">${reader1.uptime || 0}%</div>
-                        <div class="analytics-stat-percentage">uptime</div>
+                        <div class="analytics-stat-icon"><i class="fas fa-circle" style="color: #28a745;"></i></div>
+                        <div class="analytics-stat-label">Online Readers</div>
+                        <div class="analytics-stat-value">${onlineReaders}</div>
+                        <div class="analytics-stat-percentage">of ${totalReaders}</div>
                     </div>
                 `;
                 
-                // Reader 2 (Exit)
-                const reader2 = data.readers?.find(r => r.type === 'exit') || { uptime: 100, events_per_hour: 19, last_event: '8 min ago' };
+                // Events Last 24h
+                const totalEvents24h = data.readers.reduce((sum, r) => sum + (r.events_24h || 0), 0);
                 html += `
                     <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-circle" style="color: ${reader2.uptime > 0 ? '#28a745' : '#dc3545'};"></i></div>
-                        <div class="analytics-stat-label">Reader 2 (Exit)</div>
-                        <div class="analytics-stat-value">${reader2.events_per_hour || 0}</div>
-                        <div class="analytics-stat-percentage">events/hr</div>
+                        <div class="analytics-stat-icon"><i class="fas fa-chart-line" style="color: #007bff;"></i></div>
+                        <div class="analytics-stat-label">Events (24h)</div>
+                        <div class="analytics-stat-value">${totalEvents24h}</div>
+                        <div class="analytics-stat-percentage">total</div>
                     </div>
                 `;
                 
-                // Overall Health
-                const avgUptime = data.readers ? (data.readers.reduce((sum, r) => sum + (r.uptime || 0), 0) / data.readers.length) : 50;
+                // Health Score
+                const healthScore = totalReaders > 0 ? Math.round((onlineReaders / totalReaders) * 100) : 0;
                 html += `
                     <div class="analytics-stat-card">
                         <div class="analytics-stat-icon"><i class="fas fa-heart"></i></div>
-                        <div class="analytics-stat-label">Overall Health</div>
-                        <div class="analytics-stat-value">${Math.round(avgUptime)}%</div>
-                        <div class="analytics-stat-percentage">average</div>
+                        <div class="analytics-stat-label">Health Score</div>
+                        <div class="analytics-stat-value">${healthScore}%</div>
+                        <div class="analytics-stat-percentage">online rate</div>
                     </div>
                 `;
                 
                 html += '</div>';
                 
                 container.innerHTML = html;
-                createReaderHealthChart(data);
+                createReaderHealthChart(data.readers);
             })
             .catch(error => {
+                console.error('Error loading reader health:', error);
                 container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading reader health data</div></div>';
             });
     }
@@ -4370,26 +4382,41 @@
         });
     }
     
-    function createReaderHealthChart(data) {
+    function createReaderHealthChart(readers) {
         const canvas = document.getElementById('readerHealthChart');
-        if (!canvas) return;
+        if (!canvas || !readers || readers.length === 0) return;
         
         const ctx = canvas.getContext('2d');
         
-        // Generate sample data for reader health
-        const labels = ['Reader 1 (Entry)', 'Reader 2 (Exit)'];
-        const uptimeData = [0, 100]; // Based on the image
-        const eventsData = [0, 19]; // Based on the image
+        // Create real data from reader information
+        const labels = readers.map(r => `Reader ${r.id} (${r.type})`);
+        const statusData = readers.map(r => {
+            switch(r.status) {
+                case 'online': return 100;
+                case 'idle': return 50;
+                case 'offline': return 0;
+                default: return 0;
+            }
+        });
+        const eventData = readers.map(r => r.events_24h || 0);
         
         new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Uptime %',
-                    data: uptimeData,
-                    backgroundColor: ['#dc3545', '#28a745'],
-                    borderColor: ['#dc3545', '#28a745'],
+                    label: 'Status Score',
+                    data: statusData,
+                    backgroundColor: statusData.map(score => {
+                        if (score === 100) return '#28a745'; // Online - Green
+                        if (score === 50) return '#ffc107';  // Idle - Yellow
+                        return '#dc3545'; // Offline - Red
+                    }),
+                    borderColor: statusData.map(score => {
+                        if (score === 100) return '#28a745';
+                        if (score === 50) return '#ffc107';
+                        return '#dc3545';
+                    }),
                     borderWidth: 2
                 }]
             },
@@ -4399,16 +4426,36 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const reader = readers[context.dataIndex];
+                                return [
+                                    `Status: ${reader.status}`,
+                                    `Events (24h): ${reader.events_24h}`,
+                                    `Last Event: ${reader.last_event}`
+                                ];
+                            }
+                        }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
                         max: 100,
-                        ticks: { maxTicksLimit: 6 }
+                        ticks: { 
+                            maxTicksLimit: 6,
+                            callback: function(value) {
+                                if (value === 100) return 'Online';
+                                if (value === 50) return 'Idle';
+                                if (value === 0) return 'Offline';
+                                return value;
+                            }
+                        }
                     },
                     x: {
-                        ticks: { maxTicksLimit: 2 }
+                        ticks: { maxTicksLimit: 4 }
                     }
                 }
             }
