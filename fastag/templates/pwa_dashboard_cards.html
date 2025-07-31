@@ -109,14 +109,20 @@
             box-shadow: 0 2px 8px rgba(80,80,160,0.08);
             border: none;
             outline: none;
-            transition: box-shadow 0.18s, transform 0.12s, background 0.18s;
+            transition: all 0.2s ease;
             cursor: pointer;
             margin-bottom: 0.1rem;
+            transform: scale(1);
+        }
+        .feature-btn:hover {
+            box-shadow: 0 6px 16px rgba(118,75,162,0.15);
+            background: linear-gradient(135deg, #f3e9ff 60%, #fff 100%);
+            transform: scale(1.1);
         }
         .feature-btn:active, .feature-btn:focus {
             box-shadow: 0 4px 12px rgba(118,75,162,0.10);
             background: linear-gradient(135deg, #f3e9ff 60%, #fff 100%);
-            transform: translateY(2px) scale(0.98);
+            transform: translateY(2px) scale(0.95);
         }
         .feature-btn .icon {
             font-size: 1.45rem;
@@ -2746,14 +2752,29 @@
                 featureScroll.scrollTo({ left: scrollAmount, behavior: 'smooth' });
             }
         }, 40);
-        // Stop auto-scroll on any feature icon click
+        // Stop auto-scroll on any feature icon click and add haptic feedback
         document.querySelectorAll('.feature-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                // Trigger haptic feedback
+                triggerHapticFeedback();
+                
+                // Stop auto-scroll
                 featureScrollPaused = true;
                 if (featureScrollInterval) {
                     clearInterval(featureScrollInterval);
                     featureScrollInterval = null;
                 }
+            });
+            
+            // Add hover effects for better UX
+            btn.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('disabled')) {
+                    this.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
             });
         });
         // Also stop on manual scroll (user interaction)
