@@ -322,7 +322,7 @@
             const role = document.getElementById('editUserRole').value;
             const isActive = document.getElementById('editUserActive').checked;
 
-            fetch(`/kyc-management/api/kyc-users/${userId}`, {
+            fetch(`/api/kyc-users/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
