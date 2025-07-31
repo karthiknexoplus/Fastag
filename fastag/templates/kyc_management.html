@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Management - Fastag</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .user-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+        
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .role-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .role-tenant { background: #1976d2; }
+        .role-service_engineer { background: #f57c00; }
+        .role-manager { background: #7b1fa2; }
+        .role-superuser { background: #388e3c; }
+        
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .status-active { background: #e8f5e8; color: #388e3c; }
+        .status-inactive { background: #ffebee; color: #d32f2f; }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .search-box {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2"><i class="fas fa-users me-3"></i>KYC Management</h1>
+                    <p class="text-muted mb-0">Manage KYC users and assign roles for access control</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-gradient" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="totalUsers">0</h3>
+                    <p class="mb-0">Total Users</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="activeUsers">0</h3>
+                    <p class="mb-0">Active Users</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="tenants">0</h3>
+                    <p class="mb-0">Tenants</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="managers">0</h3>
+                    <p class="mb-0">Managers</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="search-box">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search users by name, vehicle, or contact...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control" id="roleFilter">
+                        <option value="">All Roles</option>
+                        <option value="tenant">Tenant</option>
+                        <option value="service_engineer">Service Engineer</option>
+                        <option value="manager">Manager</option>
+                        <option value="superuser">Superuser</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users List -->
+        <div class="content-card">
+            <div id="usersList">
+                {% for user in users %}
+                <div class="user-card" data-role="{{ user.role }}" data-status="{{ 'active' if user.is_active else 'inactive' }}">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h5 class="mb-1">{{ user.name }}</h5>
+                            <p class="text-muted mb-0">{{ user.vehicle_number }}</p>
+                            <small class="text-muted">{{ user.contact_number }}</small>
+                        </div>
+                        <div class="col-md-2">
+                            <span class="role-badge role-{{ user.role }}">{{ roles[user.role].name }}</span>
+                        </div>
+                        <div class="col-md-2">
+                            <span class="status-badge status-{{ 'active' if user.is_active else 'inactive' }}">
+                                {{ 'Active' if user.is_active else 'Inactive' }}
+                            </span>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">
+                                FASTag: {{ user.fastag_id }}<br>
+                                Created: {{ user.created_at.split(' ')[0] if user.created_at else 'N/A' }}
+                            </small>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editUser({{ user.id }}, '{{ user.name }}', '{{ user.role }}', {{ user.is_active|lower }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-{{ 'danger' if user.is_active else 'success' }}" onclick="toggleUserStatus({{ user.id }}, {{ user.is_active|lower }})">
+                                <i class="fas fa-{{ 'ban' if user.is_active else 'check' }}"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Edit User Role</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label class="form-label">User Name</label>
+                            <input type="text" class="form-control" id="editUserName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <select class="form-control" id="editUserRole" required>
+                                <option value="tenant">Tenant - Basic access</option>
+                                <option value="service_engineer">Service Engineer - Technical access</option>
+                                <option value="manager">Manager - Management access</option>
+                                <option value="superuser">Superuser - Full access</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editUserActive" checked>
+                                <label class="form-check-label" for="editUserActive">
+                                    Active User
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-gradient" onclick="updateUser()">Update User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search and filter functionality
+        document.getElementById('searchInput').addEventListener('input', filterUsers);
+        document.getElementById('roleFilter').addEventListener('change', filterUsers);
+        document.getElementById('statusFilter').addEventListener('change', filterUsers);
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const userCards = document.querySelectorAll('.user-card');
+            userCards.forEach(card => {
+                const userName = card.querySelector('h5').textContent.toLowerCase();
+                const vehicleNumber = card.querySelector('p').textContent.toLowerCase();
+                const contactNumber = card.querySelector('small').textContent.toLowerCase();
+                const userRole = card.dataset.role;
+                const userStatus = card.dataset.status;
+
+                const matchesSearch = userName.includes(searchTerm) || 
+                                    vehicleNumber.includes(searchTerm) || 
+                                    contactNumber.includes(searchTerm);
+                const matchesRole = !roleFilter || userRole === roleFilter;
+                const matchesStatus = !statusFilter || userStatus === statusFilter;
+
+                card.style.display = matchesSearch && matchesRole && matchesStatus ? 'block' : 'none';
+            });
+        }
+
+        function editUser(userId, userName, userRole, isActive) {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUserName').value = userName;
+            document.getElementById('editUserRole').value = userRole;
+            document.getElementById('editUserActive').checked = isActive;
+            
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+
+        function updateUser() {
+            const userId = document.getElementById('editUserId').value;
+            const role = document.getElementById('editUserRole').value;
+            const isActive = document.getElementById('editUserActive').checked;
+
+            fetch(`/kyc-management/api/kyc-users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ role, is_active: isActive })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating user');
+            });
+        }
+
+        function toggleUserStatus(userId, currentStatus) {
+            const action = currentStatus ? 'deactivate' : 'activate';
+            if (!confirm(`Are you sure you want to ${action} this user?`)) {
+                return;
+            }
+
+            fetch(`/kyc-management/api/kyc-users/${userId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating user status');
+            });
+        }
+
+        function refreshUsers() {
+            location.reload();
+        }
+
+        // Update statistics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const userCards = document.querySelectorAll('.user-card');
+            const totalUsers = userCards.length;
+            const activeUsers = Array.from(userCards).filter(card => card.dataset.status === 'active').length;
+            const tenants = Array.from(userCards).filter(card => card.dataset.role === 'tenant').length;
+            const managers = Array.from(userCards).filter(card => card.dataset.role === 'manager').length;
+
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('tenants').textContent = tenants;
+            document.getElementById('managers').textContent = managers;
+        });
+    </script>
+</body>
+</html> 

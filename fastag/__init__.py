@@ -177,6 +177,7 @@ def create_app():
     from fastag.routes.offline import offline_bp
     from fastag.routes.health import health_bp
     from fastag.routes.pwa_dashboard import pwa_dashboard_bp
+    from fastag.routes.kyc_management import kyc_management_bp
     # Initialize OAuth
     init_oauth(app)
     app.register_blueprint(auth_bp)
@@ -196,6 +197,7 @@ def create_app():
     app.register_blueprint(offline_bp)
     app.register_blueprint(health_bp)
     app.register_blueprint(pwa_dashboard_bp, url_prefix='/pwa-dashboard')
+    app.register_blueprint(kyc_management_bp)
     # DB teardown
     app.teardown_appcontext(close_db)
     # Register Jinja filters for FASTag and vehicle masking
