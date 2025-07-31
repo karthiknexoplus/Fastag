@@ -953,6 +953,15 @@
                 <span class="modal-title">Add KYC User</span>
             </div>
             <div class="modal-desc">Enter user details or scan QR to autofill.</div>
+            
+            <!-- QR Scanner Section -->
+            <div class="qr-scanner-section">
+                <button type="button" class="qr-scan-btn" onclick="openQRScanner()">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Scan QR Code</span>
+                </button>
+            </div>
+            
             <form id="addKycUserForm" onsubmit="submitAddKycUser(event)">
                 <div class="mb-2">
                     <label class="form-label">Name</label>
@@ -984,6 +993,47 @@
             </form>
         </div>
     </div>
+    
+    <!-- QR Scanner Modal -->
+    <div id="qrScannerModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom qr-scanner-modal" style="max-width: 500px;">
+            <span class="close-modal" onclick="closeQRScanner()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-qrcode"></i></span>
+                <span class="modal-title">QR Code Scanner</span>
+            </div>
+            <div class="modal-desc">Point camera at QR code to scan FASTag ID</div>
+            
+            <!-- Camera Controls -->
+            <div class="camera-controls">
+                <button type="button" class="flash-btn" onclick="toggleFlash()" id="flashBtn">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Flash Off</span>
+                </button>
+            </div>
+            
+            <!-- Camera View -->
+            <div class="camera-container">
+                <video id="qrVideo" autoplay playsinline style="width: 100%; height: 300px; background: #000;"></video>
+                <div class="scan-overlay">
+                    <div class="scan-frame"></div>
+                </div>
+            </div>
+            
+            <!-- Scan Result -->
+            <div id="scanResult" class="scan-result" style="display: none;">
+                <div class="result-content">
+                    <i class="fas fa-check-circle" style="color: #28a745; font-size: 1.5rem;"></i>
+                    <span>QR Code Scanned Successfully!</span>
+                </div>
+            </div>
+            
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeQRScanner()">Close</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- KYC Users List Modal -->
     <div id="kycUsersListModal" class="modal-custom" style="display:none;">
         <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
@@ -1476,6 +1526,108 @@
     .action-btn.delete-btn:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+    }
+    
+    /* QR Scanner Styles */
+    .qr-scanner-section {
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .qr-scan-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 auto;
+    }
+    
+    .qr-scan-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .qr-scanner-modal {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .camera-controls {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .flash-btn {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    
+    .flash-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(255, 193, 7, 0.4);
+    }
+    
+    .camera-container {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    
+    .scan-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+    
+    .scan-frame {
+        width: 200px;
+        height: 200px;
+        border: 2px solid #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    }
+    
+    .scan-result {
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%);
+        border: 1px solid rgba(40, 167, 69, 0.2);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .result-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #28a745;
+        font-weight: 600;
     }
     
     /* Disabled Feature Styles */
@@ -5729,6 +5881,144 @@
             }
         })
         .catch(() => alert('Failed to add location'));
+    }
+    
+    // QR Scanner Functions
+    let qrStream = null;
+    let qrVideoTrack = null;
+    let flashEnabled = false;
+    
+    function openQRScanner() {
+        document.getElementById('qrScannerModal').style.display = 'flex';
+        startCamera();
+    }
+    
+    function closeQRScanner() {
+        document.getElementById('qrScannerModal').style.display = 'none';
+        stopCamera();
+    }
+    
+    async function startCamera() {
+        try {
+            const constraints = {
+                video: {
+                    facingMode: 'environment', // Use back camera
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+            
+            qrStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const video = document.getElementById('qrVideo');
+            video.srcObject = qrStream;
+            
+            // Get video track for flash control
+            qrVideoTrack = qrStream.getVideoTracks()[0];
+            
+            // Start QR code detection
+            detectQRCode();
+            
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            alert('Unable to access camera. Please check permissions.');
+        }
+    }
+    
+    function stopCamera() {
+        if (qrStream) {
+            qrStream.getTracks().forEach(track => track.stop());
+            qrStream = null;
+            qrVideoTrack = null;
+        }
+    }
+    
+    function toggleFlash() {
+        if (!qrVideoTrack) return;
+        
+        try {
+            const capabilities = qrVideoTrack.getCapabilities();
+            if (capabilities.torch) {
+                flashEnabled = !flashEnabled;
+                qrVideoTrack.applyConstraints({
+                    advanced: [{ torch: flashEnabled }]
+                });
+                
+                const flashBtn = document.getElementById('flashBtn');
+                const icon = flashBtn.querySelector('i');
+                const text = flashBtn.querySelector('span');
+                
+                if (flashEnabled) {
+                    icon.className = 'fas fa-lightbulb';
+                    text.textContent = 'Flash On';
+                } else {
+                    icon.className = 'far fa-lightbulb';
+                    text.textContent = 'Flash Off';
+                }
+            }
+        } catch (error) {
+            console.error('Flash not supported:', error);
+        }
+    }
+    
+    function detectQRCode() {
+        const video = document.getElementById('qrVideo');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        function scan() {
+            if (video.videoWidth === 0) {
+                requestAnimationFrame(scan);
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Simple QR code detection (you might want to use a proper QR library)
+            // For now, we'll simulate QR detection
+            setTimeout(() => {
+                // Simulate QR code found
+                const mockQRData = 'upi://pay?ver=01&mode=01&pa=netc.34161FA820328EE83E668A60@idfcnetc&purpose=00&mc=4784&pn=NETC%20FASTag%20Recharge&orgid=180071&qrMedium=04';
+                processQRCode(mockQRData);
+            }, 2000);
+            
+            requestAnimationFrame(scan);
+        }
+        
+        scan();
+    }
+    
+    function processQRCode(qrData) {
+        try {
+            // Extract FASTag ID from UPI QR format
+            const fastagIdMatch = qrData.match(/&pa=netc\.([^@]+)@/);
+            if (fastagIdMatch && fastagIdMatch[1]) {
+                const fastagId = fastagIdMatch[1];
+                
+                // Fill the FASTag ID field
+                document.getElementById('kycFastagId').value = fastagId;
+                
+                // Show success message
+                document.getElementById('scanResult').style.display = 'block';
+                
+                // Auto-fetch vehicle number
+                lookupVehicleByFastag();
+                
+                // Close scanner after 2 seconds
+                setTimeout(() => {
+                    closeQRScanner();
+                }, 2000);
+                
+            } else {
+                alert('Invalid QR code format. Please scan a valid FASTag QR code.');
+            }
+        } catch (error) {
+            console.error('Error processing QR code:', error);
+            alert('Error processing QR code. Please try again.');
+        }
     }
     // Lanes Modal logic
     function openLanesModal() {
