@@ -692,16 +692,15 @@ def restart_controller():
     try:
         logger.info("Controller restart requested")
         
-        # Try different sudo paths and commands
+        # Try different sudo paths with reboot command
         sudo_paths = ['/usr/bin/sudo', '/bin/sudo', 'sudo']
-        reboot_commands = ['reboot', 'shutdown', '-r', 'now']
         
         success = False
         error_msg = ""
         
         for sudo_path in sudo_paths:
             try:
-                cmd = [sudo_path] + reboot_commands
+                cmd = [sudo_path, 'reboot']
                 logger.info(f"Trying command: {' '.join(cmd)}")
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
                 
