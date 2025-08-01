@@ -1222,21 +1222,28 @@
             background-clip: text;
             color: #764ba2;
             font-weight: 700;
-            animation: waveText 2s ease-in-out infinite;
             display: inline-block;
+            animation: waveText 1.5s ease-in-out infinite !important;
+            transform-origin: center;
+        }
+        .feature-slider .carousel-item.active .desc {
+            animation: waveText 1.5s ease-in-out infinite !important;
         }
         @keyframes waveText {
-            0%, 100% { 
+            0% { 
                 transform: translateY(0px) scale(1); 
             }
             25% { 
-                transform: translateY(-3px) scale(1.02); 
+                transform: translateY(-4px) scale(1.03); 
             }
             50% { 
                 transform: translateY(0px) scale(1); 
             }
             75% { 
-                transform: translateY(3px) scale(0.98); 
+                transform: translateY(4px) scale(0.97); 
+            }
+            100% { 
+                transform: translateY(0px) scale(1); 
             }
         }
     </style>
