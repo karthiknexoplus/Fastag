@@ -9,6 +9,8 @@ import subprocess
 import os
 import platform
 from datetime import datetime
+import paramiko
+import threading
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -1104,3 +1106,154 @@ def download_database():
             'success': False,
             'error': str(e)
         }), 500 
+
+# SSH connection management
+ssh_connections = {}
+
+@api.route('/ssh/connect', methods=['POST'])
+def ssh_connect():
+    """Establish SSH connection to the local system"""
+    try:
+        # Connect to localhost (same system)
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
+        # Connect to localhost with current user
+        ssh.connect('localhost', username='ubuntu', timeout=10)
+        
+        # Store connection with unique ID
+        connection_id = f"ssh_{int(time.time())}"
+        ssh_connections[connection_id] = {
+            'client': ssh,
+            'created': time.time(),
+            'last_activity': time.time()
+        }
+        
+        logger.info(f"SSH connection established: {connection_id}")
+        
+        return jsonify({
+            'success': True,
+            'connection_id': connection_id,
+            'message': 'SSH connection established'
+        })
+        
+    except Exception as e:
+        logger.error(f"SSH connection failed: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'SSH connection failed: {str(e)}'
+        }), 500
+
+@api.route('/ssh/execute', methods=['POST'])
+def ssh_execute():
+    """Execute command via SSH"""
+    try:
+        data = request.get_json()
+        connection_id = data.get('connection_id')
+        command = data.get('command')
+        
+        if not connection_id or not command:
+            return jsonify({
+                'success': False,
+                'error': 'Missing connection_id or command'
+            }), 400
+        
+        if connection_id not in ssh_connections:
+            return jsonify({
+                'success': False,
+                'error': 'SSH connection not found'
+            }), 404
+        
+        ssh = ssh_connections[connection_id]['client']
+        ssh_connections[connection_id]['last_activity'] = time.time()
+        
+        # Execute command
+        stdin, stdout, stderr = ssh.exec_command(command, timeout=30)
+        
+        # Get output
+        output = stdout.read().decode('utf-8')
+        error = stderr.read().decode('utf-8')
+        exit_code = stdout.channel.recv_exit_status()
+        
+        result = {
+            'success': True,
+            'output': output,
+            'error': error,
+            'exit_code': exit_code
+        }
+        
+        logger.info(f"SSH command executed: {command} (exit code: {exit_code})")
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"SSH command execution failed: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Command execution failed: {str(e)}'
+        }), 500
+
+@api.route('/ssh/disconnect', methods=['POST'])
+def ssh_disconnect():
+    """Disconnect SSH connection"""
+    try:
+        data = request.get_json()
+        connection_id = data.get('connection_id')
+        
+        if not connection_id:
+            return jsonify({
+                'success': False,
+                'error': 'Missing connection_id'
+            }), 400
+        
+        if connection_id in ssh_connections:
+            ssh = ssh_connections[connection_id]['client']
+            ssh.close()
+            del ssh_connections[connection_id]
+            
+            logger.info(f"SSH connection closed: {connection_id}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'SSH connection closed'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'SSH connection not found'
+            }), 404
+        
+    except Exception as e:
+        logger.error(f"SSH disconnect failed: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Disconnect failed: {str(e)}'
+        }), 500
+
+# Cleanup old SSH connections periodically
+def cleanup_ssh_connections():
+    """Clean up old SSH connections"""
+    current_time = time.time()
+    expired_connections = []
+    
+    for conn_id, conn_data in ssh_connections.items():
+        if current_time - conn_data['last_activity'] > 3600:  # 1 hour timeout
+            expired_connections.append(conn_id)
+    
+    for conn_id in expired_connections:
+        try:
+            ssh_connections[conn_id]['client'].close()
+            del ssh_connections[conn_id]
+            logger.info(f"Cleaned up expired SSH connection: {conn_id}")
+        except:
+            pass
+
+# Run cleanup every 10 minutes
+def ssh_cleanup_thread():
+    while True:
+        time.sleep(600)  # 10 minutes
+        cleanup_ssh_connections()
+
+# Start cleanup thread
+cleanup_thread = threading.Thread(target=ssh_cleanup_thread, daemon=True)
+cleanup_thread.start() 

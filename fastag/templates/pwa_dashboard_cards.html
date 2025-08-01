@@ -5481,11 +5481,13 @@
     
     // SSH Terminal Functions
     let sshConnected = false;
+    let sshConnectionId = null;
     
     function showSSHPanel() {
         document.getElementById('sshTerminalModal').style.display = 'flex';
         // Reset connection state
         window.sshConnected = false;
+        sshConnectionId = null;
         updateSSHButtons();
     }
     
@@ -5494,23 +5496,49 @@
         
         appendToSSHOutput('<span style="color: #00ff00;">Connecting to avhifields...</span>');
         
-        // Simulate SSH connection (in real implementation, this would connect to actual SSH)
-        setTimeout(() => {
-            sshConnected = true;
-            window.sshConnected = true;
-            updateSSHButtons();
-            appendToSSHOutput('<span style="color: #00ff00;">Connected to avhifields</span>');
-            appendToSSHOutput('<span style="color: #888;">Type commands or use quick command buttons below</span>');
-        }, 1000);
+        // Connect to real SSH
+        fetch('/api/ssh/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                sshConnected = true;
+                window.sshConnected = true;
+                sshConnectionId = data.connection_id;
+                updateSSHButtons();
+                appendToSSHOutput('<span style="color: #00ff00;">Connected to avhifields</span>');
+                appendToSSHOutput('<span style="color: #888;">Type commands or use quick command buttons below</span>');
+            } else {
+                appendToSSHOutput(`<span style="color: #ff6b6b;">Connection failed: ${data.error}</span>`);
+            }
+        })
+        .catch(error => {
+            appendToSSHOutput(`<span style="color: #ff6b6b;">Connection error: ${error}</span>`);
+        });
     }
     
     function disconnectSSH() {
-        if (!sshConnected) return;
+        if (!sshConnected || !sshConnectionId) return;
         
-        sshConnected = false;
-        window.sshConnected = false;
-        updateSSHButtons();
-        appendToSSHOutput('<span style="color: #ff6b6b;">Disconnected from avhifields</span>');
+        // Disconnect from real SSH
+        fetch('/api/ssh/disconnect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ connection_id: sshConnectionId })
+        })
+        .then(r => r.json())
+        .then(data => {
+            sshConnected = false;
+            window.sshConnected = false;
+            sshConnectionId = null;
+            updateSSHButtons();
+            appendToSSHOutput('<span style="color: #ff6b6b;">Disconnected from avhifields</span>');
+        })
+        .catch(error => {
+            appendToSSHOutput(`<span style="color: #ff6b6b;">Disconnect error: ${error}</span>`);
+        });
     }
     
     function updateSSHButtons() {
@@ -5527,46 +5555,43 @@
     }
     
     function sendSSHCommand(command) {
-        if (!sshConnected) {
+        if (!sshConnected || !sshConnectionId) {
             appendToSSHOutput('<span style="color: #ff6b6b;">Not connected. Please connect first.</span>');
             return;
         }
         
         appendToSSHOutput(`<span style="color: #00ff00;">$ ${command}</span>`);
         
-        // Simulate command execution (in real implementation, this would send to actual SSH)
-        setTimeout(() => {
-            let response = '';
-            switch(command) {
-                case 'cd /home/ubuntu/Fastag':
-                    response = 'Changed directory to /home/ubuntu/Fastag';
-                    break;
-                case 'cd ..':
-                    response = 'Changed directory to parent folder';
-                    break;
-                case 'source venv/bin/activate':
-                    response = 'Virtual environment activated';
-                    break;
-                case 'sudo git pull':
-                    response = 'Already up to date.';
-                    break;
-                case 'sudo systemctl restart fastag':
-                    response = 'Fastag service restarted successfully';
-                    break;
-                case 'sudo systemctl restart rfid_readers.service':
-                    response = 'RFID readers service restarted successfully';
-                    break;
-                case 'journalctl -u fastag.service -f':
-                    response = 'Following fastag service logs...\n[Press Ctrl+C to stop]';
-                    break;
-                case 'journalctl -u rfid_readers.service -f':
-                    response = 'Following RFID readers service logs...\n[Press Ctrl+C to stop]';
-                    break;
-                default:
-                    response = `Command executed: ${command}`;
+        // Execute real SSH command
+        fetch('/api/ssh/execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                connection_id: sshConnectionId,
+                command: command
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                let output = '';
+                if (data.output) {
+                    output += data.output;
+                }
+                if (data.error) {
+                    output += (output ? '\n' : '') + data.error;
+                }
+                if (data.exit_code !== 0) {
+                    output += `\n[Exit code: ${data.exit_code}]`;
+                }
+                appendToSSHOutput(`<span style="color: #888;">${output || 'Command completed'}</span>`);
+            } else {
+                appendToSSHOutput(`<span style="color: #ff6b6b;">Command failed: ${data.error}</span>`);
             }
-            appendToSSHOutput(`<span style="color: #888;">${response}</span>`);
-        }, 500);
+        })
+        .catch(error => {
+            appendToSSHOutput(`<span style="color: #ff6b6b;">Command error: ${error}</span>`);
+        });
     }
     
     function appendToSSHOutput(content) {
