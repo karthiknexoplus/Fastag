@@ -874,89 +874,119 @@ def test_restart_apis():
 
 @api.route('/network-info', methods=['GET'])
 def get_network_info():
-    """Get network interface information using ifconfig/ipconfig"""
+    """Get network interface information using multiple methods"""
     try:
         interfaces = []
         
         if platform.system() == "Linux":
-            # Use ifconfig command for Linux/Raspberry Pi
-            ifconfig_paths = ['/sbin/ifconfig', '/usr/sbin/ifconfig', 'ifconfig']
-            ifconfig_found = None
+            # Method 1: Try ip command (modern Linux systems)
+            try:
+                result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    current_interface = None
+                    for line in result.stdout.split('\n'):
+                        line = line.strip()
+                        if line and line[0].isdigit() and ':' in line:
+                            # Interface name (e.g., "1: eth0: ...")
+                            current_interface = line.split(':')[1].strip()
+                            if current_interface not in ['lo']:  # Skip loopback
+                                interfaces.append({
+                                    'name': current_interface,
+                                    'ip': 'N/A',
+                                    'mac': 'N/A',
+                                    'status': 'UP'
+                                })
+                        elif line.startswith('link/ether ') and current_interface:
+                            # MAC address
+                            mac = line.split()[1]
+                            for iface in interfaces:
+                                if iface['name'] == current_interface:
+                                    iface['mac'] = mac
+                                    break
+                        elif line.startswith('inet ') and current_interface:
+                            # IP address
+                            ip = line.split()[1].split('/')[0]  # Remove CIDR notation
+                            for iface in interfaces:
+                                if iface['name'] == current_interface:
+                                    iface['ip'] = ip
+                                    break
+            except Exception as e:
+                logger.warning(f"ip command failed: {e}")
             
-            # Find ifconfig executable
-            for path in ifconfig_paths:
-                try:
-                    result = subprocess.run([path, '--version'], capture_output=True, text=True, timeout=5)
-                    if result.returncode == 0:
-                        ifconfig_found = path
-                        break
-                except:
-                    continue
-            
-            if ifconfig_found:
-                try:
-                    result = subprocess.run([ifconfig_found], capture_output=True, text=True, timeout=10)
-                    if result.returncode == 0:
-                        current_interface = None
-                        for line in result.stdout.split('\n'):
-                            line = line.strip()
-                            if line and not line.startswith('lo:'):  # Skip loopback
-                                if ':' in line and not line.startswith(' '):
-                                    # Interface name
-                                    current_interface = line.split(':')[0].strip()
-                                    interfaces.append({
-                                        'name': current_interface,
-                                        'ip': 'N/A',
-                                        'mac': 'N/A',
-                                        'status': 'UP'
-                                    })
-                                elif line.startswith('inet ') and current_interface:
-                                    # IP address
-                                    ip = line.split()[1]
-                                    for iface in interfaces:
-                                        if iface['name'] == current_interface:
-                                            iface['ip'] = ip
-                                            break
-                                elif line.startswith('ether ') and current_interface:
-                                    # MAC address
-                                    mac = line.split()[1]
-                                    for iface in interfaces:
-                                        if iface['name'] == current_interface:
-                                            iface['mac'] = mac
-                                            break
-                except subprocess.TimeoutExpired:
-                    logger.error("Timeout getting network info")
-                except Exception as e:
-                    logger.error(f"Error getting network info: {e}")
-            else:
-                # Fallback: try to get network info from /proc/net/dev and /sys/class/net
-                try:
-                    # Read /proc/net/dev for interface names
-                    with open('/proc/net/dev', 'r') as f:
-                        lines = f.readlines()[2:]  # Skip header lines
-                        for line in lines:
-                            if ':' in line:
-                                interface_name = line.split(':')[0].strip()
-                                if interface_name not in ['lo']:  # Skip loopback
-                                    interfaces.append({
-                                        'name': interface_name,
-                                        'ip': 'N/A',
-                                        'mac': 'N/A',
-                                        'status': 'UP'
-                                    })
-                    
-                    # Try to get IP addresses using hostname
+            # Method 2: Try ifconfig if ip command didn't work
+            if not interfaces:
+                ifconfig_paths = ['/sbin/ifconfig', '/usr/sbin/ifconfig', 'ifconfig']
+                ifconfig_found = None
+                
+                for path in ifconfig_paths:
                     try:
-                        import socket
-                        hostname = socket.gethostname()
-                        ip = socket.gethostbyname(hostname)
-                        if interfaces:
-                            interfaces[0]['ip'] = ip
+                        result = subprocess.run([path, '--version'], capture_output=True, text=True, timeout=5)
+                        if result.returncode == 0:
+                            ifconfig_found = path
+                            break
                     except:
-                        pass
-                        
+                        continue
+                
+                if ifconfig_found:
+                    try:
+                        result = subprocess.run([ifconfig_found], capture_output=True, text=True, timeout=10)
+                        if result.returncode == 0:
+                            current_interface = None
+                            for line in result.stdout.split('\n'):
+                                line = line.strip()
+                                if line and not line.startswith('lo:'):  # Skip loopback
+                                    if ':' in line and not line.startswith(' '):
+                                        # Interface name
+                                        current_interface = line.split(':')[0].strip()
+                                        interfaces.append({
+                                            'name': current_interface,
+                                            'ip': 'N/A',
+                                            'mac': 'N/A',
+                                            'status': 'UP'
+                                        })
+                                    elif line.startswith('inet ') and current_interface:
+                                        # IP address
+                                        ip = line.split()[1]
+                                        for iface in interfaces:
+                                            if iface['name'] == current_interface:
+                                                iface['ip'] = ip
+                                                break
+                                    elif line.startswith('ether ') and current_interface:
+                                        # MAC address
+                                        mac = line.split()[1]
+                                        for iface in interfaces:
+                                            if iface['name'] == current_interface:
+                                                iface['mac'] = mac
+                                                break
+                    except Exception as e:
+                        logger.warning(f"ifconfig failed: {e}")
+            
+            # Method 3: Try reading from /sys/class/net for MAC addresses
+            if interfaces:
+                for iface in interfaces:
+                    if iface['mac'] == 'N/A':
+                        try:
+                            mac_file = f"/sys/class/net/{iface['name']}/address"
+                            if os.path.exists(mac_file):
+                                with open(mac_file, 'r') as f:
+                                    mac = f.read().strip()
+                                    iface['mac'] = mac
+                        except Exception as e:
+                            logger.warning(f"Failed to read MAC for {iface['name']}: {e}")
+            
+            # Method 4: Try to get IP addresses using socket
+            if interfaces:
+                try:
+                    import socket
+                    hostname = socket.gethostname()
+                    ip = socket.gethostbyname(hostname)
+                    # Assign to first interface without IP
+                    for iface in interfaces:
+                        if iface['ip'] == 'N/A':
+                            iface['ip'] = ip
+                            break
                 except Exception as e:
-                    logger.error(f"Error in fallback network info: {e}")
+                    logger.warning(f"Socket method failed: {e}")
                 
         elif platform.system() == "Windows":
             # Use ipconfig for Windows
@@ -995,12 +1025,15 @@ def get_network_info():
             except Exception as e:
                 logger.error(f"Error getting network info: {e}")
         
-        # Filter out interfaces without IP addresses
-        interfaces = [iface for iface in interfaces if iface['ip'] != 'N/A']
+        # Filter out interfaces without IP addresses and show all interfaces
+        active_interfaces = [iface for iface in interfaces if iface['ip'] != 'N/A']
+        if not active_interfaces and interfaces:
+            # If no active interfaces found, show all interfaces
+            active_interfaces = interfaces
         
         return jsonify({
             'success': True,
-            'interfaces': interfaces
+            'interfaces': active_interfaces
         })
         
     except Exception as e:
