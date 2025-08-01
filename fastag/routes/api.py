@@ -1126,6 +1126,7 @@ def ssh_connect():
         }
         
         logger.info(f"Terminal session established: {connection_id}")
+        logger.info(f"Current connections: {list(ssh_connections.keys())}")
         
         return jsonify({
             'success': True,
@@ -1148,6 +1149,9 @@ def ssh_execute():
         connection_id = data.get('connection_id')
         command = data.get('command')
         
+        logger.info(f"SSH execute request - connection_id: {connection_id}, command: {command}")
+        logger.info(f"Available connections: {list(ssh_connections.keys())}")
+        
         if not connection_id or not command:
             return jsonify({
                 'success': False,
@@ -1155,6 +1159,7 @@ def ssh_execute():
             }), 400
         
         if connection_id not in ssh_connections:
+            logger.error(f"Connection {connection_id} not found in {list(ssh_connections.keys())}")
             return jsonify({
                 'success': False,
                 'error': 'Terminal session not found'

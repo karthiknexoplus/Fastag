@@ -5507,6 +5507,7 @@
                 sshConnected = true;
                 window.sshConnected = true;
                 sshConnectionId = data.connection_id;
+                console.log('SSH Connection ID:', sshConnectionId); // Debug log
                 updateSSHButtons();
                 appendToSSHOutput('<span style="color: #00ff00;">Connected to avhifields</span>');
                 appendToSSHOutput('<span style="color: #888;">Type commands or use quick command buttons below</span>');
@@ -5561,6 +5562,7 @@
         }
         
         appendToSSHOutput(`<span style="color: #00ff00;">$ ${command}</span>`);
+        console.log('Sending command:', command, 'with connection ID:', sshConnectionId); // Debug log
         
         // Execute real SSH command
         fetch('/api/ssh/execute', {
@@ -5573,6 +5575,7 @@
         })
         .then(r => r.json())
         .then(data => {
+            console.log('Command response:', data); // Debug log
             if (data.success) {
                 let output = '';
                 if (data.output) {
@@ -5590,6 +5593,7 @@
             }
         })
         .catch(error => {
+            console.error('Command error:', error); // Debug log
             appendToSSHOutput(`<span style="color: #ff6b6b;">Command error: ${error}</span>`);
         });
     }
