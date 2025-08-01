@@ -1107,76 +1107,115 @@ def download_database():
             'error': str(e)
         }), 500 
 
-# SSH connection management - use a more persistent approach
+# SSH connection management - real SSH connections
 ssh_connections = {}
 import threading
+import paramiko
+import time
 
 # Thread lock for connection management
 ssh_lock = threading.Lock()
 
 @api.route('/ssh/connect', methods=['POST'])
 def ssh_connect():
-    """Establish terminal connection to the local system"""
+    """Establish real SSH connection to the server"""
     try:
-        logger.info("Terminal session established")
+        # SSH connection parameters
+        hostname = 'avhifields.tail1b76dc.ts.net'
+        username = 'ubuntu'
+        password = 'ubuntu'
+        port = 22
+        
+        # Create SSH client
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
+        # Connect to server
+        ssh_client.connect(
+            hostname=hostname,
+            username=username,
+            password=password,
+            port=port,
+            timeout=10
+        )
+        
+        # Create session ID
+        connection_id = f"ssh_{int(time.time())}"
+        
+        # Store connection
+        with ssh_lock:
+            ssh_connections[connection_id] = {
+                'client': ssh_client,
+                'created': time.time(),
+                'last_activity': time.time(),
+                'channel': None
+            }
+        
+        logger.info(f"SSH connection established: {connection_id} to {hostname}")
+        logger.info(f"Current connections: {list(ssh_connections.keys())}")
         
         return jsonify({
             'success': True,
-            'connection_id': 'terminal_session',
-            'message': 'Terminal session established'
+            'connection_id': connection_id,
+            'message': f'Connected to {hostname}'
         })
         
     except Exception as e:
-        logger.error(f"Terminal session failed: {str(e)}")
+        logger.error(f"SSH connection failed: {str(e)}")
         return jsonify({
             'success': False,
-            'error': f'Terminal session failed: {str(e)}'
+            'error': f'SSH connection failed: {str(e)}'
         }), 500
 
 @api.route('/ssh/execute', methods=['POST'])
 def ssh_execute():
-    """Execute command directly on the system"""
+    """Execute command on remote SSH server"""
     try:
         data = request.get_json()
+        connection_id = data.get('connection_id')
         command = data.get('command')
         
-        logger.info(f"SSH execute request - command: {command}")
+        logger.info(f"SSH execute request - connection_id: {connection_id}, command: {command}")
+        logger.info(f"Available connections: {list(ssh_connections.keys())}")
         
-        if not command:
+        if not connection_id or not command:
             return jsonify({
                 'success': False,
-                'error': 'Missing command'
+                'error': 'Missing connection_id or command'
             }), 400
         
-        # Execute command using subprocess
-        result = subprocess.run(
-            command, 
-            shell=True, 
-            capture_output=True, 
-            text=True, 
-            timeout=30,
-            cwd='/home/ubuntu/Fastag'  # Default to Fastag directory
-        )
+        with ssh_lock:
+            if connection_id not in ssh_connections:
+                logger.error(f"Connection {connection_id} not found in {list(ssh_connections.keys())}")
+                return jsonify({
+                    'success': False,
+                    'error': 'SSH connection not found'
+                }), 404
+            
+            ssh_client = ssh_connections[connection_id]['client']
+            ssh_connections[connection_id]['last_activity'] = time.time()
+        
+        # Execute command on remote server
+        stdin, stdout, stderr = ssh_client.exec_command(command, timeout=30)
+        
+        # Get output
+        output = stdout.read().decode('utf-8')
+        error = stderr.read().decode('utf-8')
+        exit_code = stdout.channel.recv_exit_status()
         
         result_data = {
             'success': True,
-            'output': result.stdout,
-            'error': result.stderr,
-            'exit_code': result.returncode
+            'output': output,
+            'error': error,
+            'exit_code': exit_code
         }
         
-        logger.info(f"Command executed: {command} (exit code: {result.returncode})")
+        logger.info(f"Command executed on remote server: {command} (exit code: {exit_code})")
         
         return jsonify(result_data)
         
-    except subprocess.TimeoutExpired:
-        logger.error(f"Command timeout: {command}")
-        return jsonify({
-            'success': False,
-            'error': f'Command timed out: {command}'
-        }), 500
     except Exception as e:
-        logger.error(f"Command execution failed: {str(e)}")
+        logger.error(f"SSH command execution failed: {str(e)}")
         return jsonify({
             'success': False,
             'error': f'Command execution failed: {str(e)}'
@@ -1184,7 +1223,7 @@ def ssh_execute():
 
 @api.route('/ssh/disconnect', methods=['POST'])
 def ssh_disconnect():
-    """Disconnect terminal session"""
+    """Disconnect SSH session"""
     try:
         data = request.get_json()
         connection_id = data.get('connection_id')
@@ -1197,20 +1236,22 @@ def ssh_disconnect():
         
         with ssh_lock:
             if connection_id in ssh_connections:
+                ssh_client = ssh_connections[connection_id]['client']
+                ssh_client.close()
                 del ssh_connections[connection_id]
-                logger.info(f"Terminal session closed: {connection_id}")
+                logger.info(f"SSH connection closed: {connection_id}")
                 return jsonify({
                     'success': True,
-                    'message': 'Terminal session closed'
+                    'message': 'SSH connection closed'
                 })
             else:
                 return jsonify({
                     'success': False,
-                    'error': 'Terminal session not found'
+                    'error': 'SSH connection not found'
                 }), 404
         
     except Exception as e:
-        logger.error(f"Terminal disconnect failed: {str(e)}")
+        logger.error(f"SSH disconnect failed: {str(e)}")
         return jsonify({
             'success': False,
             'error': f'Disconnect failed: {str(e)}'
