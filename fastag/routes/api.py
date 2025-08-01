@@ -1112,41 +1112,37 @@ ssh_connections = {}
 
 @api.route('/ssh/connect', methods=['POST'])
 def ssh_connect():
-    """Establish SSH connection to the local system"""
+    """Establish terminal connection to the local system"""
     try:
-        # Connect to localhost (same system)
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # Create a session ID for tracking
+        connection_id = f"terminal_{int(time.time())}"
         
-        # Connect to localhost with current user
-        ssh.connect('localhost', username='ubuntu', timeout=10)
-        
-        # Store connection with unique ID
-        connection_id = f"ssh_{int(time.time())}"
+        # Store session info
         ssh_connections[connection_id] = {
-            'client': ssh,
+            'client': None,  # No SSH client needed
             'created': time.time(),
-            'last_activity': time.time()
+            'last_activity': time.time(),
+            'cwd': os.getcwd()  # Track current working directory
         }
         
-        logger.info(f"SSH connection established: {connection_id}")
+        logger.info(f"Terminal session established: {connection_id}")
         
         return jsonify({
             'success': True,
             'connection_id': connection_id,
-            'message': 'SSH connection established'
+            'message': 'Terminal session established'
         })
         
     except Exception as e:
-        logger.error(f"SSH connection failed: {str(e)}")
+        logger.error(f"Terminal session failed: {str(e)}")
         return jsonify({
             'success': False,
-            'error': f'SSH connection failed: {str(e)}'
+            'error': f'Terminal session failed: {str(e)}'
         }), 500
 
 @api.route('/ssh/execute', methods=['POST'])
 def ssh_execute():
-    """Execute command via SSH"""
+    """Execute command directly on the system"""
     try:
         data = request.get_json()
         connection_id = data.get('connection_id')
@@ -1161,33 +1157,87 @@ def ssh_execute():
         if connection_id not in ssh_connections:
             return jsonify({
                 'success': False,
-                'error': 'SSH connection not found'
+                'error': 'Terminal session not found'
             }), 404
         
-        ssh = ssh_connections[connection_id]['client']
+        # Update last activity
         ssh_connections[connection_id]['last_activity'] = time.time()
         
-        # Execute command
-        stdin, stdout, stderr = ssh.exec_command(command, timeout=30)
+        # Handle special commands
+        if command.startswith('cd '):
+            # Handle directory change
+            new_dir = command[3:].strip()
+            if new_dir == '..':
+                current_cwd = ssh_connections[connection_id]['cwd']
+                parent_dir = os.path.dirname(current_cwd)
+                ssh_connections[connection_id]['cwd'] = parent_dir
+                return jsonify({
+                    'success': True,
+                    'output': f'Changed directory to {parent_dir}',
+                    'error': '',
+                    'exit_code': 0
+                })
+            elif new_dir.startswith('/'):
+                # Absolute path
+                ssh_connections[connection_id]['cwd'] = new_dir
+                return jsonify({
+                    'success': True,
+                    'output': f'Changed directory to {new_dir}',
+                    'error': '',
+                    'exit_code': 0
+                })
+            else:
+                # Relative path
+                current_cwd = ssh_connections[connection_id]['cwd']
+                new_path = os.path.join(current_cwd, new_dir)
+                if os.path.exists(new_path) and os.path.isdir(new_path):
+                    ssh_connections[connection_id]['cwd'] = new_path
+                    return jsonify({
+                        'success': True,
+                        'output': f'Changed directory to {new_path}',
+                        'error': '',
+                        'exit_code': 0
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'output': '',
+                        'error': f'Directory not found: {new_path}',
+                        'exit_code': 1
+                    })
         
-        # Get output
-        output = stdout.read().decode('utf-8')
-        error = stderr.read().decode('utf-8')
-        exit_code = stdout.channel.recv_exit_status()
+        # Execute command in the current working directory
+        current_cwd = ssh_connections[connection_id]['cwd']
         
-        result = {
+        # Execute command using subprocess
+        result = subprocess.run(
+            command, 
+            shell=True, 
+            capture_output=True, 
+            text=True, 
+            timeout=30,
+            cwd=current_cwd
+        )
+        
+        result_data = {
             'success': True,
-            'output': output,
-            'error': error,
-            'exit_code': exit_code
+            'output': result.stdout,
+            'error': result.stderr,
+            'exit_code': result.returncode
         }
         
-        logger.info(f"SSH command executed: {command} (exit code: {exit_code})")
+        logger.info(f"Command executed: {command} (exit code: {result.returncode})")
         
-        return jsonify(result)
+        return jsonify(result_data)
         
+    except subprocess.TimeoutExpired:
+        logger.error(f"Command timeout: {command}")
+        return jsonify({
+            'success': False,
+            'error': f'Command timed out: {command}'
+        }), 500
     except Exception as e:
-        logger.error(f"SSH command execution failed: {str(e)}")
+        logger.error(f"Command execution failed: {str(e)}")
         return jsonify({
             'success': False,
             'error': f'Command execution failed: {str(e)}'
