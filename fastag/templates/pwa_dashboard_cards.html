@@ -6886,6 +6886,44 @@
             .catch(() => alert('Failed to delete user'));
     }
     
+    // Smart notification system for cache updates
+    function showUpdateNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#28a745' : '#17a2b8'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        notification.textContent = message;
+        
+        // Add animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
     // Locations Modal logic
     function openLocationsModal() {
         document.getElementById('locationsModal').style.display = 'flex';
@@ -6897,17 +6935,59 @@
     }
     
     function loadLocationsList() {
-        document.getElementById('locationsRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        // Check if we have cached data
+        if (window._locationsList && window._locationsList.length > 0) {
+            // Show cached data immediately
+            document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${window._locationsList.length}</b>`;
+            renderLocationsList(window._locationsList);
+            
+            // Show a subtle indicator that we're refreshing
+            const refreshIndicator = document.createElement('div');
+            refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+            refreshIndicator.id = 'locationsRefreshIndicator';
+            document.getElementById('locationsRecords').appendChild(refreshIndicator);
+        } else {
+            // No cache, show loading
+            document.getElementById('locationsRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/api/locations')
             .then(r => r.json())
             .then(data => {
                 let locations = data.locations || [];
+                const oldData = window._locationsList || [];
+                
+                // Update cache
                 window._locationsList = locations;
-                document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${locations.length}</b>`;
-                renderLocationsList(locations);
+                
+                // Check if data has changed
+                const hasChanged = JSON.stringify(oldData) !== JSON.stringify(locations);
+                
+                if (hasChanged || !oldData.length) {
+                    // Data changed or first load, update UI
+                    document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${locations.length}</b>`;
+                    renderLocationsList(locations);
+                    
+                    // Show update notification if data changed
+                    if (hasChanged && oldData.length > 0) {
+                        showUpdateNotification('Locations updated!', 'success');
+                    }
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('locationsRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(() => {
-                document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load locations.</div>';
+                // Only show error if we don't have cached data
+                if (!window._locationsList || window._locationsList.length === 0) {
+                    document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load locations.</div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('locationsRefreshIndicator');
+                if (indicator) indicator.remove();
             });
     }
     
@@ -7290,17 +7370,59 @@
         document.getElementById('lanesModal').style.display = 'none';
     }
     function loadLanesList() {
-        document.getElementById('lanesRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        // Check if we have cached data
+        if (window._lanesList && window._lanesList.length > 0) {
+            // Show cached data immediately
+            document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${window._lanesList.length}</b>`;
+            renderLanesList(window._lanesList);
+            
+            // Show a subtle indicator that we're refreshing
+            const refreshIndicator = document.createElement('div');
+            refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+            refreshIndicator.id = 'lanesRefreshIndicator';
+            document.getElementById('lanesRecords').appendChild(refreshIndicator);
+        } else {
+            // No cache, show loading
+            document.getElementById('lanesRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/api/lanes')
             .then(r => r.json())
             .then(data => {
                 let lanes = data.lanes || [];
+                const oldData = window._lanesList || [];
+                
+                // Update cache
                 window._lanesList = lanes;
-                document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${lanes.length}</b>`;
-                renderLanesList(lanes);
+                
+                // Check if data has changed
+                const hasChanged = JSON.stringify(oldData) !== JSON.stringify(lanes);
+                
+                if (hasChanged || !oldData.length) {
+                    // Data changed or first load, update UI
+                    document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${lanes.length}</b>`;
+                    renderLanesList(lanes);
+                    
+                    // Show update notification if data changed
+                    if (hasChanged && oldData.length > 0) {
+                        showUpdateNotification('Lanes updated!', 'success');
+                    }
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('lanesRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(() => {
-                document.getElementById('lanesRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load lanes.</div>';
+                // Only show error if we don't have cached data
+                if (!window._lanesList || window._lanesList.length === 0) {
+                    document.getElementById('lanesRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load lanes.</div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('lanesRefreshIndicator');
+                if (indicator) indicator.remove();
             });
     }
     function renderLanesList(lanes) {
