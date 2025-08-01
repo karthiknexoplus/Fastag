@@ -11,6 +11,7 @@ import platform
 from datetime import datetime
 import paramiko
 import threading
+import pickle
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -1107,14 +1108,72 @@ def download_database():
             'error': str(e)
         }), 500 
 
-# SSH connection management - real SSH connections
-ssh_connections = {}
+# SSH connection management - real SSH connections with persistent storage
 import threading
 import paramiko
 import time
+import json
+import os
+import pickle
+from datetime import datetime
 
 # Thread lock for connection management
 ssh_lock = threading.Lock()
+
+# File-based session storage
+SSH_SESSIONS_FILE = '/tmp/ssh_sessions.pkl'
+
+# Initialize SSH connections dictionary
+ssh_connections = {}
+
+def save_ssh_sessions():
+    """Save SSH sessions to file"""
+    try:
+        with ssh_lock:
+            # Convert SSH clients to None since they can't be pickled
+            sessions_to_save = {}
+            for conn_id, conn_data in ssh_connections.items():
+                sessions_to_save[conn_id] = {
+                    'created': conn_data['created'],
+                    'last_activity': conn_data['last_activity'],
+                    'hostname': 'avhifields.tail1b76dc.ts.net',
+                    'username': 'ubuntu'
+                }
+            
+            with open(SSH_SESSIONS_FILE, 'wb') as f:
+                pickle.dump(sessions_to_save, f)
+    except Exception as e:
+        logger.error(f"Failed to save SSH sessions: {e}")
+
+def load_ssh_sessions():
+    """Load SSH sessions from file"""
+    try:
+        if os.path.exists(SSH_SESSIONS_FILE):
+            with open(SSH_SESSIONS_FILE, 'rb') as f:
+                sessions = pickle.load(f)
+                return sessions
+    except Exception as e:
+        logger.error(f"Failed to load SSH sessions: {e}")
+    return {}
+
+def create_ssh_connection(hostname, username, password, port=22):
+    """Create a new SSH connection"""
+    try:
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
+        ssh_client.connect(
+            hostname=hostname,
+            username=username,
+            password=password,
+            port=port,
+            timeout=10
+        )
+        
+        return ssh_client
+    except Exception as e:
+        logger.error(f"Failed to create SSH connection: {e}")
+        raise e
 
 @api.route('/ssh/connect', methods=['POST'])
 def ssh_connect():
@@ -1126,21 +1185,11 @@ def ssh_connect():
         password = 'ubuntu'
         port = 22
         
-        # Create SSH client
-        ssh_client = paramiko.SSHClient()
-        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        
-        # Connect to server
-        ssh_client.connect(
-            hostname=hostname,
-            username=username,
-            password=password,
-            port=port,
-            timeout=10
-        )
-        
         # Create session ID
         connection_id = f"ssh_{int(time.time())}"
+        
+        # Create SSH connection
+        ssh_client = create_ssh_connection(hostname, username, password, port)
         
         # Store connection
         with ssh_lock:
@@ -1148,8 +1197,10 @@ def ssh_connect():
                 'client': ssh_client,
                 'created': time.time(),
                 'last_activity': time.time(),
-                'channel': None
+                'hostname': hostname,
+                'username': username
             }
+            save_ssh_sessions()
         
         logger.info(f"SSH connection established: {connection_id} to {hostname}")
         logger.info(f"Current connections: {list(ssh_connections.keys())}")
@@ -1176,7 +1227,6 @@ def ssh_execute():
         command = data.get('command')
         
         logger.info(f"SSH execute request - connection_id: {connection_id}, command: {command}")
-        logger.info(f"Available connections: {list(ssh_connections.keys())}")
         
         if not connection_id or not command:
             return jsonify({
@@ -1184,16 +1234,42 @@ def ssh_execute():
                 'error': 'Missing connection_id or command'
             }), 400
         
+        # Try to get existing connection
+        ssh_client = None
         with ssh_lock:
-            if connection_id not in ssh_connections:
-                logger.error(f"Connection {connection_id} not found in {list(ssh_connections.keys())}")
+            if connection_id in ssh_connections:
+                ssh_client = ssh_connections[connection_id]['client']
+                ssh_connections[connection_id]['last_activity'] = time.time()
+                save_ssh_sessions()
+        
+        # If connection not found, try to recreate it
+        if not ssh_client:
+            logger.info(f"Connection {connection_id} not found, attempting to recreate...")
+            try:
+                hostname = 'avhifields.tail1b76dc.ts.net'
+                username = 'ubuntu'
+                password = 'ubuntu'
+                
+                ssh_client = create_ssh_connection(hostname, username, password)
+                
+                # Store the recreated connection
+                with ssh_lock:
+                    ssh_connections[connection_id] = {
+                        'client': ssh_client,
+                        'created': time.time(),
+                        'last_activity': time.time(),
+                        'hostname': hostname,
+                        'username': username
+                    }
+                    save_ssh_sessions()
+                
+                logger.info(f"Recreated SSH connection: {connection_id}")
+            except Exception as e:
+                logger.error(f"Failed to recreate SSH connection: {e}")
                 return jsonify({
                     'success': False,
-                    'error': 'SSH connection not found'
+                    'error': 'SSH connection not found and could not be recreated'
                 }), 404
-            
-            ssh_client = ssh_connections[connection_id]['client']
-            ssh_connections[connection_id]['last_activity'] = time.time()
         
         # Execute command on remote server
         stdin, stdout, stderr = ssh_client.exec_command(command, timeout=30)
@@ -1239,6 +1315,7 @@ def ssh_disconnect():
                 ssh_client = ssh_connections[connection_id]['client']
                 ssh_client.close()
                 del ssh_connections[connection_id]
+                save_ssh_sessions()
                 logger.info(f"SSH connection closed: {connection_id}")
                 return jsonify({
                     'success': True,
