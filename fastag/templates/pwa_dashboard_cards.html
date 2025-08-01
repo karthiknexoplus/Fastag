@@ -994,6 +994,54 @@
         </div>
     </div>
     
+    <!-- System Health Modal -->
+    <div id="systemHealthModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 600px;">
+            <span class="close-modal" onclick="closeSystemHealthModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-heartbeat" style="background: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i></span>
+                <span class="modal-title">System Health</span>
+            </div>
+            <div class="modal-desc">Real-time system monitoring and health status.</div>
+            <div id="systemHealthContent" class="modal-records"></div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeSystemHealthModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Network Info Modal -->
+    <div id="networkInfoModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 600px;">
+            <span class="close-modal" onclick="closeNetworkInfoModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-network-wired" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i></span>
+                <span class="modal-title">Network Information</span>
+            </div>
+            <div class="modal-desc">Network interfaces, IP addresses, and connection status.</div>
+            <div id="networkInfoContent" class="modal-records"></div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeNetworkInfoModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Backup Modal -->
+    <div id="databaseBackupModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 600px;">
+            <span class="close-modal" onclick="closeDatabaseBackupModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-database" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i></span>
+                <span class="modal-title">Database Backup</span>
+            </div>
+            <div class="modal-desc">Database information and backup management.</div>
+            <div id="databaseBackupContent" class="modal-records"></div>
+            <div class="modal-footer-custom" style="justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeDatabaseBackupModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Restart Confirmation Modal -->
     <div id="restartConfirmModal" class="modal-custom" style="display:none;">
         <div class="modal-content-custom" style="max-width: 400px;">
@@ -5230,14 +5278,29 @@
         document.getElementById('controllerStatusModal').style.display = 'none';
     }
     
+    function closeSystemHealthModal() {
+        document.getElementById('systemHealthModal').style.display = 'none';
+    }
+    
+    function closeNetworkInfoModal() {
+        document.getElementById('networkInfoModal').style.display = 'none';
+    }
+    
+    function closeDatabaseBackupModal() {
+        document.getElementById('databaseBackupModal').style.display = 'none';
+    }
+    
     // Controller Status Functions
     function showControllerHealth() {
-        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading system health...</div>';
+        // Show the modal first
+        document.getElementById('systemHealthModal').style.display = 'flex';
+        document.getElementById('systemHealthContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading system health...</div>';
+        
         fetch('/api/status')
             .then(r => r.json())
             .then(data => {
                 if (!data.success || !data.info_str) {
-                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load system health.</div>';
+                    document.getElementById('systemHealthContent').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load system health.</div>';
                     return;
                 }
                 // Parse and display health info - show all health-related data
@@ -5246,16 +5309,19 @@
                     line.includes('Uptime') || line.includes('RAM') || line.includes('Disk') ||
                     line.includes('CPU') || line.includes('Memory')
                 );
-                document.getElementById('controllerStatusRecords').innerHTML =
+                document.getElementById('systemHealthContent').innerHTML =
                     '<div style="font-size:1.08em;line-height:1.7;">' + healthInfo.join('<br>') + '</div>';
             })
             .catch(() => {
-                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load system health.</div>';
+                document.getElementById('systemHealthContent').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load system health.</div>';
             });
     }
     
     function showControllerIPInfo() {
-        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading network information...</div>';
+        // Show the modal first
+        document.getElementById('networkInfoModal').style.display = 'flex';
+        document.getElementById('networkInfoContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading network information...</div>';
+        
         fetch('/api/network-info')
             .then(r => r.json())
             .then(data => {
@@ -5274,18 +5340,21 @@
                         html += '<div style="text-align:center;color:#dc3545;">No network interfaces found.</div>';
                     }
                     html += '</div>';
-                    document.getElementById('controllerStatusRecords').innerHTML = html;
+                    document.getElementById('networkInfoContent').innerHTML = html;
                 } else {
-                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load network information.</div>';
+                    document.getElementById('networkInfoContent').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load network information.</div>';
                 }
             })
             .catch(() => {
-                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load network information.</div>';
+                document.getElementById('networkInfoContent').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load network information.</div>';
             });
     }
     
     function showControllerBackup() {
-        document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading database information...</div>';
+        // Show the modal first
+        document.getElementById('databaseBackupModal').style.display = 'flex';
+        document.getElementById('databaseBackupContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading database information...</div>';
+        
         fetch('/api/database-info')
             .then(r => r.json())
             .then(data => {
@@ -5302,13 +5371,13 @@
                     html += `<i class="fas fa-download"></i> Download Backup</button>`;
                     html += '</div>';
                     html += '</div>';
-                    document.getElementById('controllerStatusRecords').innerHTML = html;
+                    document.getElementById('databaseBackupContent').innerHTML = html;
                 } else {
-                    document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load database information.</div>';
+                    document.getElementById('databaseBackupContent').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load database information.</div>';
                 }
             })
             .catch(() => {
-                document.getElementById('controllerStatusRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load database information.</div>';
+                document.getElementById('databaseBackupContent').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load database information.</div>';
             });
     }
     
@@ -5322,7 +5391,7 @@
         document.body.removeChild(link);
         
         // Show success message
-        document.getElementById('controllerStatusRecords').innerHTML += 
+        document.getElementById('databaseBackupContent').innerHTML += 
             '<div style="text-align:center;color:#28a745;margin-top:1rem;font-weight:600;">Database backup download started!</div>';
     }
     
