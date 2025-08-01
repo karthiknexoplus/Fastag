@@ -5556,20 +5556,19 @@
     }
     
     function sendSSHCommand(command) {
-        if (!sshConnected || !sshConnectionId) {
+        if (!sshConnected) {
             appendToSSHOutput('<span style="color: #ff6b6b;">Not connected. Please connect first.</span>');
             return;
         }
         
         appendToSSHOutput(`<span style="color: #00ff00;">$ ${command}</span>`);
-        console.log('Sending command:', command, 'with connection ID:', sshConnectionId); // Debug log
+        console.log('Sending command:', command); // Debug log
         
         // Execute real SSH command
         fetch('/api/ssh/execute', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                connection_id: sshConnectionId,
                 command: command
             })
         })
