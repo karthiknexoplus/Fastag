@@ -1245,7 +1245,7 @@ def ssh_execute():
 
 @api.route('/ssh/disconnect', methods=['POST'])
 def ssh_disconnect():
-    """Disconnect SSH connection"""
+    """Disconnect terminal session"""
     try:
         data = request.get_json()
         connection_id = data.get('connection_id')
@@ -1257,24 +1257,22 @@ def ssh_disconnect():
             }), 400
         
         if connection_id in ssh_connections:
-            ssh = ssh_connections[connection_id]['client']
-            ssh.close()
             del ssh_connections[connection_id]
             
-            logger.info(f"SSH connection closed: {connection_id}")
+            logger.info(f"Terminal session closed: {connection_id}")
             
             return jsonify({
                 'success': True,
-                'message': 'SSH connection closed'
+                'message': 'Terminal session closed'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'SSH connection not found'
+                'error': 'Terminal session not found'
             }), 404
         
     except Exception as e:
-        logger.error(f"SSH disconnect failed: {str(e)}")
+        logger.error(f"Terminal disconnect failed: {str(e)}")
         return jsonify({
             'success': False,
             'error': f'Disconnect failed: {str(e)}'
