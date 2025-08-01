@@ -6752,17 +6752,59 @@
     }
     
     function loadKycUsersList() {
-        document.getElementById('kycUsersListRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        // Check if we have cached data
+        if (window._kycUsersList && window._kycUsersList.length > 0) {
+            // Show cached data immediately
+            document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${window._kycUsersList.length}</b>`;
+            renderKycUsersList(window._kycUsersList);
+            
+            // Show a subtle indicator that we're refreshing
+            const refreshIndicator = document.createElement('div');
+            refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+            refreshIndicator.id = 'kycUsersRefreshIndicator';
+            document.getElementById('kycUsersListRecords').appendChild(refreshIndicator);
+        } else {
+            // No cache, show loading
+            document.getElementById('kycUsersListRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/api/kyc_users')
             .then(r => r.json())
             .then(data => {
                 let users = data.users || [];
+                const oldData = window._kycUsersList || [];
+                
+                // Update cache
                 window._kycUsersList = users;
-                document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${users.length}</b>`;
-                renderKycUsersList(users);
+                
+                // Check if data has changed
+                const hasChanged = JSON.stringify(oldData) !== JSON.stringify(users);
+                
+                if (hasChanged || !oldData.length) {
+                    // Data changed or first load, update UI
+                    document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${users.length}</b>`;
+                    renderKycUsersList(users);
+                    
+                    // Show update notification if data changed
+                    if (hasChanged && oldData.length > 0) {
+                        showUpdateNotification('KYC users updated!', 'success');
+                    }
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('kycUsersRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(() => {
-                document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load KYC users.</div>';
+                // Only show error if we don't have cached data
+                if (!window._kycUsersList || window._kycUsersList.length === 0) {
+                    document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load KYC users.</div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('kycUsersRefreshIndicator');
+                if (indicator) indicator.remove();
             });
     }
     
