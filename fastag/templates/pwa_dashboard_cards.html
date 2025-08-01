@@ -1223,27 +1223,14 @@
             color: #764ba2;
             font-weight: 700;
             display: inline-block;
-            animation: waveText 1.5s ease-in-out infinite !important;
-            transform-origin: center;
-        }
-        .feature-slider .carousel-item.active .desc {
-            animation: waveText 1.5s ease-in-out infinite !important;
+            animation: waveText 1s ease-in-out infinite !important;
         }
         @keyframes waveText {
-            0% { 
-                transform: translateY(0px) scale(1); 
-            }
-            25% { 
-                transform: translateY(-4px) scale(1.03); 
+            0%, 100% { 
+                transform: translateY(0px); 
             }
             50% { 
-                transform: translateY(0px) scale(1); 
-            }
-            75% { 
-                transform: translateY(4px) scale(0.97); 
-            }
-            100% { 
-                transform: translateY(0px) scale(1); 
+                transform: translateY(-8px); 
             }
         }
     </style>
@@ -1276,7 +1263,7 @@
             <button class="feature-btn" onclick="showBarrierModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
             <button class="feature-btn" onclick="showVehicleDemographicsModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-chart-pie"></i></span></button>
         </div>
-        <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="carousel" data-bs-interval="3000">
+        <div class="feature-slider carousel slide" id="featureSlider" data-bs-ride="false" data-bs-interval="false">
             <div class="carousel-inner">
                 <div class="carousel-item active"><span class="icon"><i class="fas fa-bolt"></i></span><span class="desc">Lightning Fast & Secure</span></div>
                 <div class="carousel-item"><span class="icon"><i class="fas fa-sliders-h"></i></span><span class="desc">Adjust Reader Settings</span></div>
