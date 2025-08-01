@@ -1107,8 +1107,12 @@ def download_database():
             'error': str(e)
         }), 500 
 
-# SSH connection management
+# SSH connection management - use a more persistent approach
 ssh_connections = {}
+import threading
+
+# Thread lock for connection management
+ssh_lock = threading.Lock()
 
 @api.route('/ssh/connect', methods=['POST'])
 def ssh_connect():
@@ -1117,13 +1121,14 @@ def ssh_connect():
         # Create a session ID for tracking
         connection_id = f"terminal_{int(time.time())}"
         
-        # Store session info
-        ssh_connections[connection_id] = {
-            'client': None,  # No SSH client needed
-            'created': time.time(),
-            'last_activity': time.time(),
-            'cwd': os.getcwd()  # Track current working directory
-        }
+        # Store session info with thread lock
+        with ssh_lock:
+            ssh_connections[connection_id] = {
+                'client': None,  # No SSH client needed
+                'created': time.time(),
+                'last_activity': time.time(),
+                'cwd': os.getcwd()  # Track current working directory
+            }
         
         logger.info(f"Terminal session established: {connection_id}")
         logger.info(f"Current connections: {list(ssh_connections.keys())}")
@@ -1165,54 +1170,61 @@ def ssh_execute():
                 'error': 'Terminal session not found'
             }), 404
         
-        # Update last activity
-        ssh_connections[connection_id]['last_activity'] = time.time()
+        # Update last activity with thread lock
+        with ssh_lock:
+            if connection_id not in ssh_connections:
+                logger.error(f"Connection {connection_id} not found in {list(ssh_connections.keys())}")
+                return jsonify({
+                    'success': False,
+                    'error': 'Terminal session not found'
+                }), 404
+            
+            ssh_connections[connection_id]['last_activity'] = time.time()
+            current_cwd = ssh_connections[connection_id]['cwd']
         
         # Handle special commands
         if command.startswith('cd '):
             # Handle directory change
             new_dir = command[3:].strip()
-            if new_dir == '..':
-                current_cwd = ssh_connections[connection_id]['cwd']
-                parent_dir = os.path.dirname(current_cwd)
-                ssh_connections[connection_id]['cwd'] = parent_dir
-                return jsonify({
-                    'success': True,
-                    'output': f'Changed directory to {parent_dir}',
-                    'error': '',
-                    'exit_code': 0
-                })
-            elif new_dir.startswith('/'):
-                # Absolute path
-                ssh_connections[connection_id]['cwd'] = new_dir
-                return jsonify({
-                    'success': True,
-                    'output': f'Changed directory to {new_dir}',
-                    'error': '',
-                    'exit_code': 0
-                })
-            else:
-                # Relative path
-                current_cwd = ssh_connections[connection_id]['cwd']
-                new_path = os.path.join(current_cwd, new_dir)
-                if os.path.exists(new_path) and os.path.isdir(new_path):
-                    ssh_connections[connection_id]['cwd'] = new_path
+            with ssh_lock:
+                if new_dir == '..':
+                    parent_dir = os.path.dirname(current_cwd)
+                    ssh_connections[connection_id]['cwd'] = parent_dir
                     return jsonify({
                         'success': True,
-                        'output': f'Changed directory to {new_path}',
+                        'output': f'Changed directory to {parent_dir}',
+                        'error': '',
+                        'exit_code': 0
+                    })
+                elif new_dir.startswith('/'):
+                    # Absolute path
+                    ssh_connections[connection_id]['cwd'] = new_dir
+                    return jsonify({
+                        'success': True,
+                        'output': f'Changed directory to {new_dir}',
                         'error': '',
                         'exit_code': 0
                     })
                 else:
-                    return jsonify({
-                        'success': False,
-                        'output': '',
-                        'error': f'Directory not found: {new_path}',
-                        'exit_code': 1
-                    })
+                    # Relative path
+                    new_path = os.path.join(current_cwd, new_dir)
+                    if os.path.exists(new_path) and os.path.isdir(new_path):
+                        ssh_connections[connection_id]['cwd'] = new_path
+                        return jsonify({
+                            'success': True,
+                            'output': f'Changed directory to {new_path}',
+                            'error': '',
+                            'exit_code': 0
+                        })
+                    else:
+                        return jsonify({
+                            'success': False,
+                            'output': '',
+                            'error': f'Directory not found: {new_path}',
+                            'exit_code': 1
+                        })
         
-        # Execute command in the current working directory
-        current_cwd = ssh_connections[connection_id]['cwd']
+        # Execute command in the current working directory (already got current_cwd above)
         
         # Execute command using subprocess
         result = subprocess.run(
