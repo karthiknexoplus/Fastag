@@ -1118,24 +1118,11 @@ ssh_lock = threading.Lock()
 def ssh_connect():
     """Establish terminal connection to the local system"""
     try:
-        # Create a session ID for tracking
-        connection_id = f"terminal_{int(time.time())}"
-        
-        # Store session info with thread lock
-        with ssh_lock:
-            ssh_connections[connection_id] = {
-                'client': None,  # No SSH client needed
-                'created': time.time(),
-                'last_activity': time.time(),
-                'cwd': os.getcwd()  # Track current working directory
-            }
-        
-        logger.info(f"Terminal session established: {connection_id}")
-        logger.info(f"Current connections: {list(ssh_connections.keys())}")
+        logger.info("Terminal session established")
         
         return jsonify({
             'success': True,
-            'connection_id': connection_id,
+            'connection_id': 'terminal_session',
             'message': 'Terminal session established'
         })
         
@@ -1151,80 +1138,15 @@ def ssh_execute():
     """Execute command directly on the system"""
     try:
         data = request.get_json()
-        connection_id = data.get('connection_id')
         command = data.get('command')
         
-        logger.info(f"SSH execute request - connection_id: {connection_id}, command: {command}")
-        logger.info(f"Available connections: {list(ssh_connections.keys())}")
+        logger.info(f"SSH execute request - command: {command}")
         
-        if not connection_id or not command:
+        if not command:
             return jsonify({
                 'success': False,
-                'error': 'Missing connection_id or command'
+                'error': 'Missing command'
             }), 400
-        
-        if connection_id not in ssh_connections:
-            logger.error(f"Connection {connection_id} not found in {list(ssh_connections.keys())}")
-            return jsonify({
-                'success': False,
-                'error': 'Terminal session not found'
-            }), 404
-        
-        # Update last activity with thread lock
-        with ssh_lock:
-            if connection_id not in ssh_connections:
-                logger.error(f"Connection {connection_id} not found in {list(ssh_connections.keys())}")
-                return jsonify({
-                    'success': False,
-                    'error': 'Terminal session not found'
-                }), 404
-            
-            ssh_connections[connection_id]['last_activity'] = time.time()
-            current_cwd = ssh_connections[connection_id]['cwd']
-        
-        # Handle special commands
-        if command.startswith('cd '):
-            # Handle directory change
-            new_dir = command[3:].strip()
-            with ssh_lock:
-                if new_dir == '..':
-                    parent_dir = os.path.dirname(current_cwd)
-                    ssh_connections[connection_id]['cwd'] = parent_dir
-                    return jsonify({
-                        'success': True,
-                        'output': f'Changed directory to {parent_dir}',
-                        'error': '',
-                        'exit_code': 0
-                    })
-                elif new_dir.startswith('/'):
-                    # Absolute path
-                    ssh_connections[connection_id]['cwd'] = new_dir
-                    return jsonify({
-                        'success': True,
-                        'output': f'Changed directory to {new_dir}',
-                        'error': '',
-                        'exit_code': 0
-                    })
-                else:
-                    # Relative path
-                    new_path = os.path.join(current_cwd, new_dir)
-                    if os.path.exists(new_path) and os.path.isdir(new_path):
-                        ssh_connections[connection_id]['cwd'] = new_path
-                        return jsonify({
-                            'success': True,
-                            'output': f'Changed directory to {new_path}',
-                            'error': '',
-                            'exit_code': 0
-                        })
-                    else:
-                        return jsonify({
-                            'success': False,
-                            'output': '',
-                            'error': f'Directory not found: {new_path}',
-                            'exit_code': 1
-                        })
-        
-        # Execute command in the current working directory (already got current_cwd above)
         
         # Execute command using subprocess
         result = subprocess.run(
@@ -1233,7 +1155,7 @@ def ssh_execute():
             capture_output=True, 
             text=True, 
             timeout=30,
-            cwd=current_cwd
+            cwd='/home/ubuntu/Fastag'  # Default to Fastag directory
         )
         
         result_data = {
@@ -1273,6 +1195,7 @@ def ssh_disconnect():
                 'error': 'Missing connection_id'
             }), 400
         
+        with ssh_lock:
             if connection_id in ssh_connections:
                 del ssh_connections[connection_id]
                 logger.info(f"Terminal session closed: {connection_id}")
