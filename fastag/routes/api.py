@@ -1278,9 +1278,9 @@ def ssh_disconnect():
             'error': f'Disconnect failed: {str(e)}'
         }), 500
 
-# Cleanup old SSH connections periodically
+# Cleanup old terminal sessions periodically
 def cleanup_ssh_connections():
-    """Clean up old SSH connections"""
+    """Clean up old terminal sessions"""
     current_time = time.time()
     expired_connections = []
     
@@ -1290,9 +1290,8 @@ def cleanup_ssh_connections():
     
     for conn_id in expired_connections:
         try:
-            ssh_connections[conn_id]['client'].close()
             del ssh_connections[conn_id]
-            logger.info(f"Cleaned up expired SSH connection: {conn_id}")
+            logger.info(f"Cleaned up expired terminal session: {conn_id}")
         except:
             pass
 
