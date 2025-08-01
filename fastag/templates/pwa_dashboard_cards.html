@@ -3549,86 +3549,102 @@
         });
     }
 
-    // Load analytics data
+    // Load analytics data with caching
     function loadAnalyticsData() {
-        // Current Occupancy
-        fetch('/analytics/api/current-occupancy')
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('card-occupancy').textContent = data.total || 0;
-            })
-            .catch(() => {
-                document.getElementById('card-occupancy').textContent = '--';
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_analytics_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_analytics_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
+        
+        if (cachedData && cacheValid) {
+            try {
+                const analyticsData = JSON.parse(cachedData);
+                updateAnalyticsCards(analyticsData);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_analytics_cache');
+                localStorage.removeItem('fastag_analytics_timestamp');
+            }
+        }
+        
+        // Always fetch fresh data in background
+        Promise.all([
+            fetch('/analytics/api/current-occupancy').then(r => r.json()).catch(() => ({ total: 0 })),
+            fetch('/analytics/api/today-granted').then(r => r.json()).catch(() => ({ granted: 0 })),
+            fetch('/analytics/api/unique-tags-denied-today').then(r => r.json()).catch(() => ({ total: 0 })),
+            fetch('/analytics/api/unique-vehicles-today').then(r => r.json()).catch(() => ({ unique_vehicles_today: 0 })),
+            fetch('/analytics/api/entry-exit-trend').then(r => r.json()).catch(() => ({ entry_exit_trend: [] })),
+            fetch('/analytics/api/vehicle-demographics').then(r => r.json()).catch(() => ({ fuel_types: [] }))
+        ])
+        .then(([occupancy, granted, denied, unique, trend, demographics]) => {
+            const analyticsData = {
+                occupancy: occupancy.total || 0,
+                granted: granted.granted || 0,
+                denied: denied.total || 0,
+                unique: unique.unique_vehicles_today || 0,
+                trend: trend.entry_exit_trend || [],
+                demographics: demographics.fuel_types || []
+            };
+            
+            // Update cache in localStorage
+            localStorage.setItem('fastag_analytics_cache', JSON.stringify(analyticsData));
+            localStorage.setItem('fastag_analytics_timestamp', Date.now().toString());
+            
+            // Update UI
+            updateAnalyticsCards(analyticsData);
+        })
+        .catch(() => {
+            // If all requests fail, show fallback values
+            updateAnalyticsCards({
+                occupancy: 0,
+                granted: 0,
+                denied: 0,
+                unique: 0,
+                trend: [],
+                demographics: []
             });
-
-        // Today's Granted
-        fetch('/analytics/api/today-granted')
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('card-granted').textContent = data.granted || 0;
-            })
-            .catch(() => {
-                document.getElementById('card-granted').textContent = '--';
-            });
-
-        // Denied Today
-        fetch('/analytics/api/unique-tags-denied-today')
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('card-denied').textContent = data.total || 0;
-            })
-            .catch(() => {
-                document.getElementById('card-denied').textContent = '--';
-            });
-
-        // Unique Vehicles Today
-        fetch('/analytics/api/unique-vehicles-today')
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('card-unique').textContent = data.unique_vehicles_today || 0;
-            })
-            .catch(() => {
-                document.getElementById('card-unique').textContent = '--';
-            });
-
-        // Activity Trend (simplified - show peak hour)
-        fetch('/analytics/api/entry-exit-trend')
-            .then(r => r.json())
-            .then(data => {
-                if (data.entry_exit_trend && data.entry_exit_trend.length > 0) {
-                    // Find peak hour
-                    let peakHour = '14:00';
-                    let maxActivity = 0;
-                    data.entry_exit_trend.forEach(hour => {
-                        const total = hour[1] + hour[2];
-                        if (total > maxActivity) {
-                            maxActivity = total;
-                            peakHour = hour[0] + ':00';
-                        }
-                    });
-                    document.getElementById('card-trend').textContent = peakHour;
-                } else {
-                    document.getElementById('card-trend').textContent = '14:00';
+        });
+    }
+    
+    // Helper function to update analytics cards
+    function updateAnalyticsCards(data) {
+        // Update occupancy
+        document.getElementById('card-occupancy').textContent = data.occupancy || 0;
+        
+        // Update granted
+        document.getElementById('card-granted').textContent = data.granted || 0;
+        
+        // Update denied
+        document.getElementById('card-denied').textContent = data.denied || 0;
+        
+        // Update unique vehicles
+        document.getElementById('card-unique').textContent = data.unique || 0;
+        
+        // Update trend (peak hour)
+        if (data.trend && data.trend.length > 0) {
+            let peakHour = '14:00';
+            let maxActivity = 0;
+            data.trend.forEach(hour => {
+                const total = hour[1] + hour[2];
+                if (total > maxActivity) {
+                    maxActivity = total;
+                    peakHour = hour[0] + ':00';
                 }
-            })
-            .catch(() => {
-                document.getElementById('card-trend').textContent = '14:00';
             });
-
-        // Top Fuel Type
-        fetch('/analytics/api/vehicle-demographics')
-            .then(r => r.json())
-            .then(data => {
-                if (data.fuel_types && data.fuel_types.length > 0) {
-                    const topFuel = data.fuel_types[0].type;
-                    document.getElementById('card-fuel').textContent = topFuel;
-                } else {
-                    document.getElementById('card-fuel').textContent = 'Petrol';
-                }
-            })
-            .catch(() => {
-                document.getElementById('card-fuel').textContent = 'Petrol';
-            });
+            document.getElementById('card-trend').textContent = peakHour;
+        } else {
+            document.getElementById('card-trend').textContent = '14:00';
+        }
+        
+        // Update fuel type
+        if (data.demographics && data.demographics.length > 0) {
+            const topFuel = data.demographics[0].type;
+            document.getElementById('card-fuel').textContent = topFuel;
+        } else {
+            document.getElementById('card-fuel').textContent = 'Petrol';
+        }
     }
 
     // Show analytics details modal
@@ -4206,12 +4222,53 @@
         const container = document.getElementById('fuelPriceContainer');
         const citySelect = document.getElementById('fuelPriceCitySelect');
         
-                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading fuel prices...</div></div>';
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_fuel_prices_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_fuel_prices_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 600000; // 10 minutes cache validity for fuel prices
         
+        if (cachedData && cacheValid) {
+            try {
+                const fuelData = JSON.parse(cachedData);
+                
+                // Populate city dropdown
+                citySelect.innerHTML = '<option value="">All Cities</option>';
+                fuelData.cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+                
+                // Display cached prices
+                displayFuelPrices(fuelData.prices);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'fuelPricesRefreshIndicator';
+                container.appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_fuel_prices_cache');
+                localStorage.removeItem('fastag_fuel_prices_timestamp');
+            }
+        } else {
+            // No valid cache, show loading
+            container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading fuel prices...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/pwa-dashboard/api/fuel-price')
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.prices) {
+                    // Update cache in localStorage
+                    localStorage.setItem('fastag_fuel_prices_cache', JSON.stringify(data));
+                    localStorage.setItem('fastag_fuel_prices_timestamp', Date.now().toString());
+                    
                     // Populate city dropdown
                     citySelect.innerHTML = '<option value="">All Cities</option>';
                     data.cities.forEach(city => {
@@ -4223,13 +4280,31 @@
                     
                     // Display prices
                     displayFuelPrices(data.prices);
+                    
+                    // Show update notification if data changed
+                    const oldData = localStorage.getItem('fastag_fuel_prices_cache');
+                    if (oldData && JSON.stringify(data) !== oldData) {
+                        showUpdateNotification('Fuel prices updated!', 'success');
+                    }
                 } else {
                     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Unable to fetch fuel prices</div></div>';
                 }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('fuelPricesRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(error => {
                 console.error('Error fetching fuel prices:', error);
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading fuel prices</div></div>';
+                
+                // Only show error if we don't have cached data
+                if (!cachedData || !cacheValid) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading fuel prices</div></div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('fuelPricesRefreshIndicator');
+                if (indicator) indicator.remove();
             });
     }
     
@@ -4321,20 +4396,68 @@
     function loadVehicleDemographics() {
         const container = document.getElementById('demographicsContainer');
         
-                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading demographics...</div></div>';
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_demographics_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_demographics_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
         
+        if (cachedData && cacheValid) {
+            try {
+                const demographicsData = JSON.parse(cachedData);
+                displayVehicleDemographics(demographicsData);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'demographicsRefreshIndicator';
+                container.appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_demographics_cache');
+                localStorage.removeItem('fastag_demographics_timestamp');
+            }
+        } else {
+            // No valid cache, show loading
+            container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading demographics...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/analytics/api/vehicle-demographics')
             .then(response => response.json())
             .then(data => {
                 if (data.fuel_types && data.top_models) {
+                    // Update cache in localStorage
+                    localStorage.setItem('fastag_demographics_cache', JSON.stringify(data));
+                    localStorage.setItem('fastag_demographics_timestamp', Date.now().toString());
+                    
                     displayVehicleDemographics(data);
+                    
+                    // Show update notification if data changed
+                    const oldData = localStorage.getItem('fastag_demographics_cache');
+                    if (oldData && JSON.stringify(data) !== oldData) {
+                        showUpdateNotification('Demographics updated!', 'success');
+                    }
                 } else {
                     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-chart-pie" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i><div>No demographics data available</div></div>';
                 }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('demographicsRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(error => {
                 console.error('Error fetching demographics:', error);
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading demographics</div></div>';
+                
+                // Only show error if we don't have cached data
+                if (!cachedData || !cacheValid) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading demographics</div></div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('demographicsRefreshIndicator');
+                if (indicator) indicator.remove();
             });
     }
     
@@ -4581,99 +4704,211 @@
     function loadFastagVsNonfastagSlide() {
         const container = document.getElementById('analyticsContent');
         
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_vs_nonfastag_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_vs_nonfastag_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
+        
+        if (cachedData && cacheValid) {
+            try {
+                const fastagData = JSON.parse(cachedData);
+                displayFastagVsNonfastag(fastagData);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'fastagVsNonfastagRefreshIndicator';
+                container.appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_vs_nonfastag_cache');
+                localStorage.removeItem('fastag_vs_nonfastag_timestamp');
+            }
+        } else {
+            // No valid cache, show loading
+            container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading FASTag data...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/analytics/api/fastag-vs-nonfastag')
             .then(response => response.json())
             .then(data => {
-                let html = '<div class="analytics-chart-container">';
-                html += '<div class="analytics-chart-title"><i class="fas fa-chart-pie"></i>FASTag vs Non-FASTag (Today)</div>';
-                html += '<div class="analytics-chart"><canvas id="fastagVsNonfastagChart"></canvas></div>';
-                html += '</div>';
+                // Update cache in localStorage
+                localStorage.setItem('fastag_vs_nonfastag_cache', JSON.stringify(data));
+                localStorage.setItem('fastag_vs_nonfastag_timestamp', Date.now().toString());
                 
-                html += '<div class="analytics-stats-grid">';
-                const fastagCount = data.fastag || 0;
-                const nonfastagCount = data.nonfastag || 0;
-                const total = fastagCount + nonfastagCount;
-                const fastagPercentage = total > 0 ? Math.round((fastagCount / total) * 100) : 0;
-                const nonfastagPercentage = total > 0 ? Math.round((nonfastagCount / total) * 100) : 0;
+                displayFastagVsNonfastag(data);
                 
-                html += `
-                    <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-tag"></i></div>
-                        <div class="analytics-stat-label">FASTag</div>
-                        <div class="analytics-stat-value">${fastagCount}</div>
-                        <div class="analytics-stat-percentage">${fastagPercentage}%</div>
-                    </div>
-                `;
-                html += `
-                    <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-times-circle"></i></div>
-                        <div class="analytics-stat-label">Non-FASTag</div>
-                        <div class="analytics-stat-value">${nonfastagCount}</div>
-                        <div class="analytics-stat-percentage">${nonfastagPercentage}%</div>
-                    </div>
-                `;
-                html += `
-                    <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-percentage"></i></div>
-                        <div class="analytics-stat-label">Total</div>
-                        <div class="analytics-stat-value">${total}</div>
-                        <div class="analytics-stat-percentage">vehicles</div>
-                    </div>
-                `;
-                html += '</div>';
+                // Show update notification if data changed
+                const oldData = localStorage.getItem('fastag_vs_nonfastag_cache');
+                if (oldData && JSON.stringify(data) !== oldData) {
+                    showUpdateNotification('FASTag data updated!', 'success');
+                }
                 
-                container.innerHTML = html;
-                createFastagVsNonfastagChart(data);
+                // Remove refresh indicator
+                const indicator = document.getElementById('fastagVsNonfastagRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(error => {
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading FASTag data</div></div>';
+                // Only show error if we don't have cached data
+                if (!cachedData || !cacheValid) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading FASTag data</div></div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('fastagVsNonfastagRefreshIndicator');
+                if (indicator) indicator.remove();
             });
+    }
+    
+    // Helper function to display FASTag vs Non-FASTag data
+    function displayFastagVsNonfastag(data) {
+        const container = document.getElementById('analyticsContent');
+        
+        let html = '<div class="analytics-chart-container">';
+        html += '<div class="analytics-chart-title"><i class="fas fa-chart-pie"></i>FASTag vs Non-FASTag (Today)</div>';
+        html += '<div class="analytics-chart"><canvas id="fastagVsNonfastagChart"></canvas></div>';
+        html += '</div>';
+        
+        html += '<div class="analytics-stats-grid">';
+        const fastagCount = data.fastag || 0;
+        const nonfastagCount = data.nonfastag || 0;
+        const total = fastagCount + nonfastagCount;
+        const fastagPercentage = total > 0 ? Math.round((fastagCount / total) * 100) : 0;
+        const nonfastagPercentage = total > 0 ? Math.round((nonfastagCount / total) * 100) : 0;
+        
+        html += `
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-icon"><i class="fas fa-tag"></i></div>
+                <div class="analytics-stat-label">FASTag</div>
+                <div class="analytics-stat-value">${fastagCount}</div>
+                <div class="analytics-stat-percentage">${fastagPercentage}%</div>
+            </div>
+        `;
+        html += `
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-icon"><i class="fas fa-times-circle"></i></div>
+                <div class="analytics-stat-label">Non-FASTag</div>
+                <div class="analytics-stat-value">${nonfastagCount}</div>
+                <div class="analytics-stat-percentage">${nonfastagPercentage}%</div>
+            </div>
+        `;
+        html += `
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-icon"><i class="fas fa-percentage"></i></div>
+                <div class="analytics-stat-label">Total</div>
+                <div class="analytics-stat-value">${total}</div>
+                <div class="analytics-stat-percentage">vehicles</div>
+            </div>
+        `;
+        html += '</div>';
+        
+        container.innerHTML = html;
+        createFastagVsNonfastagChart(data);
     }
     
     function loadOverstayedVehiclesSlide() {
         const container = document.getElementById('analyticsContent');
         
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_overstayed_vehicles_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_overstayed_vehicles_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
+        
+        if (cachedData && cacheValid) {
+            try {
+                const overstayedData = JSON.parse(cachedData);
+                displayOverstayedVehicles(overstayedData);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'overstayedVehiclesRefreshIndicator';
+                container.appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_overstayed_vehicles_cache');
+                localStorage.removeItem('fastag_overstayed_vehicles_timestamp');
+            }
+        } else {
+            // No valid cache, show loading
+            container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading overstayed vehicles...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/analytics/api/overstayed-vehicles')
             .then(response => response.json())
             .then(data => {
-                let html = '<div class="analytics-chart-container">';
-                html += '<div class="analytics-chart-title"><i class="fas fa-exclamation-triangle"></i>OVERSTAYED VEHICLES</div>';
-                html += '<div class="analytics-chart"><canvas id="overstayedVehiclesChart"></canvas></div>';
-                html += '</div>';
+                // Update cache in localStorage
+                localStorage.setItem('fastag_overstayed_vehicles_cache', JSON.stringify(data));
+                localStorage.setItem('fastag_overstayed_vehicles_timestamp', Date.now().toString());
                 
-                html += '<div class="analytics-stats-grid">';
-                html += `
-                    <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-clock"></i></div>
-                        <div class="analytics-stat-label">Avg Duration</div>
-                        <div class="analytics-stat-value">${data.avg_duration || '2.5h'}</div>
-                        <div class="analytics-stat-percentage">average</div>
-                    </div>
-                `;
-                html += `
-                    <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-arrow-up"></i></div>
-                        <div class="analytics-stat-label">Trend</div>
-                        <div class="analytics-stat-value">+${data.trend || '12'}%</div>
-                        <div class="analytics-stat-percentage">increase</div>
-                    </div>
-                `;
-                html += `
-                    <div class="analytics-stat-card">
-                        <div class="analytics-stat-icon"><i class="fas fa-car"></i></div>
-                        <div class="analytics-stat-label">Total</div>
-                        <div class="analytics-stat-value">${data.total || 73}</div>
-                        <div class="analytics-stat-percentage">vehicles</div>
-                    </div>
-                `;
-                html += '</div>';
+                displayOverstayedVehicles(data);
                 
-                container.innerHTML = html;
-                createOverstayedVehiclesChart(data);
+                // Show update notification if data changed
+                const oldData = localStorage.getItem('fastag_overstayed_vehicles_cache');
+                if (oldData && JSON.stringify(data) !== oldData) {
+                    showUpdateNotification('Overstayed vehicles updated!', 'success');
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('overstayedVehiclesRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(error => {
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading overstayed vehicles data</div></div>';
+                // Only show error if we don't have cached data
+                if (!cachedData || !cacheValid) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading overstayed vehicles data</div></div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('overstayedVehiclesRefreshIndicator');
+                if (indicator) indicator.remove();
             });
+    }
+    
+    // Helper function to display overstayed vehicles data
+    function displayOverstayedVehicles(data) {
+        const container = document.getElementById('analyticsContent');
+        
+        let html = '<div class="analytics-chart-container">';
+        html += '<div class="analytics-chart-title"><i class="fas fa-exclamation-triangle"></i>OVERSTAYED VEHICLES</div>';
+        html += '<div class="analytics-chart"><canvas id="overstayedVehiclesChart"></canvas></div>';
+        html += '</div>';
+        
+        html += '<div class="analytics-stats-grid">';
+        html += `
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="analytics-stat-label">Avg Duration</div>
+                <div class="analytics-stat-value">${data.avg_duration || '2.5h'}</div>
+                <div class="analytics-stat-percentage">average</div>
+            </div>
+        `;
+        html += `
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-icon"><i class="fas fa-arrow-up"></i></div>
+                <div class="analytics-stat-label">Trend</div>
+                <div class="analytics-stat-value">+${data.trend || '12'}%</div>
+                <div class="analytics-stat-percentage">increase</div>
+            </div>
+        `;
+        html += `
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-icon"><i class="fas fa-car"></i></div>
+                <div class="analytics-stat-label">Total</div>
+                <div class="analytics-stat-value">${data.total || 73}</div>
+                <div class="analytics-stat-percentage">vehicles</div>
+            </div>
+        `;
+        html += '</div>';
+        
+        container.innerHTML = html;
+        createOverstayedVehiclesChart(data);
     }
     
     function loadUniqueVehiclesSlide() {
@@ -5324,60 +5559,113 @@
             return;
         }
         
-        // Show loading
-                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading hourly activity...</div></div>';
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_hourly_activity_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_hourly_activity_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
         
+        if (cachedData && cacheValid) {
+            try {
+                const hourlyData = JSON.parse(cachedData);
+                displayHourlyActivity(hourlyData);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'hourlyActivityRefreshIndicator';
+                container.appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_hourly_activity_cache');
+                localStorage.removeItem('fastag_hourly_activity_timestamp');
+            }
+        } else {
+            // No valid cache, show loading
+            container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading hourly activity...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/analytics/api/hourly-activity')
             .then(response => response.json())
             .then(data => {
-                let html = '<div class="analytics-chart-container">';
-                html += '<div class="analytics-chart-title"><i class="fas fa-clock"></i>Hourly Activity (Last 24 Hours)</div>';
-                html += '<div class="analytics-chart"><canvas id="hourlyActivityChart"></canvas></div>';
-                html += '<div class="analytics-stats-grid">';
+                // Update cache in localStorage
+                localStorage.setItem('fastag_hourly_activity_cache', JSON.stringify(data));
+                localStorage.setItem('fastag_hourly_activity_timestamp', Date.now().toString());
                 
-                if (data.hourly_data && data.hourly_data.length > 0) {
-                    const totalGranted = data.hourly_data.reduce((sum, item) => sum + (item[2] || 0), 0);
-                    const totalDenied = data.hourly_data.reduce((sum, item) => sum + (item[3] || 0), 0);
-                    
-                    html += `
-                        <div class="analytics-stat-card">
-                            <div class="analytics-stat-icon"><i class="fas fa-check-circle"></i></div>
-                            <div class="analytics-stat-label">Granted</div>
-                            <div class="analytics-stat-value">${totalGranted}</div>
-                            <div class="analytics-stat-percentage">total</div>
-                        </div>
-                    `;
-                    
-                    html += `
-                        <div class="analytics-stat-card">
-                            <div class="analytics-stat-icon"><i class="fas fa-times-circle"></i></div>
-                            <div class="analytics-stat-label">Denied</div>
-                            <div class="analytics-stat-value">${totalDenied}</div>
-                            <div class="analytics-stat-percentage">total</div>
-                        </div>
-                    `;
-                    
-                    html += `
-                        <div class="analytics-stat-card">
-                            <div class="analytics-stat-icon"><i class="fas fa-percentage"></i></div>
-                            <div class="analytics-stat-label">Success Rate</div>
-                            <div class="analytics-stat-value">${totalGranted + totalDenied > 0 ? Math.round((totalGranted / (totalGranted + totalDenied)) * 100) : 0}%</div>
-                            <div class="analytics-stat-percentage">granted</div>
-                        </div>
-                    `;
-                } else {
-                    html += '<div class="analytics-stat-card"><div class="analytics-stat-value">No data available</div></div>';
+                displayHourlyActivity(data);
+                
+                // Show update notification if data changed
+                const oldData = localStorage.getItem('fastag_hourly_activity_cache');
+                if (oldData && JSON.stringify(data) !== oldData) {
+                    showUpdateNotification('Hourly activity updated!', 'success');
                 }
                 
-                html += '</div></div>';
-                container.innerHTML = html;
-                
-                // Create line chart
-                createHourlyActivityChart(data);
+                // Remove refresh indicator
+                const indicator = document.getElementById('hourlyActivityRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(error => {
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading hourly activity data</div></div>';
+                // Only show error if we don't have cached data
+                if (!cachedData || !cacheValid) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error loading hourly activity data</div></div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('hourlyActivityRefreshIndicator');
+                if (indicator) indicator.remove();
             });
+    }
+    
+    // Helper function to display hourly activity
+    function displayHourlyActivity(data) {
+        const container = document.getElementById('analyticsContent');
+        
+        let html = '<div class="analytics-chart-container">';
+        html += '<div class="analytics-chart-title"><i class="fas fa-clock"></i>Hourly Activity (Last 24 Hours)</div>';
+        html += '<div class="analytics-chart"><canvas id="hourlyActivityChart"></canvas></div>';
+        html += '<div class="analytics-stats-grid">';
+        
+        if (data.hourly_data && data.hourly_data.length > 0) {
+            const totalGranted = data.hourly_data.reduce((sum, item) => sum + (item[2] || 0), 0);
+            const totalDenied = data.hourly_data.reduce((sum, item) => sum + (item[3] || 0), 0);
+            
+            html += `
+                <div class="analytics-stat-card">
+                    <div class="analytics-stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="analytics-stat-label">Granted</div>
+                    <div class="analytics-stat-value">${totalGranted}</div>
+                    <div class="analytics-stat-percentage">total</div>
+                </div>
+            `;
+            
+            html += `
+                <div class="analytics-stat-card">
+                    <div class="analytics-stat-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="analytics-stat-label">Denied</div>
+                    <div class="analytics-stat-value">${totalDenied}</div>
+                    <div class="analytics-stat-percentage">total</div>
+                </div>
+            `;
+            
+            html += `
+                <div class="analytics-stat-card">
+                    <div class="analytics-stat-icon"><i class="fas fa-percentage"></i></div>
+                    <div class="analytics-stat-label">Success Rate</div>
+                    <div class="analytics-stat-value">${totalGranted + totalDenied > 0 ? Math.round((totalGranted / (totalGranted + totalDenied)) * 100) : 0}%</div>
+                    <div class="analytics-stat-percentage">granted</div>
+                </div>
+            `;
+        } else {
+            html += '<div class="analytics-stat-card"><div class="analytics-stat-value">No data available</div></div>';
+        }
+        
+        html += '</div></div>';
+        container.innerHTML = html;
+        
+        // Create line chart
+        createHourlyActivityChart(data);
     }
     
     function createHourlyActivityChart(data) {
@@ -7209,19 +7497,76 @@
     }
     
     function loadPushNotificationUsersList() {
-        document.getElementById('pushNotificationUsersRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_push_users_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_push_users_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
         
-        // Fetch FCM tokens from the database
+        if (cachedData && cacheValid) {
+            try {
+                const users = JSON.parse(cachedData);
+                window._pushNotificationUsersList = users;
+                
+                // Show cached data immediately
+                document.getElementById('pushNotificationUsersTotal').innerHTML = `All push notification users. <b>Total: ${users.length}</b>`;
+                renderPushNotificationUsersList(users);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'pushUsersRefreshIndicator';
+                document.getElementById('pushNotificationUsersRecords').appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_push_users_cache');
+                localStorage.removeItem('fastag_push_users_timestamp');
+            }
+        } else {
+            // No valid cache, show loading
+            document.getElementById('pushNotificationUsersRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
+        }
+        
+        // Always fetch fresh data in background
         fetch('/api/fcm-tokens')
             .then(r => r.json())
             .then(data => {
                 let users = data.tokens || [];
+                const oldData = window._pushNotificationUsersList || [];
+                
+                // Update cache in localStorage
+                localStorage.setItem('fastag_push_users_cache', JSON.stringify(users));
+                localStorage.setItem('fastag_push_users_timestamp', Date.now().toString());
                 window._pushNotificationUsersList = users;
-                document.getElementById('pushNotificationUsersTotal').innerHTML = `All push notification users. <b>Total: ${users.length}</b>`;
-                renderPushNotificationUsersList(users);
+                
+                // Check if data has changed
+                const hasChanged = JSON.stringify(oldData) !== JSON.stringify(users);
+                
+                if (hasChanged || !oldData.length) {
+                    // Data changed or first load, update UI
+                    document.getElementById('pushNotificationUsersTotal').innerHTML = `All push notification users. <b>Total: ${users.length}</b>`;
+                    renderPushNotificationUsersList(users);
+                    
+                    // Show update notification if data changed
+                    if (hasChanged && oldData.length > 0) {
+                        showUpdateNotification('Push notification users updated!', 'success');
+                    }
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('pushUsersRefreshIndicator');
+                if (indicator) indicator.remove();
             })
             .catch(() => {
-                document.getElementById('pushNotificationUsersRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load push notification users.</div>';
+                // Only show error if we don't have cached data
+                if (!window._pushNotificationUsersList || window._pushNotificationUsersList.length === 0) {
+                    document.getElementById('pushNotificationUsersRecords').innerHTML = '<div style="text-align:center;color:#dc3545;padding:0.7rem;">Failed to load push notification users.</div>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('pushUsersRefreshIndicator');
+                if (indicator) indicator.remove();
             });
     }
     
@@ -7757,11 +8102,77 @@
       document.getElementById('watchlistModal').style.display = 'none';
     }
     function loadWatchlistData() {
-              document.getElementById('watchlistKycTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr>';
-        document.getElementById('watchlistNonuserTbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr>';
-      fetch('/api/watchlist/list')
-        .then(res => res.json())
-        .then(data => renderWatchlistTables(data.results));
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_watchlist_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_watchlist_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
+        
+        if (cachedData && cacheValid) {
+            try {
+                const data = JSON.parse(cachedData);
+                window._watchlistData = data;
+                
+                // Show cached data immediately
+                renderWatchlistTables(data);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'watchlistRefreshIndicator';
+                document.getElementById('watchlistModal').appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_watchlist_cache');
+                localStorage.removeItem('fastag_watchlist_timestamp');
+            }
+        } else {
+            // No valid cache, show loading
+            document.getElementById('watchlistKycTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr>';
+            document.getElementById('watchlistNonuserTbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr>';
+        }
+        
+        // Always fetch fresh data in background
+        fetch('/api/watchlist/list')
+            .then(res => res.json())
+            .then(data => {
+                const results = data.results || [];
+                const oldData = window._watchlistData || [];
+                
+                // Update cache in localStorage
+                localStorage.setItem('fastag_watchlist_cache', JSON.stringify(results));
+                localStorage.setItem('fastag_watchlist_timestamp', Date.now().toString());
+                window._watchlistData = results;
+                
+                // Check if data has changed
+                const hasChanged = JSON.stringify(oldData) !== JSON.stringify(results);
+                
+                if (hasChanged || !oldData.length) {
+                    // Data changed or first load, update UI
+                    renderWatchlistTables(results);
+                    
+                    // Show update notification if data changed
+                    if (hasChanged && oldData.length > 0) {
+                        showUpdateNotification('Watchlist updated!', 'success');
+                    }
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('watchlistRefreshIndicator');
+                if (indicator) indicator.remove();
+            })
+            .catch(() => {
+                // Only show error if we don't have cached data
+                if (!window._watchlistData || window._watchlistData.length === 0) {
+                    document.getElementById('watchlistKycTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#dc3545;">Failed to load watchlist data.</td></tr>';
+                    document.getElementById('watchlistNonuserTbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#dc3545;">Failed to load watchlist data.</td></tr>';
+                }
+                
+                // Remove refresh indicator
+                const indicator = document.getElementById('watchlistRefreshIndicator');
+                if (indicator) indicator.remove();
+            });
     }
     function renderWatchlistTables(data) {
       const kyc = data.filter(u => u.type === 'Registered');
