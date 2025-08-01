@@ -1273,20 +1273,18 @@ def ssh_disconnect():
                 'error': 'Missing connection_id'
             }), 400
         
-        if connection_id in ssh_connections:
-            del ssh_connections[connection_id]
-            
-            logger.info(f"Terminal session closed: {connection_id}")
-            
-            return jsonify({
-                'success': True,
-                'message': 'Terminal session closed'
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Terminal session not found'
-            }), 404
+            if connection_id in ssh_connections:
+                del ssh_connections[connection_id]
+                logger.info(f"Terminal session closed: {connection_id}")
+                return jsonify({
+                    'success': True,
+                    'message': 'Terminal session closed'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Terminal session not found'
+                }), 404
         
     except Exception as e:
         logger.error(f"Terminal disconnect failed: {str(e)}")
