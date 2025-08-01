@@ -1157,6 +1157,55 @@
             .action-card i { font-size: 1.3rem !important; }
             .action-card div { font-size: 0.85rem !important; }
         }
+        
+        /* Loader-1: Circular spinner with outer/inner rings */
+        .loader-1 {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+        }
+        .loader-1 .loader-outter {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102,126,234,0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loader-1 .loader-inner {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(118,75,162,0.2);
+            border-top: 3px solid #764ba2;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+            animation: spin 0.8s linear infinite reverse;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Enhanced loading states with loader-1 */
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 1rem;
+        }
+        .loading-container .loader-1 {
+            margin: 0;
+        }
+        .loading-text {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -3623,7 +3672,7 @@
         icon.innerHTML = iconHtml;
         title.textContent = titleText;
         desc.textContent = descText;
-        content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        content.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         // Fetch and render records
         fetch(apiUrl)
             .then(r => r.json())
@@ -3864,7 +3913,7 @@
     
     function loadReadersData() {
         const container = document.getElementById('readers-container');
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: white;"><span class="loading"></span> Loading readers...</div>';
+                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading readers...</div></div>';
         
         // Use the working separate page approach - fetch the full page and extract content
         fetch('/reader-settings')
@@ -3983,7 +4032,7 @@
         if (!statusDot || !statusText || !powerValue || !setBtn) return;
         
         // Show loading state
-        statusText.innerHTML = '<span class="loading"></span> Checking...';
+                    statusText.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Checking...</div></div>';
         setBtn.disabled = true;
         
         // Always try to get RF power regardless of status
@@ -4105,7 +4154,7 @@
         const container = document.getElementById('fuelPriceContainer');
         const citySelect = document.getElementById('fuelPriceCitySelect');
         
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading fuel prices...</div>';
+                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading fuel prices...</div></div>';
         
         fetch('/pwa-dashboard/api/fuel-price')
             .then(response => response.json())
@@ -4220,7 +4269,7 @@
     function loadVehicleDemographics() {
         const container = document.getElementById('demographicsContainer');
         
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading demographics...</div>';
+                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading demographics...</div></div>';
         
         fetch('/analytics/api/vehicle-demographics')
             .then(response => response.json())
@@ -4433,7 +4482,7 @@
         }
         
         // Show loading
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading ' + slide.title + '...</div>';
+                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading ' + slide.title + '...</div></div>';
         
         switch (slide.name) {
             case 'vehicle-demographics':
@@ -5224,7 +5273,7 @@
         }
         
         // Show loading
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading hourly activity...</div>';
+                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading hourly activity...</div></div>';
         
         fetch('/analytics/api/hourly-activity')
             .then(response => response.json())
@@ -5369,7 +5418,7 @@
         }
         
         // Show loading
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><span class="loading"></span> Loading reports...</div>';
+                    container.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading reports...</div></div>';
         
         // Define all reports
         const reports = {
@@ -5857,7 +5906,7 @@
     function showControllerHealth() {
         // Show the modal first
         document.getElementById('systemHealthModal').style.display = 'flex';
-        document.getElementById('systemHealthContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading system health...</div>';
+        document.getElementById('systemHealthContent').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading system health...</div></div>';
         
         fetch('/api/status')
             .then(r => r.json())
@@ -5883,7 +5932,7 @@
     function showControllerIPInfo() {
         // Show the modal first
         document.getElementById('networkInfoModal').style.display = 'flex';
-        document.getElementById('networkInfoContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading network information...</div>';
+        document.getElementById('networkInfoContent').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading network information...</div></div>';
         
         fetch('/api/network-info')
             .then(r => r.json())
@@ -5916,7 +5965,7 @@
     function showControllerBackup() {
         // Show the modal first
         document.getElementById('databaseBackupModal').style.display = 'flex';
-        document.getElementById('databaseBackupContent').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading database information...</div>';
+        document.getElementById('databaseBackupContent').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading database information...</div></div>';
         
         fetch('/api/database-info')
             .then(r => r.json())
@@ -6651,7 +6700,7 @@
     }
     
     function loadKycUsersList() {
-        document.getElementById('kycUsersListRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        document.getElementById('kycUsersListRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         fetch('/api/kyc_users')
             .then(r => r.json())
             .then(data => {
@@ -6796,7 +6845,7 @@
     }
     
     function loadLocationsList() {
-        document.getElementById('locationsRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        document.getElementById('locationsRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         fetch('/api/locations')
             .then(r => r.json())
             .then(data => {
@@ -6952,7 +7001,7 @@
     }
     
     function loadPushNotificationUsersList() {
-        document.getElementById('pushNotificationUsersRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        document.getElementById('pushNotificationUsersRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         
         // Fetch FCM tokens from the database
         fetch('/api/fcm-tokens')
@@ -7189,7 +7238,7 @@
         document.getElementById('lanesModal').style.display = 'none';
     }
     function loadLanesList() {
-        document.getElementById('lanesRecords').innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+        document.getElementById('lanesRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         fetch('/api/lanes')
             .then(r => r.json())
             .then(data => {
@@ -7441,8 +7490,8 @@
       document.getElementById('watchlistModal').style.display = 'none';
     }
     function loadWatchlistData() {
-      document.getElementById('watchlistKycTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;">Loading...</td></tr>';
-      document.getElementById('watchlistNonuserTbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;">Loading...</td></tr>';
+              document.getElementById('watchlistKycTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr>';
+        document.getElementById('watchlistNonuserTbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr>';
       fetch('/api/watchlist/list')
         .then(res => res.json())
         .then(data => renderWatchlistTables(data.results));
@@ -7613,7 +7662,7 @@
     function openWatchlistActivityModal(id) {
       document.getElementById('watchlistActivityModal').style.display = 'flex';
       const content = document.getElementById('watchlistActivityContent');
-      content.innerHTML = '<div style="text-align:center;color:#aaa;padding:0.7rem;">Loading...</div>';
+              content.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
       fetch(`/api/watchlist/activity/${id}`)
         .then(res => res.json())
         .then(data => {
@@ -7659,14 +7708,14 @@
           <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Registered KYC Users</div>
           <table style="min-width:700px;font-size:0.93em;">
             <thead><tr><th>Name</th><th>FASTag ID</th><th>Vehicle</th><th>Contact</th><th>Address</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
-            <tbody id="watchlistKycTbody"><tr><td colspan="8" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
+                            <tbody id="watchlistKycTbody"><tr><td colspan="8" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr></tbody>
           </table>
         </div>
         <div style="overflow-x:auto;max-height:30vh;overflow-y:auto;">
           <div style="font-weight:600;color:#764ba2;margin-bottom:0.3em;">Non-User Vehicles</div>
           <table style="min-width:500px;font-size:0.93em;">
             <thead><tr><th>FASTag ID</th><th>Reason</th><th>Added</th><th>Actions</th></tr></thead>
-            <tbody id="watchlistNonuserTbody"><tr><td colspan="4" style="text-align:center;color:#aaa;">Loading...</td></tr></tbody>
+                            <tbody id="watchlistNonuserTbody"><tr><td colspan="4" style="text-align:center;color:#aaa;"><div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div></td></tr></tbody>
           </table>
         </div>
         <div class="modal-footer-custom" style="justify-content: flex-end;">
