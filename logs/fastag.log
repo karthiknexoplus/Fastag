@@ -1698,3 +1698,20 @@
  * Running on http://127.0.0.1:5000
  * Running on http://192.168.1.2:5000
 [2025-07-31 20:55:34,806] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-08-01 09:53:08,465] INFO in relay_controller: Initializing GPIO for relay control...
+[2025-08-01 09:53:08,465] WARNING in relay_controller: GPIO is not available, skipping GPIO initialization.
+[2025-08-01 09:53:08,466] WARNING in relay_controller: GPIO is not available, cannot turn off all relays.
+[2025-08-01 09:53:08,466] INFO in relay_controller: 🔌 Safety check: All relays confirmed OFF on startup
+[2025-08-01 09:53:09,376] INFO in google_auth: DEBUG: GOOGLE_CLIENT_ID='565920794982-jufd26bgd910efmfgasrnoqrc6bube15.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='GOCSPX-your-nexoplus@1234'
+[2025-08-01 09:53:09,376] INFO in google_auth: Google OAuth initialized successfully
+[2025-08-01 09:53:09,659] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.2:5000
+[2025-08-01 09:53:09,659] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-08-01 09:53:15,527] INFO in transport: Connected (version 2.0, client OpenSSH_9.2p1)
+[2025-08-01 09:53:16,177] INFO in transport: Authentication (password) successful!
+[2025-08-01 09:53:16,177] INFO in api: SSH connection established to ubuntu@avhifields.tail1b76dc.ts.net
+[2025-08-01 09:54:33,291] INFO in transport: Connected (version 2.0, client OpenSSH_9.2p1)
+[2025-08-01 09:54:33,902] INFO in transport: Authentication (password) successful!
+[2025-08-01 09:54:33,902] INFO in api: SSH connection established to ubuntu@avhifields.tail1b76dc.ts.net
