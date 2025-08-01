@@ -1236,6 +1236,28 @@
                 transform: translateY(-8px); 
             }
         }
+        .bottom-nav-btn.qr-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin: -10px 0;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+            transform: scale(1.1);
+        }
+        .bottom-nav-btn.qr-highlight:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(102,126,234,0.4);
+        }
+        .bottom-nav-btn.qr-highlight:active {
+            transform: scale(1.05);
+        }
+        .bottom-nav-btn.qr-highlight span {
+            color: #fff;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -1495,7 +1517,7 @@
     <nav class="bottom-nav">
         <button class="bottom-nav-btn active"><i class="fas fa-home"></i><span>Home</span></button>
         <button class="bottom-nav-btn" onclick="showAnalyticsModal()"><i class="fas fa-chart-line"></i><span>Analytics</span></button>
-        <button class="bottom-nav-btn" onclick="openAddKycUserModal()"><i class="fas fa-qrcode"></i><span>Scan QR</span></button>
+        <button class="bottom-nav-btn qr-highlight" onclick="openAddKycUserModal()"><i class="fas fa-qrcode"></i><span>Scan QR</span></button>
         <button class="bottom-nav-btn" onclick="showReportsModal()"><i class="fas fa-file-alt"></i><span>Reports</span></button>
         <button class="bottom-nav-btn" onclick="showActionModal()"><i class="fas fa-bolt"></i><span>Action</span></button>
     </nav>
