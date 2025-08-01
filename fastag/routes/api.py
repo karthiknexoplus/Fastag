@@ -776,7 +776,7 @@ def restart_application():
                 except Exception as e:
                     logger.warning(f"Command failed: {' '.join(cmd)} - {str(e)}")
                     error_msg = f"Command failed: {' '.join(cmd)} - {str(e)}"
-            
+                
             if success:
                 break
         
@@ -1157,29 +1157,33 @@ def load_ssh_sessions():
     return {}
 
 def create_ssh_connection(hostname, username, password, port=22):
-    """Create a new SSH connection"""
+    """Create a new SSH connection using the exact connection string format"""
     try:
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         
+        # Use the exact connection format: ssh ubuntu@avhifields.tail1b76dc.ts.net
         ssh_client.connect(
             hostname=hostname,
             username=username,
             password=password,
             port=port,
-            timeout=10
+            timeout=10,
+            allow_agent=False,
+            look_for_keys=False
         )
         
+        logger.info(f"SSH connection established to {username}@{hostname}")
         return ssh_client
     except Exception as e:
-        logger.error(f"Failed to create SSH connection: {e}")
+        logger.error(f"Failed to create SSH connection to {username}@{hostname}: {e}")
         raise e
 
 @api.route('/ssh/connect', methods=['POST'])
 def ssh_connect():
-    """Establish real SSH connection to the server"""
+    """Establish real SSH connection to the server using exact connection string"""
     try:
-        # SSH connection parameters
+        # SSH connection parameters - using exact connection string format
         hostname = 'avhifields.tail1b76dc.ts.net'
         username = 'ubuntu'
         password = 'ubuntu'
@@ -1188,7 +1192,7 @@ def ssh_connect():
         # Create session ID
         connection_id = f"ssh_{int(time.time())}"
         
-        # Create SSH connection
+        # Create SSH connection using exact format: ssh ubuntu@avhifields.tail1b76dc.ts.net
         ssh_client = create_ssh_connection(hostname, username, password, port)
         
         # Store connection
@@ -1198,17 +1202,18 @@ def ssh_connect():
                 'created': time.time(),
                 'last_activity': time.time(),
                 'hostname': hostname,
-                'username': username
+                'username': username,
+                'connection_string': f'ssh {username}@{hostname}'
             }
             save_ssh_sessions()
         
-        logger.info(f"SSH connection established: {connection_id} to {hostname}")
+        logger.info(f"SSH connection established: {connection_id} using {username}@{hostname}")
         logger.info(f"Current connections: {list(ssh_connections.keys())}")
         
         return jsonify({
             'success': True,
             'connection_id': connection_id,
-            'message': f'Connected to {hostname}'
+            'message': f'Connected to {username}@{hostname}'
         })
         
     except Exception as e:
@@ -1244,7 +1249,7 @@ def ssh_execute():
         
         # If connection not found, try to recreate it
         if not ssh_client:
-            logger.info(f"Connection {connection_id} not found, attempting to recreate...")
+            logger.info(f"Connection {connection_id} not found, attempting to recreate using ssh ubuntu@avhifields.tail1b76dc.ts.net...")
             try:
                 hostname = 'avhifields.tail1b76dc.ts.net'
                 username = 'ubuntu'
@@ -1259,16 +1264,17 @@ def ssh_execute():
                         'created': time.time(),
                         'last_activity': time.time(),
                         'hostname': hostname,
-                        'username': username
+                        'username': username,
+                        'connection_string': f'ssh {username}@{hostname}'
                     }
                     save_ssh_sessions()
                 
-                logger.info(f"Recreated SSH connection: {connection_id}")
+                logger.info(f"Recreated SSH connection: {connection_id} using {username}@{hostname}")
             except Exception as e:
-                logger.error(f"Failed to recreate SSH connection: {e}")
+                logger.error(f"Failed to recreate SSH connection to {username}@{hostname}: {e}")
                 return jsonify({
                     'success': False,
-                    'error': 'SSH connection not found and could not be recreated'
+                    'error': f'SSH connection not found and could not be recreated: {str(e)}'
                 }), 404
         
         # Execute command on remote server
