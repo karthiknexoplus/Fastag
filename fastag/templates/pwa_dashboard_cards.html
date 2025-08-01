@@ -6752,19 +6752,34 @@
     }
     
     function loadKycUsersList() {
-        // Check if we have cached data
-        if (window._kycUsersList && window._kycUsersList.length > 0) {
-            // Show cached data immediately
-            document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${window._kycUsersList.length}</b>`;
-            renderKycUsersList(window._kycUsersList);
-            
-            // Show a subtle indicator that we're refreshing
-            const refreshIndicator = document.createElement('div');
-            refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
-            refreshIndicator.id = 'kycUsersRefreshIndicator';
-            document.getElementById('kycUsersListRecords').appendChild(refreshIndicator);
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_kyc_users_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_kyc_users_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
+        
+        if (cachedData && cacheValid) {
+            try {
+                const users = JSON.parse(cachedData);
+                window._kycUsersList = users;
+                
+                // Show cached data immediately
+                document.getElementById('kycUsersListTotal').innerHTML = `All registered KYC users. <b>Total: ${users.length}</b>`;
+                renderKycUsersList(users);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'kycUsersRefreshIndicator';
+                document.getElementById('kycUsersListRecords').appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_kyc_users_cache');
+                localStorage.removeItem('fastag_kyc_users_timestamp');
+            }
         } else {
-            // No cache, show loading
+            // No valid cache, show loading
             document.getElementById('kycUsersListRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         }
         
@@ -6775,7 +6790,9 @@
                 let users = data.users || [];
                 const oldData = window._kycUsersList || [];
                 
-                // Update cache
+                // Update cache in localStorage
+                localStorage.setItem('fastag_kyc_users_cache', JSON.stringify(users));
+                localStorage.setItem('fastag_kyc_users_timestamp', Date.now().toString());
                 window._kycUsersList = users;
                 
                 // Check if data has changed
@@ -6977,19 +6994,34 @@
     }
     
     function loadLocationsList() {
-        // Check if we have cached data
-        if (window._locationsList && window._locationsList.length > 0) {
-            // Show cached data immediately
-            document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${window._locationsList.length}</b>`;
-            renderLocationsList(window._locationsList);
-            
-            // Show a subtle indicator that we're refreshing
-            const refreshIndicator = document.createElement('div');
-            refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
-            refreshIndicator.id = 'locationsRefreshIndicator';
-            document.getElementById('locationsRecords').appendChild(refreshIndicator);
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_locations_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_locations_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
+        
+        if (cachedData && cacheValid) {
+            try {
+                const locations = JSON.parse(cachedData);
+                window._locationsList = locations;
+                
+                // Show cached data immediately
+                document.getElementById('locationsTotal').innerHTML = `All locations. <b>Total: ${locations.length}</b>`;
+                renderLocationsList(locations);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'locationsRefreshIndicator';
+                document.getElementById('locationsRecords').appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_locations_cache');
+                localStorage.removeItem('fastag_locations_timestamp');
+            }
         } else {
-            // No cache, show loading
+            // No valid cache, show loading
             document.getElementById('locationsRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         }
         
@@ -7000,7 +7032,9 @@
                 let locations = data.locations || [];
                 const oldData = window._locationsList || [];
                 
-                // Update cache
+                // Update cache in localStorage
+                localStorage.setItem('fastag_locations_cache', JSON.stringify(locations));
+                localStorage.setItem('fastag_locations_timestamp', Date.now().toString());
                 window._locationsList = locations;
                 
                 // Check if data has changed
@@ -7412,19 +7446,34 @@
         document.getElementById('lanesModal').style.display = 'none';
     }
     function loadLanesList() {
-        // Check if we have cached data
-        if (window._lanesList && window._lanesList.length > 0) {
-            // Show cached data immediately
-            document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${window._lanesList.length}</b>`;
-            renderLanesList(window._lanesList);
-            
-            // Show a subtle indicator that we're refreshing
-            const refreshIndicator = document.createElement('div');
-            refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
-            refreshIndicator.id = 'lanesRefreshIndicator';
-            document.getElementById('lanesRecords').appendChild(refreshIndicator);
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('fastag_lanes_cache');
+        const cacheTimestamp = localStorage.getItem('fastag_lanes_timestamp');
+        const now = Date.now();
+        const cacheAge = now - (parseInt(cacheTimestamp) || 0);
+        const cacheValid = cacheAge < 300000; // 5 minutes cache validity
+        
+        if (cachedData && cacheValid) {
+            try {
+                const lanes = JSON.parse(cachedData);
+                window._lanesList = lanes;
+                
+                // Show cached data immediately
+                document.getElementById('lanesTotal').innerHTML = `All lanes. <b>Total: ${lanes.length}</b>`;
+                renderLanesList(lanes);
+                
+                // Show a subtle indicator that we're refreshing
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.innerHTML = '<small style="color:#666;text-align:center;padding:0.3rem;">🔄 Refreshing...</small>';
+                refreshIndicator.id = 'lanesRefreshIndicator';
+                document.getElementById('lanesRecords').appendChild(refreshIndicator);
+            } catch (e) {
+                // Invalid cache, clear it
+                localStorage.removeItem('fastag_lanes_cache');
+                localStorage.removeItem('fastag_lanes_timestamp');
+            }
         } else {
-            // No cache, show loading
+            // No valid cache, show loading
             document.getElementById('lanesRecords').innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Loading...</div></div>';
         }
         
@@ -7435,7 +7484,9 @@
                 let lanes = data.lanes || [];
                 const oldData = window._lanesList || [];
                 
-                // Update cache
+                // Update cache in localStorage
+                localStorage.setItem('fastag_lanes_cache', JSON.stringify(lanes));
+                localStorage.setItem('fastag_lanes_timestamp', Date.now().toString());
                 window._lanesList = lanes;
                 
                 // Check if data has changed
