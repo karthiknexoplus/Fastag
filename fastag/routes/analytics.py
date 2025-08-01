@@ -2726,11 +2726,7 @@ def api_vehicle_demographics():
                 ],
                 'top_models': [
                     {'model': 'No data available', 'count': 0, 'percentage': 0}
-                ],
-                'year_analysis': {
-                    'range': 'No data',
-                    'count': 0
-                }
+                ]
             }
             return jsonify(demographics)
         
@@ -2767,15 +2763,6 @@ def api_vehicle_demographics():
             LIMIT 5
         """).fetchall()
         
-        # Registration year analysis (extract from vehicle_number if possible)
-        year_analysis = db.execute("""
-            SELECT 
-                '2020-2022' as year_range,
-                COUNT(*) as count
-            FROM tag_vehicle_cache 
-            WHERE vehicle_number IS NOT NULL
-        """).fetchone()
-        
         demographics = {
             'fuel_types': [
                 {
@@ -2790,11 +2777,7 @@ def api_vehicle_demographics():
                     'count': row[1],
                     'percentage': round(row[2], 1)
                 } for row in top_models
-            ],
-            'year_analysis': {
-                'range': year_analysis[0] if year_analysis else 'Unknown',
-                'count': year_analysis[1] if year_analysis else 0
-            }
+            ]
         }
         
         return jsonify(demographics)

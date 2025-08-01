@@ -4530,18 +4530,7 @@
             </div>
         `;
         
-        // Year range
-        const yearAnalysis = data.year_analysis || { range: 'Unknown', count: 0 };
-        html += `
-            <div class="demo-stat-card">
-                <div class="demo-stat-icon">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="demo-stat-label">Year Range</div>
-                <div class="demo-stat-value">${yearAnalysis.range}</div>
-                <div class="demo-stat-percentage">${yearAnalysis.count} vehicles</div>
-            </div>
-        `;
+
         
         // Total vehicles
         const totalVehicles = data.fuel_types.reduce((sum, fuel) => sum + fuel.count, 0);
