@@ -356,10 +356,14 @@ def main():
     
     # Create message
     message = create_stats_message(stats, controller_status, reader_status)
+    logger.info(f"📝 Message created - Title: {message['title']}")
+    logger.info(f"📝 Message body preview: {message['body'][:200]}...")
     
     logger.info(f"📊 Statistics: {stats}")
     logger.info(f"🖥️ Controller Status: {controller_status}")
     logger.info(f"📡 Reader Status: {len(reader_status)} readers found")
+    for key, reader in reader_status.items():
+        logger.info(f"  📡 Reader{reader['reader_id']} ({reader['reader_type']}): {reader['event_count']} events, {reader['status']}")
     
     # Send to all super users
     success_count = 0
