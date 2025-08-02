@@ -1116,4 +1116,101 @@ import os
 from datetime import datetime
 
 # Thread lock for general use
-api_lock = threading.Lock() 
+api_lock = threading.Lock()
+
+@api.route('/challan-search', methods=['POST'])
+def challan_search():
+    """Search for challan information using Acko API"""
+    try:
+        data = request.get_json()
+        vehicle_number = data.get('vehicle_number', '').strip().upper()
+        
+        if not vehicle_number:
+            return jsonify({
+                "success": False,
+                "message": "Vehicle number is required"
+            }), 400
+        
+        # Import the challan search function
+        import requests
+        import json
+        from datetime import datetime
+        
+        def get_challan_info(vehicle_number):
+            """Get challan information for a given vehicle number from Acko API"""
+            url = f"https://www.acko.com/api/seo/challanService/{vehicle_number}/?pageType=challan"
+            
+            headers = {
+                "authority": "www.acko.com",
+                "accept": "*/*",
+                "accept-encoding": "gzip, deflate",
+                "accept-language": "en-US,en;q=0.9",
+                "cookie": "trackerid=58db3079-80b0-40a3-b71e-0aa17adcd4ff; FPID=FPID2.2.ToGOKuS7C2efkVbq%2Bx%2BpCXn0yjg%2FwGQS6y4ntw7Wk90%3D.1751304220; FPAU=1.2.1994248006.1751304220; _gtmeec=e30%3D; _fbp=fb.1.1751304220057.1374344911; _gcl_aw=GCL.1751337589.Cj0KCQjw64jDBhDXARIsABkk8J5eAGbVcbYe7dXULgWuJqzC2tYF5a3-1OUSiSnISfHewpOcZlf06dQaAkJREALw_wcB; _gcl_gs=2.1.k1$i1751337586$u160137261; _gcl_au=1.1.512325211.1751338615; _clck=1diylsh%7C2%7Cfx8%7C0%7C2008; _hjSessionUser_3514615=eyJpZCI6ImM0NWEyYzE0LTE0MDctNTEyYi05YjU0LTBhZjc0ODUzMmNmNiIsImNyZWF0ZWQiOjE3NTEzMzg2MTU4ODcsImV4aXN0aW5nIjp0cnVlfQ==; wisepops_visits=%5B%222025-07-01T03%3A05%3A43.374Z%22%2C%222025-07-01T02%3A56%3A55.085Z%22%5D; wisepops=%7B%22popups%22%3A%7B%7D%2C%22sub%22%3A0%2C%22ucrn%22%3A68%2C%22cid%22%3A%2267186%22%2C%22v%22%3A5%2C%22bandit%22%3A%7B%22recos%22%3A%7B%7D%7D%7D; _uetvid=0c55f830562711f0b14775b5a326d579; _ga=GA1.1.2025589563.1751304220; wisepops_visitor=%7B%22AgGNMkk7M8%22%3A%2241895c6a-c43f-46b5-8985-f08662859001%22%7D; acko_visit=JwJcFECRkurxiF8wvvt4vw; __cf_bm=KrrFtLpYIqTidHyHgnzWg.fil54sGauft3UFoBI7wQo-1754102386-1.0.1.1-8qp_jKnmH8.SWKlajamEGcrWZYRDIMGAp7w4HpY9or_p_Q.wBavLCCaPV5TLmxDE6Z_E2JwQps95oxASJgVIVNrkTiAdYaQjjDgw.0OuUck; FPLC=t%2FcCDFBO8DCbYG7XCFRejU34RTWEpr9Y7XIED26ssoeKAFdRmWc3JTaQg57VAIDNmX06fSI1326%2Bou5aAPdObAXuAX1Pu0y0JDtwv2NLyd7Bt8NQdlaPZTcry7RR2w%3D%3D; FPGSID=1.1754102388.1754102388.G-W47KBK64MF.PAUVgaxQAhe9oVuy6KT_RQ; _ga_W47KBK64MF=GS2.1.s1754102388$o7$g1$t1754102418$j30$l0$h1076368055; user_id=cYJ-tb8UPQYR_DSruC1KVg:1754102425654:a8d43f9e274e7c0e04148f87f18fd1fa1d2c8e33",
+                "priority": "u=1, i",
+                "referer": "https://www.acko.com/traffic-rules/e-challan-coimbatore/",
+                "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": '"macOS"',
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-origin",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+            }
+            
+            try:
+                # Make request with session to handle cookies better
+                session = requests.Session()
+                session.headers.update(headers)
+                
+                # Make the request
+                response = session.get(url, timeout=30)
+                
+                # Check response status
+                if response.status_code != 200:
+                    logger.error(f"HTTP Error {response.status_code}: {response.reason}")
+                    return None
+                
+                # Try to parse JSON
+                try:
+                    data = response.json()
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON decode error: {e}")
+                    return None
+                
+                # Check if the response indicates success
+                if data.get('success') == True:
+                    return data
+                else:
+                    logger.error(f"API returned error for vehicle: {vehicle_number}")
+                    return None
+                
+            except requests.exceptions.Timeout:
+                logger.error(f"Request timeout for vehicle: {vehicle_number}")
+                return None
+            except requests.exceptions.ConnectionError:
+                logger.error("Connection error. Please check your internet connection.")
+                return None
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Network error: {e}")
+                return None
+        
+        # Get challan information
+        result = get_challan_info(vehicle_number)
+        
+        if result:
+            return jsonify({
+                "success": True,
+                "data": result
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "No challan information found for this vehicle"
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in challan search: {e}")
+        return jsonify({
+            "success": False,
+            "message": "Error processing request"
+        }), 500 

@@ -1261,6 +1261,92 @@
         .bottom-nav-btn.qr-highlight i {
             color: #fff !important;
         }
+        
+        /* Challan Modal Styles */
+        .challan-vehicle-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .vehicle-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .vehicle-detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .challan-records {
+            margin-top: 1rem;
+        }
+        
+        .challan-record {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .challan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .challan-number {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .challan-status {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .challan-amount, .challan-date, .challan-location, .challan-violation {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .violation-details {
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .violation-item {
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .challan-summary {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .summary-item {
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        
+        .summary-item:last-child {
+            margin-bottom: 0;
+            font-size: 1rem;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -1285,7 +1371,7 @@
             <button class="feature-btn" onclick="showVehicleFinderModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-car"></i></span></button>
             <button class="feature-btn" onclick="showBankFinderModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-university"></i></span></button>
             <button class="feature-btn" onclick="showFastagBalanceModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-wallet"></i></span></button>
-            <button class="feature-btn" style="opacity: 0.5; cursor: not-allowed; border: 2px solid #764ba2;" title="Coming Soon"><span class="icon"><i class="fas fa-receipt"></i></span></button>
+            <button class="feature-btn" onclick="showChallanModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-receipt"></i></span></button>
             <button class="feature-btn" onclick="showFuelPriceModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-gas-pump"></i></span></button>
             <button class="feature-btn" onclick="showReaderSettingsModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-sliders-h"></i></span></button>
             <button class="feature-btn" onclick="showBarrierModal()" style="border: 2px solid #764ba2;"><span class="icon"><i class="fas fa-unlock-alt"></i></span></button>
@@ -1995,6 +2081,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Challan Modal -->
+    <div id="challanModal" class="modal-custom" style="display:none;">
+        <div class="modal-content-custom" style="max-width: 500px;">
+            <span class="close-modal" onclick="closeChallanModal()">&times;</span>
+            <div class="modal-header-custom">
+                <span class="modal-icon"><i class="fas fa-receipt"></i></span>
+                <span class="modal-title">Traffic Challan Check</span>
+            </div>
+            <div class="modal-desc">Check traffic challan information by vehicle number</div>
+            <form id="challanSearchForm" onsubmit="searchChallan(event)">
+                <div class="mb-3">
+                    <label class="form-label">Vehicle Registration Number</label>
+                    <input type="text" class="form-control" id="challanVehicleNumber" placeholder="e.g., KA03KD1578" required>
+                    <div class="form-text">Enter the complete vehicle number</div>
+                </div>
+                <div id="challanSearchError" style="color:#dc3545;font-size:0.9em;margin-bottom:0.5em;display:none;"></div>
+                <div class="modal-footer-custom" style="justify-content: flex-end;">
+                    <button class="modal-close-btn" type="submit" style="background:linear-gradient(90deg,#764ba2 0%,#ffe082 100%);color:#fff;">Search Challan</button>
+                </div>
+            </form>
+            <div id="challanResults" style="margin-top:1rem;display:none;">
+                <div id="challanResultsContent"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Analytics Modal -->
     <div id="analyticsModal" class="modal-custom" style="display:none;">
         <div class="modal-content-custom" style="max-width: 98vw; min-width: 340px;">
@@ -4607,6 +4720,169 @@
     document.getElementById('vehicleDemographicsModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeVehicleDemographicsModal();
+        }
+    });
+
+    // Challan modal functions
+    function showChallanModal() {
+        document.getElementById('challanModal').style.display = 'flex';
+        document.getElementById('challanSearchError').style.display = 'none';
+        document.getElementById('challanResults').style.display = 'none';
+        document.getElementById('challanVehicleNumber').value = '';
+    }
+    
+    function closeChallanModal() {
+        document.getElementById('challanModal').style.display = 'none';
+    }
+    
+    function searchChallan(event) {
+        event.preventDefault();
+        
+        const vehicleNumber = document.getElementById('challanVehicleNumber').value.trim().toUpperCase();
+        const errorDiv = document.getElementById('challanSearchError');
+        const resultsDiv = document.getElementById('challanResults');
+        const contentDiv = document.getElementById('challanResultsContent');
+        
+        if (!vehicleNumber) {
+            errorDiv.textContent = 'Please enter a vehicle number';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        // Clear previous errors and results
+        errorDiv.style.display = 'none';
+        resultsDiv.style.display = 'none';
+        
+        // Show loading
+        contentDiv.innerHTML = '<div class="loading-container"><div class="loader-1"><div class="loader-outter"></div><div class="loader-inner"></div></div><div class="loading-text">Searching challan information...</div></div>';
+        resultsDiv.style.display = 'block';
+        
+        // Make API call to backend
+        fetch('/api/challan-search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ vehicle_number: vehicleNumber })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayChallanResults(data.data, vehicleNumber);
+            } else {
+                contentDiv.innerHTML = `<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>${data.message || 'No challan information found'}</div></div>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error searching challan:', error);
+            contentDiv.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i><div>Error connecting to server</div></div>';
+        });
+    }
+    
+    function displayChallanResults(data, vehicleNumber) {
+        const contentDiv = document.getElementById('challanResultsContent');
+        
+        let html = '';
+        
+        // Vehicle Information
+        if (data.vehicleData && data.vehicleData.status === 'fulfilled') {
+            const vehicle = data.vehicleData.value;
+            html += '<div class="challan-vehicle-info">';
+            html += '<h4 style="color: #333; margin-bottom: 1rem; border-bottom: 2px solid #764ba2; padding-bottom: 0.5rem;">Vehicle Details</h4>';
+            html += `<div class="vehicle-detail-row"><strong>Registration:</strong> ${vehicle.registration_number || 'N/A'}</div>`;
+            html += `<div class="vehicle-detail-row"><strong>Model:</strong> ${vehicle.model_name || 'N/A'}</div>`;
+            html += `<div class="vehicle-detail-row"><strong>Type:</strong> ${vehicle.vehicle_type_v2 || 'N/A'}</div>`;
+            html += `<div class="vehicle-detail-row"><strong>Fuel:</strong> ${vehicle.fuel_type || 'N/A'}</div>`;
+            html += `<div class="vehicle-detail-row"><strong>Owner:</strong> ${vehicle.owner_name || 'N/A'}</div>`;
+            html += `<div class="vehicle-detail-row"><strong>Brand:</strong> ${vehicle.vehicle_name || 'N/A'}</div>`;
+            html += '</div>';
+        }
+        
+        // Challan Information
+        if (data.challanData && data.challanData.status === 'fulfilled') {
+            const challanData = data.challanData.value;
+            const challans = challanData.data || [];
+            
+            if (challans.length > 0) {
+                html += '<div class="challan-records">';
+                html += `<h4 style="color: #333; margin: 1.5rem 0 1rem 0; border-bottom: 2px solid #dc3545; padding-bottom: 0.5rem;">Challan Records (${challans.length} found)</h4>`;
+                
+                challans.forEach((challan, index) => {
+                    const isPaid = challan.challan_status === 'PAID';
+                    const statusColor = isPaid ? '#28a745' : '#dc3545';
+                    const statusIcon = isPaid ? '✅' : '❌';
+                    
+                    html += '<div class="challan-record">';
+                    html += `<div class="challan-header">`;
+                    html += `<span class="challan-number">Challan #${index + 1}</span>`;
+                    html += `<span class="challan-status" style="color: ${statusColor};">${statusIcon} ${challan.challan_status || 'UNKNOWN'}</span>`;
+                    html += '</div>';
+                    
+                    html += `<div class="challan-amount"><strong>Amount:</strong> ₹${challan.amount?.total || 'N/A'}</div>`;
+                    html += `<div class="challan-date"><strong>Date:</strong> ${formatChallanDate(challan.violations?.date)}</div>`;
+                    html += `<div class="challan-location"><strong>Location:</strong> ${challan.state || 'N/A'}</div>`;
+                    
+                    if (challan.violations?.name) {
+                        html += `<div class="challan-violation"><strong>Violation:</strong> ${challan.violations.name}</div>`;
+                    }
+                    
+                    // Violation Details
+                    const violations = challan.violations?.details || [];
+                    if (violations.length > 0) {
+                        html += '<div class="violation-details">';
+                        html += '<strong>Details:</strong>';
+                        violations.forEach((violation, vIndex) => {
+                            const penalty = violation.penalty ? ` (₹${violation.penalty})` : '';
+                            html += `<div class="violation-item">${vIndex + 1}. ${violation.offence}${penalty}</div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                // Summary
+                const totalAmount = challans.reduce((sum, challan) => sum + parseFloat(challan.amount?.total || 0), 0);
+                const paidCount = challans.filter(challan => challan.challan_status === 'PAID').length;
+                const unpaidCount = challans.length - paidCount;
+                
+                html += '<div class="challan-summary">';
+                html += '<h5 style="color: #333; margin: 1rem 0 0.5rem 0;">Summary</h5>';
+                html += `<div class="summary-item">Total Challans: ${challans.length}</div>`;
+                html += `<div class="summary-item">Paid: ${paidCount}</div>`;
+                html += `<div class="summary-item">Unpaid: ${unpaidCount}</div>`;
+                html += `<div class="summary-item"><strong>Total Amount: ₹${totalAmount.toLocaleString()}</strong></div>`;
+                html += '</div>';
+                
+                html += '</div>';
+            } else {
+                html += '<div style="text-align: center; padding: 2rem; color: #28a745;"><i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i><div>✅ No challan records found for this vehicle!</div></div>';
+            }
+        } else {
+            html += '<div style="text-align: center; padding: 2rem; color: #666;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i><div>Unable to fetch challan information</div></div>';
+        }
+        
+        contentDiv.innerHTML = html;
+    }
+    
+    function formatChallanDate(dateStr) {
+        if (!dateStr) return 'N/A';
+        try {
+            const date = new Date(dateStr.replace('Z', '+00:00'));
+            return date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+        } catch {
+            return dateStr;
+        }
+    }
+    
+    // Close challan modal when clicking outside
+    document.getElementById('challanModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeChallanModal();
         }
     });
 
