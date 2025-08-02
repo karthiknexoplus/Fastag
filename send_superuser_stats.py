@@ -222,20 +222,33 @@ def create_stats_message(stats, controller_status, reader_status):
             last_event = reader['last_event']
             
             # Format last event time (convert UTC to IST)
+            logger.info(f"🔍 Raw timestamp for Reader{reader_id}: {last_event}")
             if last_event:
                 try:
-                    # Parse the timestamp (handle both UTC and local time)
-                    if 'Z' in last_event or '+00:00' in last_event:
-                        # UTC time - convert to IST
-                        last_event_dt = datetime.fromisoformat(last_event.replace('Z', '+00:00'))
-                        # Add 5 hours 30 minutes for IST
-                        ist_time = last_event_dt + timedelta(hours=5, minutes=30)
-                        last_event_str = ist_time.strftime('%H:%M IST')
-                    else:
-                        # Assume local time already
+                    # Parse the timestamp (SQLite timestamps are usually in local time)
+                    # First try to parse as local time
+                    try:
                         last_event_dt = datetime.fromisoformat(last_event)
-                        last_event_str = last_event_dt.strftime('%H:%M IST')
-                except:
+                    except:
+                        # If that fails, try UTC format
+                        if 'Z' in last_event:
+                            last_event_dt = datetime.fromisoformat(last_event.replace('Z', '+00:00'))
+                        else:
+                            last_event_dt = datetime.fromisoformat(last_event + '+00:00')
+                    
+                    # Convert to IST (UTC+5:30)
+                    # First convert to UTC if it's not already
+                    if last_event_dt.tzinfo is None:
+                        # Assume it's already in IST (local time)
+                        ist_time = last_event_dt
+                    else:
+                        # Convert from UTC to IST
+                        utc_time = last_event_dt.replace(tzinfo=None) - last_event_dt.utcoffset()
+                        ist_time = utc_time + timedelta(hours=5, minutes=30)
+                    
+                    last_event_str = ist_time.strftime('%H:%M IST')
+                except Exception as e:
+                    logger.error(f"Error parsing time {last_event}: {e}")
                     last_event_str = 'Unknown'
             else:
                 last_event_str = 'Never'
