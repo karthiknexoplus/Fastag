@@ -225,27 +225,10 @@ def create_stats_message(stats, controller_status, reader_status):
             logger.info(f"🔍 Raw timestamp for Reader{reader_id}: {last_event}")
             if last_event:
                 try:
-                    # Parse the timestamp (SQLite timestamps are usually in local time)
-                    # First try to parse as local time
-                    try:
-                        last_event_dt = datetime.fromisoformat(last_event)
-                    except:
-                        # If that fails, try UTC format
-                        if 'Z' in last_event:
-                            last_event_dt = datetime.fromisoformat(last_event.replace('Z', '+00:00'))
-                        else:
-                            last_event_dt = datetime.fromisoformat(last_event + '+00:00')
-                    
-                    # Convert to IST (UTC+5:30)
-                    # First convert to UTC if it's not already
-                    if last_event_dt.tzinfo is None:
-                        # Assume it's already in IST (local time)
-                        ist_time = last_event_dt
-                    else:
-                        # Convert from UTC to IST
-                        utc_time = last_event_dt.replace(tzinfo=None) - last_event_dt.utcoffset()
-                        ist_time = utc_time + timedelta(hours=5, minutes=30)
-                    
+                    # Parse the timestamp (SQLite stores in UTC)
+                    last_event_dt = datetime.fromisoformat(last_event)
+                    # Convert UTC to IST (add 5 hours 30 minutes)
+                    ist_time = last_event_dt + timedelta(hours=5, minutes=30)
                     last_event_str = ist_time.strftime('%H:%M IST')
                 except Exception as e:
                     logger.error(f"Error parsing time {last_event}: {e}")
