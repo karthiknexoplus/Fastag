@@ -1678,8 +1678,10 @@ function initializeCharts() {
     });
 
     // Entry/Exit Trend Chart
-    const entryExitTrendCtx = document.getElementById('entryExitTrendChart').getContext('2d');
-    entryExitTrendChart = new Chart(entryExitTrendCtx, {
+    try {
+        const entryExitTrendCtx = document.getElementById('entryExitTrendChart').getContext('2d');
+        console.log('Entry/Exit Trend Chart canvas found:', entryExitTrendCtx);
+        entryExitTrendChart = new Chart(entryExitTrendCtx, {
         type: 'line',
         data: {
             labels: [],
@@ -1732,6 +1734,9 @@ function initializeCharts() {
             }
         }
     });
+    } catch (error) {
+        console.error('Error creating Entry/Exit Trend Chart:', error);
+    }
 }
 
 function setCardLoading(id) {
@@ -1838,18 +1843,29 @@ function loadFastagVsNonfastag() {
         });
 }
 function loadEntryExitTrend() {
+    console.log('Loading entry/exit trend...');
     fetch('/analytics/api/entry-exit-trend')
         .then(r => r.json())
         .then(data => {
+            console.log('Entry/exit trend data:', data);
             if (data.entry_exit_trend) {
                 const labels = data.entry_exit_trend.map(item => item[0] + ':00');
                 const entries = data.entry_exit_trend.map(item => item[1]);
                 const exits = data.entry_exit_trend.map(item => item[2]);
+                console.log('Labels:', labels);
+                console.log('Entries:', entries);
+                console.log('Exits:', exits);
                 entryExitTrendChart.data.labels = labels;
                 entryExitTrendChart.data.datasets[0].data = entries;
                 entryExitTrendChart.data.datasets[1].data = exits;
                 entryExitTrendChart.update();
+                console.log('Chart updated successfully');
+            } else {
+                console.log('No entry_exit_trend data found');
             }
+        })
+        .catch(error => {
+            console.error('Error loading entry/exit trend:', error);
         });
 }
 function loadHourlyActivity() {
