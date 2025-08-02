@@ -119,22 +119,23 @@ def get_reader_status():
         yesterday = datetime.now() - timedelta(hours=24)
         yesterday_str = yesterday.strftime('%Y-%m-%d %H:%M:%S')
         
-        # Get reader status and events from access_logs
+        # Get reader status and events from access_logs joined with readers table
         cursor.execute('''
             SELECT 
-                reader_id,
-                reader_type,
+                al.reader_id,
+                COALESCE(r.new_type, r.type) as reader_type,
                 COUNT(*) as event_count,
-                MAX(timestamp) as last_event,
+                MAX(al.timestamp) as last_event,
                 CASE 
-                    WHEN MAX(timestamp) > datetime('now', '-5 minutes') THEN '🟢 Online'
-                    WHEN MAX(timestamp) > datetime('now', '-1 hour') THEN '🟡 Recent'
+                    WHEN MAX(al.timestamp) > datetime('now', '-5 minutes') THEN '🟢 Online'
+                    WHEN MAX(al.timestamp) > datetime('now', '-1 hour') THEN '🟡 Recent'
                     ELSE '🔴 Offline'
                 END as status
-            FROM access_logs 
-            WHERE timestamp > ?
-            GROUP BY reader_id, reader_type
-            ORDER BY reader_id, reader_type
+            FROM access_logs al
+            LEFT JOIN readers r ON al.reader_id = r.id
+            WHERE al.timestamp > ?
+            GROUP BY al.reader_id, COALESCE(r.new_type, r.type)
+            ORDER BY al.reader_id, COALESCE(r.new_type, r.type)
         ''', (yesterday_str,))
         
         readers = cursor.fetchall()
