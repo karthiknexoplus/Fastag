@@ -123,7 +123,7 @@ def get_reader_status():
         cursor.execute('''
             SELECT 
                 al.reader_id,
-                COALESCE(r.new_type, r.type) as reader_type,
+                r.type as reader_type,
                 COUNT(*) as event_count,
                 MAX(al.timestamp) as last_event,
                 CASE 
@@ -134,8 +134,8 @@ def get_reader_status():
             FROM access_logs al
             LEFT JOIN readers r ON al.reader_id = r.id
             WHERE al.timestamp > ?
-            GROUP BY al.reader_id, COALESCE(r.new_type, r.type)
-            ORDER BY al.reader_id, COALESCE(r.new_type, r.type)
+            GROUP BY al.reader_id, r.type
+            ORDER BY al.reader_id, r.type
         ''', (yesterday_str,))
         
         readers = cursor.fetchall()
