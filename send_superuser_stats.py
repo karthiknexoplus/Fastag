@@ -165,7 +165,7 @@ def create_stats_message(stats, controller_status):
         'body': body
     }
 
-def send_push_notification(token, message):
+def send_push_notification(token, message, username):
     """Send push notification to a single token"""
     try:
         # Authenticate with service account
