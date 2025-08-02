@@ -328,12 +328,14 @@ def main():
     # Get statistics
     stats = get_today_statistics()
     controller_status = get_controller_status()
+    reader_status = get_reader_status()
     
     # Create message
-    message = create_stats_message(stats, controller_status)
+    message = create_stats_message(stats, controller_status, reader_status)
     
     logger.info(f"📊 Statistics: {stats}")
     logger.info(f"🖥️ Controller Status: {controller_status}")
+    logger.info(f"📡 Reader Status: {len(reader_status)} readers found")
     
     # Send to all super users
     success_count = 0
