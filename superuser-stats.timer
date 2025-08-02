@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Super User Statistics every hour
+Requires=superuser-stats.service
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target 

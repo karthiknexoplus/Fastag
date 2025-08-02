@@ -1,0 +1,14 @@
+[Unit]
+Description=Super User Statistics Push Notifications
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Fastag
+ExecStart=/home/ubuntu/Fastag/venv/bin/python /home/ubuntu/Fastag/send_superuser_stats.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target 
