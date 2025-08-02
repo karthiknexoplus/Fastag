@@ -106,6 +106,63 @@ def get_today_statistics():
     finally:
         conn.close()
 
+def get_reader_status():
+    """Get RFID reader status and last 24 hours events"""
+    if not os.path.exists(DATABASE_PATH):
+        return {}
+    
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    
+    try:
+        # Get last 24 hours timestamp
+        yesterday = datetime.now() - timedelta(hours=24)
+        yesterday_str = yesterday.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Get reader status and events from access_logs
+        cursor.execute('''
+            SELECT 
+                reader_id,
+                reader_type,
+                COUNT(*) as event_count,
+                MAX(timestamp) as last_event,
+                CASE 
+                    WHEN MAX(timestamp) > datetime('now', '-5 minutes') THEN '🟢 Online'
+                    WHEN MAX(timestamp) > datetime('now', '-1 hour') THEN '🟡 Recent'
+                    ELSE '🔴 Offline'
+                END as status
+            FROM access_logs 
+            WHERE timestamp > ?
+            GROUP BY reader_id, reader_type
+            ORDER BY reader_id, reader_type
+        ''', (yesterday_str,))
+        
+        readers = cursor.fetchall()
+        
+        reader_status = {}
+        for reader in readers:
+            reader_id = reader[0] or 'Unknown'
+            reader_type = reader[1] or 'Unknown'
+            event_count = reader[2]
+            last_event = reader[3]
+            status = reader[4]
+            
+            key = f"{reader_id}_{reader_type}"
+            reader_status[key] = {
+                'reader_id': reader_id,
+                'reader_type': reader_type,
+                'event_count': event_count,
+                'last_event': last_event,
+                'status': status
+            }
+        
+        return reader_status
+    except Exception as e:
+        logger.error(f"Error getting reader status: {e}")
+        return {}
+    finally:
+        conn.close()
+
 def get_controller_status():
     """Get controller system status"""
     try:
@@ -146,11 +203,36 @@ def get_controller_status():
             'cpu_usage': 0
         }
 
-def create_stats_message(stats, controller_status):
+def create_stats_message(stats, controller_status, reader_status):
     """Create the statistics message"""
     current_time = datetime.now().strftime('%H:%M')
     
     title = f"📊 System Statistics ({current_time})"
+    
+    # Build reader status section
+    reader_section = ""
+    if reader_status:
+        reader_section = "\n📡 Reader Status (Last 24h):"
+        for key, reader in reader_status.items():
+            reader_id = reader['reader_id']
+            reader_type = reader['reader_type']
+            status = reader['status']
+            event_count = reader['event_count']
+            last_event = reader['last_event']
+            
+            # Format last event time
+            if last_event:
+                try:
+                    last_event_dt = datetime.fromisoformat(last_event.replace('Z', '+00:00'))
+                    last_event_str = last_event_dt.strftime('%H:%M')
+                except:
+                    last_event_str = 'Unknown'
+            else:
+                last_event_str = 'Never'
+            
+            reader_section += f"\n{status} {reader_id} ({reader_type}): {event_count} events, last: {last_event_str}"
+    else:
+        reader_section = "\n📡 Reader Status: No data available"
     
     body = f"""🚗 Entries: {stats.get('total_entries', 0)} | Exits: {stats.get('total_exits', 0)}
 ❌ Denied Entry: {stats.get('total_denied_entry', 0)} | Denied Exit: {stats.get('total_denied_exit', 0)}
@@ -158,7 +240,7 @@ def create_stats_message(stats, controller_status):
 
 🖥️ Controller Status:
 🌡️ CPU: {controller_status.get('cpu_usage', 0)}% | Temp: {controller_status.get('cpu_temp', 'N/A')}°C
-💾 RAM: {controller_status.get('ram_usage', 0)}% | Disk: {controller_status.get('disk_usage', 0)}%"""
+💾 RAM: {controller_status.get('ram_usage', 0)}% | Disk: {controller_status.get('disk_usage', 0)}%{reader_section}"""
     
     return {
         'title': title,
