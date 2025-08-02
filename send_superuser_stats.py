@@ -264,7 +264,7 @@ def main():
         
         logger.info(f"Sending to {username} ({user_role})...")
         
-        if send_push_notification(token, message):
+        if send_push_notification(token, message, username):
             success_count += 1
         else:
             error_count += 1
