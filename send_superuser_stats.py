@@ -143,6 +143,7 @@ def get_reader_status():
         ''', (yesterday_str,))
         
         readers = cursor.fetchall()
+        logger.info(f"🔍 Raw reader data: {len(readers)} rows fetched")
         
         reader_status = {}
         for reader in readers:
