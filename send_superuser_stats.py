@@ -44,13 +44,13 @@ def get_superuser_tokens():
     try:
         # Get tokens for super users only
         cursor.execute('''
-            SELECT ft.token, ft.username, ku.user_role
+            SELECT ft.fcm_token as token, ku.contact_number as username, ku.user_role
             FROM fcm_tokens ft
-            LEFT JOIN kyc_users ku ON ft.username = ku.phone_number
-            WHERE ft.is_active = 1 
-            AND ft.token IS NOT NULL 
-            AND ft.token != ''
-            AND (ku.user_role = 'superuser' OR ft.username LIKE '%7904030221%')
+            JOIN kyc_users ku ON ft.user_id = ku.id
+            WHERE ft.status = 'active' 
+            AND ft.fcm_token IS NOT NULL 
+            AND ft.fcm_token != ''
+            AND (ku.user_role = 'superuser' OR ku.contact_number LIKE '%7904030221%')
         ''')
         tokens = cursor.fetchall()
         logger.info(f"Found {len(tokens)} super user tokens")
