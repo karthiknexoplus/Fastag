@@ -181,7 +181,7 @@ def send_push_notification(token, message):
             "Content-Type": "application/json; UTF-8"
         }
 
-        # Prepare FCM message
+        # Prepare FCM message (using same structure as working script)
         fcm_message = {
             "message": {
                 "token": token,
@@ -189,27 +189,17 @@ def send_push_notification(token, message):
                     "title": message['title'],
                     "body": message['body']
                 },
+                "webpush": {
+                    "fcm_options": {
+                        "link": "https://www.onebee.in"
+                    }
+                },
                 "data": {
+                    "message_id": f"superuser_stats_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    "timestamp": str(datetime.now().timestamp()),
                     "type": "superuser_stats",
-                    "timestamp": datetime.now().isoformat(),
-                    "click_action": "FLUTTER_NOTIFICATION_CLICK"
-                },
-                "android": {
-                    "priority": "high",
-                    "notification": {
-                        "channel_id": "superuser_stats",
-                        "priority": "high",
-                        "default_sound": True,
-                        "default_vibrate_timings": True
-                    }
-                },
-                "apns": {
-                    "payload": {
-                        "aps": {
-                            "sound": "default",
-                            "badge": 1
-                        }
-                    }
+                    "username": username,
+                    "campaign": "superuser_stats"
                 }
             }
         }
@@ -227,6 +217,7 @@ def send_push_notification(token, message):
                 return False
         else:
             logger.error(f"❌ HTTP error {response.status_code} for token {token[:20]}...")
+            logger.error(f"Response body: {response.text}")
             return False
             
     except Exception as e:
@@ -240,7 +231,11 @@ def main():
     # Check if service account file exists
     if not os.path.exists(SERVICE_ACCOUNT_FILE):
         logger.error(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
+        logger.error("Please ensure the Firebase service account JSON file is in the current directory")
         return
+    
+    logger.info(f"✅ Service account file found: {SERVICE_ACCOUNT_FILE}")
+    logger.info(f"📱 Firebase Project ID: {FIREBASE_PROJECT_ID}")
     
     # Get super user tokens
     tokens = get_superuser_tokens()
