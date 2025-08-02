@@ -44,13 +44,13 @@ def get_superuser_tokens():
     try:
         # Get tokens for super users only
         cursor.execute('''
-            SELECT ft.fcm_token as token, ku.contact_number as username, ku.user_role
+            SELECT ft.token, ft.username, ku.contact_number, ku.user_role
             FROM fcm_tokens ft
-            JOIN kyc_users ku ON ft.user_id = ku.id
-            WHERE ft.status = 'active' 
-            AND ft.fcm_token IS NOT NULL 
-            AND ft.fcm_token != ''
-            AND (ku.user_role = 'superuser' OR ku.contact_number LIKE '%7904030221%')
+            LEFT JOIN kyc_users ku ON ft.username = ku.contact_number
+            WHERE ft.is_active = 1 
+            AND ft.token IS NOT NULL 
+            AND ft.token != ''
+            AND (ku.user_role = 'superuser' OR ft.username = '7904030221')
         ''')
         tokens = cursor.fetchall()
         logger.info(f"Found {len(tokens)} super user tokens")
@@ -265,7 +265,7 @@ def main():
     for token_row in tokens:
         token = token_row['token']
         username = token_row['username']
-        user_role = token_row['user_role']
+        user_role = token_row['user_role'] if token_row['user_role'] else 'unknown'
         
         logger.info(f"Sending to {username} ({user_role})...")
         
