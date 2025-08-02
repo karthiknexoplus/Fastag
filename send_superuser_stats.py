@@ -124,9 +124,6 @@ def get_reader_status():
             SELECT 
                 r.id as reader_id,
                 r.type as reader_type,
-                r.reader_ip,
-                l.lane_name,
-                loc.name as location_name,
                 COALESCE(COUNT(al.id), 0) as event_count,
                 MAX(al.timestamp) as last_event,
                 CASE 
@@ -135,10 +132,8 @@ def get_reader_status():
                     ELSE '🔴 Offline'
                 END as status
             FROM readers r
-            LEFT JOIN lanes l ON r.lane_id = l.id
-            LEFT JOIN locations loc ON l.location_id = loc.id
             LEFT JOIN access_logs al ON r.id = al.reader_id AND al.timestamp > ?
-            GROUP BY r.id, r.type, r.reader_ip, l.lane_name, loc.name
+            GROUP BY r.id, r.type
             ORDER BY r.id, r.type
         ''', (yesterday_str,))
         
@@ -149,20 +144,14 @@ def get_reader_status():
         for reader in readers:
             reader_id = reader[0] or 'Unknown'
             reader_type = reader[1] or 'Unknown'
-            reader_ip = reader[2] or 'Unknown'
-            lane_name = reader[3] or 'Unknown'
-            location_name = reader[4] or 'Unknown'
-            event_count = reader[5]
-            last_event = reader[6]
-            status = reader[7]
+            event_count = reader[2]
+            last_event = reader[3]
+            status = reader[4]
             
             key = f"{reader_id}_{reader_type}"
             reader_status[key] = {
                 'reader_id': reader_id,
                 'reader_type': reader_type,
-                'reader_ip': reader_ip,
-                'lane_name': lane_name,
-                'location_name': location_name,
                 'event_count': event_count,
                 'last_event': last_event,
                 'status': status
@@ -228,9 +217,6 @@ def create_stats_message(stats, controller_status, reader_status):
         for key, reader in reader_status.items():
             reader_id = reader['reader_id']
             reader_type = reader['reader_type']
-            reader_ip = reader['reader_ip']
-            lane_name = reader['lane_name']
-            location_name = reader['location_name']
             status = reader['status']
             event_count = reader['event_count']
             last_event = reader['last_event']
@@ -244,27 +230,24 @@ def create_stats_message(stats, controller_status, reader_status):
                         last_event_dt = datetime.fromisoformat(last_event.replace('Z', '+00:00'))
                         # Add 5 hours 30 minutes for IST
                         ist_time = last_event_dt + timedelta(hours=5, minutes=30)
-                        last_event_str = ist_time.strftime('%H:%M')
+                        last_event_str = ist_time.strftime('%H:%M IST')
                     else:
                         # Assume local time already
                         last_event_dt = datetime.fromisoformat(last_event)
-                        last_event_str = last_event_dt.strftime('%H:%M')
+                        last_event_str = last_event_dt.strftime('%H:%M IST')
                 except:
                     last_event_str = 'Unknown'
             else:
                 last_event_str = 'Never'
             
             reader_section += f"\n{status} Reader{reader_id} ({reader_type}): {event_count} events, last: {last_event_str}"
-            reader_section += f"\n  📍 {location_name} • {lane_name}"
     else:
         reader_section = "\n📡 Reader Status: No data available"
     
     body = f"""🚗 Entries: {stats.get('total_entries', 0)} | Exits: {stats.get('total_exits', 0)}
-❌ Denied Entry: {stats.get('total_denied_entry', 0)} | Denied Exit: {stats.get('total_denied_exit', 0)}
-✅ Success Rate: {stats.get('success_rate', 0)}%
+❌ Denied: {stats.get('total_denied_entry', 0)} | Success: {stats.get('success_rate', 0)}%
 
-🖥️ Controller Status:
-🌡️ CPU: {controller_status.get('cpu_usage', 0)}% | Temp: {controller_status.get('cpu_temp', 'N/A')}°C
+🖥️ CPU: {controller_status.get('cpu_usage', 0)}% | Temp: {controller_status.get('cpu_temp', 'N/A')}°C
 💾 RAM: {controller_status.get('ram_usage', 0)}% | Disk: {controller_status.get('disk_usage', 0)}%{reader_section}"""
     
     return {
