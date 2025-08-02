@@ -255,7 +255,7 @@ def create_stats_message(stats, controller_status, reader_status):
                 last_event_str = 'Never'
             
             reader_section += f"\n{status} Reader{reader_id} ({reader_type}): {event_count} events, last: {last_event_str}"
-            reader_section += f"\n  📍 {location_name} • {lane_name} • {reader_ip}"
+            reader_section += f"\n  📍 {location_name} • {lane_name}"
     else:
         reader_section = "\n📡 Reader Status: No data available"
     
@@ -358,7 +358,9 @@ def main():
     # Create message
     message = create_stats_message(stats, controller_status, reader_status)
     logger.info(f"📝 Message created - Title: {message['title']}")
-    logger.info(f"📝 Message body preview: {message['body'][:200]}...")
+    logger.info(f"📝 Full message body:")
+    logger.info(f"📝 {message['body']}")
+    logger.info(f"📝 Message length: {len(message['body'])} characters")
     
     logger.info(f"📊 Statistics: {stats}")
     logger.info(f"🖥️ Controller Status: {controller_status}")
