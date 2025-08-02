@@ -124,6 +124,9 @@ def get_reader_status():
             SELECT 
                 al.reader_id,
                 r.type as reader_type,
+                r.reader_ip,
+                l.lane_name,
+                loc.name as location_name,
                 COUNT(*) as event_count,
                 MAX(al.timestamp) as last_event,
                 CASE 
@@ -133,8 +136,10 @@ def get_reader_status():
                 END as status
             FROM access_logs al
             LEFT JOIN readers r ON al.reader_id = r.id
+            LEFT JOIN lanes l ON r.lane_id = l.id
+            LEFT JOIN locations loc ON l.location_id = loc.id
             WHERE al.timestamp > ?
-            GROUP BY al.reader_id, r.type
+            GROUP BY al.reader_id, r.type, r.reader_ip, l.lane_name, loc.name
             ORDER BY al.reader_id, r.type
         ''', (yesterday_str,))
         
@@ -144,14 +149,20 @@ def get_reader_status():
         for reader in readers:
             reader_id = reader[0] or 'Unknown'
             reader_type = reader[1] or 'Unknown'
-            event_count = reader[2]
-            last_event = reader[3]
-            status = reader[4]
+            reader_ip = reader[2] or 'Unknown'
+            lane_name = reader[3] or 'Unknown'
+            location_name = reader[4] or 'Unknown'
+            event_count = reader[5]
+            last_event = reader[6]
+            status = reader[7]
             
             key = f"{reader_id}_{reader_type}"
             reader_status[key] = {
                 'reader_id': reader_id,
                 'reader_type': reader_type,
+                'reader_ip': reader_ip,
+                'lane_name': lane_name,
+                'location_name': location_name,
                 'event_count': event_count,
                 'last_event': last_event,
                 'status': status
@@ -217,6 +228,9 @@ def create_stats_message(stats, controller_status, reader_status):
         for key, reader in reader_status.items():
             reader_id = reader['reader_id']
             reader_type = reader['reader_type']
+            reader_ip = reader['reader_ip']
+            lane_name = reader['lane_name']
+            location_name = reader['location_name']
             status = reader['status']
             event_count = reader['event_count']
             last_event = reader['last_event']
@@ -231,7 +245,8 @@ def create_stats_message(stats, controller_status, reader_status):
             else:
                 last_event_str = 'Never'
             
-            reader_section += f"\n{status} {reader_id} ({reader_type}): {event_count} events, last: {last_event_str}"
+            reader_section += f"\n{status} Reader{reader_id} ({reader_type}): {event_count} events, last: {last_event_str}"
+            reader_section += f"\n  📍 {location_name} • {lane_name} • {reader_ip}"
     else:
         reader_section = "\n📡 Reader Status: No data available"
     
