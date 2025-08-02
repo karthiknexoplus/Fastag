@@ -119,28 +119,27 @@ def get_reader_status():
         yesterday = datetime.now() - timedelta(hours=24)
         yesterday_str = yesterday.strftime('%Y-%m-%d %H:%M:%S')
         
-        # Get reader status and events from access_logs joined with readers table
+        # Get all readers with their status (including those with no events)
         cursor.execute('''
             SELECT 
-                al.reader_id,
+                r.id as reader_id,
                 r.type as reader_type,
                 r.reader_ip,
                 l.lane_name,
                 loc.name as location_name,
-                COUNT(*) as event_count,
+                COALESCE(COUNT(al.id), 0) as event_count,
                 MAX(al.timestamp) as last_event,
                 CASE 
                     WHEN MAX(al.timestamp) > datetime('now', '-5 minutes') THEN '🟢 Online'
                     WHEN MAX(al.timestamp) > datetime('now', '-1 hour') THEN '🟡 Recent'
                     ELSE '🔴 Offline'
                 END as status
-            FROM access_logs al
-            LEFT JOIN readers r ON al.reader_id = r.id
+            FROM readers r
             LEFT JOIN lanes l ON r.lane_id = l.id
             LEFT JOIN locations loc ON l.location_id = loc.id
-            WHERE al.timestamp > ?
-            GROUP BY al.reader_id, r.type, r.reader_ip, l.lane_name, loc.name
-            ORDER BY al.reader_id, r.type
+            LEFT JOIN access_logs al ON r.id = al.reader_id AND al.timestamp > ?
+            GROUP BY r.id, r.type, r.reader_ip, l.lane_name, loc.name
+            ORDER BY r.id, r.type
         ''', (yesterday_str,))
         
         readers = cursor.fetchall()
@@ -235,11 +234,20 @@ def create_stats_message(stats, controller_status, reader_status):
             event_count = reader['event_count']
             last_event = reader['last_event']
             
-            # Format last event time
+            # Format last event time (convert UTC to IST)
             if last_event:
                 try:
-                    last_event_dt = datetime.fromisoformat(last_event.replace('Z', '+00:00'))
-                    last_event_str = last_event_dt.strftime('%H:%M')
+                    # Parse the timestamp (handle both UTC and local time)
+                    if 'Z' in last_event or '+00:00' in last_event:
+                        # UTC time - convert to IST
+                        last_event_dt = datetime.fromisoformat(last_event.replace('Z', '+00:00'))
+                        # Add 5 hours 30 minutes for IST
+                        ist_time = last_event_dt + timedelta(hours=5, minutes=30)
+                        last_event_str = ist_time.strftime('%H:%M')
+                    else:
+                        # Assume local time already
+                        last_event_dt = datetime.fromisoformat(last_event)
+                        last_event_str = last_event_dt.strftime('%H:%M')
                 except:
                     last_event_str = 'Unknown'
             else:
